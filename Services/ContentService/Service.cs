@@ -43,10 +43,20 @@ namespace SportDJ.Services.ContentService
                 Name = "Player 2",
             };
 
+            var player3 = new Player()
+            {
+                Name = "Player 3",
+            };
+
+            var player4 = new Player()
+            {
+                Name = "Player 4",
+            };
+
             var group = new Group()
             {
                 Name = "Player Group",
-                Contents = new Content[] { player1, player2 },
+                Contents = new Content[] { player1, player2, player3, player4 },
             };
 
             Set = new Set

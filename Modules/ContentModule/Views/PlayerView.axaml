@@ -10,10 +10,22 @@
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
 
-    <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Button
+        Margin="5"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch">
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
+            FontSize="{DynamicResource PlayerFontSize}"
             Text="{Binding Name}" />
     </Button>
 </UserControl>
