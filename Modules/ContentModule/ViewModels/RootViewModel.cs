@@ -3,6 +3,7 @@ using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Events;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
@@ -13,7 +14,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly IContentService contentService;
+        private readonly ISettingsService<Set> settingsService;
 
         private GridViewModel element;
 
@@ -22,11 +23,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Constructors
 
         public RootViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IContentService contentService)
+            IEventAggregator eventAggregator, ISettingsService<Set> settingsService)
             : base(regionManager)
         {
             this.containerProvider = containerProvider;
-            this.contentService = contentService;
+            this.settingsService = settingsService;
 
             eventAggregator.GetEvent<ContentLoadedEvent>().Subscribe(
                 action: LoadSet,
@@ -51,7 +52,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void LoadSet()
         {
-            var set = contentService.Set;
+            var set = settingsService.Get();
 
             Element = containerProvider.Resolve<GridViewModel>();
             Element.Initialize(set.Contents);

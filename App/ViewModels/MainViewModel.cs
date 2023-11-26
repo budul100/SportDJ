@@ -1,5 +1,6 @@
 ﻿using Prism.Mvvm;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 
 namespace SportDJ.App.ViewModels
 {
@@ -8,9 +9,8 @@ namespace SportDJ.App.ViewModels
     {
         #region Public Constructors
 
-        public MainViewModel(IContentService contentService)
+        public MainViewModel(ISettingsService<Set> settingsService)
         {
-            contentService.Load();
         }
 
         #endregion Public Constructors

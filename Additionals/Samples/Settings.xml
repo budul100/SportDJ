@@ -1,0 +1,35 @@
+﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Contents>
+		<Content xsi:type="Group">
+			<Name>Player Group</Name>
+			<Contents>
+				<Content xsi:type="Player">
+					<Name>Player 1</Name>
+				</Content>
+				<Content xsi:type="Player">
+					<Name>Player 2</Name>
+				</Content>
+				<Content xsi:type="Player">
+					<Name>Player 3</Name>
+				</Content>
+				<Content xsi:type="Group">
+					<Name>Player Group 2</Name>
+					<Contents>
+						<Content xsi:type="Player">
+							<Name>Player 1</Name>
+						</Content>
+						<Content xsi:type="Player">
+							<Name>Player 2</Name>
+						</Content>
+						<Content xsi:type="Player">
+							<Name>Player 3</Name>
+						</Content>
+						<Content xsi:type="Player">
+							<Name>Player 4</Name>
+						</Content>
+					</Contents>
+				</Content>
+			</Contents>
+		</Content>
+	</Contents>
+</Set>

@@ -1,5 +1,5 @@
 ﻿using Prism.Ioc;
-using SportDJ.Commons.Models;
+using SportDJ.Commons.Models.Settings;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -41,7 +41,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(IEnumerable<Content> contents, string name = default)
+        public void Initialize(IEnumerable<object> contents, string name = default)
         {
             Initialize(name);
 

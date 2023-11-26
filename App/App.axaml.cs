@@ -7,6 +7,7 @@ using Prism.Regions;
 using SportDJ.App.Views;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Modules.ContentModule.Views;
 using System;
 using System.Linq;
@@ -69,7 +70,7 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterSingleton<IContentService, Services.ContentService.Service>();
+            containerRegistry.RegisterSingleton<ISettingsService<Set>, Services.SettingsService.Service<Set>>();
 
             containerRegistry.Register<MainView>();
         }

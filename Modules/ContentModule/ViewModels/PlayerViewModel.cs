@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models;
+﻿using SportDJ.Commons.Models.Settings;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {

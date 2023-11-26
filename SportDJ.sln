@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContentModule", "Modules\Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E76B23EF-AB70-4CD9-BC07-44D1EED74641}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContentService", "Services\ContentService\ContentService.csproj", "{98C3D340-27F1-476D-98E9-69590464CFEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsService", "Services\SettingsService\SettingsService.csproj", "{98C3D340-27F1-476D-98E9-69590464CFEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
