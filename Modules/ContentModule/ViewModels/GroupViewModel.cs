@@ -1,5 +1,4 @@
 ﻿using Prism.Ioc;
-using Prism.Mvvm;
 using SportDJ.Commons.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,13 +6,11 @@ using System.Linq;
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
     public class GroupViewModel
-        : BindableBase
+        : BaseViewModel
     {
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-
-        private string name;
 
         #endregion Private Fields
 
@@ -28,13 +25,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<BindableBase> Elements { get; } = new ObservableCollection<BindableBase>();
-
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public ObservableCollection<GridViewModel> Elements { get; } = new ObservableCollection<GridViewModel>();
 
         #endregion Public Properties
 
@@ -42,17 +33,17 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         public void Initialize(Group group)
         {
-            this.Name = group.Name;
+            Initialize(group.Name);
 
             if (group.Contents?.Any() == true)
             {
-                foreach (var content in group.Contents)
-                {
-                    var element = containerProvider.Resolve<ContainerViewModel>();
-                    element.Initialize(content);
+                var element = containerProvider.Resolve<GridViewModel>();
 
-                    Elements.Add(element);
-                }
+                element.Initialize(
+                    contents: group.Contents,
+                    name: group.Name);
+
+                Elements.Add(element);
             }
         }
 

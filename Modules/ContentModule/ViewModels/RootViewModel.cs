@@ -7,14 +7,15 @@ using SportDJ.Commons.Prism;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
-    internal class RootViewModel : RegionViewModelBase
+    internal class RootViewModel
+        : RegionViewModelBase
     {
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
         private readonly IContentService contentService;
 
-        private ContainerViewModel element;
+        private GridViewModel element;
 
         #endregion Private Fields
 
@@ -28,17 +29,17 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             this.contentService = contentService;
 
             eventAggregator.GetEvent<ContentLoadedEvent>().Subscribe(
-                action: LoadContent,
+                action: LoadSet,
                 keepSubscriberReferenceAlive: true);
 
-            LoadContent();
+            LoadSet();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public ContainerViewModel Element
+        public GridViewModel Element
         {
             get { return element; }
             set { SetProperty(ref element, value); }
@@ -48,12 +49,12 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Private Methods
 
-        private void LoadContent()
+        private void LoadSet()
         {
-            var content = contentService.GetContent();
+            var set = contentService.Set;
 
-            Element = containerProvider.Resolve<ContainerViewModel>();
-            Element.Initialize(content);
+            Element = containerProvider.Resolve<GridViewModel>();
+            Element.Initialize(set.Contents);
         }
 
         #endregion Private Methods

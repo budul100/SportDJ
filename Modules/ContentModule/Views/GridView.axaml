@@ -1,5 +1,5 @@
 <UserControl
-    x:Class="SportDJ.Modules.ContentModule.Views.ContainerView"
+    x:Class="SportDJ.Modules.ContentModule.Views.GridView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,18 +13,24 @@
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
 
-    <ContentControl
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        Content="{Binding Element}">
+    <ItemsControl ItemsSource="{Binding Elements}">
 
-        <ContentControl.DataTemplates>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <UniformGrid
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Columns="{Binding Columns}" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+
+        <ItemsControl.DataTemplates>
             <DataTemplate x:DataType="vm:GroupViewModel">
                 <v:GroupView />
             </DataTemplate>
             <DataTemplate x:DataType="vm:PlayerViewModel">
                 <v:PlayerView />
             </DataTemplate>
-        </ContentControl.DataTemplates>
-    </ContentControl>
+        </ItemsControl.DataTemplates>
+    </ItemsControl>
 </UserControl>

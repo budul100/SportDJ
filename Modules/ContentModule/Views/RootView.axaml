@@ -8,7 +8,7 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.ContentModule.Views"
     xmlns:vm="using:SportDJ.Modules.ContentModule.ViewModels"
-    d:DesignHeight="100"
+    d:DesignHeight="200"
     d:DesignWidth="100"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
@@ -20,7 +20,7 @@
 
         <ContentControl.ContentTemplate>
             <DataTemplate>
-                <v:ContainerView />
+                <v:GridView />
             </DataTemplate>
         </ContentControl.ContentTemplate>
     </ContentControl>

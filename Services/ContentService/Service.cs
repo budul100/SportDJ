@@ -12,9 +12,6 @@ namespace SportDJ.Services.ContentService
 
         private readonly IEventAggregator eventAggregator;
 
-        private Content content;
-        private bool isCalledAlready;
-
         #endregion Private Fields
 
         #region Public Constructors
@@ -26,20 +23,13 @@ namespace SportDJ.Services.ContentService
 
         #endregion Public Constructors
 
+        #region Public Properties
+
+        public Set Set { get; private set; }
+
+        #endregion Public Properties
+
         #region Public Methods
-
-        public Content GetContent()
-        {
-            var result = default(Content);
-
-            if (!isCalledAlready)
-            {
-                result = content;
-                isCalledAlready = true;
-            }
-
-            return result;
-        }
 
         public void Load()
         {
@@ -59,8 +49,10 @@ namespace SportDJ.Services.ContentService
                 Contents = new Content[] { player1, player2 },
             };
 
-            content = group;
-            isCalledAlready = false;
+            Set = new Set
+            {
+                Contents = new Content[] { group },
+            };
 
             eventAggregator.GetEvent<ContentLoadedEvent>().Publish();
         }

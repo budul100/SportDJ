@@ -1,23 +1,15 @@
-﻿using Prism.Mvvm;
-using SportDJ.Commons.Models;
+﻿using SportDJ.Commons.Models;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
     public class PlayerViewModel
-        : BindableBase
+        : BaseViewModel
     {
-        #region Public Properties
-
-        public string Name { get; private set; }
-
-        #endregion Public Properties
-
         #region Public Methods
 
         public void Initialize(Player player)
         {
-            Name = player.Name;
-            this.RaisePropertyChanged(nameof(Name));
+            Initialize(player.Name);
         }
 
         #endregion Public Methods

@@ -4,9 +4,13 @@ namespace SportDJ.Commons.Interfaces
 {
     public interface IContentService
     {
-        #region Public Methods
+        #region Public Properties
 
-        Content GetContent();
+        Set Set { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         void Load();
 

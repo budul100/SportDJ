@@ -2,11 +2,11 @@ using Avalonia.Controls;
 
 namespace SportDJ.Modules.ContentModule.Views;
 
-public partial class ContainerView : UserControl
+public partial class GridView : UserControl
 {
     #region Public Constructors
 
-    public ContainerView()
+    public GridView()
     {
         InitializeComponent();
     }

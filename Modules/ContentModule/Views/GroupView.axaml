@@ -14,28 +14,18 @@
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
 
-    <gbac:GroupBox Header="{Binding Name}">
-        <gbac:GroupBox.Styles>
-            <SimpleTheme />
-            <gbact:ModernTheme />
-        </gbac:GroupBox.Styles>
+    <TabControl ItemsSource="{Binding Elements}">
 
-        <ItemsControl
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            ItemsSource="{Binding Elements}">
+        <TabControl.ItemTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+        </TabControl.ItemTemplate>
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <v:ContainerView />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </gbac:GroupBox>
+        <TabControl.ContentTemplate>
+            <DataTemplate>
+                <v:GridView />
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+    </TabControl>
 </UserControl>
