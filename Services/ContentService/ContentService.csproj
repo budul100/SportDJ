@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>SportDJ.Modules.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+	</ItemGroup>
+</Project>

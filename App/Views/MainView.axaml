@@ -1,0 +1,32 @@
+<Window
+    x:Class="SportDJ.App.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="using:SportDJ.Commons.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:en="using:SportDJ.Commons.Enums"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:SportDJ.App.ViewModels"
+    Title="SportDJ"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:MainViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+    </Window.Resources>
+
+    <DockPanel
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        LastChildFill="True">
+        <ContentControl DockPanel.Dock="Top">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ContentRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+    </DockPanel>
+</Window>

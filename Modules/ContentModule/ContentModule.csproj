@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>SportDJ.Modules.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Commons\Commons.csproj" />
+	  <ProjectReference Include="..\..\Externals\GroupBox.Avalonia\GroupBox.Avalonia.csproj" />
+	</ItemGroup>
+</Project>

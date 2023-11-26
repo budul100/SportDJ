@@ -1,0 +1,30 @@
+<UserControl
+    x:Class="SportDJ.Modules.ContentModule.Views.ContainerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hp="using:SportDJ.Modules.ContentModule.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:SportDJ.Modules.ContentModule.Views"
+    xmlns:vm="using:SportDJ.Modules.ContentModule.ViewModels"
+    d:DesignHeight="100"
+    d:DesignWidth="100"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    mc:Ignorable="d">
+
+    <ContentControl
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Content="{Binding Element}">
+
+        <ContentControl.DataTemplates>
+            <DataTemplate x:DataType="vm:GroupViewModel">
+                <v:GroupView />
+            </DataTemplate>
+            <DataTemplate x:DataType="vm:PlayerViewModel">
+                <v:PlayerView />
+            </DataTemplate>
+        </ContentControl.DataTemplates>
+    </ContentControl>
+</UserControl>

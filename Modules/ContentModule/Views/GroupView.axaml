@@ -1,0 +1,41 @@
+<UserControl
+    x:Class="SportDJ.Modules.ContentModule.Views.GroupView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gbac="using:GroupBox.Avalonia.Controls"
+    xmlns:gbact="using:GroupBox.Avalonia.ControlThemes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:SportDJ.Modules.ContentModule.Views"
+    xmlns:vm="using:SportDJ.Modules.ContentModule.ViewModels"
+    d:DesignHeight="100"
+    d:DesignWidth="200"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    mc:Ignorable="d">
+
+    <gbac:GroupBox Header="{Binding Name}">
+        <gbac:GroupBox.Styles>
+            <SimpleTheme />
+            <gbact:ModernTheme />
+        </gbac:GroupBox.Styles>
+
+        <ItemsControl
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            ItemsSource="{Binding Elements}">
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <v:ContainerView />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </gbac:GroupBox>
+</UserControl>
