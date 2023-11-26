@@ -3,15 +3,20 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:hp="using:SportDJ.Modules.ContentModule.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.ContentModule.Views"
     xmlns:vm="using:SportDJ.Modules.ContentModule.ViewModels"
-    d:DesignHeight="100"
-    d:DesignWidth="100"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
+
+    <Design.DataContext>
+        <dt:GridViewModel />
+    </Design.DataContext>
 
     <ItemsControl ItemsSource="{Binding Elements}">
 
@@ -31,6 +36,14 @@
             <DataTemplate x:DataType="vm:PlayerViewModel">
                 <v:PlayerView />
             </DataTemplate>
+            <DataTemplate x:DataType="dt:GroupViewModel">
+                <v:GroupView />
+            </DataTemplate>
+            <DataTemplate x:DataType="dt:PlayerViewModel">
+                <v:PlayerView />
+            </DataTemplate>
         </ItemsControl.DataTemplates>
+
     </ItemsControl>
+
 </UserControl>

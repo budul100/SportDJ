@@ -3,10 +3,11 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    d:DesignHeight="100"
-    d:DesignWidth="100"
+    d:DesignHeight="150"
+    d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
 
@@ -18,14 +19,20 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
+    <Design.DataContext>
+        <dt:PlayerViewModel />
+    </Design.DataContext>
+
     <Button
         Margin="5"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
+
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="{DynamicResource PlayerFontSize}"
+            FontSize="{DynamicResource ContentFontSize}"
             Text="{Binding Name}" />
     </Button>
+
 </UserControl>

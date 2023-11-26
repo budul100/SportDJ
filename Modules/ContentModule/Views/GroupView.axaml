@@ -3,22 +3,35 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:gbac="using:GroupBox.Avalonia.Controls"
     xmlns:gbact="using:GroupBox.Avalonia.ControlThemes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.ContentModule.Views"
     xmlns:vm="using:SportDJ.Modules.ContentModule.ViewModels"
-    d:DesignHeight="100"
-    d:DesignWidth="200"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Design.DataContext>
+        <dt:GroupViewModel />
+    </Design.DataContext>
 
     <TabControl ItemsSource="{Binding Elements}">
 
         <TabControl.ItemTemplate>
             <DataTemplate>
-                <TextBlock Text="{Binding Name}" />
+                <TextBlock FontSize="{DynamicResource ContentFontSize}" Text="{Binding Name}" />
             </DataTemplate>
         </TabControl.ItemTemplate>
 
@@ -27,5 +40,7 @@
                 <v:GridView />
             </DataTemplate>
         </TabControl.ContentTemplate>
+
     </TabControl>
+
 </UserControl>
