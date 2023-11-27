@@ -27,7 +27,7 @@
         <dt:GroupViewModel />
     </Design.DataContext>
 
-    <TabControl ItemsSource="{Binding Elements}">
+    <TabControl Margin="{DynamicResource ContentMargin}" ItemsSource="{Binding Elements}">
 
         <TabControl.ItemTemplate>
             <DataTemplate>
@@ -40,7 +40,5 @@
                 <v:GridView />
             </DataTemplate>
         </TabControl.ContentTemplate>
-
     </TabControl>
-
 </UserControl>

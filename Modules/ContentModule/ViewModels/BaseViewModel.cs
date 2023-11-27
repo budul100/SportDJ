@@ -16,7 +16,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         protected void Initialize(string name)
         {
             Name = name;
-            this.RaisePropertyChanged(nameof(Name));
         }
 
         #endregion Protected Methods

@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace SportDJ.Modules.ContentModule.DesignTime
+﻿namespace SportDJ.Modules.ContentModule.DesignTime
 {
     public class GridViewModel
-        : ViewModels.BaseViewModel
+        : ViewModels.GridViewModel
     {
         #region Private Fields
 
@@ -19,31 +16,26 @@ namespace SportDJ.Modules.ContentModule.DesignTime
         { }
 
         public GridViewModel(string name)
+            : base(default)
         {
             Initialize(
                 name: name);
 
-            Elements = GetElements().ToArray();
+            SetElements();
         }
 
         #endregion Public Constructors
 
-        #region Public Properties
-
-        public IEnumerable<ViewModels.BaseViewModel> Elements { get; }
-
-        #endregion Public Properties
-
         #region Private Methods
 
-        private IEnumerable<ViewModels.BaseViewModel> GetElements()
+        private void SetElements()
         {
             for (int index = 0; index < ElementsCount; index++)
             {
-                var result = new PlayerViewModel(
+                var element = new PlayerViewModel(
                     name: $"Player {index}");
 
-                yield return result;
+                Elements.Add(element);
             }
         }
 

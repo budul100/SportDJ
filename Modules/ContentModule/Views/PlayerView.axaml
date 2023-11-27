@@ -6,6 +6,7 @@
     xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    Grid.Row="2"
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
@@ -24,7 +25,8 @@
     </Design.DataContext>
 
     <Button
-        Margin="5"
+        Grid.Row="2"
+        Margin="{DynamicResource ContentMargin}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
 
@@ -34,5 +36,4 @@
             FontSize="{DynamicResource ContentFontSize}"
             Text="{Binding Name}" />
     </Button>
-
 </UserControl>

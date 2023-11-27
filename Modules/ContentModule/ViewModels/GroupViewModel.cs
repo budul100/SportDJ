@@ -6,7 +6,7 @@ using System.Linq;
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
     public class GroupViewModel
-        : BaseViewModel
+        : CellViewModel
     {
         #region Private Fields
 
@@ -31,9 +31,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Group group)
+        public void Initialize(Group group, int row, int column)
         {
-            Initialize(group.Name);
+            var rowSpan = 1;
+            var columnSpan = 1;
 
             if (group.Contents?.Any() == true)
             {
@@ -43,8 +44,18 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                     contents: group.Contents,
                     name: group.Name);
 
+                rowSpan = element.Rows;
+                columnSpan = element.Columns;
+
                 Elements.Add(element);
             }
+
+            Initialize(
+                name: group.Name,
+                row: row,
+                column: column,
+                rowSpan: rowSpan,
+                columnSpan: columnSpan);
         }
 
         #endregion Public Methods

@@ -2,6 +2,7 @@
     x:Class="SportDJ.Modules.ContentModule.Views.GridView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:hp="using:SportDJ.Modules.ContentModule.Helpers"
@@ -14,6 +15,14 @@
     prism:ViewModelLocator.AutoWireViewModel="False"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Design.DataContext>
         <dt:GridViewModel />
     </Design.DataContext>
@@ -22,12 +31,22 @@
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <UniformGrid
+                <Grid
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Columns="{Binding Columns}" />
+                    hp:GridHelpers.ColumnCount="{Binding Columns}"
+                    hp:GridHelpers.RowCount="{Binding Rows}" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
+
+        <ItemsControl.Styles>
+            <Style Selector="ItemsControl > ContentPresenter">
+                <Setter Property="Grid.Row" Value="{Binding Row}" />
+                <Setter Property="Grid.Column" Value="{Binding Column}" />
+                <Setter Property="Grid.RowSpan" Value="{Binding RowSpan}" />
+                <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}" />
+            </Style>
+        </ItemsControl.Styles>
 
         <ItemsControl.DataTemplates>
             <DataTemplate x:DataType="vm:GroupViewModel">
@@ -39,11 +58,9 @@
             <DataTemplate x:DataType="dt:GroupViewModel">
                 <v:GroupView />
             </DataTemplate>
-            <DataTemplate x:DataType="dt:PlayerViewModel">
+            <DataTemplate x:DataType="vm:PlayerViewModel">
                 <v:PlayerView />
             </DataTemplate>
         </ItemsControl.DataTemplates>
-
     </ItemsControl>
-
 </UserControl>
