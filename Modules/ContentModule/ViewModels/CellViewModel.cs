@@ -1,28 +1,64 @@
-﻿namespace SportDJ.Modules.ContentModule.ViewModels
+﻿using Prism.Mvvm;
+using SportDJ.Commons.Models.Settings;
+
+namespace SportDJ.Modules.ContentModule.ViewModels
 {
     public abstract class CellViewModel
-        : BaseViewModel
+        : BindableBase
     {
+        #region Private Fields
+
+        private int column;
+        private int columnSpan;
+        private string name;
+        private int row;
+        private int rowSpan;
+
+        #endregion Private Fields
+
         #region Public Properties
 
-        public int Column { get; private set; }
+        public int Column
+        {
+            get { return column; }
+            set { SetProperty(ref column, value); }
+        }
 
-        public int ColumnSpan { get; private set; }
+        public int ColumnSpan
+        {
+            get { return columnSpan; }
+            set { SetProperty(ref columnSpan, value); }
+        }
 
-        public int Row { get; private set; }
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
 
-        public int RowSpan { get; private set; }
+        public int Row
+        {
+            get { return row; }
+            set { SetProperty(ref row, value); }
+        }
+
+        public int RowSpan
+        {
+            get { return rowSpan; }
+            set { SetProperty(ref rowSpan, value); }
+        }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public virtual void Initialize(string name, int row, int column, int rowSpan = 1, int columnSpan = 1)
+        public virtual void Initialize<T>(T cell, int rowSpan = 1, int columnSpan = 1)
+            where T : Cell
         {
-            base.Initialize(name);
+            this.Name = cell.Name;
 
-            this.Row = row;
-            this.Column = column;
+            this.Row = cell.Row;
+            this.Column = cell.Column;
 
             this.RowSpan = rowSpan;
             this.ColumnSpan = columnSpan;

@@ -1,35 +1,30 @@
-﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Columns="4" Rows="2">
 	<Contents>
-		<Content xsi:type="Group">
-			<Name>Player Group</Name>
+		<Cell xsi:type="Player" Column="0" Row="0">
+			<Name>Player 1</Name>
+		</Cell>
+		<Cell xsi:type="Player" Column="0" Row="1">
+			<Name>Player 2</Name>
+		</Cell>
+		<Cell xsi:type="Player" Column="1" Row="0">
+			<Name>Player 3</Name>
+		</Cell>
+		<Cell xsi:type="Group" Column="2" Row="0" Columns="2" Rows="2">
+			<Name>Group1</Name>
 			<Contents>
-				<Content xsi:type="Player">
-					<Name>Player 1</Name>
-				</Content>
-				<Content xsi:type="Player">
-					<Name>Player 2</Name>
-				</Content>
-				<Content xsi:type="Player">
-					<Name>Player 3</Name>
-				</Content>
-				<Content xsi:type="Group">
-					<Name>Player Group 2</Name>
-					<Contents>
-						<Content xsi:type="Player">
-							<Name>Player 1</Name>
-						</Content>
-						<Content xsi:type="Player">
-							<Name>Player 2</Name>
-						</Content>
-						<Content xsi:type="Player">
-							<Name>Player 3</Name>
-						</Content>
-						<Content xsi:type="Player">
-							<Name>Player 4</Name>
-						</Content>
-					</Contents>
-				</Content>
+				<Cell xsi:type="Player" Column="0" Row="0">
+					<Name>Player 21</Name>
+				</Cell>
+				<Cell xsi:type="Player" Column="0" Row="1">
+					<Name>Player 22</Name>
+				</Cell>
+				<Cell xsi:type="Player" Column="1" Row="0">
+					<Name>Player 23</Name>
+				</Cell>
+				<Cell xsi:type="Player" Column="1" Row="1">
+					<Name>Player 24</Name>
+				</Cell>
 			</Contents>
-		</Content>
+		</Cell>
 	</Contents>
 </Set>

@@ -1,18 +1,19 @@
-﻿namespace SportDJ.Modules.ContentModule.DesignTime
+﻿using SportDJ.Commons.Models.Settings;
+
+namespace SportDJ.Modules.ContentModule.DesignTime
 {
     public class PlayerViewModel
-        : ViewModels.BaseViewModel
+        : ViewModels.PlayerViewModel
     {
         #region Public Constructors
 
         public PlayerViewModel()
-            : this("Player")
+            : this("Player", 0, 0)
         { }
 
-        public PlayerViewModel(string name)
+        public PlayerViewModel(string name, int row, int column)
         {
-            Initialize(
-                name: name);
+            Initialize(new Player { Name = name, Row = row, Column = column });
         }
 
         #endregion Public Constructors

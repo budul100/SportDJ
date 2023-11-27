@@ -31,31 +31,21 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Group group, int row, int column)
+        public void Initialize(Group group)
         {
-            var rowSpan = 1;
-            var columnSpan = 1;
-
             if (group.Contents?.Any() == true)
             {
                 var element = containerProvider.Resolve<GridViewModel>();
 
-                element.Initialize(
-                    contents: group.Contents,
-                    name: group.Name);
-
-                rowSpan = element.Rows;
-                columnSpan = element.Columns;
+                element.Initialize(group);
 
                 Elements.Add(element);
             }
 
-            Initialize(
-                name: group.Name,
-                row: row,
-                column: column,
-                rowSpan: rowSpan,
-                columnSpan: columnSpan);
+            base.Initialize(
+                cell: group,
+                rowSpan: group.Rows,
+                columnSpan: group.Columns);
         }
 
         #endregion Public Methods

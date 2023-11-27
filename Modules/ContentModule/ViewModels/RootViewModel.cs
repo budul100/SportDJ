@@ -55,7 +55,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             var set = settingsService.Get();
 
             Element = containerProvider.Resolve<GridViewModel>();
-            Element.Initialize(set.Contents);
+            Element.Initialize(set);
         }
 
         #endregion Private Methods

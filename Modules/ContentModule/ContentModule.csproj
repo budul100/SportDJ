@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
@@ -8,15 +9,11 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.0.5" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+		<PackageReference Include="budul.AvaloniaGridDefinitionBehavoir" Version="1.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Views\GridView.axaml.cs">
-	    <DependentUpon>GridView.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
 </Project>

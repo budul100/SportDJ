@@ -4,11 +4,17 @@ namespace SportDJ.Commons.Models.Settings
 {
     [XmlInclude(typeof(Group))]
     [XmlInclude(typeof(Player))]
-    public abstract class Content
+    public abstract class Cell
     {
         #region Public Properties
 
+        [XmlAttribute]
+        public int Column { get; set; }
+
         public string Name { get; set; }
+
+        [XmlAttribute]
+        public int Row { get; set; }
 
         #endregion Public Properties
     }

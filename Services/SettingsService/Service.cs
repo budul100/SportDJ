@@ -1,11 +1,11 @@
-﻿using Score2Stream.Commons;
-using SportDJ.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Score2Stream.Commons;
+using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.SettingsService
 {

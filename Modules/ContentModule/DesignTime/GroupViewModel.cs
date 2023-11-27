@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using SportDJ.Commons.Models.Settings;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {
     public class GroupViewModel
-        : ViewModels.BaseViewModel
+        : ViewModels.GroupViewModel
     {
         #region Private Fields
 
@@ -15,27 +14,22 @@ namespace SportDJ.Modules.ContentModule.DesignTime
         #region Public Constructors
 
         public GroupViewModel()
+            : base(default)
         {
-            Elements = GetElements().ToArray();
+            SetElements();
         }
 
         #endregion Public Constructors
 
-        #region Public Properties
-
-        public IEnumerable<GridViewModel> Elements { get; }
-
-        #endregion Public Properties
-
         #region Private Methods
 
-        private IEnumerable<GridViewModel> GetElements()
+        private void SetElements()
         {
-            for (int index = 0; index < ElementsCount; index++)
+            for (int index = 0; index < ElementsCount; index += 2)
             {
-                var result = new GridViewModel();
+                Elements.Add(new GridViewModel());
 
-                yield return result;
+                this.Initialize(new Group() { Column = index, Row = 0, Rows = 2, Columns = 2, Name = $"Group {index}" });
             }
         }
 

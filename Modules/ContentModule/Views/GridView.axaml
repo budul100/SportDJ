@@ -5,7 +5,7 @@
     xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
-    xmlns:hp="using:SportDJ.Modules.ContentModule.Helpers"
+    xmlns:gd="using:AvaloniaGridDefinitionBehavoir"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.ContentModule.Views"
@@ -13,6 +13,8 @@
     d:DesignHeight="300"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="False"
+    x:CompileBindings="True"
+    x:DataType="vm:GridViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -27,20 +29,22 @@
         <dt:GridViewModel />
     </Design.DataContext>
 
-    <ItemsControl ItemsSource="{Binding Elements}">
+    <ItemsControl x:DataType="vm:GridViewModel" ItemsSource="{Binding Elements}">
 
         <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
+            <ItemsPanelTemplate x:DataType="vm:GridViewModel">
                 <Grid
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    hp:GridHelpers.ColumnCount="{Binding Columns}"
-                    hp:GridHelpers.RowCount="{Binding Rows}" />
+                    gd:GridDefinitionBehavior.ColumnCount="{Binding Columns}"
+                    gd:GridDefinitionBehavior.RowCount="{Binding Rows}"
+                    gd:GridDefinitionBehavior.StarColumns=".*"
+                    gd:GridDefinitionBehavior.StarRows=".*" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 
         <ItemsControl.Styles>
-            <Style Selector="ItemsControl > ContentPresenter">
+            <Style x:DataType="vm:CellViewModel" Selector="ItemsControl > ContentPresenter">
                 <Setter Property="Grid.Row" Value="{Binding Row}" />
                 <Setter Property="Grid.Column" Value="{Binding Column}" />
                 <Setter Property="Grid.RowSpan" Value="{Binding RowSpan}" />

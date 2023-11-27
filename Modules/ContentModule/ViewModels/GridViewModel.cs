@@ -1,14 +1,13 @@
 ﻿using Prism.Ioc;
+using Prism.Mvvm;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
     public class GridViewModel
-        : BaseViewModel
+        : BindableBase
     {
         #region Private Fields
 
@@ -36,7 +35,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             set { SetProperty(ref columns, value); }
         }
 
-        public ObservableCollection<BaseViewModel> Elements { get; } = new ObservableCollection<BaseViewModel>();
+        public ObservableCollection<CellViewModel> Elements { get; } = new ObservableCollection<CellViewModel>();
 
         public int Rows
         {
@@ -48,63 +47,38 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(IEnumerable<object> contents, string name = default)
+        public void Initialize<T>(T grid)
+            where T : IGrid
         {
-            if (contents?.Any() == true)
+            if (grid?.Contents?.Any() == true)
             {
-                Columns = Convert.ToInt32(Math.Ceiling(Math.Sqrt(contents.Count())));
-                Rows = 0;
+                Rows = grid.Rows;
+                Columns = grid.Columns;
 
-                var column = 0;
-                var currentRows = 1;
-
-                foreach (var content in contents)
+                foreach (var content in grid.Contents)
                 {
-                    if (column >= Columns)
-                    {
-                        Rows += currentRows;
-                        column = 0;
-                    }
-
                     switch (content)
                     {
                         case Player player:
 
                             var playerElement = containerProvider.Resolve<PlayerViewModel>();
-
-                            playerElement.Initialize(
-                                name: player.Name,
-                                row: Rows,
-                                column: column);
+                            playerElement.Initialize(player);
 
                             Elements.Add(playerElement);
-
-                            column += playerElement.ColumnSpan;
 
                             break;
 
                         case Group group:
 
                             var groupElement = containerProvider.Resolve<GroupViewModel>();
-
-                            groupElement.Initialize(
-                                group: group,
-                                row: Rows,
-                                column: column);
+                            groupElement.Initialize(group);
 
                             Elements.Add(groupElement);
-
-                            column += groupElement.ColumnSpan;
-                            currentRows = groupElement.RowSpan > currentRows
-                                ? groupElement.RowSpan
-                                : currentRows;
 
                             break;
                     }
                 }
             }
-
-            Initialize(name);
         }
 
         #endregion Public Methods

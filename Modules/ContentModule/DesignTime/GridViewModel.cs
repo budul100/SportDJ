@@ -5,22 +5,15 @@
     {
         #region Private Fields
 
-        private const int ElementsCount = 4;
+        private const int SideCount = 4;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public GridViewModel()
-            : this("Group")
-        { }
-
-        public GridViewModel(string name)
             : base(default)
         {
-            Initialize(
-                name: name);
-
             SetElements();
         }
 
@@ -30,12 +23,17 @@
 
         private void SetElements()
         {
-            for (int index = 0; index < ElementsCount; index++)
+            for (int row = 0; row < SideCount; row++)
             {
-                var element = new PlayerViewModel(
-                    name: $"Player {index}");
+                for (int column = 0; column < SideCount; column++)
+                {
+                    var element = new PlayerViewModel(
+                        name: $"Player {row}{column}",
+                        row: row,
+                        column: column);
 
-                Elements.Add(element);
+                    Elements.Add(element);
+                }
             }
         }
 
