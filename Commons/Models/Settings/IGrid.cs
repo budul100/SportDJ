@@ -6,11 +6,11 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        public int Columns { get; }
+        int Columns { get; }
 
-        public List<Cell> Contents { get; }
+        List<Cell> Contents { get; }
 
-        public int Rows { get; }
+        int Rows { get; }
 
         #endregion Public Properties
     }

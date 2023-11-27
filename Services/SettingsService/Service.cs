@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Prism.Events;
+using Score2Stream.Commons;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Score2Stream.Commons;
-using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.SettingsService
 {
@@ -17,7 +19,7 @@ namespace SportDJ.Services.SettingsService
 
         private const string AppName = nameof(SportDJ);
 
-        private static readonly XmlWriterSettings xmlSettings = new XmlWriterSettings
+        private static readonly XmlWriterSettings xmlSettings = new()
         {
             Indent = true,
             IndentChars = "\t",
@@ -26,24 +28,32 @@ namespace SportDJ.Services.SettingsService
             OmitXmlDeclaration = true,
         };
 
+        private readonly IEventAggregator eventAggregator;
         private readonly SemaphoreSlim saveLock = new(1, 1);
+        private readonly XmlSerializer serializer = new(typeof(T));
 
-        private readonly XmlSerializer serializer;
         private string filePath;
         private string folderPath;
         private bool isDisposed;
-        private T settings;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service()
+        public Service(IEventAggregator eventAggregator)
         {
-            serializer = new XmlSerializer(typeof(T));
+            this.eventAggregator = eventAggregator;
+
+            Load();
         }
 
         #endregion Public Constructors
+
+        #region Public Properties
+
+        public T Settings { get; private set; }
+
+        #endregion Public Properties
 
         #region Public Methods
 
@@ -56,17 +66,7 @@ namespace SportDJ.Services.SettingsService
                 obj: this);
         }
 
-        public T Get()
-        {
-            if (settings == default)
-            {
-                Initialize();
-            }
-
-            return settings;
-        }
-
-        public void Initialize(string fileName = Constants.SettingsFileNameDefault)
+        public void Load(string fileName = Constants.SettingsFileNameDefault)
         {
             this.folderPath = GetSettingsFolderPath();
             this.filePath = Path.Combine(
@@ -75,10 +75,12 @@ namespace SportDJ.Services.SettingsService
 
             LoadSettings(filePath);
 
-            if (settings is default(T))
+            if (Settings is default(T))
             {
-                settings = Activator.CreateInstance<T>();
+                Settings = Activator.CreateInstance<T>();
             }
+
+            eventAggregator.GetEvent<SettingsLoadedEvent>().Publish();
         }
 
         public void Save()
@@ -129,7 +131,7 @@ namespace SportDJ.Services.SettingsService
 
             try
             {
-                settings = serializer.Deserialize(file) as T;
+                Settings = serializer.Deserialize(file) as T;
             }
             catch { }
         }
@@ -151,7 +153,7 @@ namespace SportDJ.Services.SettingsService
             {
                 serializer.Serialize(
                     xmlWriter: writer,
-                    o: settings);
+                    o: Settings);
             }
             catch
             { }

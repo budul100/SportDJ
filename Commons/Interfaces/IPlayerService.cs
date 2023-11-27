@@ -7,23 +7,23 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        public bool IsLoop { get; set; }
+        bool IsLoop { get; set; }
 
-        public IMixerService MixerLive { get; }
+        IMixerService MixerLive { get; }
 
-        public IMixerService MixerPre { get; }
+        IMixerService MixerPre { get; }
 
-        public TimeSpan PositionLive { get; }
+        TimeSpan PositionLive { get; }
 
-        public TimeSpan PositionPre { get; }
+        TimeSpan PositionPre { get; }
 
-        public TimeSpan RemainingLive { get; }
+        TimeSpan RemainingLive { get; }
 
-        public TimeSpan RemainingPre { get; }
+        TimeSpan RemainingPre { get; }
 
-        public StateType StateLive { get; }
+        StateType StateLive { get; }
 
-        public StateType StatePre { get; }
+        StateType StatePre { get; }
 
         #endregion Public Properties
 

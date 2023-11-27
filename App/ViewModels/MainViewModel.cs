@@ -11,7 +11,7 @@ namespace SportDJ.App.ViewModels
 
         public MainViewModel(ISettingsService<Set> settingsService)
         {
-            var set = settingsService.Get();
+            var set = settingsService.Settings;
 
             set.Contents.Clear();
 

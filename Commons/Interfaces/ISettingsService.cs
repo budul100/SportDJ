@@ -6,11 +6,15 @@ namespace SportDJ.Commons.Interfaces
         : IDisposable
         where T : class
     {
+        #region Public Properties
+
+        T Settings { get; }
+
+        #endregion Public Properties
+
         #region Public Methods
 
-        T Get();
-
-        void Initialize(string fileName);
+        void Load(string fileName);
 
         void Save();
 

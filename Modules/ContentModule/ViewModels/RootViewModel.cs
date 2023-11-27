@@ -1,7 +1,7 @@
 ﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using SportDJ.Commons.Events;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
@@ -29,7 +29,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             this.containerProvider = containerProvider;
             this.settingsService = settingsService;
 
-            eventAggregator.GetEvent<ContentLoadedEvent>().Subscribe(
+            eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
                 action: LoadSet,
                 keepSubscriberReferenceAlive: true);
 
@@ -52,7 +52,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void LoadSet()
         {
-            var set = settingsService.Get();
+            var set = settingsService.Settings;
 
             Element = containerProvider.Resolve<GridViewModel>();
             Element.Initialize(set);
