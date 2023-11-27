@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace TrackService
+namespace SportDJ.Services.TrackService
 {
     public class Service
         : ITrackService
@@ -21,8 +21,8 @@ namespace TrackService
         private readonly AudioDataIOFactory audioDataIOFactory;
         private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
-        private readonly IEnumerable<string> extensionsAudio;
-        private readonly IEnumerable<string> extensionsPlaylist;
+        private readonly IEnumerable<ATL.Format> formatsAudio;
+        private readonly IEnumerable<ATL.Format> formatsPlaylist;
         private readonly PlaylistIOFactory playlistIOFactory;
         private readonly ISettingsService<Set> settingsService;
 
@@ -40,8 +40,8 @@ namespace TrackService
             playlistIOFactory = PlaylistIOFactory.GetInstance();
             audioDataIOFactory = AudioDataIOFactory.GetInstance();
 
-            extensionsAudio = GetExtensionsAudio();
-            extensionsPlaylist = GetExtensionsPlaylist();
+            formatsAudio = GetFormatsAudio();
+            formatsPlaylist = GetFormatsPlaylist();
         }
 
         #endregion Public Constructors
@@ -98,7 +98,7 @@ namespace TrackService
             {
                 Track = track;
 
-                eventAggregator.GetEvent<TrackSelectedEvent>().Publish(this);
+                eventAggregator.GetEvent<TrackSelectedEvent>()?.Publish(this);
             }
         }
 
@@ -124,85 +124,87 @@ namespace TrackService
 
         #region Private Methods
 
-        private IEnumerable<string> GetExtensionsAudio()
-        {
-            var result = audioDataIOFactory.getFormats()
-                .Where(f => f.Readable)
-                .Select(f => f.ShortName.ToLower()).ToArray();
-
-            return result;
-        }
-
-        private IEnumerable<string> GetExtensionsPlaylist()
-        {
-            var result = playlistIOFactory.getFormats()
-                .Where(f => f.Readable)
-                .Select(f => f.ShortName.ToLower()).ToArray();
-
-            return result;
-        }
-
         private IEnumerable<string> GetFiles(string path, SearchOption searchOption)
         {
-            if (File.Exists(path)
-                && extensionsAudio.Contains(Path.GetExtension(path)))
+            if (!string.IsNullOrWhiteSpace(path))
             {
-                yield return path;
-            }
-
-            var relevants = default(IEnumerable<string>);
-
-            if (File.Exists(path)
-                && extensionsPlaylist.Contains(Path.GetExtension(path)))
-            {
-                relevants = playlistIOFactory.GetPlaylistIO(path).FilePaths;
-            }
-            else if (Directory.Exists(path))
-            {
-                relevants = Directory.GetFiles(
-                    path: path,
-                    searchPattern: "*.*",
-                    searchOption: searchOption)
-                    .Where(f => extensionsAudio.Contains(Path.GetExtension(f).ToLower())
-                        || extensionsPlaylist.Contains(Path.GetExtension(f).ToLower())).ToArray();
-            }
-
-            if (relevants?.Any() == true)
-            {
-                foreach (var relevant in relevants)
+                if (File.Exists(path)
+                    && formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(path))))
                 {
-                    var files = GetFiles(
-                        path: relevant,
-                        searchOption: searchOption).ToArray();
+                    yield return path;
+                }
 
-                    foreach (var file in files)
+                var relevants = default(IEnumerable<string>);
+
+                if (File.Exists(path)
+                    && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(path))))
+                {
+                    relevants = playlistIOFactory.GetPlaylistIO(path).FilePaths;
+                }
+                else if (Directory.Exists(path))
+                {
+                    relevants = Directory.GetFiles(
+                        path: path,
+                        searchPattern: "*.*",
+                        searchOption: searchOption)
+                        .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
+                            || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
+                }
+
+                if (relevants?.Any() == true)
+                {
+                    foreach (var relevant in relevants)
                     {
-                        yield return relevant;
+                        var files = GetFiles(
+                            path: relevant,
+                            searchOption: searchOption).ToArray();
+
+                        foreach (var file in files)
+                        {
+                            yield return relevant;
+                        }
                     }
                 }
             }
+        }
+
+        private IEnumerable<ATL.Format> GetFormatsAudio()
+        {
+            var result = audioDataIOFactory.getFormats()
+                .Where(f => f.Readable).ToArray();
+
+            return result;
+        }
+
+        private IEnumerable<ATL.Format> GetFormatsPlaylist()
+        {
+            var result = playlistIOFactory.getFormats()
+                .Where(f => f.Readable).ToArray();
+
+            return result;
         }
 
         private IEnumerable<Track> GetTracks(string path, SearchOption searchOption)
         {
             var files = GetFiles(
                 path: path,
-                searchOption: searchOption).ToArray();
+                searchOption: searchOption)
+                .Select(p => Path.GetFullPath(p)).ToArray();
 
             if (files?.Any() == true)
             {
                 foreach (var file in files)
                 {
-                    var track = new ATL.Track(file);
+                    var atlTrack = new ATL.Track(file);
 
-                    if (track != default)
+                    if (atlTrack != default)
                     {
-                        var length = TimeSpan.FromSeconds(track.Duration);
+                        var length = TimeSpan.FromSeconds(atlTrack.Duration);
 
                         var result = new Track(
-                            path: path,
-                            title: track.Title,
-                            artist: track.Artist,
+                            path: file,
+                            title: atlTrack.Title,
+                            artist: atlTrack.Artist,
                             length: length);
 
                         yield return result;
@@ -236,7 +238,7 @@ namespace TrackService
 
                     if (relevant.Trimmed)
                     {
-                        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(relevant);
+                        eventAggregator.GetEvent<TrackUpdatedEvent>()?.Publish(relevant);
                     }
                 }
             }

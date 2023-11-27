@@ -41,9 +41,9 @@ namespace SportDJ.Services.TrackService.Extensions
                 var start = TimeSpan.Zero;
                 var end = input.TotalTime;
 
-                var startForRearCheck = trimRearPortion > 1
-                    ? 0
-                    : 1 - trimRearPortion;
+                var startForRearCheck = trimRearPortion < 1
+                    ? 1 - trimRearPortion
+                    : 0;
 
                 var lastPosition = TimeSpan.Zero;
                 var isTrimRearFound = false;
@@ -55,6 +55,11 @@ namespace SportDJ.Services.TrackService.Extensions
                 while (input.Position < input.Length)
                 {
                     read = input.Read(buffer, 0, blockAlign);
+
+                    if (read == 0)
+                    {
+                        break;
+                    }
 
                     for (var i = 0; i < read / 4; i++)
                     {

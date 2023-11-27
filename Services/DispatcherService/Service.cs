@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace Score2Stream.DispatcherService
+namespace SportDJ.Services.DispatcherService
 {
     public class Service
         : IDispatcherService
