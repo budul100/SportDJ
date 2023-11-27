@@ -1,15 +1,11 @@
-﻿using Avalonia.Controls.Primitives;
-using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {
     public interface IPlayerService
     {
         #region Public Properties
-
-        public int Index { get; }
 
         public bool IsLoop { get; set; }
 
@@ -29,33 +25,19 @@ namespace SportDJ.Commons.Interfaces
 
         public StateType StatePre { get; }
 
-        Track Track { get; }
-
-        IEnumerable<Track> Tracks { get; }
-
         #endregion Public Properties
 
         #region Public Methods
 
-        void Backward();
+        void ExecuteLive();
 
-        void Clear();
-
-        void Execute();
-
-        void Forward();
+        void ExecutePre();
 
         void InitializeLive(IMixerService mixer);
 
         void InitializePre(IMixerService mixer);
 
         void Reset();
-
-        void Shuffle();
-
-        void StartPre();
-
-        void StopPre();
 
         #endregion Public Methods
     }
