@@ -61,7 +61,7 @@ namespace SportDJ.Services.TrackService
             Tracks = default;
             Track = default;
 
-            eventAggregator.GetEvent<TrackSelectedEvent>().Publish(this);
+            eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(default);
         }
 
         public void Load(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -98,7 +98,7 @@ namespace SportDJ.Services.TrackService
             {
                 Track = track;
 
-                eventAggregator.GetEvent<TrackSelectedEvent>()?.Publish(this);
+                eventAggregator.GetEvent<TrackUpdatedEvent>()?.Publish(Track);
             }
         }
 
@@ -238,7 +238,7 @@ namespace SportDJ.Services.TrackService
 
                     if (relevant.Trimmed)
                     {
-                        eventAggregator.GetEvent<TrackUpdatedEvent>()?.Publish(relevant);
+                        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(relevant);
                     }
                 }
             }

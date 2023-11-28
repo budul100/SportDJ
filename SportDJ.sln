@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0DA6D9CB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackServiceTests", "Tests\TrackServiceTests\TrackServiceTests.csproj", "{BE76A95D-3B8D-4364-860A-EDED1CCB5031}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalService", "Services\SignalService\SignalService.csproj", "{F33E81E6-D75B-410D-A6D0-3F54150E7E51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{42D88BC0-2695-4E28-91A5-7293F389F563} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{F76C948D-2817-45C1-AF91-9F18856D8514} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
+		{F33E81E6-D75B-410D-A6D0-3F54150E7E51} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

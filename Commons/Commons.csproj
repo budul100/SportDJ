@@ -6,7 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Prism.Avalonia" Version="8.1.97.11000" />
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="Prism.Avalonia" Version="8.1.97.11000" />
 	</ItemGroup>
 
 </Project>

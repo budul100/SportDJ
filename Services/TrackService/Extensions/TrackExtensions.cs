@@ -54,7 +54,10 @@ namespace SportDJ.Services.TrackService.Extensions
 
                 while (input.Position < input.Length)
                 {
-                    read = input.Read(buffer, 0, blockAlign);
+                    read = input.Read(
+                        buffer: buffer,
+                        offset: 0,
+                        count: blockAlign);
 
                     if (read == 0)
                     {

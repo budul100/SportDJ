@@ -1,5 +1,6 @@
 using Moq;
 using Prism.Events;
+using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -26,9 +27,9 @@ namespace SportDJ.Tests.TrackServiceTests
         {
             mockEventAggregator = new Mock<IEventAggregator>();
 
-            var mockTrackSelectedEvent = new Mock<TrackSelectedEvent>();
+            var mockTrackSelectedEvent = new Mock<SignalUpdatedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<TrackSelectedEvent>()).
+                Setup(m => m.GetEvent<SignalUpdatedEvent>()).
                 Returns(mockTrackSelectedEvent.Object);
 
             var mockTrackUpdatedEvent = new Mock<TrackUpdatedEvent>();
