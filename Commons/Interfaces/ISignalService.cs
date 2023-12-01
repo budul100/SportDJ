@@ -27,7 +27,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Initialize(WaveFormat waveFormat, Track track, TimeSpan? begin = default,
+        void Initialize(Track track, WaveFormat waveFormat, TimeSpan? begin = default,
             TimeSpan? length = default);
 
         void Pause();

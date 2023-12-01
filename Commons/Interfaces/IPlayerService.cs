@@ -15,7 +15,7 @@ namespace SportDJ.Commons.Interfaces
 
         string Name { get; }
 
-        ISampleProvider OutputProvider { get; }
+        ISampleProvider Output { get; }
 
         TimeSpan Position { get; }
 
@@ -33,7 +33,7 @@ namespace SportDJ.Commons.Interfaces
 
         ISignalService Add(Track track);
 
-        void Initialize(WaveFormat waveFormat, string name, bool isMultiSignalPlayer);
+        void Initialize(string name, WaveFormat waveFormat, bool isMultiSignalPlayer);
 
         void Pause();
 

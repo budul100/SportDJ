@@ -103,11 +103,11 @@ namespace SportDJ.Commons.Providers
 
             while (sample < count)
             {
-                if (FadeType == FadeType.In)
+                if (FadeType == FadeType.Raise)
                 {
                     volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
                 }
-                else if (FadeType == FadeType.Out)
+                else if (FadeType == FadeType.Reduce)
                 {
                     volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                 }
@@ -157,13 +157,13 @@ namespace SportDJ.Commons.Providers
             {
                 if (volume > volumeCurrent)
                 {
-                    FadeType = FadeType.In;
+                    FadeType = FadeType.Raise;
                     volumeFadeStart = volumeCurrent;
                     volumeFadeDiff = (volume - volumeCurrent) / fadeSampleCount;
                 }
                 else
                 {
-                    FadeType = FadeType.Out;
+                    FadeType = FadeType.Reduce;
                     volumeFadeStart = volumeCurrent;
                     volumeFadeDiff = (volumeCurrent - volume) / fadeSampleCount;
                 }

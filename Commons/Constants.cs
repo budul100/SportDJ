@@ -15,6 +15,8 @@
         public const float VolumeMax = 1f;
         public const float VolumeMin = 0f;
 
+        public const double VolumePortionBackgroundDefault = 0.5;
+
         #endregion Public Fields
     }
 }

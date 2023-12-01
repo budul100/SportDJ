@@ -27,9 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalService", "Services\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService", "Services\PlayerService\PlayerService.csproj", "{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterService", "Services\MasterService\MasterService.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService", "Services\OutputService\OutputService.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterServiceTests", "Tests\MasterServiceTests\MasterServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

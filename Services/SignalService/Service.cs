@@ -79,7 +79,7 @@ namespace SportDJ.Services.SignalService
             GC.SuppressFinalize(this);
         }
 
-        public void Initialize(WaveFormat waveFormat, Track track, TimeSpan? begin = default,
+        public void Initialize(Track track, WaveFormat waveFormat, TimeSpan? begin = default,
             TimeSpan? length = default)
         {
             if (track == default)
@@ -148,7 +148,7 @@ namespace SportDJ.Services.SignalService
             if (playingProvider != default
                 && IsPlaying)
             {
-                var milliSeconds = settingsService.Settings.Options.FadeDurationPause;
+                var milliSeconds = settingsService.Settings.Options.FadeDurationOnPause;
 
                 outputProvider.Fade(
                     volume: Constants.VolumeMin,
@@ -165,7 +165,7 @@ namespace SportDJ.Services.SignalService
                 playingProvider.Start();
 
                 var milliSeconds = IsStarted
-                    ? settingsService.Settings.Options.FadeDurationPause
+                    ? settingsService.Settings.Options.FadeDurationOnPause
                     : 0;
 
                 outputProvider.Fade(

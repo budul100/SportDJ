@@ -68,7 +68,7 @@ namespace SportDJ.Services.PlayerService
 
         public string Name { get; private set; }
 
-        public ISampleProvider OutputProvider => outputProvider;
+        public ISampleProvider Output => outputProvider;
 
         public TimeSpan Position => SignalService?.Position ?? TimeSpan.Zero;
 
@@ -86,7 +86,8 @@ namespace SportDJ.Services.PlayerService
             }
             set
             {
-                if (outputProvider != default)
+                if (outputProvider != default
+                    && value != outputProvider.Volume)
                 {
                     outputProvider.Fade(value);
                 }
@@ -107,8 +108,8 @@ namespace SportDJ.Services.PlayerService
             var result = containerProvider.Resolve<ISignalService>();
 
             result.Initialize(
-                waveFormat: outputProvider.WaveFormat,
-                track: track);
+                track: track,
+                waveFormat: outputProvider.WaveFormat);
 
             if (result.Output != default)
             {
@@ -146,7 +147,7 @@ namespace SportDJ.Services.PlayerService
             GC.SuppressFinalize(this);
         }
 
-        public void Initialize(WaveFormat waveFormat, string name, bool isMultiSignalPlayer)
+        public void Initialize(string name, WaveFormat waveFormat, bool isMultiSignalPlayer)
         {
             Name = name;
             IsMultiSignalPlayer = isMultiSignalPlayer;
@@ -210,14 +211,14 @@ namespace SportDJ.Services.PlayerService
                         .Where(s => s != SignalService
                             && s.IsPlaying).ToArray();
 
-                    var fadeInMilliseconds = settingsService.Settings.Options.FadeDurationMixIn > 0
+                    var fadeInMilliseconds = settingsService.Settings.Options.FadeDurationOnMixIn > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Settings.Options.FadeDurationMixIn
+                        ? settingsService.Settings.Options.FadeDurationOnMixIn
                         : 0;
 
-                    var fadeOutMilliSeconds = settingsService.Settings.Options.FadeDurationMixOut > 0
+                    var fadeOutMilliSeconds = settingsService.Settings.Options.FadeDurationOnMixOut > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Settings.Options.FadeDurationMixOut
+                        ? settingsService.Settings.Options.FadeDurationOnMixOut
                         : 0;
 
                     fadingProviders[SignalService].Fade(

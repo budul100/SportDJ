@@ -1,4 +1,5 @@
 ﻿using Score2Stream.Commons;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -6,11 +7,15 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        public int FadeDurationMixIn { get; set; }
+        public int FadeDurationOnBackground { get; set; }
 
-        public int FadeDurationMixOut { get; set; }
+        public int FadeDurationOnMixIn { get; set; }
 
-        public int FadeDurationPause { get; set; }
+        public int FadeDurationOnMixOut { get; set; }
+
+        public int FadeDurationOnPause { get; set; }
+
+        public List<Output> Outputs { get; set; } = new List<Output>();
 
         public double SelectNextPortion { get; set; }
 
