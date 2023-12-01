@@ -79,24 +79,6 @@ namespace SportDJ.Services.SignalService
             GC.SuppressFinalize(this);
         }
 
-        public void End()
-        {
-            if (playingProvider != default)
-            {
-                playingProvider.Stop();
-
-                playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
-
-                playingProvider.Dispose();
-
-                outputProvider.SignalFadedEvent -= OnSignalFaded;
-
-                outputProvider.Dispose();
-
-                eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
-            }
-        }
-
         public void Initialize(WaveFormat waveFormat, Track track, TimeSpan? begin = default,
             TimeSpan? length = default)
         {
@@ -121,7 +103,7 @@ namespace SportDJ.Services.SignalService
                     length: length);
 
                 var duration = (int)(settingsService.Settings.Options.SelectNextPortion * playingProvider.Duration.Ticks);
-                this.selectNextThreshold = new TimeSpan(duration);
+                selectNextThreshold = new TimeSpan(duration);
 
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
                 playingProvider.SignalEndedEvent += OnSignalEnded;
@@ -156,13 +138,15 @@ namespace SportDJ.Services.SignalService
                     sourceProvider: resampleProvider,
                     volume: Constants.VolumeMin);
 
+                outputProvider.SignalStartedEvent += OnSignalStarted;
                 outputProvider.SignalFadedEvent += OnSignalFaded;
             }
         }
 
         public void Pause()
         {
-            if (playingProvider != default)
+            if (playingProvider != default
+                && IsPlaying)
             {
                 var milliSeconds = settingsService.Settings.Options.FadeDurationPause;
 
@@ -190,8 +174,6 @@ namespace SportDJ.Services.SignalService
 
                 IsStarted = true;
                 IsPlaying = true;
-
-                eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
             }
         }
 
@@ -216,9 +198,22 @@ namespace SportDJ.Services.SignalService
         {
             if (!isDisposed)
             {
-                if (isDisposing)
+                if (isDisposing
+                    && playingProvider != default)
                 {
-                    End();
+                    playingProvider.Stop();
+
+                    eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
+
+                    outputProvider.SignalStartedEvent -= OnSignalStarted;
+                    outputProvider.SignalFadedEvent -= OnSignalFaded;
+
+                    outputProvider.Dispose();
+
+                    playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
+                    playingProvider.SignalEndedEvent -= OnSignalEnded;
+
+                    playingProvider.Dispose();
                 }
 
                 isDisposed = true;
@@ -231,19 +226,26 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalEnded(object sender, EventArgs e)
         {
-            End();
+            Dispose();
         }
 
         private void OnSignalFaded(object sender, EventArgs e)
         {
-            if (outputProvider?.Volume == Constants.VolumeMin)
+            if (outputProvider?.IsSilent == true)
             {
                 Stop();
             }
         }
 
+        private void OnSignalStarted(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
+        }
+
         private void OnSignalUpdated(object sender, EventArgs e)
         {
+            eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
+
             if (!selectNextThresholdExceeded
                 && Position.Ticks > selectNextThreshold.Ticks)
             {

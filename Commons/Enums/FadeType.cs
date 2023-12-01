@@ -1,11 +1,11 @@
 ﻿namespace SportDJ.Commons.Enums
 {
-    internal enum FadeType
+    public enum FadeType
     {
-        Full,
+        Complete,
 
-        FadingIn,
+        In,
 
-        FadingOut,
+        Out,
     }
 }

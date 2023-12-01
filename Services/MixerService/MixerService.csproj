@@ -8,7 +8,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
-		<ProjectReference Include="..\..\SportDJ\Commons\Commons.csproj" />
 	</ItemGroup>
 
 </Project>

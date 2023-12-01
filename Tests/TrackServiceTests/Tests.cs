@@ -1,5 +1,6 @@
 using Moq;
 using Prism.Events;
+using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -44,7 +45,7 @@ namespace SportDJ.Tests.TrackServiceTests
             mockSettingsService = new Mock<ISettingsService<Session>>();
             mockSettingsService
                 .Setup(m => m.Settings)
-                .Returns(new Set());
+                .Returns(new Session());
         }
 
         #endregion Public Constructors

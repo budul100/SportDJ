@@ -11,7 +11,6 @@
         public const double TrimRearPortionDefault = 0.1;
 
         public const float VolumeMax = 1f;
-        public const float VolumeMiddle = 0.5f;
         public const float VolumeMin = 0f;
 
         #endregion Public Fields
