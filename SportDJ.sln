@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService", "Services\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService", "Services\OutputService\OutputService.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -18,7 +18,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Clear();
 
-        void Load(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        void Initialize(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         void Next();
 

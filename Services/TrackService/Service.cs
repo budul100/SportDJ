@@ -64,7 +64,7 @@ namespace SportDJ.Services.TrackService
             eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(default);
         }
 
-        public void Load(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public void Initialize(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             var tracks = GetTracks(
                 path: path,

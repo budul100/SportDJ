@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SportDJ.Commons.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
@@ -8,7 +9,7 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        string Name { get; }
+        OutputType Type { get; }
 
         float Volume { get; set; }
 
@@ -22,7 +23,7 @@ namespace SportDJ.Commons.Interfaces
 
         Dictionary<int, string> GetDevices();
 
-        void Initialize(string name);
+        void Initialize(OutputType type);
 
         void Lower();
 

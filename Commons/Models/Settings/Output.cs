@@ -1,4 +1,5 @@
 ﻿using Score2Stream.Commons;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -8,7 +9,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public string DeviceName { get; set; }
 
-        public string Name { get; set; }
+        public OutputType Type { get; set; }
 
         public float Volume { get; set; } = Constants.VolumeMax;
 

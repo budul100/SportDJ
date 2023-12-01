@@ -3,7 +3,7 @@
 namespace SportDJ.Commons.Models.Settings
 {
     [XmlInclude(typeof(Group))]
-    [XmlInclude(typeof(Player))]
+    [XmlInclude(typeof(Controller))]
     public abstract class Cell
     {
         #region Public Properties

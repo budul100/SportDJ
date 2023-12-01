@@ -2,11 +2,11 @@ using Avalonia.Controls;
 
 namespace SportDJ.Modules.ContentModule.Views;
 
-public partial class PlayerView : UserControl
+public partial class ControllerView : UserControl
 {
     #region Public Constructors
 
-    public PlayerView()
+    public ControllerView()
     {
         InitializeComponent();
     }

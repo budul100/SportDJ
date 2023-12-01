@@ -21,8 +21,6 @@ namespace SportDJ.Commons.Interfaces
 
         TimeSpan Remaining { get; }
 
-        ISignalService SignalService { get; }
-
         Track Track { get; }
 
         float Volume { get; set; }

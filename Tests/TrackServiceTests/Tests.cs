@@ -57,7 +57,7 @@ namespace SportDJ.Tests.TrackServiceTests
         {
             var trackService = new Service(mockEventAggregator.Object, mockDispatcherService.Object, mockSettingsService.Object);
 
-            trackService.Load(@"..\..\..\Samples");
+            trackService.Initialize(@"..\..\..\Samples");
 
             Assert.True(trackService.Tracks.Count(t => t.Trimmed) == 2);
             Assert.True(trackService.Track != default);

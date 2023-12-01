@@ -1,6 +1,6 @@
 ﻿namespace SportDJ.Commons.Models.Settings
 {
-    public class Player
+    public class Controller
         : Cell
     { }
 }

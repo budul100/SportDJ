@@ -15,11 +15,11 @@ namespace SportDJ.App.ViewModels
 
             session.Set.Contents.Clear();
 
-            session.Set.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0 });
+            session.Set.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0 });
 
-            session.Set.Contents.Add(new Player() { Name = "Player 2", Row = 1, Column = 0 });
+            session.Set.Contents.Add(new Controller() { Name = "Player 2", Row = 1, Column = 0 });
 
-            session.Set.Contents.Add(new Player() { Name = "Player 3", Row = 0, Column = 1 });
+            session.Set.Contents.Add(new Controller() { Name = "Player 3", Row = 0, Column = 1 });
 
             var group = new Group
             {
@@ -30,13 +30,13 @@ namespace SportDJ.App.ViewModels
                 Columns = 2,
             };
 
-            group.Contents.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
+            group.Contents.Add(new Controller() { Name = "Player 21", Row = 0, Column = 0 });
 
-            group.Contents.Add(new Player() { Name = "Player 22", Row = 1, Column = 0 });
+            group.Contents.Add(new Controller() { Name = "Player 22", Row = 1, Column = 0 });
 
-            group.Contents.Add(new Player() { Name = "Player 23", Row = 0, Column = 1 });
+            group.Contents.Add(new Controller() { Name = "Player 23", Row = 0, Column = 1 });
 
-            group.Contents.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
+            group.Contents.Add(new Controller() { Name = "Player 24", Row = 1, Column = 1 });
 
             session.Set.Contents.Add(group);
 

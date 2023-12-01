@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -53,7 +54,7 @@ namespace SportDJ.Services.OutputService
 
         #region Public Properties
 
-        public string Name { get; private set; }
+        public OutputType Type { get; private set; }
 
         public float Volume
         {
@@ -165,10 +166,10 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        public void Initialize(string name)
+        public void Initialize(OutputType type)
         {
-            Name = name;
-            outputOptions = GetOptions(Name);
+            Type = type;
+            outputOptions = GetOptions(type);
 
             if (!string.IsNullOrWhiteSpace(outputOptions.DeviceName))
             {
@@ -299,13 +300,13 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private Output GetOptions(string name)
+        private Output GetOptions(OutputType type)
         {
-            if (!settingsService.Settings.Options.Outputs.Any(m => m.Name == name))
+            if (!settingsService.Settings.Options.Outputs.Any(o => o.Type == type))
             {
                 var outputOptions = new Output
                 {
-                    Name = name,
+                    Type = type,
                     Volume = Constants.VolumeMax,
                 };
 
@@ -313,7 +314,7 @@ namespace SportDJ.Services.OutputService
             }
 
             var result = settingsService.Settings.Options.Outputs
-                .Single(s => s.Name == Name);
+                .Single(s => s.Type == type);
 
             return result;
         }

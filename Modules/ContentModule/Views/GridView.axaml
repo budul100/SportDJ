@@ -56,14 +56,14 @@
             <DataTemplate x:DataType="vm:GroupViewModel">
                 <v:GroupView />
             </DataTemplate>
-            <DataTemplate x:DataType="vm:PlayerViewModel">
-                <v:PlayerView />
+            <DataTemplate x:DataType="vm:ControllerViewModel">
+                <v:ControllerView />
             </DataTemplate>
             <DataTemplate x:DataType="dt:GroupViewModel">
                 <v:GroupView />
             </DataTemplate>
-            <DataTemplate x:DataType="vm:PlayerViewModel">
-                <v:PlayerView />
+            <DataTemplate x:DataType="vm:ControllerViewModel">
+                <v:ControllerView />
             </DataTemplate>
         </ItemsControl.DataTemplates>
     </ItemsControl>

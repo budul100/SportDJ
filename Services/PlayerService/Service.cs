@@ -29,13 +29,14 @@ namespace SportDJ.Services.PlayerService
         private bool isDisposed;
         private MixingSampleProvider mixingProvider;
         private FadingSampleProvider outputProvider;
+        private ISignalService signalService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ISettingsService<Session> settingsService)
+                   ISettingsService<Session> settingsService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
@@ -62,7 +63,7 @@ namespace SportDJ.Services.PlayerService
 
         #region Public Properties
 
-        public bool IsLoop => SignalService?.IsLoop ?? false;
+        public bool IsLoop => signalService?.IsLoop ?? false;
 
         public bool IsMultiSignalPlayer { get; private set; }
 
@@ -70,13 +71,10 @@ namespace SportDJ.Services.PlayerService
 
         public ISampleProvider Output => outputProvider;
 
-        public TimeSpan Position => SignalService?.Position ?? TimeSpan.Zero;
+        public TimeSpan Position => signalService?.Position ?? TimeSpan.Zero;
 
-        public TimeSpan Remaining => SignalService?.Remaining ?? TimeSpan.Zero;
-
-        public ISignalService SignalService { get; private set; }
-
-        public Track Track => SignalService?.Track;
+        public TimeSpan Remaining => signalService?.Remaining ?? TimeSpan.Zero;
+        public Track Track => signalService?.Track;
 
         public float Volume
         {
@@ -203,12 +201,12 @@ namespace SportDJ.Services.PlayerService
         {
             if (signalService != default)
             {
-                SignalService = signalService;
+                this.signalService = signalService;
 
                 if (fadingProviders.ContainsKey(signalService))
                 {
                     var otherSignalServices = signalServices
-                        .Where(s => s != SignalService
+                        .Where(s => s != signalService
                             && s.IsPlaying).ToArray();
 
                     var fadeInMilliseconds = settingsService.Settings.Options.FadeDurationOnMixIn > 0
@@ -221,7 +219,7 @@ namespace SportDJ.Services.PlayerService
                         ? settingsService.Settings.Options.FadeDurationOnMixOut
                         : 0;
 
-                    fadingProviders[SignalService].Fade(
+                    fadingProviders[this.signalService].Fade(
                         volume: Constants.VolumeMax,
                         milliSeconds: fadeInMilliseconds);
 
@@ -254,16 +252,16 @@ namespace SportDJ.Services.PlayerService
         {
             if (signalServices.Contains(signalService))
             {
-                if (SignalService == signalService)
+                if (this.signalService == signalService)
                 {
-                    SignalService = default;
+                    this.signalService = default;
                 }
 
                 if (fadingProviders.ContainsKey(signalService))
                 {
-                    fadingProviders[SignalService].SignalFadedEvent -= OnSignalFaded;
+                    fadingProviders[this.signalService].SignalFadedEvent -= OnSignalFaded;
 
-                    mixingProvider.Remove(fadingProviders[SignalService]);
+                    mixingProvider.Remove(fadingProviders[this.signalService]);
                     fadingProviders.Remove(signalService);
                 }
                 else if (signalService.Output != default)
@@ -278,7 +276,7 @@ namespace SportDJ.Services.PlayerService
         private void SendUpdate(ISignalService signalService)
         {
             if (!IsMultiSignalPlayer
-                && signalService == SignalService)
+                && signalService == this.signalService)
             {
                 eventAggregator.GetEvent<PlayerUpdatedEvent>().Publish(this);
             }

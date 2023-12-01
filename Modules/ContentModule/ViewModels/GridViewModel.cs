@@ -60,12 +60,12 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 {
                     switch (content)
                     {
-                        case Player player:
+                        case Controller controller:
 
-                            var playerElement = containerProvider.Resolve<PlayerViewModel>();
-                            playerElement.Initialize(player);
+                            var controllerElement = containerProvider.Resolve<ControllerViewModel>();
+                            controllerElement.Initialize(controller);
 
-                            Elements.Add(playerElement);
+                            Elements.Add(controllerElement);
 
                             break;
 
