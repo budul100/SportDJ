@@ -73,6 +73,9 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<ISettingsService<Session>, Services.SettingsService.Service<Session>>();
 
+            containerRegistry.Register<IOutputService, Services.OutputService.Service>();
+            containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
+            containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<ITrackService, Services.TrackService.Service>();
 
             containerRegistry.Register<MainView>();

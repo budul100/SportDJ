@@ -302,7 +302,7 @@ namespace SportDJ.Services.OutputService
 
         private Output GetOptions(OutputType type)
         {
-            if (!settingsService.Settings.Options.Outputs.Any(o => o.Type == type))
+            if (!settingsService.Settings.Outputs.Any(o => o.Type == type))
             {
                 var outputOptions = new Output
                 {
@@ -310,10 +310,10 @@ namespace SportDJ.Services.OutputService
                     Volume = Constants.VolumeMax,
                 };
 
-                settingsService.Settings.Options.Outputs.Add(outputOptions);
+                settingsService.Settings.Outputs.Add(outputOptions);
             }
 
-            var result = settingsService.Settings.Options.Outputs
+            var result = settingsService.Settings.Outputs
                 .Single(s => s.Type == type);
 
             return result;

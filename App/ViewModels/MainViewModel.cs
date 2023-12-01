@@ -11,6 +11,11 @@ namespace SportDJ.App.ViewModels
 
         public MainViewModel(ISettingsService<Session> settingsService)
         {
+            XXXX(settingsService);
+        }
+
+        private static void XXXX(ISettingsService<Session> settingsService)
+        {
             var session = settingsService.Settings;
 
             session.Set.Contents.Clear();

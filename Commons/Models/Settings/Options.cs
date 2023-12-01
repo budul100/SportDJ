@@ -15,7 +15,6 @@ namespace SportDJ.Commons.Models.Settings
 
         public int FadeDurationOnPause { get; set; }
 
-        public List<Output> Outputs { get; set; } = new List<Output>();
 
         public double SelectNextPortion { get; set; }
 

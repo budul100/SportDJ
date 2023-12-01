@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -35,6 +35,8 @@
 	  <ProjectReference Include="..\Commons\Commons.csproj" />
 	  <ProjectReference Include="..\Modules\ContentModule\ContentModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
+	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
+	  <ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
 	  <ProjectReference Include="..\Services\SettingsService\SettingsService.csproj" />
 	  <ProjectReference Include="..\Services\SignalService\SignalService.csproj" />
 	  <ProjectReference Include="..\Services\TrackService\TrackService.csproj" />

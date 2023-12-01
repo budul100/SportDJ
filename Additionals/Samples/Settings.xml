@@ -1,30 +1,42 @@
-﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Columns="4" Rows="2">
-	<Contents>
-		<Cell xsi:type="Player" Column="0" Row="0">
-			<Name>Player 1</Name>
-		</Cell>
-		<Cell xsi:type="Player" Column="0" Row="1">
-			<Name>Player 2</Name>
-		</Cell>
-		<Cell xsi:type="Player" Column="1" Row="0">
-			<Name>Player 3</Name>
-		</Cell>
-		<Cell xsi:type="Group" Column="2" Row="0" Columns="2" Rows="2">
-			<Name>Group1</Name>
-			<Contents>
-				<Cell xsi:type="Player" Column="0" Row="0">
-					<Name>Player 21</Name>
-				</Cell>
-				<Cell xsi:type="Player" Column="0" Row="1">
-					<Name>Player 22</Name>
-				</Cell>
-				<Cell xsi:type="Player" Column="1" Row="0">
-					<Name>Player 23</Name>
-				</Cell>
-				<Cell xsi:type="Player" Column="1" Row="1">
-					<Name>Player 24</Name>
-				</Cell>
-			</Contents>
-		</Cell>
-	</Contents>
-</Set>
+﻿<Session xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Outputs />
+	<Options>
+		<FadeDurationOnBackground>0</FadeDurationOnBackground>
+		<FadeDurationOnMixIn>0</FadeDurationOnMixIn>
+		<FadeDurationOnMixOut>0</FadeDurationOnMixOut>
+		<FadeDurationOnPause>0</FadeDurationOnPause>
+		<SelectNextPortion>0</SelectNextPortion>
+		<TrimRearPortion>0.1</TrimRearPortion>
+		<TrimVolume>0</TrimVolume>
+	</Options>
+	<Set Columns="4" Rows="2">
+		<Contents>
+			<Cell xsi:type="Controller" Column="0" Row="0">
+				<Name>Player 1</Name>
+			</Cell>
+			<Cell xsi:type="Controller" Column="0" Row="1">
+				<Name>Player 2</Name>
+			</Cell>
+			<Cell xsi:type="Controller" Column="1" Row="0">
+				<Name>Player 3</Name>
+			</Cell>
+			<Cell xsi:type="Group" Column="2" Row="0" Columns="2" Rows="2">
+				<Name>Group1</Name>
+				<Contents>
+					<Cell xsi:type="Controller" Column="0" Row="0">
+						<Name>Player 21</Name>
+					</Cell>
+					<Cell xsi:type="Controller" Column="0" Row="1">
+						<Name>Player 22</Name>
+					</Cell>
+					<Cell xsi:type="Controller" Column="1" Row="0">
+						<Name>Player 23</Name>
+					</Cell>
+					<Cell xsi:type="Controller" Column="1" Row="1">
+						<Name>Player 24</Name>
+					</Cell>
+				</Contents>
+			</Cell>
+		</Contents>
+	</Set>
+</Session>
