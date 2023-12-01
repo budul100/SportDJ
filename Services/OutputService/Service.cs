@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
-using Prism.Ioc;
 using Score2Stream.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
@@ -18,9 +17,8 @@ namespace SportDJ.Services.OutputService
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
         private readonly List<IPlayerService> foregroundServices = new List<IPlayerService>();
-        private readonly Dictionary<string, IPlayerService> playerServices = new Dictionary<string, IPlayerService>();
+        private readonly List<IPlayerService> playerServices = new List<IPlayerService>();
         private readonly ISettingsService<Session> settingsService;
 
         private FadingSampleProvider backgroundFader;
@@ -35,10 +33,8 @@ namespace SportDJ.Services.OutputService
 
         #region Public Constructors
 
-        public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ISettingsService<Session> settingsService)
+        public Service(IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
         {
-            this.containerProvider = containerProvider;
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<PlayerStartedEvent>().Subscribe(
@@ -53,6 +49,8 @@ namespace SportDJ.Services.OutputService
         #endregion Public Constructors
 
         #region Public Properties
+
+        public WaveFormat Format { get; private set; }
 
         public OutputType Type { get; private set; }
 
@@ -110,49 +108,28 @@ namespace SportDJ.Services.OutputService
 
         #region Public Methods
 
+        public void Add(IPlayerService playerService, bool isForegroundPlayer)
+        {
+            if (isForegroundPlayer)
+            {
+                outputMixer.Add(playerService.Output);
+
+                foregroundServices.Add(playerService);
+            }
+            else
+            {
+                backgroundMixer.Add(playerService.Output);
+            }
+
+            playerServices.Add(playerService);
+        }
+
         public void Dispose()
         {
             Dispose(
                 isDisposing: true);
 
             GC.SuppressFinalize(this);
-        }
-
-        public IPlayerService Get(string name, bool isMultiSignalPlayer, bool isBackgroundPlayer)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (!playerServices.ContainsKey(name))
-            {
-                var playerService = containerProvider.Resolve<IPlayerService>();
-
-                playerService.Initialize(
-                    name: name,
-                    waveFormat: output.OutputWaveFormat,
-                    isMultiSignalPlayer: isMultiSignalPlayer);
-
-                if (isBackgroundPlayer)
-                {
-                    backgroundMixer.Add(playerService.Output);
-                }
-                else
-                {
-                    outputMixer.Add(playerService.Output);
-
-                    foregroundServices.Add(playerService);
-                }
-
-                playerServices.Add(
-                    key: name,
-                    value: playerService);
-            }
-
-            var result = playerServices[name];
-
-            return result;
         }
 
         public Dictionary<int, string> GetDevices()
@@ -169,6 +146,7 @@ namespace SportDJ.Services.OutputService
         public void Initialize(OutputType type)
         {
             Type = type;
+
             outputOptions = GetOptions(type);
 
             if (!string.IsNullOrWhiteSpace(outputOptions.DeviceName))
@@ -209,7 +187,7 @@ namespace SportDJ.Services.OutputService
                 milliSeconds: settingsService.Settings.Options.FadeDurationOnBackground);
         }
 
-        public void Set(int deviceNumber)
+        public void Set(int deviceNumber, int sampleRate = Constants.SampleRateDefault)
         {
             var capabilities = GetCapabilities();
 
@@ -225,15 +203,19 @@ namespace SportDJ.Services.OutputService
 
                 outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
 
+                Format = WaveFormat.CreateIeeeFloatWaveFormat(
+                    sampleRate: sampleRate,
+                    channels: capabilities[deviceNumber].Channels);
+
                 backgroundMixer = new MixingSampleProvider(
-                    waveFormat: output.OutputWaveFormat);
+                    waveFormat: Format);
 
                 backgroundFader = new FadingSampleProvider(
                     sourceProvider: backgroundMixer,
                     volume: Constants.VolumeMax);
 
                 outputMixer = new MixingSampleProvider(
-                    waveFormat: output.OutputWaveFormat);
+                    waveFormat: Format);
 
                 outputMixer.Add(backgroundFader);
 

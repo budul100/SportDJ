@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 using System;
 
@@ -11,10 +12,6 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsLoop { get; }
 
-        bool IsMultiSignalPlayer { get; }
-
-        string Name { get; }
-
         ISampleProvider Output { get; }
 
         TimeSpan Position { get; }
@@ -22,6 +19,8 @@ namespace SportDJ.Commons.Interfaces
         TimeSpan Remaining { get; }
 
         Track Track { get; }
+
+        PlayerType Type { get; }
 
         float Volume { get; set; }
 
@@ -31,7 +30,7 @@ namespace SportDJ.Commons.Interfaces
 
         ISignalService Add(Track track);
 
-        void Initialize(string name, WaveFormat waveFormat, bool isMultiSignalPlayer);
+        void Initialize(PlayerType type, WaveFormat waveFormat, bool isMultiSignalPlayer);
 
         void Pause();
 

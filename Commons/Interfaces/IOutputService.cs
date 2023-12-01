@@ -1,4 +1,6 @@
-﻿using SportDJ.Commons.Enums;
+﻿using NAudio.Wave;
+using Score2Stream.Commons;
+using SportDJ.Commons.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -8,6 +10,8 @@ namespace SportDJ.Commons.Interfaces
         : IDisposable
     {
         #region Public Properties
+
+        WaveFormat Format { get; }
 
         OutputType Type { get; }
 
@@ -19,7 +23,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        IPlayerService Get(string name, bool isMultiSignalPlayer, bool isBackgroundPlayer);
+        void Add(IPlayerService playerService, bool isForegroundPlayer);
 
         Dictionary<int, string> GetDevices();
 
@@ -29,7 +33,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Raise();
 
-        void Set(int deviceNumber);
+        void Set(int deviceNumber, int sampleRate = Constants.SampleRateDefault);
 
         #endregion Public Methods
     }

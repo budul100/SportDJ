@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
 using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Extensions;
@@ -27,6 +28,7 @@ namespace SportDJ.Services.PlayerService
         private readonly HashSet<ISignalService> signalServices = new();
 
         private bool isDisposed;
+        private bool isMultiSignalPlayer;
         private MixingSampleProvider mixingProvider;
         private FadingSampleProvider outputProvider;
         private ISignalService signalService;
@@ -36,7 +38,7 @@ namespace SportDJ.Services.PlayerService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-                   ISettingsService<Session> settingsService)
+            ISettingsService<Session> settingsService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
@@ -65,16 +67,15 @@ namespace SportDJ.Services.PlayerService
 
         public bool IsLoop => signalService?.IsLoop ?? false;
 
-        public bool IsMultiSignalPlayer { get; private set; }
-
-        public string Name { get; private set; }
-
         public ISampleProvider Output => outputProvider;
 
         public TimeSpan Position => signalService?.Position ?? TimeSpan.Zero;
 
         public TimeSpan Remaining => signalService?.Remaining ?? TimeSpan.Zero;
+
         public Track Track => signalService?.Track;
+
+        public PlayerType Type { get; private set; }
 
         public float Volume
         {
@@ -115,7 +116,7 @@ namespace SportDJ.Services.PlayerService
 
                 ISampleProvider signalProvider;
 
-                if (IsMultiSignalPlayer)
+                if (isMultiSignalPlayer)
                 {
                     signalProvider = result.Output;
                 }
@@ -145,10 +146,10 @@ namespace SportDJ.Services.PlayerService
             GC.SuppressFinalize(this);
         }
 
-        public void Initialize(string name, WaveFormat waveFormat, bool isMultiSignalPlayer)
+        public void Initialize(PlayerType type, WaveFormat waveFormat, bool isMultiSignalPlayer)
         {
-            Name = name;
-            IsMultiSignalPlayer = isMultiSignalPlayer;
+            Type = type;
+            this.isMultiSignalPlayer = isMultiSignalPlayer;
 
             mixingProvider = new MixingSampleProvider(
                 waveFormat: waveFormat);
@@ -275,7 +276,7 @@ namespace SportDJ.Services.PlayerService
 
         private void SendUpdate(ISignalService signalService)
         {
-            if (!IsMultiSignalPlayer
+            if (!isMultiSignalPlayer
                 && signalService == this.signalService)
             {
                 eventAggregator.GetEvent<PlayerUpdatedEvent>().Publish(this);
