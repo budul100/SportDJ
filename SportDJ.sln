@@ -15,15 +15,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsService", "Services\SettingsService\SettingsService.csproj", "{98C3D340-27F1-476D-98E9-69590464CFEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackService", "Services\TrackService\TrackService.csproj", "{42D88BC0-2695-4E28-91A5-7293F389F563}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackService", "Services\TrackService\TrackService.csproj", "{42D88BC0-2695-4E28-91A5-7293F389F563}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DispatcherService", "Services\DispatcherService\DispatcherService.csproj", "{F76C948D-2817-45C1-AF91-9F18856D8514}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackServiceTests", "Tests\TrackServiceTests\TrackServiceTests.csproj", "{BE76A95D-3B8D-4364-860A-EDED1CCB5031}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackServiceTests", "Tests\TrackServiceTests\TrackServiceTests.csproj", "{BE76A95D-3B8D-4364-860A-EDED1CCB5031}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalService", "Services\SignalService\SignalService.csproj", "{F33E81E6-D75B-410D-A6D0-3F54150E7E51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalService", "Services\SignalService\SignalService.csproj", "{F33E81E6-D75B-410D-A6D0-3F54150E7E51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixerService", "Services\MixerService\MixerService.csproj", "{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F33E81E6-D75B-410D-A6D0-3F54150E7E51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{F76C948D-2817-45C1-AF91-9F18856D8514} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 		{F33E81E6-D75B-410D-A6D0-3F54150E7E51} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{A7C1AB0B-C987-470D-A457-5D9C2EED48EB} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

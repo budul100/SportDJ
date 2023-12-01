@@ -1,10 +1,12 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using Prism.Events;
+using Score2Stream.Commons;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Services.SignalService.Providers;
+using SportDJ.Commons.Providers;
 using System;
 using System.IO;
 
@@ -15,29 +17,22 @@ namespace SportDJ.Services.SignalService
     {
         #region Private Fields
 
-        private const float FadingVolunmeDown = 0f;
-        private const float FadingVolunmeUp = 1f;
-
         private readonly IEventAggregator eventAggregator;
-        private readonly ISettingsService<Set> settingsService;
-        private readonly ITrackService trackService;
-        private FadingSampleProvider fadingProvider;
+        private readonly ISettingsService<Session> settingsService;
 
         private bool isDisposed;
+        private FadingSampleProvider outputProvider;
         private PlayingFileProvider playingProvider;
         private TimeSpan selectNextThreshold;
         private bool selectNextThresholdExceeded;
-        private Track track;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, ITrackService trackService,
-            ISettingsService<Set> settingsService)
+        public Service(IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
         {
             this.eventAggregator = eventAggregator;
-            this.trackService = trackService;
             this.settingsService = settingsService;
         }
 
@@ -45,13 +40,11 @@ namespace SportDJ.Services.SignalService
 
         #region Public Properties
 
-        public TimeSpan FadeDuration { get; set; }
-
         public bool IsLoop
         {
             get
             {
-                return playingProvider?.IsLoop == true;
+                return playingProvider?.IsLoop ?? default;
             }
             set
             {
@@ -66,13 +59,13 @@ namespace SportDJ.Services.SignalService
 
         public bool IsStarted { get; private set; }
 
-        public ISampleProvider Output => fadingProvider;
+        public ISampleProvider Output => outputProvider;
 
-        public TimeSpan Position => playingProvider?.Current
-            ?? TimeSpan.Zero;
+        public TimeSpan Position => playingProvider?.Current ?? TimeSpan.Zero;
 
-        public TimeSpan Remaining => playingProvider?.Remaining
-            ?? TimeSpan.Zero;
+        public TimeSpan Remaining => playingProvider?.Remaining ?? TimeSpan.Zero;
+
+        public Track Track { get; private set; }
 
         #endregion Public Properties
 
@@ -92,48 +85,78 @@ namespace SportDJ.Services.SignalService
             {
                 playingProvider.Stop();
 
-                IsPlaying = false;
+                playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
 
                 playingProvider.Dispose();
+
+                outputProvider.SignalFadedEvent -= OnSignalFaded;
+
+                outputProvider.Dispose();
+
+                eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
             }
         }
 
-        public void Initialize(TimeSpan begin, TimeSpan length)
+        public void Initialize(WaveFormat waveFormat, Track track, TimeSpan? begin = default,
+            TimeSpan? length = default)
         {
-            if (trackService?.Track != default
-                && File.Exists(trackService.Track.Path))
+            if (track == default)
             {
-                track = trackService.Track;
+                throw new ArgumentNullException(nameof(track));
+            }
 
-                var reader = new AudioFileReader(track.Path);
+            if (File.Exists(track.Path))
+            {
+                Track = track;
+
+                var reader = new AudioFileReader(Track.Path);
+
+                begin ??= Track.Start;
+                length ??= Track.Length;
 
                 playingProvider = new PlayingFileProvider(
-                    eventAggregator: eventAggregator,
                     reader: reader,
-                    track: track,
+                    track: Track,
                     begin: begin,
                     length: length);
 
-                fadingProvider = new FadingSampleProvider(
-                    eventAggregator: eventAggregator,
-                    source: playingProvider,
-                    track: track,
-                    volume: FadingVolunmeUp);
-
-                var duration = (int)(settingsService.Settings.SelectNextPortion * playingProvider.Duration.Ticks);
+                var duration = (int)(settingsService.Settings.Options.SelectNextPortion * playingProvider.Duration.Ticks);
                 this.selectNextThreshold = new TimeSpan(duration);
 
-                eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
-                    action: _ => End(),
-                    keepSubscriberReferenceAlive: true);
+                playingProvider.SignalUpdatedEvent += OnSignalUpdated;
+                playingProvider.SignalEndedEvent += OnSignalEnded;
 
-                eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
-                    action: _ => OnSignalUpdated(),
-                    keepSubscriberReferenceAlive: true);
+                var channelProvider = default(ISampleProvider);
 
-                eventAggregator.GetEvent<SignalFadedEvent>().Subscribe(
-                    action: _ => OnSignalFaded(),
-                    keepSubscriberReferenceAlive: true);
+                if (playingProvider.WaveFormat.Channels == waveFormat.Channels)
+                {
+                    channelProvider = playingProvider;
+                }
+                else
+                {
+                    channelProvider = playingProvider.WaveFormat.Channels == 1
+                        ? new MonoToStereoSampleProvider(playingProvider)
+                        : new StereoToMonoSampleProvider(playingProvider);
+                }
+
+                var resampleProvider = default(ISampleProvider);
+
+                if (channelProvider.WaveFormat.SampleRate == waveFormat.SampleRate)
+                {
+                    resampleProvider = channelProvider;
+                }
+                else
+                {
+                    resampleProvider = new WdlResamplingSampleProvider(
+                        source: channelProvider,
+                        newSampleRate: waveFormat.SampleRate);
+                }
+
+                outputProvider = new FadingSampleProvider(
+                    sourceProvider: resampleProvider,
+                    volume: Constants.VolumeMin);
+
+                outputProvider.SignalFadedEvent += OnSignalFaded;
             }
         }
 
@@ -141,9 +164,11 @@ namespace SportDJ.Services.SignalService
         {
             if (playingProvider != default)
             {
-                fadingProvider.Fade(
-                    volume: FadingVolunmeDown,
-                    duration: FadeDuration);
+                var milliSeconds = settingsService.Settings.Options.FadeDurationPause;
+
+                outputProvider.Fade(
+                    volume: Constants.VolumeMin,
+                    milliSeconds: milliSeconds);
 
                 IsPlaying = false;
             }
@@ -155,30 +180,31 @@ namespace SportDJ.Services.SignalService
             {
                 playingProvider.Start();
 
-                var fadingDuration = IsStarted
-                    ? FadeDuration
-                    : TimeSpan.Zero;
+                var milliSeconds = IsStarted
+                    ? settingsService.Settings.Options.FadeDurationPause
+                    : 0;
 
-                fadingProvider.Fade(
-                    volume: FadingVolunmeUp,
-                    duration: fadingDuration);
+                outputProvider.Fade(
+                    volume: Constants.VolumeMax,
+                    milliSeconds: milliSeconds);
 
                 IsStarted = true;
                 IsPlaying = true;
 
-                eventAggregator.GetEvent<SignalStartedEvent>().Publish(track);
+                eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
             }
         }
 
         public void Stop()
         {
-            if (playingProvider != default)
+            if (playingProvider != default
+                && IsPlaying)
             {
                 playingProvider.Pause();
 
                 IsPlaying = false;
 
-                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(track);
+                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
             }
         }
 
@@ -203,22 +229,27 @@ namespace SportDJ.Services.SignalService
 
         #region Private Methods
 
-        private void OnSignalFaded()
+        private void OnSignalEnded(object sender, EventArgs e)
         {
-            if (fadingProvider?.Volume == FadingVolunmeDown)
+            End();
+        }
+
+        private void OnSignalFaded(object sender, EventArgs e)
+        {
+            if (outputProvider?.Volume == Constants.VolumeMin)
             {
                 Stop();
             }
         }
 
-        private void OnSignalUpdated()
+        private void OnSignalUpdated(object sender, EventArgs e)
         {
             if (!selectNextThresholdExceeded
                 && Position.Ticks > selectNextThreshold.Ticks)
             {
                 selectNextThresholdExceeded = true;
 
-                trackService.Next();
+                eventAggregator.GetEvent<SignalNextThresholdExceededEvent>().Publish(this);
             }
         }
 

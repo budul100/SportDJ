@@ -71,7 +71,7 @@ namespace SportDJ.App
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
-            containerRegistry.RegisterSingleton<ISettingsService<Set>, Services.SettingsService.Service<Set>>();
+            containerRegistry.RegisterSingleton<ISettingsService<Session>, Services.SettingsService.Service<Set>>();
 
             containerRegistry.Register<ITrackService, Services.TrackService.Service>();
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SportDJ.Commons.Models.Interfaces;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings

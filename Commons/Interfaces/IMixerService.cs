@@ -1,6 +1,8 @@
-﻿namespace SportDJ.Commons.Interfaces
+﻿using System;
+
+namespace SportDJ.Commons.Interfaces
 {
-    public class IMixerService
-    {
-    }
+    public interface IMixerService
+        : IDisposable
+    { }
 }

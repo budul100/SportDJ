@@ -24,14 +24,14 @@ namespace SportDJ.Services.TrackService
         private readonly IEnumerable<ATL.Format> formatsAudio;
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
         private readonly PlaylistIOFactory playlistIOFactory;
-        private readonly ISettingsService<Set> settingsService;
+        private readonly ISettingsService<Session> settingsService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService,
-            ISettingsService<Set> settingsService)
+            ISettingsService<Session> settingsService)
         {
             this.eventAggregator = eventAggregator;
             this.dispatcherService = dispatcherService;

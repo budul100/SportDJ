@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using SportDJ.Commons.Models.Contents;
 using System;
 
 namespace SportDJ.Commons.Interfaces
@@ -7,8 +8,6 @@ namespace SportDJ.Commons.Interfaces
         : IDisposable
     {
         #region Public Properties
-
-        TimeSpan FadeDuration { get; set; }
 
         bool IsLoop { get; set; }
 
@@ -22,11 +21,16 @@ namespace SportDJ.Commons.Interfaces
 
         TimeSpan Remaining { get; }
 
+        Track Track { get; }
+
         #endregion Public Properties
 
         #region Public Methods
 
         void End();
+
+        void Initialize(WaveFormat waveFormat, Track track, TimeSpan? begin = default,
+            TimeSpan? length = default);
 
         void Pause();
 

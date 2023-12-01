@@ -9,7 +9,7 @@ namespace SportDJ.App.ViewModels
     {
         #region Public Constructors
 
-        public MainViewModel(ISettingsService<Set> settingsService)
+        public MainViewModel(ISettingsService<Session> settingsService)
         {
             var set = settingsService.Settings;
 

@@ -1,15 +1,13 @@
 ﻿using NAudio.Wave;
-using Prism.Events;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Services.SignalService.Extensions;
 using System;
 
-namespace SportDJ.Services.SignalService.Providers
+namespace SportDJ.Commons.Providers
 {
-    internal class PlayingFileProvider
-        : BaseSampleProvider, IDisposable
+    public class PlayingFileProvider
+        : BaseSampleProvider
     {
         #region Private Fields
 
@@ -17,7 +15,6 @@ namespace SportDJ.Services.SignalService.Providers
         private readonly AudioFileReader reader;
         private readonly long start;
 
-        private bool isDisposed;
         private long position;
         private StateType state;
 
@@ -25,12 +22,14 @@ namespace SportDJ.Services.SignalService.Providers
 
         #region Public Constructors
 
-        public PlayingFileProvider(IEventAggregator eventAggregator, AudioFileReader reader, Track track,
-            TimeSpan? begin = default, TimeSpan? length = default)
-            : base(eventAggregator, reader, track)
+        public PlayingFileProvider(AudioFileReader reader, Track track, TimeSpan? begin = default,
+            TimeSpan? length = default)
+            : base(sourceProvider: reader)
         {
-            start = begin.ToLength(averageBytesPerSecond);
-            end = start + length.ToLength(averageBytesPerSecond);
+            Track = track;
+
+            start = begin.ToSeconds(averageBytesPerSecond);
+            end = start + length.ToSeconds(averageBytesPerSecond);
 
             if (start > end)
             {
@@ -44,32 +43,34 @@ namespace SportDJ.Services.SignalService.Providers
                 end = reader.Length;
             }
 
-            Duration = (end - start).ToTime(averageBytesPerSecond);
+            Duration = (end - start).ToDuration(averageBytesPerSecond);
         }
 
         #endregion Public Constructors
 
+        #region Public Events
+
+        public event EventHandler SignalEndedEvent;
+
+        public event EventHandler SignalUpdatedEvent;
+
+        #endregion Public Events
+
         #region Public Properties
 
-        public TimeSpan Current => (position - start).ToTime(averageBytesPerSecond);
+        public TimeSpan Current => (position - start).ToDuration(averageBytesPerSecond);
 
         public TimeSpan Duration { get; }
 
         public bool IsLoop { get; set; }
 
-        public TimeSpan Remaining => (end - position).ToTime(averageBytesPerSecond);
+        public TimeSpan Remaining => (end - position).ToDuration(averageBytesPerSecond);
+
+        public Track Track { get; }
 
         #endregion Public Properties
 
         #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(
-                isDisposing: true);
-
-            GC.SuppressFinalize(this);
-        }
 
         public void Pause()
         {
@@ -125,7 +126,7 @@ namespace SportDJ.Services.SignalService.Providers
 
                             read = reader.Read(buffer, offset, count);
 
-                            if ((reader.Position >= end) || (reader.Position == lastPosition))
+                            if (reader.Position >= end || reader.Position == lastPosition)
                             {
                                 state = StateType.None;
                             }
@@ -134,12 +135,14 @@ namespace SportDJ.Services.SignalService.Providers
                         if (state == StateType.None)
                         {
                             position = end;
-                            eventAggregator.GetEvent<SignalEndedEvent>().Publish(track);
+
+                            OnSignalEnded();
                         }
                         else
                         {
                             position = reader.Position;
-                            eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(track);
+
+                            OnSignalUpdated();
                         }
                     }
                 }
@@ -164,19 +167,13 @@ namespace SportDJ.Services.SignalService.Providers
 
         #region Protected Methods
 
-        protected virtual void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
-            if (!isDisposed)
-            {
-                if (isDisposing)
-                {
-                    state = StateType.None;
+            state = StateType.None;
 
-                    reader?.Dispose();
-                }
+            reader?.Dispose();
 
-                isDisposed = true;
-            }
+            base.Dispose(isDisposing);
         }
 
         #endregion Protected Methods
@@ -193,6 +190,20 @@ namespace SportDJ.Services.SignalService.Providers
                     buffer[offset + sample++] = 0;
                 }
             }
+        }
+
+        private void OnSignalEnded()
+        {
+            SignalEndedEvent?.Invoke(
+                sender: this,
+                e: default);
+        }
+
+        private void OnSignalUpdated()
+        {
+            SignalUpdatedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         #endregion Private Methods

@@ -14,7 +14,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly ISettingsService<Set> settingsService;
+        private readonly ISettingsService<Session> settingsService;
 
         private GridViewModel element;
 
@@ -23,7 +23,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Constructors
 
         public RootViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, ISettingsService<Set> settingsService)
+            IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
             : base(regionManager)
         {
             this.containerProvider = containerProvider;

@@ -1,5 +1,6 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
+using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System.Collections.ObjectModel;
 using System.Linq;

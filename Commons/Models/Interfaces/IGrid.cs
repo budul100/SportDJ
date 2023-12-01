@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using SportDJ.Commons.Models.Settings;
+using System.Collections.Generic;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Interfaces
 {
     public interface IGrid
     {

@@ -1,4 +1,4 @@
-﻿namespace SportDJ.Services.SignalService.Enums
+﻿namespace SportDJ.Commons.Enums
 {
     internal enum FadeType
     {

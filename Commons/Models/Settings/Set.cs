@@ -1,4 +1,5 @@
 ﻿using Score2Stream.Commons;
+using SportDJ.Commons.Models.Interfaces;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -13,6 +14,8 @@ namespace SportDJ.Commons.Models.Settings
         public int Columns { get; set; }
 
         public List<Cell> Contents { get; set; } = new List<Cell>();
+
+        public int FadeInDurationMix { get; set; }
 
         [XmlAttribute]
         public int Rows { get; set; }

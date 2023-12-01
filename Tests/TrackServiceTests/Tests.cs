@@ -1,6 +1,5 @@
 using Moq;
 using Prism.Events;
-using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -17,7 +16,7 @@ namespace SportDJ.Tests.TrackServiceTests
 
         private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
-        private readonly Mock<ISettingsService<Set>> mockSettingsService;
+        private readonly Mock<ISettingsService<Session>> mockSettingsService;
 
         #endregion Private Fields
 
@@ -42,7 +41,7 @@ namespace SportDJ.Tests.TrackServiceTests
                 .Setup(m => m.InvokeAsync(It.IsAny<Action>()))
                 .Callback<Action>(a => a.Invoke());
 
-            mockSettingsService = new Mock<ISettingsService<Set>>();
+            mockSettingsService = new Mock<ISettingsService<Session>>();
             mockSettingsService
                 .Setup(m => m.Settings)
                 .Returns(new Set());

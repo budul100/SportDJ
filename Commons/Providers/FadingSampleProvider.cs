@@ -1,14 +1,12 @@
 ﻿using NAudio.Wave;
-using Prism.Events;
-using SportDJ.Commons.Events.Signal;
-using SportDJ.Commons.Models.Contents;
-using SportDJ.Services.SignalService.Enums;
-using SportDJ.Services.SignalService.Extensions;
+using Score2Stream.Commons;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Extensions;
 using System;
 
-namespace SportDJ.Services.SignalService.Providers
+namespace SportDJ.Commons.Providers
 {
-    internal class FadingSampleProvider
+    public class FadingSampleProvider
         : BaseSampleProvider
     {
         #region Private Fields
@@ -24,15 +22,20 @@ namespace SportDJ.Services.SignalService.Providers
 
         #region Public Constructors
 
-        public FadingSampleProvider(IEventAggregator eventAggregator, ISampleProvider source, Track track,
-            float volume = 0)
-            : base(eventAggregator, source, track)
+        public FadingSampleProvider(ISampleProvider sourceProvider, float volume = 0f)
+            : base(sourceProvider: sourceProvider)
         {
             Volume = volume;
             volumeCurrent = Volume;
         }
 
         #endregion Public Constructors
+
+        #region Public Events
+
+        public event EventHandler SignalFadedEvent;
+
+        #endregion Public Events
 
         #region Public Properties
 
@@ -42,22 +45,39 @@ namespace SportDJ.Services.SignalService.Providers
 
         #region Public Methods
 
+        public void Fade(float volume, int milliSeconds)
+        {
+            var duration = milliSeconds.ToDuration();
+
+            Fade(
+                volume: volume,
+                duration: duration);
+        }
+
         public void Fade(float volume, TimeSpan? duration = default)
         {
-            fadeSampleCount = duration.ToLength(averageBytesPerSecond);
-            Volume = volume;
+            if (volume < Constants.VolumeMin || volume > Constants.VolumeMax)
+            {
+                throw new ArgumentOutOfRangeException(nameof(volume));
+            }
 
-            StartFade(Volume);
+            if (volume != Volume)
+            {
+                fadeSampleCount = duration.ToSeconds(averageBytesPerSecond);
+                Volume = volume;
+
+                StartFade(Volume);
+            }
         }
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            var read = source.Read(
+            var read = sourceProvider.Read(
                 buffer: buffer,
                 offset: offset,
                 count: count);
 
-            lock (source)
+            lock (sourceProvider)
             {
                 AdjustBuffer(
                     buffer: buffer,
@@ -80,14 +100,14 @@ namespace SportDJ.Services.SignalService.Providers
             {
                 if (fadeType == FadeType.FadingIn)
                 {
-                    volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff / fadeSampleCount);
+                    volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
                 }
                 else if (fadeType == FadeType.FadingOut)
                 {
-                    volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff / fadeSampleCount);
+                    volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                 }
 
-                for (var ch = 0; ch < source.WaveFormat.Channels; ch++)
+                for (var ch = 0; ch < sourceProvider.WaveFormat.Channels; ch++)
                 {
                     buffer[offset + sample++] *= volumeCurrent;
                 }
@@ -95,12 +115,20 @@ namespace SportDJ.Services.SignalService.Providers
                 fadeSamplePosition++;
 
                 if (fadeType != FadeType.Full
-                    && fadeSamplePosition > fadeSampleCount)
+                    && (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount))
                 {
                     fadeType = FadeType.Full;
-                    eventAggregator.GetEvent<SignalFadedEvent>().Publish(track);
+
+                    OnSignalFaded();
                 }
             }
+        }
+
+        private void OnSignalFaded()
+        {
+            SignalFadedEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         private void StartFade(float volume)
@@ -108,7 +136,8 @@ namespace SportDJ.Services.SignalService.Providers
             if (fadeSampleCount == 0)
             {
                 volumeCurrent = volume;
-                eventAggregator.GetEvent<SignalFadedEvent>().Publish(track);
+
+                OnSignalFaded();
             }
             else
             {
@@ -116,16 +145,16 @@ namespace SportDJ.Services.SignalService.Providers
                 {
                     fadeType = FadeType.FadingIn;
                     volumeFadeStart = volumeCurrent;
-                    volumeFadeDiff = volume - volumeCurrent;
+                    volumeFadeDiff = (volume - volumeCurrent) / fadeSampleCount;
                 }
                 else
                 {
                     fadeType = FadeType.FadingOut;
                     volumeFadeStart = volumeCurrent;
-                    volumeFadeDiff = volumeCurrent - volume;
+                    volumeFadeDiff = (volumeCurrent - volume) / fadeSampleCount;
                 }
 
-                lock (source)
+                lock (sourceProvider)
                 {
                     fadeSamplePosition = 0;
                 }
