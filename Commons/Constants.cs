@@ -6,6 +6,8 @@
 
         public const int MixerSourcesMax = 1024;
 
+        public const int SampleRateDefault = 44100;
+
         public const string SettingsFileNameDefault = "Settings.xml";
 
         public const double TrimRearPortionDefault = 0.1;

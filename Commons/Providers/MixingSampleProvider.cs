@@ -11,7 +11,7 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
-        private readonly List<ISampleProvider> sourceProviders = new();
+        private readonly List<ISampleProvider> sourceProviders = new List<ISampleProvider>();
 
         private float[] sourceBuffer;
 
