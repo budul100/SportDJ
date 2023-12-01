@@ -1,6 +1,6 @@
 using Moq;
 using Prism.Events;
-using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;

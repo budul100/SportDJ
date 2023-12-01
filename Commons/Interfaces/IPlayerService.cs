@@ -1,43 +1,41 @@
-﻿using SportDJ.Commons.Enums;
+﻿using NAudio.Wave;
+using SportDJ.Commons.Models.Contents;
 using System;
 
 namespace SportDJ.Commons.Interfaces
 {
     public interface IPlayerService
+        : IDisposable
     {
         #region Public Properties
 
-        bool IsLoop { get; set; }
+        bool IsLoop { get; }
 
-        IMixerService MixerLive { get; }
+        bool IsMultiSignalPlayer { get; }
 
-        IMixerService MixerPre { get; }
+        string Name { get; }
 
-        TimeSpan PositionLive { get; }
+        ISampleProvider OutputProvider { get; }
 
-        TimeSpan PositionPre { get; }
+        TimeSpan Position { get; }
 
-        TimeSpan RemainingLive { get; }
+        TimeSpan Remaining { get; }
 
-        TimeSpan RemainingPre { get; }
+        ISignalService SignalService { get; }
 
-        StateType StateLive { get; }
+        Track Track { get; }
 
-        StateType StatePre { get; }
+        float Volume { get; set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void ExecuteLive();
+        ISignalService Add(Track track);
 
-        void ExecutePre();
+        void Initialize(WaveFormat waveFormat, string name, bool isMultiSignalPlayer);
 
-        void InitializeLive(IMixerService mixer);
-
-        void InitializePre(IMixerService mixer);
-
-        void Reset();
+        void Pause();
 
         #endregion Public Methods
     }

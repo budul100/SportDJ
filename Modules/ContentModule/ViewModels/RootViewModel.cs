@@ -52,7 +52,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void LoadSet()
         {
-            var set = settingsService.Settings;
+            var set = settingsService.Settings.Set;
 
             Element = containerProvider.Resolve<GridViewModel>();
             Element.Initialize(set);

@@ -227,8 +227,8 @@ namespace SportDJ.Services.TrackService
 
             if (relevants?.Any() == true)
             {
-                var trimVolume = settingsService.Settings.TrimVolume;
-                var trimRearPortion = settingsService.Settings.TrimRearPortion;
+                var trimVolume = settingsService.Settings.Options.TrimVolume;
+                var trimRearPortion = settingsService.Settings.Options.TrimRearPortion;
 
                 foreach (var relevant in relevants)
                 {

@@ -2,7 +2,7 @@
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using Score2Stream.Commons;
-using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;

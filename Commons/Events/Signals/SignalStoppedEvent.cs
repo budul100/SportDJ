@@ -1,9 +1,9 @@
 ﻿using Prism.Events;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Commons.Events.Signal
+namespace SportDJ.Commons.Events.Signals
 {
-    public class SignalStartedEvent
+    public class SignalStoppedEvent
         : PubSubEvent<ISignalService>
     { }
 }

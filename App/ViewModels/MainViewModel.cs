@@ -11,15 +11,15 @@ namespace SportDJ.App.ViewModels
 
         public MainViewModel(ISettingsService<Session> settingsService)
         {
-            var set = settingsService.Settings;
+            var session = settingsService.Settings;
 
-            set.Contents.Clear();
+            session.Set.Contents.Clear();
 
-            set.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0 });
+            session.Set.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0 });
 
-            set.Contents.Add(new Player() { Name = "Player 2", Row = 1, Column = 0 });
+            session.Set.Contents.Add(new Player() { Name = "Player 2", Row = 1, Column = 0 });
 
-            set.Contents.Add(new Player() { Name = "Player 3", Row = 0, Column = 1 });
+            session.Set.Contents.Add(new Player() { Name = "Player 3", Row = 0, Column = 1 });
 
             var group = new Group
             {
@@ -38,10 +38,10 @@ namespace SportDJ.App.ViewModels
 
             group.Contents.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
 
-            set.Contents.Add(group);
+            session.Set.Contents.Add(group);
 
-            set.Rows = 2;
-            set.Columns = 4;
+            session.Set.Rows = 2;
+            session.Set.Columns = 4;
 
             settingsService.Save();
         }

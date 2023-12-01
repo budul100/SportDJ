@@ -2,8 +2,8 @@
 using Prism.Events;
 using Prism.Ioc;
 using Score2Stream.Commons;
-using SportDJ.Commons.Events.Mixer;
-using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Players;
+using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -13,10 +13,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SportDJ.Services.MixerService
+namespace SportDJ.Services.PlayerService
 {
     public class Service
-        : IMixerService
+        : IPlayerService
     {
         #region Private Fields
 
@@ -194,7 +194,7 @@ namespace SportDJ.Services.MixerService
         {
             if (!signalServices.Any(s => s.IsPlaying))
             {
-                eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
+                eventAggregator.GetEvent<PlayerStoppedEvent>().Publish(this);
             }
         }
 
@@ -245,7 +245,7 @@ namespace SportDJ.Services.MixerService
         {
             if (signalServices.Count(s => s.IsStarted) == 1)
             {
-                eventAggregator.GetEvent<MixerStartedEvent>().Publish(this);
+                eventAggregator.GetEvent<PlayerStartedEvent>().Publish(this);
             }
         }
 
@@ -279,7 +279,7 @@ namespace SportDJ.Services.MixerService
             if (!IsMultiSignalPlayer
                 && signalService == SignalService)
             {
-                eventAggregator.GetEvent<MixerUpdatedEvent>().Publish(this);
+                eventAggregator.GetEvent<PlayerUpdatedEvent>().Publish(this);
             }
         }
 
