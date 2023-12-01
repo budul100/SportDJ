@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Contents
 {
     [XmlInclude(typeof(Group))]
     [XmlInclude(typeof(Controller))]

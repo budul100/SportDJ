@@ -1,15 +1,19 @@
-﻿namespace Score2Stream.Commons
+﻿namespace SportDJ.Commons
 {
     public static class Constants
     {
         #region Public Fields
 
+        public const string AppName = nameof(SportDJ);
+
+        public const string FileNamePositions = "Positions.xml";
+        public const string FileNameSettings = "Settings.xml";
+
         public const int MixerSourcesMax = 1024;
 
+        public const string PlayerNamePFL = "PFL";
+
         public const int SampleRateDefault = 44100;
-
-        public const string SettingsFileNameDefault = "Settings.xml";
-
         public const double TrimRearPortionDefault = 0.1;
 
         public const float VolumeMax = 1f;

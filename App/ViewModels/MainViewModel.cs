@@ -1,7 +1,9 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using System.Linq;
 
@@ -19,16 +21,20 @@ namespace SportDJ.App.ViewModels
 
         #region Public Constructors
 
-        public MainViewModel(IContainerProvider containerProvider, ISettingsService<Session> settingsService)
+        public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
+            IStorageService<Position> positionsService)
         {
             this.containerProvider = containerProvider;
 
-            var session = settingsService.Settings;
+            settingsService.Load(Constants.FileNameSettings);
+            positionsService.Load(Constants.FileNamePositions);
+
+            var set = settingsService.Contents;
 
             InitializeOutput();
             InitializePlayersLive();
 
-            XXXX(session, containerProvider.Resolve<IOutputService>(name: OutputType.Live.ToString()).GetDevices().ElementAt(3).Value);
+            XXXX(set, containerProvider.Resolve<IOutputService>(name: OutputType.Live.ToString()).GetDevices().ElementAt(3).Value);
 
             settingsService.Save();
         }
@@ -37,15 +43,15 @@ namespace SportDJ.App.ViewModels
 
         #region Private Methods
 
-        private static void XXXX(Session session, string device)
+        private static void XXXX(Set set, string device)
         {
-            session.Set.Contents.Clear();
+            set.Root.Contents.Clear();
 
-            session.Set.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0 });
 
-            session.Set.Contents.Add(new Controller() { Name = "Player 2", Row = 1, Column = 0 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 1, Column = 0 });
 
-            session.Set.Contents.Add(new Controller() { Name = "Player 3", Row = 0, Column = 1 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 0, Column = 1 });
 
             var group = new Group
             {
@@ -64,12 +70,12 @@ namespace SportDJ.App.ViewModels
 
             group.Contents.Add(new Controller() { Name = "Player 24", Row = 1, Column = 1 });
 
-            session.Set.Contents.Add(group);
+            set.Root.Contents.Add(group);
 
-            session.Set.Rows = 2;
-            session.Set.Columns = 4;
+            set.Root.Rows = 2;
+            set.Root.Columns = 4;
 
-            session.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = device;
+            set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = device;
         }
 
         private void InitializeOutput()

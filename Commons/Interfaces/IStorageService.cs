@@ -2,13 +2,13 @@
 
 namespace SportDJ.Commons.Interfaces
 {
-    public interface ISettingsService<T>
+    public interface IStorageService<T>
         : IDisposable
         where T : class
     {
         #region Public Properties
 
-        T Settings { get; }
+        T Contents { get; }
 
         #endregion Public Properties
 

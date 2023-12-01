@@ -1,5 +1,5 @@
 ﻿using Prism.Mvvm;
-using SportDJ.Commons.Models.Settings;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {

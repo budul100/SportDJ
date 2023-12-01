@@ -4,6 +4,7 @@ using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using SportDJ.Commons;
 using SportDJ.App.Views;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
@@ -71,7 +72,8 @@ namespace SportDJ.App
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
-            containerRegistry.RegisterSingleton<ISettingsService<Session>, Services.SettingsService.Service<Session>>();
+            containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
+            containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
 
             containerRegistry.RegisterSingleton<IOutputService, Services.OutputService.Service>(
                 name: nameof(OutputType.Live));
@@ -83,7 +85,7 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
                 name: nameof(PlayerType.Effects));
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.PFL));
+                name: Constants.PlayerNamePFL);
 
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<ITrackService, Services.TrackService.Service>();

@@ -12,7 +12,7 @@ namespace SportDJ.Tests.OutputServiceTests
         #region Private Fields
 
         private readonly Mock<IEventAggregator> mockEventAggregator;
-        private readonly Mock<ISettingsService<Session>> mockSettingsService;
+        private readonly Mock<IStorageService<Set>> mockSettingsService;
 
         #endregion Private Fields
 
@@ -22,9 +22,9 @@ namespace SportDJ.Tests.OutputServiceTests
         {
             mockEventAggregator = new Mock<IEventAggregator>();
 
-            mockSettingsService = new Mock<ISettingsService<Session>>();
+            mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService
-                .Setup(m => m.Settings.Options)
+                .Setup(m => m.Contents.Options)
                 .Returns(new Options());
         }
 

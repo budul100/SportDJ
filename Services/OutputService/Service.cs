@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
-using Score2Stream.Commons;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
 using SportDJ.Commons.Interfaces;
@@ -19,7 +19,7 @@ namespace SportDJ.Services.OutputService
 
         private readonly List<IPlayerService> foregroundServices = new List<IPlayerService>();
         private readonly List<IPlayerService> playerServices = new List<IPlayerService>();
-        private readonly ISettingsService<Session> settingsService;
+        private readonly IStorageService<Set> settingsService;
 
         private FadingSampleProvider backgroundFader;
         private MixingSampleProvider backgroundMixer;
@@ -33,7 +33,7 @@ namespace SportDJ.Services.OutputService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
         {
             this.settingsService = settingsService;
 
@@ -174,7 +174,7 @@ namespace SportDJ.Services.OutputService
 
                 backgroundFader.Fade(
                     volume: volume,
-                    milliSeconds: settingsService.Settings.Options.FadeDurationOnBackground);
+                    milliSeconds: settingsService.Contents.Options.FadeDurationOnBackground);
             }
         }
 
@@ -184,7 +184,7 @@ namespace SportDJ.Services.OutputService
 
             backgroundFader.Fade(
                 volume: Constants.VolumeMax,
-                milliSeconds: settingsService.Settings.Options.FadeDurationOnBackground);
+                milliSeconds: settingsService.Contents.Options.FadeDurationOnBackground);
         }
 
         public void Set(int deviceNumber, int sampleRate = Constants.SampleRateDefault)
@@ -284,7 +284,7 @@ namespace SportDJ.Services.OutputService
 
         private Output GetOptions(OutputType type)
         {
-            if (!settingsService.Settings.Outputs.Any(o => o.Type == type))
+            if (!settingsService.Contents.Outputs.Any(o => o.Type == type))
             {
                 var outputOptions = new Output
                 {
@@ -292,10 +292,10 @@ namespace SportDJ.Services.OutputService
                     Volume = Constants.VolumeMax,
                 };
 
-                settingsService.Settings.Outputs.Add(outputOptions);
+                settingsService.Contents.Outputs.Add(outputOptions);
             }
 
-            var result = settingsService.Settings.Outputs
+            var result = settingsService.Contents.Outputs
                 .Single(s => s.Type == type);
 
             return result;

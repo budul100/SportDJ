@@ -1,4 +1,5 @@
-﻿using SportDJ.Commons.Models.Settings;
+﻿using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Settings;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {

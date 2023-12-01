@@ -1,5 +1,5 @@
 ﻿using Prism.Events;
-using Score2Stream.Commons;
+using SportDJ.Commons;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using System;
@@ -9,15 +9,13 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace SportDJ.Services.SettingsService
+namespace SportDJ.Services.StorageService
 {
     public class Service<T>
-        : ISettingsService<T>
+        : IStorageService<T>
         where T : class
     {
         #region Private Fields
-
-        private const string AppName = nameof(SportDJ);
 
         private static readonly XmlWriterSettings xmlSettings = new()
         {
@@ -43,15 +41,13 @@ namespace SportDJ.Services.SettingsService
         public Service(IEventAggregator eventAggregator)
         {
             this.eventAggregator = eventAggregator;
-
-            Load();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public T Settings { get; private set; }
+        public T Contents { get; private set; }
 
         #endregion Public Properties
 
@@ -66,7 +62,7 @@ namespace SportDJ.Services.SettingsService
                 obj: this);
         }
 
-        public void Load(string fileName = Constants.SettingsFileNameDefault)
+        public void Load(string fileName)
         {
             this.folderPath = GetSettingsFolderPath();
             this.filePath = Path.Combine(
@@ -75,9 +71,9 @@ namespace SportDJ.Services.SettingsService
 
             LoadSettings(filePath);
 
-            if (Settings is default(T))
+            if (Contents is default(T))
             {
-                Settings = Activator.CreateInstance<T>();
+                Contents = Activator.CreateInstance<T>();
             }
 
             eventAggregator.GetEvent<SettingsLoadedEvent>().Publish();
@@ -115,7 +111,7 @@ namespace SportDJ.Services.SettingsService
 
             var result = Path.Combine(
                 path1: appDataFolder,
-                path2: AppName);
+                path2: Constants.AppName);
 
             return result;
         }
@@ -131,7 +127,7 @@ namespace SportDJ.Services.SettingsService
 
             try
             {
-                Settings = serializer.Deserialize(file) as T;
+                Contents = serializer.Deserialize(file) as T;
             }
             catch { }
         }
@@ -153,7 +149,7 @@ namespace SportDJ.Services.SettingsService
             {
                 serializer.Serialize(
                     xmlWriter: writer,
-                    o: Settings);
+                    o: Contents);
             }
             catch
             { }

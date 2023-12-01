@@ -14,7 +14,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly ISettingsService<Session> settingsService;
+        private readonly IStorageService<Set> settingsService;
 
         private GridViewModel element;
 
@@ -23,7 +23,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Constructors
 
         public RootViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
+            IEventAggregator eventAggregator, IStorageService<Set> settingsService)
             : base(regionManager)
         {
             this.containerProvider = containerProvider;
@@ -52,10 +52,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void LoadSet()
         {
-            var set = settingsService.Settings.Set;
+            var root = settingsService.Contents.Root;
 
             Element = containerProvider.Resolve<GridViewModel>();
-            Element.Initialize(set);
+            Element.Initialize(root);
         }
 
         #endregion Private Methods

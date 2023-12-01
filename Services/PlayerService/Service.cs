@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
-using Score2Stream.Commons;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
 using SportDJ.Commons.Events.Signals;
@@ -24,7 +24,7 @@ namespace SportDJ.Services.PlayerService
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
         private readonly Dictionary<ISignalService, FadingSampleProvider> fadingProviders = new();
-        private readonly ISettingsService<Session> settingsService;
+        private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = new();
 
         private bool isDisposed;
@@ -38,7 +38,7 @@ namespace SportDJ.Services.PlayerService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ISettingsService<Session> settingsService)
+            IStorageService<Set> settingsService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
@@ -210,14 +210,14 @@ namespace SportDJ.Services.PlayerService
                         .Where(s => s != signalService
                             && s.IsPlaying).ToArray();
 
-                    var fadeInMilliseconds = settingsService.Settings.Options.FadeDurationOnMixIn > 0
+                    var fadeInMilliseconds = settingsService.Contents.Options.FadeDurationOnMixIn > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Settings.Options.FadeDurationOnMixIn
+                        ? settingsService.Contents.Options.FadeDurationOnMixIn
                         : 0;
 
-                    var fadeOutMilliSeconds = settingsService.Settings.Options.FadeDurationOnMixOut > 0
+                    var fadeOutMilliSeconds = settingsService.Contents.Options.FadeDurationOnMixOut > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Settings.Options.FadeDurationOnMixOut
+                        ? settingsService.Contents.Options.FadeDurationOnMixOut
                         : 0;
 
                     fadingProviders[this.signalService].Fade(

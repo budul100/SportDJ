@@ -1,4 +1,4 @@
-﻿using Score2Stream.Commons;
+﻿using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using System.Xml.Serialization;
 

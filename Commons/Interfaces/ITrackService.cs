@@ -1,6 +1,5 @@
 ﻿using SportDJ.Commons.Models.Contents;
 using System.Collections.Generic;
-using System.IO;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -18,7 +17,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Clear();
 
-        void Initialize(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        void Initialize(string path);
 
         void Next();
 

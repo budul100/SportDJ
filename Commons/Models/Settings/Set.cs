@@ -1,21 +1,17 @@
-﻿using SportDJ.Commons.Models.Interfaces;
+﻿using SportDJ.Commons.Models.Contents;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings
 {
     public class Set
-        : IGrid
     {
         #region Public Properties
 
-        [XmlAttribute]
-        public int Columns { get; set; }
+        public Options Options { get; set; } = new Options();
 
-        public List<Cell> Contents { get; set; } = new List<Cell>();
+        public List<Output> Outputs { get; set; } = new List<Output>();
 
-        [XmlAttribute]
-        public int Rows { get; set; }
+        public Root Root { get; set; } = new Root();
 
         #endregion Public Properties
     }

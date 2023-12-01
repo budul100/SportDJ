@@ -24,14 +24,14 @@ namespace SportDJ.Services.TrackService
         private readonly IEnumerable<ATL.Format> formatsAudio;
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
         private readonly PlaylistIOFactory playlistIOFactory;
-        private readonly ISettingsService<Session> settingsService;
+        private readonly IStorageService<Set> settingsService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService,
-            ISettingsService<Session> settingsService)
+            IStorageService<Set> settingsService)
         {
             this.eventAggregator = eventAggregator;
             this.dispatcherService = dispatcherService;
@@ -64,11 +64,9 @@ namespace SportDJ.Services.TrackService
             eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(default);
         }
 
-        public void Initialize(string path, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        public void Initialize(string path)
         {
-            var tracks = GetTracks(
-                path: path,
-                searchOption: searchOption).ToArray();
+            var tracks = GetTracks(path).ToArray();
 
             SetTracks(tracks);
 
@@ -124,7 +122,7 @@ namespace SportDJ.Services.TrackService
 
         #region Private Methods
 
-        private IEnumerable<string> GetFiles(string path, SearchOption searchOption)
+        private IEnumerable<string> GetFiles(string path)
         {
             if (!string.IsNullOrWhiteSpace(path))
             {
@@ -146,7 +144,7 @@ namespace SportDJ.Services.TrackService
                     relevants = Directory.GetFiles(
                         path: path,
                         searchPattern: "*.*",
-                        searchOption: searchOption)
+                        searchOption: SearchOption.TopDirectoryOnly)
                         .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
                             || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
                 }
@@ -155,9 +153,7 @@ namespace SportDJ.Services.TrackService
                 {
                     foreach (var relevant in relevants)
                     {
-                        var files = GetFiles(
-                            path: relevant,
-                            searchOption: searchOption).ToArray();
+                        var files = GetFiles(relevant).ToArray();
 
                         foreach (var file in files)
                         {
@@ -184,11 +180,9 @@ namespace SportDJ.Services.TrackService
             return result;
         }
 
-        private IEnumerable<Track> GetTracks(string path, SearchOption searchOption)
+        private IEnumerable<Track> GetTracks(string path)
         {
-            var files = GetFiles(
-                path: path,
-                searchOption: searchOption)
+            var files = GetFiles(path)
                 .Select(p => Path.GetFullPath(p)).ToArray();
 
             if (files?.Any() == true)
@@ -227,8 +221,8 @@ namespace SportDJ.Services.TrackService
 
             if (relevants?.Any() == true)
             {
-                var trimVolume = settingsService.Settings.Options.TrimVolume;
-                var trimRearPortion = settingsService.Settings.Options.TrimRearPortion;
+                var trimVolume = settingsService.Contents.Options.TrimVolume;
+                var trimRearPortion = settingsService.Contents.Options.TrimRearPortion;
 
                 foreach (var relevant in relevants)
                 {

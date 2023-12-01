@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models.Settings;
+﻿using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {
@@ -12,6 +12,7 @@ namespace SportDJ.Modules.ContentModule.DesignTime
         { }
 
         public ControllerViewModel(string name, int row, int column)
+            : base(default)
         {
             Initialize(new Controller { Name = name, Row = row, Column = column });
         }

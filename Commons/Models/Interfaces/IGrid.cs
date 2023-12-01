@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models.Settings;
+﻿using SportDJ.Commons.Models.Contents;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Interfaces

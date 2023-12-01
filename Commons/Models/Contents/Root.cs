@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Contents
 {
-    public class Group
-        : Cell, IGrid
+    public class Root
+        : IGrid
     {
         #region Public Properties
 

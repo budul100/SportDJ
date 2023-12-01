@@ -17,7 +17,7 @@ namespace SportDJ.Tests.TrackServiceTests
 
         private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
-        private readonly Mock<ISettingsService<Session>> mockSettingsService;
+        private readonly Mock<IStorageService<Set>> mockSettingsService;
 
         #endregion Private Fields
 
@@ -42,10 +42,10 @@ namespace SportDJ.Tests.TrackServiceTests
                 .Setup(m => m.InvokeAsync(It.IsAny<Action>()))
                 .Callback<Action>(a => a.Invoke());
 
-            mockSettingsService = new Mock<ISettingsService<Session>>();
+            mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService
-                .Setup(m => m.Settings)
-                .Returns(new Session());
+                .Setup(m => m.Contents)
+                .Returns(new Set());
         }
 
         #endregion Public Constructors

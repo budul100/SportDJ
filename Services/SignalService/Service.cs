@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
-using Score2Stream.Commons;
+using SportDJ.Commons;
 using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -18,7 +18,7 @@ namespace SportDJ.Services.SignalService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private readonly ISettingsService<Session> settingsService;
+        private readonly IStorageService<Set> settingsService;
 
         private bool isDisposed;
         private FadingSampleProvider outputProvider;
@@ -30,7 +30,7 @@ namespace SportDJ.Services.SignalService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, ISettingsService<Session> settingsService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
         {
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
@@ -102,7 +102,7 @@ namespace SportDJ.Services.SignalService
                     begin: begin,
                     length: length);
 
-                var duration = (int)(settingsService.Settings.Options.SelectNextPortion * playingProvider.Duration.Ticks);
+                var duration = (int)(settingsService.Contents.Options.SelectNextPortion * playingProvider.Duration.Ticks);
                 selectNextThreshold = new TimeSpan(duration);
 
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
@@ -148,7 +148,7 @@ namespace SportDJ.Services.SignalService
             if (playingProvider != default
                 && IsPlaying)
             {
-                var milliSeconds = settingsService.Settings.Options.FadeDurationOnPause;
+                var milliSeconds = settingsService.Contents.Options.FadeDurationOnPause;
 
                 outputProvider.Fade(
                     volume: Constants.VolumeMin,
@@ -165,7 +165,7 @@ namespace SportDJ.Services.SignalService
                 playingProvider.Start();
 
                 var milliSeconds = IsStarted
-                    ? settingsService.Settings.Options.FadeDurationOnPause
+                    ? settingsService.Contents.Options.FadeDurationOnPause
                     : 0;
 
                 outputProvider.Fade(
