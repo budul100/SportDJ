@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -20,6 +21,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private IPlayerService playerService;
         private Position position;
         private ISignalService signalService;
+        private string state;
         private ITrackService trackService;
 
         #endregion Private Fields
@@ -32,6 +34,14 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             ExecuteSignalCommand = new DelegateCommand(ExecuteSignal);
 
+            eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
+                action: (s) => OnSignalUpdate(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SignalNextThresholdExceededEvent>().Subscribe(
+                action: (s) => OnNextThresholdExceeded(s),
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator.GetEvent<SignalStoppedEvent>().Subscribe(
                 action: (s) => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
@@ -42,6 +52,12 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Properties
 
         public DelegateCommand ExecuteSignalCommand { get; }
+
+        public string State
+        {
+            get { return state; }
+            set { SetProperty(ref state, value); }
+        }
 
         #endregion Public Properties
 
@@ -73,7 +89,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         {
             if (signalService != default)
             {
-                if (signalService.IsPlaying)
+                if (signalService.State == StateType.Play)
                 {
                     signalService.Pause();
                 }
@@ -119,14 +135,29 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private void OnSignalStopped(ISignalService signalService)
+        private void OnNextThresholdExceeded(ISignalService signalService)
         {
             if (signalService == this.signalService)
             {
-                signalService.Dispose();
                 trackService.Next();
+            }
+        }
 
+        private void OnSignalStopped(ISignalService signalService)
+        {
+            if (signalService == this.signalService
+                && (signalService.State == StateType.None || signalService.IsNextThresholdExceeded))
+            {
+                signalService.Dispose();
                 SetSignal();
+            }
+        }
+
+        private void OnSignalUpdate(ISignalService signalService)
+        {
+            if (signalService == this.signalService)
+            {
+                State = playerService.Volume.ToString();
             }
         }
 

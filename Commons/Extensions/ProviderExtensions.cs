@@ -33,14 +33,6 @@ namespace SportDJ.Commons.Extensions
             return result;
         }
 
-        public static TimeSpan ToDuration(this int milliSeconds)
-        {
-            var value = (double)milliSeconds;
-            var result = TimeSpan.FromMilliseconds(value);
-
-            return result;
-        }
-
         public static long ToSeconds(this TimeSpan? time, int averageBytesPerSecond)
         {
             var result = time.HasValue

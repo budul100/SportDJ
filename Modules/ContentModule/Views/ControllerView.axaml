@@ -31,10 +31,17 @@
         VerticalAlignment="Stretch"
         Command="{Binding ExecuteSignalCommand}">
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="{DynamicResource ContentFontSize}"
-            Text="{Binding Name}" />
+        <StackPanel>
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="{DynamicResource ContentFontSize}"
+                Text="{Binding Name}" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="{DynamicResource ContentFontSize}"
+                Text="{Binding State}" />
+        </StackPanel>
     </Button>
 </UserControl>

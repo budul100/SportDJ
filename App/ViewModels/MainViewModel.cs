@@ -26,8 +26,8 @@ namespace SportDJ.App.ViewModels
         {
             this.containerProvider = containerProvider;
 
-            settingsService.Load(Constants.FileNameSettings);
-            sessionService.Load(Constants.FileNameSession);
+            settingsService.Load(Defaults.FileNameSettings);
+            sessionService.Load(Defaults.FileNameSession);
 
             var set = settingsService.Contents;
 
@@ -79,6 +79,7 @@ namespace SportDJ.App.ViewModels
             set.Options.FadeOnPauseMilliseconds = 150;
             set.Options.FadeOnMixInMilliseconds = 50;
             set.Options.FadeOnMixOutMilliseconds = 50;
+            set.Options.SelectNextSeconds = 20;
 
             set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
         }

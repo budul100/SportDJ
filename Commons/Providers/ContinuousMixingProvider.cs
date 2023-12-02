@@ -82,7 +82,9 @@ namespace SportDJ.Commons.Providers
                         }
                     }
 
-                    outputSamples = Math.Max(samplesRead, outputSamples);
+                    outputSamples = Math.Max(
+                        val1: samplesRead,
+                        val2: outputSamples);
 
                     index--;
                 }

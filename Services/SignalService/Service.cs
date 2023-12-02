@@ -2,6 +2,7 @@
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -24,7 +25,6 @@ namespace SportDJ.Services.SignalService
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
         private TimeSpan selectNextThreshold;
-        private bool selectNextThresholdExceeded;
 
         #endregion Private Fields
 
@@ -55,7 +55,9 @@ namespace SportDJ.Services.SignalService
             }
         }
 
-        public bool IsPlaying { get; private set; }
+        public bool IsNextThresholdExceeded { get; private set; }
+
+        public bool IsSilent => outputProvider?.IsSilent ?? true;
 
         public bool IsStarted { get; private set; }
 
@@ -64,6 +66,8 @@ namespace SportDJ.Services.SignalService
         public TimeSpan Position => playingProvider?.Current ?? TimeSpan.Zero;
 
         public TimeSpan Remaining => playingProvider?.Remaining ?? TimeSpan.Zero;
+
+        public StateType State { get; private set; }
 
         public Track Track { get; private set; }
 
@@ -102,8 +106,8 @@ namespace SportDJ.Services.SignalService
                     begin: begin,
                     length: length);
 
-                var duration = (int)(settingsService.Contents.Options.SelectNextPortion * playingProvider.Duration.Ticks);
-                selectNextThreshold = new TimeSpan(duration);
+                selectNextThreshold = begin.Value.Add(
+                    ts: TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextSeconds));
 
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
                 playingProvider.SignalEndedEvent += OnSignalEnded;
@@ -144,7 +148,7 @@ namespace SportDJ.Services.SignalService
         public void Pause()
         {
             if (playingProvider != default
-                && IsPlaying)
+                && State == StateType.Play)
             {
                 var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
 
@@ -152,7 +156,7 @@ namespace SportDJ.Services.SignalService
                     volume: Constants.VolumeMin,
                     milliSeconds: milliSeconds);
 
-                IsPlaying = false;
+                State = StateType.Pause;
             }
         }
 
@@ -171,18 +175,20 @@ namespace SportDJ.Services.SignalService
                     milliSeconds: milliSeconds);
 
                 IsStarted = true;
-                IsPlaying = true;
+                State = StateType.Play;
             }
         }
 
         public void Stop()
         {
-            if (playingProvider != default
-                && IsPlaying)
+            if (playingProvider != default)
             {
                 playingProvider.Pause();
 
-                IsPlaying = false;
+                if (State != StateType.Pause)
+                {
+                    State = StateType.None;
+                }
 
                 eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
             }
@@ -244,10 +250,10 @@ namespace SportDJ.Services.SignalService
         {
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
-            if (!selectNextThresholdExceeded
+            if (!IsNextThresholdExceeded
                 && Position.Ticks > selectNextThreshold.Ticks)
             {
-                selectNextThresholdExceeded = true;
+                IsNextThresholdExceeded = true;
 
                 eventAggregator.GetEvent<SignalNextThresholdExceededEvent>().Publish(this);
             }

@@ -12,9 +12,9 @@
 
         public int FadeOnPauseMilliseconds { get; set; }
 
-        public double SelectNextPortion { get; set; }
+        public int SelectNextSeconds { get; set; } = 10;
 
-        public double TrimRearPortion { get; set; } = Constants.TrimRearPortionDefault;
+        public double TrimRearPortion { get; set; } = Defaults.TrimRearPortion;
 
         public float TrimVolume { get; set; }
 

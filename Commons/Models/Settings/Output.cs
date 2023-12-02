@@ -1,5 +1,4 @@
-﻿using SportDJ.Commons;
-using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Enums;
 using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings
@@ -15,7 +14,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public float Volume { get; set; } = Constants.VolumeMax;
 
-        public double VolumePortionBackground { get; set; } = Constants.VolumePortionBackgroundDefault;
+        public double VolumePortionBackground { get; set; } = Defaults.VolumePortionBackground;
 
         #endregion Public Properties
     }

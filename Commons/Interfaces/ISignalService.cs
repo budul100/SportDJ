@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 using System;
 
@@ -11,7 +12,9 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsLoop { get; set; }
 
-        bool IsPlaying { get; }
+        bool IsNextThresholdExceeded { get; }
+
+        bool IsSilent { get; }
 
         bool IsStarted { get; }
 
@@ -20,6 +23,8 @@ namespace SportDJ.Commons.Interfaces
         TimeSpan Position { get; }
 
         TimeSpan Remaining { get; }
+
+        StateType State { get; }
 
         Track Track { get; }
 

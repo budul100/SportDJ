@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Extensions;
 using System;
 
 namespace SportDJ.Commons.Providers
@@ -14,6 +13,7 @@ namespace SportDJ.Commons.Providers
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
+        private bool isStarted;
         private float volumeCurrent;
         private float volumeFadeDiff;
         private float volumeFadeStart;
@@ -55,7 +55,7 @@ namespace SportDJ.Commons.Providers
 
         public void Fade(float volume, int milliSeconds)
         {
-            var duration = milliSeconds.ToDuration();
+            var duration = TimeSpan.FromMilliseconds(milliSeconds);
 
             Fade(
                 volume: volume,
@@ -152,11 +152,16 @@ namespace SportDJ.Commons.Providers
 
         private void StartFade(float volume)
         {
-            OnSignalStarted();
-
-            if (fadeSampleCount == 0)
+            if (!isStarted)
             {
-                volumeCurrent = volume;
+                OnSignalStarted();
+
+                isStarted = true;
+            }
+
+            if (fadeSampleCount == 0 || volumeCurrent == Volume)
+            {
+                volumeCurrent = Volume;
 
                 OnSignalFaded();
             }

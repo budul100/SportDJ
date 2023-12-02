@@ -16,7 +16,6 @@ namespace SportDJ.Commons.Providers
         private readonly long start;
 
         private long position;
-        private StateType state;
 
         #endregion Private Fields
 
@@ -67,6 +66,8 @@ namespace SportDJ.Commons.Providers
 
         public TimeSpan Remaining => (end - position).ToDuration(averageBytesPerSecond);
 
+        public StateType State { get; private set; }
+
         public Track Track { get; }
 
         #endregion Public Properties
@@ -75,7 +76,7 @@ namespace SportDJ.Commons.Providers
 
         public void Pause()
         {
-            state = StateType.Pause;
+            State = StateType.Pause;
         }
 
         public override int Read(float[] buffer, int offset, int count)
@@ -86,7 +87,7 @@ namespace SportDJ.Commons.Providers
             {
                 lock (sourceProvider)
                 {
-                    if (state == StateType.Pause)
+                    if (State == StateType.Pause)
                     {
                         read = sourceProvider.Read(
                             buffer: buffer,
@@ -100,7 +101,7 @@ namespace SportDJ.Commons.Providers
 
                         sourceProvider.Position = position;
                     }
-                    else if (state == StateType.Play)
+                    else if (State == StateType.Play)
                     {
                         if (sourceProvider.Position < start)
                         {
@@ -129,11 +130,11 @@ namespace SportDJ.Commons.Providers
 
                             if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
                             {
-                                state = StateType.None;
+                                State = StateType.None;
                             }
                         }
 
-                        if (state == StateType.None)
+                        if (State == StateType.None)
                         {
                             position = end;
 
@@ -156,12 +157,12 @@ namespace SportDJ.Commons.Providers
 
         public void Start()
         {
-            state = StateType.Play;
+            State = StateType.Play;
         }
 
         public void Stop()
         {
-            state = StateType.None;
+            State = StateType.None;
         }
 
         #endregion Public Methods
@@ -170,7 +171,7 @@ namespace SportDJ.Commons.Providers
 
         protected override void Dispose(bool isDisposing)
         {
-            state = StateType.None;
+            State = StateType.None;
 
             sourceProvider?.Dispose();
 

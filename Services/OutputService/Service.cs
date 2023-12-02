@@ -186,7 +186,7 @@ namespace SportDJ.Services.OutputService
                 milliSeconds: settingsService.Contents.Options.FadeOnBackgroundMilliseconds);
         }
 
-        public void Set(int deviceNumber, int sampleRate = Constants.SampleRateDefault)
+        public void Set(int deviceNumber, int sampleRate = Defaults.SampleRate)
         {
             var capabilities = GetCapabilities();
 

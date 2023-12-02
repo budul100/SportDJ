@@ -32,7 +32,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Raise();
 
-        void Set(int deviceNumber, int sampleRate = Constants.SampleRateDefault);
+        void Set(int deviceNumber, int sampleRate = Defaults.SampleRate);
 
         #endregion Public Methods
     }
