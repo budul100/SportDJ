@@ -6,7 +6,7 @@
 
         public const string AppName = nameof(SportDJ);
 
-        public const string FileNamePositions = "Positions.xml";
+        public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
 
         public const int MixerSourcesMax = 1024;

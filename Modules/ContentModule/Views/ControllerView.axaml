@@ -28,7 +28,8 @@
         Grid.Row="2"
         Margin="{DynamicResource ContentMargin}"
         HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch">
+        VerticalAlignment="Stretch"
+        Command="{Binding ExecuteSignalCommand}">
 
         <TextBlock
             HorizontalAlignment="Center"

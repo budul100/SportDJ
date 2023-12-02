@@ -1,15 +1,16 @@
 ﻿using NAudio.Wave;
-using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Extensions;
 using System;
 
 namespace SportDJ.Commons.Providers
 {
-    public class FadingSampleProvider
+    public class FadedControlProvider
         : BaseSampleProvider
     {
         #region Private Fields
+
+        private readonly ISampleProvider sourceProvider;
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
@@ -21,9 +22,11 @@ namespace SportDJ.Commons.Providers
 
         #region Public Constructors
 
-        public FadingSampleProvider(ISampleProvider sourceProvider, float volume = 0f)
-            : base(sourceProvider: sourceProvider)
+        public FadedControlProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
+            : base(waveFormat: sourceProvider.WaveFormat)
         {
+            this.sourceProvider = sourceProvider;
+
             Volume = volume;
             volumeCurrent = Volume;
         }
@@ -68,11 +71,14 @@ namespace SportDJ.Commons.Providers
 
             if (volume != Volume)
             {
-                fadeSampleCount = duration.ToSeconds(averageBytesPerSecond);
                 Volume = volume;
 
-                StartFade(Volume);
+                fadeSampleCount = duration.HasValue
+                    ? (long)(duration.Value.TotalSeconds * averageBytesPerSecond)
+                    : default;
             }
+
+            StartFade(Volume);
         }
 
         public override int Read(float[] buffer, int offset, int count)
@@ -103,6 +109,12 @@ namespace SportDJ.Commons.Providers
 
             while (sample < count)
             {
+                if (FadeType != FadeType.Complete
+                    && (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount))
+                {
+                    OnSignalFaded();
+                }
+
                 if (FadeType == FadeType.Raise)
                 {
                     volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
@@ -112,24 +124,19 @@ namespace SportDJ.Commons.Providers
                     volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                 }
 
-                for (var ch = 0; ch < sourceProvider.WaveFormat.Channels; ch++)
+                for (var channel = 0; channel < sourceProvider.WaveFormat.Channels; channel++)
                 {
                     buffer[offset + sample++] *= volumeCurrent;
                 }
 
                 fadeSamplePosition++;
-
-                if (FadeType != FadeType.Complete
-                    && (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount))
-                {
-                    OnSignalFaded();
-                }
             }
         }
 
         private void OnSignalFaded()
         {
             FadeType = FadeType.Complete;
+            volumeCurrent = Volume;
 
             SignalFadedEvent?.Invoke(
                 sender: this,
@@ -161,7 +168,7 @@ namespace SportDJ.Commons.Providers
                     volumeFadeStart = volumeCurrent;
                     volumeFadeDiff = (volume - volumeCurrent) / fadeSampleCount;
                 }
-                else
+                else if (volume < volumeCurrent)
                 {
                     FadeType = FadeType.Reduce;
                     volumeFadeStart = volumeCurrent;

@@ -1,18 +1,16 @@
-﻿using SportDJ.Commons;
-
-namespace SportDJ.Commons.Models.Settings
+﻿namespace SportDJ.Commons.Models.Settings
 {
     public class Options
     {
         #region Public Properties
 
-        public int FadeDurationOnBackground { get; set; }
+        public int FadeOnBackgroundMilliseconds { get; set; }
 
-        public int FadeDurationOnMixIn { get; set; }
+        public int FadeOnMixInMilliseconds { get; set; }
 
-        public int FadeDurationOnMixOut { get; set; }
+        public int FadeOnMixOutMilliseconds { get; set; }
 
-        public int FadeDurationOnPause { get; set; }
+        public int FadeOnPauseMilliseconds { get; set; }
 
         public double SelectNextPortion { get; set; }
 

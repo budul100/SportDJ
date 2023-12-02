@@ -23,14 +23,14 @@ namespace SportDJ.Services.PlayerService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly Dictionary<ISignalService, FadingSampleProvider> fadingProviders = new();
+        private readonly Dictionary<ISignalService, FadedControlProvider> fadingProviders = new();
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = new();
 
         private bool isDisposed;
         private bool isMultiSignalPlayer;
-        private MixingSampleProvider mixingProvider;
-        private FadingSampleProvider outputProvider;
+        private ContinuousMixingProvider mixingProvider;
+        private FadedControlProvider outputProvider;
         private ISignalService signalService;
 
         #endregion Private Fields
@@ -99,41 +99,41 @@ namespace SportDJ.Services.PlayerService
 
         public ISignalService Add(Track track)
         {
-            if (track == default)
+            var result = default(ISignalService);
+
+            if (track != default)
             {
-                throw new ArgumentNullException(nameof(track));
-            }
+                result = containerProvider.Resolve<ISignalService>();
 
-            var result = containerProvider.Resolve<ISignalService>();
+                result.Initialize(
+                    track: track,
+                    waveFormat: outputProvider.WaveFormat);
 
-            result.Initialize(
-                track: track,
-                waveFormat: outputProvider.WaveFormat);
-
-            if (result.Output != default)
-            {
-                signalServices.Add(result);
-
-                ISampleProvider signalProvider;
-
-                if (isMultiSignalPlayer)
+                if (result.Output != default)
                 {
-                    signalProvider = result.Output;
+                    signalServices.Add(result);
+
+                    var signalProvider = default(ISampleProvider);
+
+                    if (isMultiSignalPlayer)
+                    {
+                        signalProvider = result.Output;
+                    }
+                    else
+                    {
+                        var fadingProvider = new FadedControlProvider(result.Output);
+
+                        fadingProvider.SignalFadedEvent += OnSignalFaded;
+
+                        fadingProviders.Add(
+                            key: result,
+                            value: fadingProvider);
+
+                        signalProvider = fadingProvider;
+                    }
+
+                    mixingProvider.Add(signalProvider);
                 }
-                else
-                {
-                    var fadingProvider = new FadingSampleProvider(result.Output);
-
-                    fadingProviders.Add(
-                        key: result,
-                        value: fadingProvider);
-
-                    fadingProvider.SignalFadedEvent += OnSignalFaded;
-
-                    signalProvider = fadingProvider;
-                }
-
-                mixingProvider.Add(signalProvider);
             }
 
             return result;
@@ -149,13 +149,14 @@ namespace SportDJ.Services.PlayerService
         public void Initialize(PlayerType type, WaveFormat waveFormat, bool isMultiSignalPlayer)
         {
             Type = type;
+
             this.isMultiSignalPlayer = isMultiSignalPlayer;
 
-            mixingProvider = new MixingSampleProvider(
-                waveFormat: waveFormat);
+            mixingProvider = new ContinuousMixingProvider(waveFormat);
 
-            outputProvider = new FadingSampleProvider(
-                sourceProvider: mixingProvider);
+            outputProvider = new FadedControlProvider(
+                sourceProvider: mixingProvider,
+                volume: Constants.VolumeMax);
 
             outputProvider.SignalStartedEvent += OnSignalStarted;
         }
@@ -210,14 +211,14 @@ namespace SportDJ.Services.PlayerService
                         .Where(s => s != signalService
                             && s.IsPlaying).ToArray();
 
-                    var fadeInMilliseconds = settingsService.Contents.Options.FadeDurationOnMixIn > 0
+                    var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Contents.Options.FadeDurationOnMixIn
+                        ? settingsService.Contents.Options.FadeOnMixInMilliseconds
                         : 0;
 
-                    var fadeOutMilliSeconds = settingsService.Contents.Options.FadeDurationOnMixOut > 0
+                    var fadeOutMilliSeconds = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0
                         && otherSignalServices.Any(s => s.IsPlaying)
-                        ? settingsService.Contents.Options.FadeDurationOnMixOut
+                        ? settingsService.Contents.Options.FadeOnMixOutMilliseconds
                         : 0;
 
                     fadingProviders[this.signalService].Fade(
@@ -233,11 +234,13 @@ namespace SportDJ.Services.PlayerService
 
         private void OnSignalFaded(object sender, EventArgs e)
         {
-            if (sender is ISignalService signalService
-                && fadingProviders.ContainsKey(signalService)
-                && fadingProviders[signalService].IsSilent)
+            if (sender is FadedControlProvider fadingProvider
+                && fadingProvider.IsSilent)
             {
-                signalService.Dispose();
+                var signalService = fadingProviders
+                    .SingleOrDefault(p => p.Value == fadingProvider).Key;
+
+                signalService.Stop();
             }
         }
 

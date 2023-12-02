@@ -1,42 +1,59 @@
-﻿<Session xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Outputs />
+﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Options>
-		<FadeDurationOnBackground>0</FadeDurationOnBackground>
-		<FadeDurationOnMixIn>0</FadeDurationOnMixIn>
-		<FadeDurationOnMixOut>0</FadeDurationOnMixOut>
-		<FadeDurationOnPause>0</FadeDurationOnPause>
+		<FadeOnBackgroundMilliseconds>50</FadeOnBackgroundMilliseconds>
+		<FadeOnMixInMilliseconds>50</FadeOnMixInMilliseconds>
+		<FadeOnMixOutMilliseconds>50</FadeOnMixOutMilliseconds>
+		<FadeOnPauseMilliseconds>150</FadeOnPauseMilliseconds>
 		<SelectNextPortion>0</SelectNextPortion>
 		<TrimRearPortion>0.1</TrimRearPortion>
 		<TrimVolume>0</TrimVolume>
 	</Options>
-	<Set Columns="4" Rows="2">
+	<Outputs>
+		<Output Type="Live">
+			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
+			<Volume>1</Volume>
+			<VolumePortionBackground>0.5</VolumePortionBackground>
+		</Output>
+	</Outputs>
+	<Root Columns="4" Rows="2">
 		<Contents>
-			<Cell xsi:type="Controller" Column="0" Row="0">
-				<Name>Player 1</Name>
-			</Cell>
-			<Cell xsi:type="Controller" Column="0" Row="1">
-				<Name>Player 2</Name>
-			</Cell>
 			<Cell xsi:type="Controller" Column="1" Row="0">
 				<Name>Player 3</Name>
+				<Path>..\..\..\..\Tests\TrackServiceTests\Samples\Sample2.mp3</Path>
+				<PlayerType>Music</PlayerType>
+				<SavePositions>false</SavePositions>
+			</Cell>
+			<Cell xsi:type="Controller" Column="0" Row="0">
+				<Name>Player 1</Name>
+				<Path>..\..\..\..\Tests\TrackServiceTests\Samples\Sample1.mp3</Path>
+				<PlayerType>Music</PlayerType>
+				<SavePositions>false</SavePositions>
 			</Cell>
 			<Cell xsi:type="Group" Column="2" Row="0" Columns="2" Rows="2">
 				<Name>Group1</Name>
 				<Contents>
 					<Cell xsi:type="Controller" Column="0" Row="0">
 						<Name>Player 21</Name>
+						<PlayerType>Music</PlayerType>
+						<SavePositions>false</SavePositions>
 					</Cell>
 					<Cell xsi:type="Controller" Column="0" Row="1">
 						<Name>Player 22</Name>
+						<PlayerType>Music</PlayerType>
+						<SavePositions>false</SavePositions>
 					</Cell>
 					<Cell xsi:type="Controller" Column="1" Row="0">
 						<Name>Player 23</Name>
+						<PlayerType>Music</PlayerType>
+						<SavePositions>false</SavePositions>
 					</Cell>
 					<Cell xsi:type="Controller" Column="1" Row="1">
 						<Name>Player 24</Name>
+						<PlayerType>Music</PlayerType>
+						<SavePositions>false</SavePositions>
 					</Cell>
 				</Contents>
 			</Cell>
 		</Contents>
-	</Set>
-</Session>
+	</Root>
+</Set>

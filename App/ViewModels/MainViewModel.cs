@@ -22,19 +22,19 @@ namespace SportDJ.App.ViewModels
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
-            IStorageService<Position> positionsService)
+            IStorageService<Session> sessionService)
         {
             this.containerProvider = containerProvider;
 
             settingsService.Load(Constants.FileNameSettings);
-            positionsService.Load(Constants.FileNamePositions);
+            sessionService.Load(Constants.FileNameSession);
 
             var set = settingsService.Contents;
 
             InitializeOutput();
             InitializePlayersLive();
 
-            XXXX(set, containerProvider.Resolve<IOutputService>(name: OutputType.Live.ToString()).GetDevices().ElementAt(3).Value);
+            XXXX(set);
 
             settingsService.Save();
         }
@@ -43,15 +43,15 @@ namespace SportDJ.App.ViewModels
 
         #region Private Methods
 
-        private static void XXXX(Set set, string device)
+        private static void XXXX(Set set)
         {
             set.Root.Contents.Clear();
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples\Sample1.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 1, Column = 0 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples\Sample2.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 0, Column = 1 });
+            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples", SavePositions = true });
 
             var group = new Group
             {
@@ -75,7 +75,12 @@ namespace SportDJ.App.ViewModels
             set.Root.Rows = 2;
             set.Root.Columns = 4;
 
-            set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = device;
+            set.Options.FadeOnBackgroundMilliseconds = 50;
+            set.Options.FadeOnPauseMilliseconds = 150;
+            set.Options.FadeOnMixInMilliseconds = 50;
+            set.Options.FadeOnMixOutMilliseconds = 50;
+
+            set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
         }
 
         private void InitializeOutput()
@@ -91,18 +96,6 @@ namespace SportDJ.App.ViewModels
         {
             if (outputLive?.Format != default)
             {
-                var playerMusic = containerProvider.Resolve<IPlayerService>(
-                    name: nameof(PlayerType.Music));
-
-                playerMusic.Initialize(
-                    type: PlayerType.Music,
-                    waveFormat: outputLive.Format,
-                    isMultiSignalPlayer: false);
-
-                outputLive.Add(
-                    playerService: playerMusic,
-                    isForegroundPlayer: false);
-
                 var playerEffects = containerProvider.Resolve<IPlayerService>(
                     name: nameof(PlayerType.Effects));
 
@@ -113,6 +106,18 @@ namespace SportDJ.App.ViewModels
 
                 outputLive.Add(
                     playerService: playerEffects,
+                    isForegroundPlayer: true);
+
+                var playerMusic = containerProvider.Resolve<IPlayerService>(
+                    name: nameof(PlayerType.Music));
+
+                playerMusic.Initialize(
+                    type: PlayerType.Music,
+                    waveFormat: outputLive.Format,
+                    isMultiSignalPlayer: false);
+
+                outputLive.Add(
+                    playerService: playerMusic,
                     isForegroundPlayer: false);
             }
         }

@@ -12,7 +12,7 @@ namespace SportDJ.Modules.ContentModule.DesignTime
         { }
 
         public ControllerViewModel(string name, int row, int column)
-            : base(default)
+            : base(default, default)
         {
             Initialize(new Controller { Name = name, Row = row, Column = column });
         }

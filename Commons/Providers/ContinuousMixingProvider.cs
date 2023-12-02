@@ -1,12 +1,11 @@
 ﻿using NAudio.Utils;
 using NAudio.Wave;
-using SportDJ.Commons;
 using System;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Providers
 {
-    public class MixingSampleProvider
+    public class ContinuousMixingProvider
         : BaseSampleProvider
     {
         #region Private Fields
@@ -19,16 +18,9 @@ namespace SportDJ.Commons.Providers
 
         #region Public Constructors
 
-        public MixingSampleProvider(WaveFormat waveFormat)
+        public ContinuousMixingProvider(WaveFormat waveFormat)
             : base(waveFormat: waveFormat)
-        {
-            if (WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
-            {
-                throw new ArgumentException(
-                    message: "Mixing sample provider format must be a floating point format.",
-                    paramName: nameof(waveFormat));
-            }
-        }
+        { }
 
         #endregion Public Constructors
 
@@ -44,8 +36,6 @@ namespace SportDJ.Commons.Providers
                     paramName: nameof(sourceProvider));
             }
 
-            // we'll just call the lock around add since we are protecting against an AddMixerInput at
-            // the same time as a Read, rather than two AddMixerInput calls at the same time
             lock (sourceProviders)
             {
                 if (sourceProviders.Count >= Constants.MixerSourcesMax)
@@ -94,12 +84,6 @@ namespace SportDJ.Commons.Providers
 
                     outputSamples = Math.Max(samplesRead, outputSamples);
 
-                    if (samplesRead == 0
-                        && (sourceProviders?.Count ?? 0) > index + 1)
-                    {
-                        sourceProviders.RemoveAt(index);
-                    }
-
                     index--;
                 }
             }
@@ -123,9 +107,9 @@ namespace SportDJ.Commons.Providers
         {
             if (sourceProviders.Contains(source))
             {
-                lock (this.sourceProviders)
+                lock (sourceProviders)
                 {
-                    this.sourceProviders.Remove(source);
+                    sourceProviders.Remove(source);
                 }
             }
         }

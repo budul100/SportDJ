@@ -12,7 +12,7 @@ namespace SportDJ.Commons.Providers
         #region Private Fields
 
         private readonly long end;
-        private readonly AudioFileReader reader;
+        private readonly AudioFileReader sourceProvider;
         private readonly long start;
 
         private long position;
@@ -22,12 +22,13 @@ namespace SportDJ.Commons.Providers
 
         #region Public Constructors
 
-        public PlayingFileProvider(AudioFileReader reader, Track track, TimeSpan? begin = default,
+        public PlayingFileProvider(AudioFileReader sourceProvider, Track track, TimeSpan? begin = default,
             TimeSpan? length = default)
-            : base(sourceProvider: reader)
+            : base(waveFormat: sourceProvider.WaveFormat)
         {
-            Track = track;
+            this.sourceProvider = sourceProvider;
 
+            Track = track;
             start = begin.ToSeconds(averageBytesPerSecond);
             end = start + length.ToSeconds(averageBytesPerSecond);
 
@@ -38,9 +39,9 @@ namespace SportDJ.Commons.Providers
                     paramName: nameof(begin));
             }
 
-            if (end > reader.Length)
+            if (end > this.sourceProvider.Length)
             {
-                end = reader.Length;
+                end = this.sourceProvider.Length;
             }
 
             Duration = (end - start).ToDuration(averageBytesPerSecond);
@@ -83,11 +84,11 @@ namespace SportDJ.Commons.Providers
 
             try
             {
-                lock (reader)
+                lock (sourceProvider)
                 {
                     if (state == StateType.Pause)
                     {
-                        read = reader.Read(
+                        read = sourceProvider.Read(
                             buffer: buffer,
                             offset: offset,
                             count: count);
@@ -97,13 +98,13 @@ namespace SportDJ.Commons.Providers
                             offset: offset,
                             count: count);
 
-                        reader.Position = position;
+                        sourceProvider.Position = position;
                     }
                     else if (state == StateType.Play)
                     {
-                        if (reader.Position < start)
+                        if (sourceProvider.Position < start)
                         {
-                            reader.Position = start;
+                            sourceProvider.Position = start;
                         }
 
                         if (IsLoop)
@@ -111,22 +112,22 @@ namespace SportDJ.Commons.Providers
                             while (read < count)
                             {
                                 var required = count - read;
-                                var readThisTime = reader.Read(buffer, offset + read, required);
+                                var readThisTime = sourceProvider.Read(buffer, offset + read, required);
 
-                                if (readThisTime < required || reader.Position >= end)
+                                if (readThisTime < required || sourceProvider.Position >= end)
                                 {
-                                    reader.Position = start;
+                                    sourceProvider.Position = start;
                                 }
                                 read += readThisTime;
                             }
                         }
                         else
                         {
-                            var lastPosition = reader.Position;
+                            var lastPosition = sourceProvider.Position;
 
-                            read = reader.Read(buffer, offset, count);
+                            read = sourceProvider.Read(buffer, offset, count);
 
-                            if (reader.Position >= end || reader.Position == lastPosition)
+                            if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
                             {
                                 state = StateType.None;
                             }
@@ -140,7 +141,7 @@ namespace SportDJ.Commons.Providers
                         }
                         else
                         {
-                            position = reader.Position;
+                            position = sourceProvider.Position;
 
                             OnSignalUpdated();
                         }
@@ -171,7 +172,7 @@ namespace SportDJ.Commons.Providers
         {
             state = StateType.None;
 
-            reader?.Dispose();
+            sourceProvider?.Dispose();
 
             base.Dispose(isDisposing);
         }
@@ -185,7 +186,7 @@ namespace SportDJ.Commons.Providers
             var sample = 0;
             while (sample < count)
             {
-                for (var ch = 0; ch < reader.WaveFormat.Channels; ch++)
+                for (var ch = 0; ch < sourceProvider.WaveFormat.Channels; ch++)
                 {
                     buffer[offset + sample++] = 0;
                 }

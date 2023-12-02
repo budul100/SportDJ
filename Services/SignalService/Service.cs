@@ -21,7 +21,7 @@ namespace SportDJ.Services.SignalService
         private readonly IStorageService<Set> settingsService;
 
         private bool isDisposed;
-        private FadingSampleProvider outputProvider;
+        private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
         private TimeSpan selectNextThreshold;
         private bool selectNextThresholdExceeded;
@@ -91,13 +91,13 @@ namespace SportDJ.Services.SignalService
             {
                 Track = track;
 
-                var reader = new AudioFileReader(Track.Path);
+                var sourceProvider = new AudioFileReader(Track.Path);
 
                 begin ??= Track.Start;
                 length ??= Track.Length;
 
                 playingProvider = new PlayingFileProvider(
-                    reader: reader,
+                    sourceProvider: sourceProvider,
                     track: Track,
                     begin: begin,
                     length: length);
@@ -134,9 +134,7 @@ namespace SportDJ.Services.SignalService
                         newSampleRate: waveFormat.SampleRate);
                 }
 
-                outputProvider = new FadingSampleProvider(
-                    sourceProvider: resampleProvider,
-                    volume: Constants.VolumeMin);
+                outputProvider = new FadedControlProvider(resampleProvider);
 
                 outputProvider.SignalStartedEvent += OnSignalStarted;
                 outputProvider.SignalFadedEvent += OnSignalFaded;
@@ -148,7 +146,7 @@ namespace SportDJ.Services.SignalService
             if (playingProvider != default
                 && IsPlaying)
             {
-                var milliSeconds = settingsService.Contents.Options.FadeDurationOnPause;
+                var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
 
                 outputProvider.Fade(
                     volume: Constants.VolumeMin,
@@ -165,7 +163,7 @@ namespace SportDJ.Services.SignalService
                 playingProvider.Start();
 
                 var milliSeconds = IsStarted
-                    ? settingsService.Contents.Options.FadeDurationOnPause
+                    ? settingsService.Contents.Options.FadeOnPauseMilliseconds
                     : 0;
 
                 outputProvider.Fade(

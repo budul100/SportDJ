@@ -10,8 +10,6 @@ namespace SportDJ.Commons.Providers
 
         protected readonly int averageBytesPerSecond;
 
-        protected ISampleProvider sourceProvider;
-
         #endregion Protected Fields
 
         #region Private Fields
@@ -22,15 +20,16 @@ namespace SportDJ.Commons.Providers
 
         #region Protected Constructors
 
-        protected BaseSampleProvider(ISampleProvider sourceProvider)
-            : this(waveFormat: sourceProvider.WaveFormat)
-        {
-            this.sourceProvider = sourceProvider;
-        }
-
         protected BaseSampleProvider(WaveFormat waveFormat)
         {
             WaveFormat = waveFormat ?? throw new ArgumentNullException(nameof(waveFormat));
+
+            if (WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
+            {
+                throw new ArgumentException(
+                    message: "Sample provider format must be a floating point format.",
+                    paramName: nameof(waveFormat));
+            }
 
             averageBytesPerSecond = WaveFormat.AverageBytesPerSecond;
         }
