@@ -76,6 +76,7 @@ namespace SportDJ.Services.TrackService.Extensions
                                 }
                             }
 
+                            end = default;
                             lastPosition = input.CurrentTime;
                         }
                         else if (start != default
