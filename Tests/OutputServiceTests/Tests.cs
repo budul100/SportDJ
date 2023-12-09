@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Prism.Events;
+using SportDJ.Commons.Events.Players;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System.Linq;
@@ -22,10 +23,20 @@ namespace SportDJ.Tests.OutputServiceTests
         {
             mockEventAggregator = new Mock<IEventAggregator>();
 
+            var mockPlayerStartedEvent = new Mock<PlayerStartedEvent>();
+            mockEventAggregator.
+                Setup(m => m.GetEvent<PlayerStartedEvent>()).
+                Returns(mockPlayerStartedEvent.Object);
+
+            var mockPlayerStoppedEvent = new Mock<PlayerStoppedEvent>();
+            mockEventAggregator.
+                Setup(m => m.GetEvent<PlayerStoppedEvent>()).
+                Returns(mockPlayerStoppedEvent.Object);
+
             mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService
-                .Setup(m => m.Contents.Options)
-                .Returns(new Options());
+                .Setup(m => m.Contents)
+                .Returns(new Set());
         }
 
         #endregion Public Constructors
