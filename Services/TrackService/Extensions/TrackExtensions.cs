@@ -38,15 +38,13 @@ namespace SportDJ.Services.TrackService.Extensions
             {
                 using var input = new AudioFileReader(track.Path);
 
-                var start = TimeSpan.Zero;
-                var end = input.TotalTime;
+                var start = default(TimeSpan?);
+                var end = default(TimeSpan?);
 
                 var startForRearCheck = trimRearPortion < 1
                     ? 1 - trimRearPortion
                     : 0;
-
                 var lastPosition = TimeSpan.Zero;
-                var isTrimRearFound = false;
 
                 var blockAlign = input.WaveFormat.BlockAlign;
                 var buffer = new byte[blockAlign];
@@ -68,7 +66,7 @@ namespace SportDJ.Services.TrackService.Extensions
                     {
                         if (BitConverter.ToSingle(buffer, i * 4) > trimVolume)
                         {
-                            if (start == TimeSpan.Zero)
+                            if (start == default)
                             {
                                 start = input.CurrentTime;
 
@@ -78,21 +76,23 @@ namespace SportDJ.Services.TrackService.Extensions
                                 }
                             }
 
-                            isTrimRearFound = false;
                             lastPosition = input.CurrentTime;
                         }
-                        else if ((start > TimeSpan.Zero) && !isTrimRearFound)
+                        else if (start != default
+                            && end == default)
                         {
-                            isTrimRearFound = true;
                             end = lastPosition;
                         }
                     }
                 }
 
+                start ??= TimeSpan.Zero;
+                end ??= input.TotalTime;
+
                 if (start <= end)
                 {
-                    track.Start = start;
-                    track.Length = end.Subtract(start);
+                    track.Start = start.Value;
+                    track.Length = end.Value.Subtract(start.Value);
                     track.Trimmed = true;
                 }
 

@@ -59,7 +59,11 @@ namespace SportDJ.Tests.TrackServiceTests
 
             trackService.Initialize(@"..\..\..\Samples");
 
-            Assert.True(trackService.Tracks.Count(t => t.Trimmed) == 2);
+            Assert.True(trackService.Tracks.Count(t => t.Trimmed) == 3);
+
+            Assert.True(trackService.Tracks.All(t => t.Start > TimeSpan.Zero));
+            Assert.True(trackService.Tracks.All(t => t.Length > TimeSpan.Zero));
+
             Assert.True(trackService.Track != default);
         }
 
