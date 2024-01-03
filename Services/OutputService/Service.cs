@@ -1,14 +1,15 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using NAudio.Wave;
 using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Players;
+using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Services.OutputService
 {
@@ -160,6 +161,15 @@ namespace SportDJ.Services.OutputService
 
                     Set(deviceNumber);
                 }
+                else
+                {
+                    throw new DeviceNotAvailableException(
+                        deviceName: outputOptions.DeviceName);
+                }
+            }
+            else
+            {
+                throw new DeviceNotDefinedException();
             }
         }
 
@@ -172,7 +182,7 @@ namespace SportDJ.Services.OutputService
                 isReducedBackground = true;
 
                 backgroundFader.Fade(
-                    volume: volume,
+                    volumeTarget: volume,
                     milliSeconds: settingsService.Contents.Options.FadeOnBackgroundMilliseconds);
             }
         }
@@ -182,7 +192,7 @@ namespace SportDJ.Services.OutputService
             isReducedBackground = false;
 
             backgroundFader.Fade(
-                volume: Constants.VolumeMax,
+                volumeTarget: Constants.VolumeMax,
                 milliSeconds: settingsService.Contents.Options.FadeOnBackgroundMilliseconds);
         }
 
