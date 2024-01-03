@@ -82,6 +82,7 @@ namespace SportDJ.App.ViewModels
             set.Options.SelectNextSeconds = 20;
 
             set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
+            //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";
         }
 
         private void InitializeOutput()

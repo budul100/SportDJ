@@ -140,8 +140,8 @@ namespace SportDJ.Services.SignalService
 
                 outputProvider = new FadedControlProvider(resampleProvider);
 
-                outputProvider.SignalStartedEvent += OnSignalStarted;
-                outputProvider.SignalFadedEvent += OnSignalFaded;
+                outputProvider.FadingEndedEvent += OnSignalStarted;
+                outputProvider.FadingStartedEvent += OnSignalFaded;
             }
         }
 
@@ -153,7 +153,7 @@ namespace SportDJ.Services.SignalService
                 var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
 
                 outputProvider.Fade(
-                    volume: Constants.VolumeMin,
+                    volumeTarget: Constants.VolumeMin,
                     milliSeconds: milliSeconds);
 
                 State = StateType.Pause;
@@ -171,7 +171,7 @@ namespace SportDJ.Services.SignalService
                     : 0;
 
                 outputProvider.Fade(
-                    volume: Constants.VolumeMax,
+                    volumeTarget: Constants.VolumeMax,
                     milliSeconds: milliSeconds);
 
                 IsStarted = true;
@@ -209,8 +209,8 @@ namespace SportDJ.Services.SignalService
 
                     eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
 
-                    outputProvider.SignalStartedEvent -= OnSignalStarted;
-                    outputProvider.SignalFadedEvent -= OnSignalFaded;
+                    outputProvider.FadingEndedEvent -= OnSignalStarted;
+                    outputProvider.FadingStartedEvent -= OnSignalFaded;
 
                     outputProvider.Dispose();
 

@@ -123,7 +123,7 @@ namespace SportDJ.Services.PlayerService
                     {
                         var fadingProvider = new FadedControlProvider(result.Output);
 
-                        fadingProvider.SignalFadedEvent += OnSignalFaded;
+                        fadingProvider.FadingStartedEvent += OnSignalFaded;
 
                         fadingProviders.Add(
                             key: result,
@@ -143,6 +143,7 @@ namespace SportDJ.Services.PlayerService
         {
             Dispose(
                 isDisposing: true);
+
             GC.SuppressFinalize(this);
         }
 
@@ -158,7 +159,7 @@ namespace SportDJ.Services.PlayerService
                 sourceProvider: mixingProvider,
                 volume: Constants.VolumeMax);
 
-            outputProvider.SignalStartedEvent += OnSignalStarted;
+            outputProvider.FadingEndedEvent += OnSignalStarted;
         }
 
         public void Pause()
@@ -181,6 +182,9 @@ namespace SportDJ.Services.PlayerService
                     mixingProvider.Dispose();
 
                     signalServices.OnEach(s => s.Dispose());
+
+                    outputProvider.FadingEndedEvent -= OnSignalStarted;
+                    outputProvider.Dispose();
                 }
 
                 isDisposed = true;
@@ -220,11 +224,11 @@ namespace SportDJ.Services.PlayerService
                         : 0;
 
                     fadingProviders[signalService].Fade(
-                        volume: Constants.VolumeMax,
+                        volumeTarget: Constants.VolumeMax,
                         milliSeconds: fadeInMilliseconds);
 
                     otherSignalServices.OnEach(s => fadingProviders[s].Fade(
-                        volume: Constants.VolumeMin,
+                        volumeTarget: Constants.VolumeMin,
                         milliSeconds: fadeOutMilliSeconds));
                 }
             }
@@ -261,7 +265,7 @@ namespace SportDJ.Services.PlayerService
 
                 if (fadingProviders.ContainsKey(signalService))
                 {
-                    fadingProviders[signalService].SignalFadedEvent -= OnSignalFaded;
+                    fadingProviders[signalService].FadingStartedEvent -= OnSignalFaded;
 
                     mixingProvider.Remove(fadingProviders[signalService]);
                     fadingProviders.Remove(signalService);

@@ -63,6 +63,7 @@ namespace SportDJ.Commons.Providers
                 while (index >= 0)
                 {
                     var source = sourceProviders[index];
+
                     var samplesRead = source.Read(
                         buffer: sourceBuffer,
                         offset: 0,

@@ -13,7 +13,6 @@ namespace SportDJ.Commons.Providers
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
-        private bool isStarted;
         private float volumeCurrent;
         private float volumeFadeDiff;
         private float volumeFadeStart;
@@ -35,9 +34,9 @@ namespace SportDJ.Commons.Providers
 
         #region Public Events
 
-        public event EventHandler SignalFadedEvent;
+        public event EventHandler FadingEndedEvent;
 
-        public event EventHandler SignalStartedEvent;
+        public event EventHandler FadingStartedEvent;
 
         #endregion Public Events
 
@@ -53,32 +52,59 @@ namespace SportDJ.Commons.Providers
 
         #region Public Methods
 
-        public void Fade(float volume, int milliSeconds)
+        public void Fade(float volumeTarget, int milliSeconds)
         {
             var duration = TimeSpan.FromMilliseconds(milliSeconds);
 
             Fade(
-                volume: volume,
+                volumeTarget: volumeTarget,
                 duration: duration);
         }
 
-        public void Fade(float volume, TimeSpan? duration = default)
+        public void Fade(float volumeTarget, TimeSpan? duration = default)
         {
-            if (volume < Constants.VolumeMin || volume > Constants.VolumeMax)
+            if (volumeTarget < Constants.VolumeMin || volumeTarget > Constants.VolumeMax)
             {
-                throw new ArgumentOutOfRangeException(nameof(volume));
+                throw new ArgumentOutOfRangeException(nameof(volumeTarget));
             }
 
-            if (volume != Volume)
+            if (volumeTarget != Volume)
             {
-                Volume = volume;
+                FadeType = volumeTarget > volumeCurrent
+                    ? FadeType.Raise
+                    : FadeType.Reduce;
 
                 fadeSampleCount = duration.HasValue
                     ? (long)(duration.Value.TotalSeconds * averageBytesPerSecond)
                     : default;
+
+                Volume = volumeTarget;
+
+                OnFadingStarted();
             }
 
-            StartFade(Volume);
+            if (fadeSampleCount == 0 || volumeCurrent == Volume)
+            {
+                OnFadingEnded();
+            }
+            else
+            {
+                lock (sourceProvider)
+                {
+                    if (FadeType == FadeType.Raise)
+                    {
+                        volumeFadeStart = volumeCurrent;
+                        volumeFadeDiff = (Volume - volumeCurrent) / fadeSampleCount;
+                    }
+                    else if (FadeType == FadeType.Reduce)
+                    {
+                        volumeFadeStart = volumeCurrent;
+                        volumeFadeDiff = (volumeCurrent - Volume) / fadeSampleCount;
+                    }
+
+                    fadeSamplePosition = 0;
+                }
+            }
         }
 
         public override int Read(float[] buffer, int offset, int count)
@@ -112,7 +138,7 @@ namespace SportDJ.Commons.Providers
                 if (FadeType != FadeType.Complete
                     && (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount))
                 {
-                    OnSignalFaded();
+                    OnFadingEnded();
                 }
 
                 if (FadeType == FadeType.Raise)
@@ -133,58 +159,25 @@ namespace SportDJ.Commons.Providers
             }
         }
 
-        private void OnSignalFaded()
+        private void OnFadingEnded()
         {
-            FadeType = FadeType.Complete;
             volumeCurrent = Volume;
 
-            SignalFadedEvent?.Invoke(
-                sender: this,
-                e: default);
+            if (FadeType != FadeType.Complete)
+            {
+                FadeType = FadeType.Complete;
+
+                FadingStartedEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
         }
 
-        private void OnSignalStarted()
+        private void OnFadingStarted()
         {
-            SignalStartedEvent?.Invoke(
+            FadingEndedEvent?.Invoke(
                 sender: this,
                 e: default);
-        }
-
-        private void StartFade(float volume)
-        {
-            if (!isStarted)
-            {
-                OnSignalStarted();
-
-                isStarted = true;
-            }
-
-            if (fadeSampleCount == 0 || volumeCurrent == Volume)
-            {
-                volumeCurrent = Volume;
-
-                OnSignalFaded();
-            }
-            else
-            {
-                if (volume > volumeCurrent)
-                {
-                    FadeType = FadeType.Raise;
-                    volumeFadeStart = volumeCurrent;
-                    volumeFadeDiff = (volume - volumeCurrent) / fadeSampleCount;
-                }
-                else if (volume < volumeCurrent)
-                {
-                    FadeType = FadeType.Reduce;
-                    volumeFadeStart = volumeCurrent;
-                    volumeFadeDiff = (volumeCurrent - volume) / fadeSampleCount;
-                }
-
-                lock (sourceProvider)
-                {
-                    fadeSamplePosition = 0;
-                }
-            }
         }
 
         #endregion Private Methods
