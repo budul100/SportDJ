@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
@@ -10,6 +7,9 @@ using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Services.OutputService
 {
@@ -178,22 +178,25 @@ namespace SportDJ.Services.OutputService
             if (!isReducedBackground)
             {
                 var volume = output.Volume * (float)outputOptions.VolumePortionBackground;
+                var fadeOnBackgroundMilliseconds = settingsService.Contents.Options.FadeOnBackgroundMilliseconds;
 
                 isReducedBackground = true;
 
                 backgroundFader.Fade(
                     volumeTarget: volume,
-                    milliSeconds: settingsService.Contents.Options.FadeOnBackgroundMilliseconds);
+                    milliSeconds: fadeOnBackgroundMilliseconds);
             }
         }
 
         public void Raise()
         {
+            var fadeOnBackgroundMilliseconds = settingsService.Contents.Options.FadeOnBackgroundMilliseconds;
+
             isReducedBackground = false;
 
             backgroundFader.Fade(
                 volumeTarget: Constants.VolumeMax,
-                milliSeconds: settingsService.Contents.Options.FadeOnBackgroundMilliseconds);
+                milliSeconds: fadeOnBackgroundMilliseconds);
         }
 
         public void Set(int deviceNumber, int sampleRate = Defaults.SampleRate)

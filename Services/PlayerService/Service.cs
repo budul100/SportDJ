@@ -123,7 +123,7 @@ namespace SportDJ.Services.PlayerService
                     {
                         var fadingProvider = new FadedControlProvider(result.Output);
 
-                        fadingProvider.FadingStartedEvent += OnSignalFaded;
+                        fadingProvider.FadingEndedEvent += OnSignalFaded;
 
                         fadingProviders.Add(
                             key: result,
@@ -159,7 +159,7 @@ namespace SportDJ.Services.PlayerService
                 sourceProvider: mixingProvider,
                 volume: Constants.VolumeMax);
 
-            outputProvider.FadingEndedEvent += OnSignalStarted;
+            outputProvider.FadingStartedEvent += OnSignalStarted;
         }
 
         public void Pause()
@@ -183,7 +183,7 @@ namespace SportDJ.Services.PlayerService
 
                     signalServices.OnEach(s => s.Dispose());
 
-                    outputProvider.FadingEndedEvent -= OnSignalStarted;
+                    outputProvider.FadingStartedEvent -= OnSignalStarted;
                     outputProvider.Dispose();
                 }
 
@@ -265,7 +265,7 @@ namespace SportDJ.Services.PlayerService
 
                 if (fadingProviders.ContainsKey(signalService))
                 {
-                    fadingProviders[signalService].FadingStartedEvent -= OnSignalFaded;
+                    fadingProviders[signalService].FadingEndedEvent -= OnSignalFaded;
 
                     mixingProvider.Remove(fadingProviders[signalService]);
                     fadingProviders.Remove(signalService);

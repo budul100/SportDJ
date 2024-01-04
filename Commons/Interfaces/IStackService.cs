@@ -7,6 +7,8 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
+        bool HasMultipleTracks { get; }
+
         Track Track { get; }
 
         IEnumerable<Track> Tracks { get; }

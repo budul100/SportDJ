@@ -25,6 +25,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly ITrackService trackService;
+
         private string artist;
         private Controller controller;
         private string counter;
@@ -45,18 +46,32 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             this.containerProvider = containerProvider;
             this.trackService = trackService;
 
-            ExecuteSignalCommand = new DelegateCommand(ExecuteSignal);
+            ExecuteCommand = new DelegateCommand(
+                executeMethod: ExecuteSignal,
+                canExecuteMethod: () => IsExecuteAvailable());
+
+            TrackBackwardCommand = new DelegateCommand(
+                executeMethod: () => stackService?.Previous(),
+                canExecuteMethod: () => IsNextTrackAvailable());
+
+            TrackForwardCommand = new DelegateCommand(
+                executeMethod: () => stackService?.Next(),
+                canExecuteMethod: () => IsNextTrackAvailable());
+
+            eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
+                action: (s) => OnSignalStarted(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
+                action: (s) => OnSignalStopped(s),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
                 action: (s) => OnSignalUpdate(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<SignalForwardEvent>().Subscribe(
-                action: (s) => OnSignalForward(s),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
-                action: (s) => OnSignalStopped(s),
+            eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
+                action: (s) => OnSignalNext(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
@@ -84,7 +99,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             set { SetProperty(ref counter, value); }
         }
 
-        public DelegateCommand ExecuteSignalCommand { get; }
+        public DelegateCommand ExecuteCommand { get; }
 
         public string Remaining
         {
@@ -97,6 +112,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             get { return title; }
             set { SetProperty(ref title, value); }
         }
+
+        public DelegateCommand TrackBackwardCommand { get; }
+
+        public DelegateCommand TrackForwardCommand { get; }
 
         #endregion Public Properties
 
@@ -166,11 +185,36 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             return result;
         }
 
-        private void OnSignalForward(ISignalService signalService)
+        private bool IsExecuteAvailable()
+        {
+            var result = stackService?.Track != default;
+
+            return result;
+        }
+
+        private bool IsNextTrackAvailable()
+        {
+            var result = stackService?.HasMultipleTracks == true
+                && ((signalService?.State != StateType.Play) || (signalService?.IsNextThresholdExceeded == true));
+
+            return result;
+        }
+
+        private void OnSignalNext(ISignalService signalService)
         {
             if (signalService == this.signalService)
             {
                 stackService.Next();
+
+                UpdateCommands();
+            }
+        }
+
+        private void OnSignalStarted(ISignalService signalService)
+        {
+            if (signalService == this.signalService)
+            {
+                UpdateCommands();
             }
         }
 
@@ -180,6 +224,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 && (signalService.State == StateType.None || signalService.IsNextThresholdExceeded))
             {
                 signalService.Dispose();
+
                 UpdateSignal();
             }
         }
@@ -208,6 +253,13 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
+        private void UpdateCommands()
+        {
+            ExecuteCommand.RaiseCanExecuteChanged();
+            TrackBackwardCommand.RaiseCanExecuteChanged();
+            TrackForwardCommand.RaiseCanExecuteChanged();
+        }
+
         private void UpdateSignal()
         {
             if (stackService.Track != default)
@@ -229,6 +281,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
             }
+
+            UpdateCommands();
         }
 
         #endregion Private Methods

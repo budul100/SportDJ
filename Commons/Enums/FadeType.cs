@@ -2,7 +2,7 @@
 {
     public enum FadeType
     {
-        Complete,
+        None,
 
         Raise,
 

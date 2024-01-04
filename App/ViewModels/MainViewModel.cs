@@ -76,10 +76,10 @@ namespace SportDJ.App.ViewModels
             set.Root.Columns = 4;
 
             set.Options.FadeOnBackgroundMilliseconds = 50;
-            set.Options.FadeOnPauseMilliseconds = 150;
-            set.Options.FadeOnMixInMilliseconds = 50;
-            set.Options.FadeOnMixOutMilliseconds = 50;
-            set.Options.SelectNextSeconds = 20;
+            set.Options.FadeOnPauseMilliseconds = 500;
+            set.Options.FadeOnMixInMilliseconds = 500;
+            set.Options.FadeOnMixOutMilliseconds = 500;
+            set.Options.SelectNextSeconds = 5;
 
             set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
             //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";

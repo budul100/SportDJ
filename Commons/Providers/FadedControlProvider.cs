@@ -52,16 +52,7 @@ namespace SportDJ.Commons.Providers
 
         #region Public Methods
 
-        public void Fade(float volumeTarget, int milliSeconds)
-        {
-            var duration = TimeSpan.FromMilliseconds(milliSeconds);
-
-            Fade(
-                volumeTarget: volumeTarget,
-                duration: duration);
-        }
-
-        public void Fade(float volumeTarget, TimeSpan? duration = default)
+        public void Fade(float volumeTarget, int? milliSeconds = default)
         {
             if (volumeTarget < Constants.VolumeMin || volumeTarget > Constants.VolumeMax)
             {
@@ -74,8 +65,8 @@ namespace SportDJ.Commons.Providers
                     ? FadeType.Raise
                     : FadeType.Reduce;
 
-                fadeSampleCount = duration.HasValue
-                    ? (long)(duration.Value.TotalSeconds * averageBytesPerSecond)
+                fadeSampleCount = milliSeconds.HasValue
+                    ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
                     : default;
 
                 Volume = volumeTarget;
@@ -135,27 +126,28 @@ namespace SportDJ.Commons.Providers
 
             while (sample < count)
             {
-                if (FadeType != FadeType.Complete
-                    && (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount))
+                if (FadeType != FadeType.None)
                 {
-                    OnFadingEnded();
-                }
+                    fadeSamplePosition += sourceProvider.WaveFormat.BlockAlign;
 
-                if (FadeType == FadeType.Raise)
-                {
-                    volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
-                }
-                else if (FadeType == FadeType.Reduce)
-                {
-                    volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
+                    if (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount)
+                    {
+                        OnFadingEnded();
+                    }
+                    else if (FadeType == FadeType.Raise)
+                    {
+                        volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
+                    }
+                    else if (FadeType == FadeType.Reduce)
+                    {
+                        volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
+                    }
                 }
 
                 for (var channel = 0; channel < sourceProvider.WaveFormat.Channels; channel++)
                 {
                     buffer[offset + sample++] *= volumeCurrent;
                 }
-
-                fadeSamplePosition++;
             }
         }
 
@@ -163,11 +155,11 @@ namespace SportDJ.Commons.Providers
         {
             volumeCurrent = Volume;
 
-            if (FadeType != FadeType.Complete)
+            if (FadeType != FadeType.None)
             {
-                FadeType = FadeType.Complete;
+                FadeType = FadeType.None;
 
-                FadingStartedEvent?.Invoke(
+                FadingEndedEvent?.Invoke(
                     sender: this,
                     e: default);
             }
@@ -175,7 +167,7 @@ namespace SportDJ.Commons.Providers
 
         private void OnFadingStarted()
         {
-            FadingEndedEvent?.Invoke(
+            FadingStartedEvent?.Invoke(
                 sender: this,
                 e: default);
         }

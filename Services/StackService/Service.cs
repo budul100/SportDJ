@@ -31,6 +31,8 @@ namespace SportDJ.Services.StackService
 
         #region Public Properties
 
+        public bool HasMultipleTracks => Tracks?.Count() > 1;
+
         public Track Track { get; private set; }
 
         public IEnumerable<Track> Tracks { get; private set; }

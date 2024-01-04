@@ -22,8 +22,8 @@ namespace SportDJ.Services.SignalService
         private readonly IStorageService<Set> settingsService;
         private readonly ITrackService trackService;
 
-        private TimeSpan forwardThreshold;
         private bool isDisposed;
+        private TimeSpan nextThreshold;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
 
@@ -107,7 +107,7 @@ namespace SportDJ.Services.SignalService
                     begin: begin,
                     length: length);
 
-                forwardThreshold = begin.Value.Add(
+                nextThreshold = begin.Value.Add(
                     ts: TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextSeconds));
 
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
@@ -141,8 +141,8 @@ namespace SportDJ.Services.SignalService
 
                 outputProvider = new FadedControlProvider(resampleProvider);
 
-                outputProvider.FadingEndedEvent += OnSignalStarted;
-                outputProvider.FadingStartedEvent += OnSignalFaded;
+                outputProvider.FadingStartedEvent += OnSignalStarted;
+                outputProvider.FadingEndedEvent += OnSignalFaded;
             }
         }
 
@@ -153,11 +153,11 @@ namespace SportDJ.Services.SignalService
             {
                 var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
 
+                State = StateType.Pause;
+
                 outputProvider.Fade(
                     volumeTarget: Constants.VolumeMin,
                     milliSeconds: milliSeconds);
-
-                State = StateType.Pause;
             }
         }
 
@@ -165,17 +165,17 @@ namespace SportDJ.Services.SignalService
         {
             if (playingProvider != default)
             {
-                playingProvider.Start();
-
                 var milliSeconds = State == StateType.Play
                     ? settingsService.Contents.Options.FadeOnPauseMilliseconds
                     : 0;
 
+                playingProvider.Start();
+
+                State = StateType.Play;
+
                 outputProvider.Fade(
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: milliSeconds);
-
-                State = StateType.Play;
             }
         }
 
@@ -209,8 +209,8 @@ namespace SportDJ.Services.SignalService
 
                     eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
 
-                    outputProvider.FadingEndedEvent -= OnSignalStarted;
-                    outputProvider.FadingStartedEvent -= OnSignalFaded;
+                    outputProvider.FadingStartedEvent -= OnSignalStarted;
+                    outputProvider.FadingEndedEvent -= OnSignalFaded;
 
                     outputProvider.Dispose();
 
@@ -257,11 +257,11 @@ namespace SportDJ.Services.SignalService
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
             if (!IsNextThresholdExceeded
-                && Position.Ticks > forwardThreshold.Ticks)
+                && Position.Ticks > nextThreshold.Ticks)
             {
                 IsNextThresholdExceeded = true;
 
-                eventAggregator.GetEvent<SignalForwardEvent>().Publish(this);
+                eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
             }
         }
 
