@@ -53,6 +53,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="{DynamicResource ContentFontSize}"
+                FontWeight="Bold"
                 Text="{Binding Title}" />
             <Grid Grid.Row="2" Grid.Column="0">
                 <Grid.ColumnDefinitions>

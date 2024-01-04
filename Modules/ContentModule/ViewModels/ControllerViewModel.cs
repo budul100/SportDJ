@@ -50,7 +50,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalForwardEvent>().Subscribe(
-                action: (s) => OnNextThresholdExceeded(s),
+                action: (s) => OnSignalForward(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
@@ -58,7 +58,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<TrackSelectedEvent>().Subscribe(
-                action: (t) => OnTrackSelectedEvent(t),
+                action: (s) => OnTrackUpdated(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<TracksUpdatedEvent>().Subscribe(
+                action: (s) => OnTrackUpdated(s),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -117,7 +121,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
-                SetSignal();
+                UpdateSignal();
             }
         }
 
@@ -175,7 +179,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private void OnNextThresholdExceeded(ISignalService signalService)
+        private void OnSignalForward(ISignalService signalService)
         {
             if (signalService == this.signalService)
             {
@@ -189,7 +193,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 && (signalService.State == StateType.None || signalService.IsNextThresholdExceeded))
             {
                 signalService.Dispose();
-                SetSignal();
+                UpdateSignal();
             }
         }
 
@@ -202,21 +206,30 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private void OnTrackSelectedEvent(ITrackService trackService)
+        private void OnTrackUpdated(ITrackService trackService)
         {
             if (trackService == this.trackService)
             {
-                Title = trackService.Track.Title;
-                Artist = trackService.Track.Artist;
+                UpdateTrack(trackService.Track);
             }
         }
 
-        private void SetSignal()
+        private void UpdateSignal()
         {
             if (trackService.Track != default)
             {
                 signalService = playerService.Add(trackService.Track);
+
+                UpdateTrack(trackService.Track);
             }
+        }
+
+        private void UpdateTrack(Track track)
+        {
+            Title = track.Title;
+            Artist = track.Artist;
+            Remaining = track.Length.ToString(DurationFormat);
+            Counter = $"[{track.Counter}]";
         }
 
         #endregion Private Methods
