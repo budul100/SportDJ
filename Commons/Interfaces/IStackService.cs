@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {
-    public interface ITrackService
+    public interface IStackService
     {
         #region Public Properties
 

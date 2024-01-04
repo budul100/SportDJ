@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SportDJ.Services.TrackService.Extensions
+namespace SportDJ.Services.StackService.Extensions
 {
     internal static class TrackExtensions
     {

@@ -38,9 +38,9 @@
 	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
 	  <ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
 	  <ProjectReference Include="..\Services\RegisterService\RegisterService.csproj" />
+	  <ProjectReference Include="..\Services\StackService\StackService.csproj" />
 	  <ProjectReference Include="..\Services\StorageService\StorageService.csproj" />
 	  <ProjectReference Include="..\Services\SignalService\SignalService.csproj" />
-	  <ProjectReference Include="..\Services\TrackService\TrackService.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

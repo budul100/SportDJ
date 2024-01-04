@@ -5,16 +5,16 @@ using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Services.TrackService.Extensions;
+using SportDJ.Services.StackService.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SportDJ.Services.TrackService
+namespace SportDJ.Services.StackService
 {
     public class Service
-        : ITrackService
+        : IStackService
     {
         #region Private Fields
 

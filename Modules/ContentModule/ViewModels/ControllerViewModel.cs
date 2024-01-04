@@ -33,7 +33,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private string remaining;
         private ISignalService signalService;
         private string title;
-        private ITrackService trackService;
+        private IStackService stackService;
 
         #endregion Private Fields
 
@@ -113,19 +113,19 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             this.controller = controller;
 
-            trackService = containerProvider?.Resolve<ITrackService>();
+            stackService = containerProvider?.Resolve<IStackService>();
             playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
-            trackService?.Initialize(controller.Path);
+            stackService?.Initialize(controller.Path);
 
             if (this.controller.SavePositions)
             {
                 position = GetPosition();
 
-                var track = trackService.Tracks
+                var track = stackService.Tracks
                     .SingleOrDefault(t => t.Path == position.Path);
 
-                trackService.Select(track);
+                stackService.Select(track);
             }
 
             UpdateSignal();
@@ -174,7 +174,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         {
             if (signalService == this.signalService)
             {
-                trackService.Next();
+                stackService.Next();
             }
         }
 
@@ -196,9 +196,9 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private void OnTrackUpdated(ITrackService trackService)
+        private void OnTrackUpdated(IStackService trackService)
         {
-            if (trackService == this.trackService)
+            if (trackService == this.stackService)
             {
                 UpdateTrack();
             }
@@ -206,18 +206,18 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void UpdateCount()
         {
-            if (trackService.Track != default)
+            if (stackService.Track != default)
             {
-                var count = registerService.GetCount(trackService.Track);
+                var count = registerService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
             }
         }
 
         private void UpdateSignal()
         {
-            if (trackService.Track != default)
+            if (stackService.Track != default)
             {
-                signalService = playerService.Add(trackService.Track);
+                signalService = playerService.Add(stackService.Track);
 
                 UpdateTrack();
             }
@@ -225,11 +225,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void UpdateTrack()
         {
-            if (trackService.Track != default)
+            if (stackService.Track != default)
             {
-                Title = trackService.Track.Title;
-                Artist = trackService.Track.Artist;
-                Remaining = trackService.Track.Length.ToString(DurationFormat);
+                Title = stackService.Track.Title;
+                Artist = stackService.Track.Artist;
+                Remaining = stackService.Track.Length.ToString(DurationFormat);
 
                 UpdateCount();
             }

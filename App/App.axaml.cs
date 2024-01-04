@@ -89,7 +89,7 @@ namespace SportDJ.App
                 name: Constants.PlayerNamePFL);
 
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
-            containerRegistry.Register<ITrackService, Services.TrackService.Service>();
+            containerRegistry.Register<IStackService, Services.StackService.Service>();
 
             containerRegistry.Register<MainView>();
         }

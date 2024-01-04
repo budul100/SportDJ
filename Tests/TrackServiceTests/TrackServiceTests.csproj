@@ -22,7 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Services\TrackService\TrackService.csproj" />
+		<ProjectReference Include="..\..\Services\StackService\StackService.csproj" />
 	</ItemGroup>
 
 </Project>
