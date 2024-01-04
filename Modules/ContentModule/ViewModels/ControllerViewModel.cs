@@ -34,15 +34,15 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             ExecuteSignalCommand = new DelegateCommand(ExecuteSignal);
 
-            eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
                 action: (s) => OnSignalUpdate(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SignalNextThresholdExceededEvent>().Subscribe(
+            eventAggregator?.GetEvent<SignalNextThresholdExceededEvent>().Subscribe(
                 action: (s) => OnNextThresholdExceeded(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator.GetEvent<SignalStoppedEvent>().Subscribe(
+            eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
                 action: (s) => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
         }
@@ -70,10 +70,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             this.controller = controller;
 
-            trackService = containerProvider.Resolve<ITrackService>();
+            trackService = containerProvider?.Resolve<ITrackService>();
+
             InitializeTracks(controller);
 
-            if (trackService.Tracks.Any())
+            if (trackService?.Tracks?.Any() == true)
             {
                 playerService = containerProvider.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
@@ -122,7 +123,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void InitializeTracks(Controller controller)
         {
-            trackService.Initialize(controller.Path);
+            trackService?.Initialize(controller.Path);
 
             if (this.controller.SavePositions)
             {
