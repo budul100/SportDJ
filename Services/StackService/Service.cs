@@ -35,7 +35,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Properties
 
-        public bool HasEntries => entries.HasUnplayeds();
+        public bool HasStack => entries.HasStack(Track);
 
         public Track Track { get; private set; }
 
@@ -93,8 +93,6 @@ namespace SportDJ.Services.StackService
         {
             if (Track != default)
             {
-                trackService.Play(Track);
-
                 entries[index].Played = true;
 
                 if (entries.AllPlayed())
@@ -165,14 +163,6 @@ namespace SportDJ.Services.StackService
             }
         }
 
-        public void Stop()
-        {
-            if (Track != default)
-            {
-                trackService.Stop(Track);
-            }
-        }
-
         #endregion Public Methods
 
         #region Private Methods
@@ -181,17 +171,9 @@ namespace SportDJ.Services.StackService
         {
             entries = tracks.GetEntries().ToList();
 
-            if (HasEntries
-                && (index >= entries.Count || entries[index].Track != Track))
-            {
-                index = entries.Any(e => e.Track == Track)
-                    ? entries.IndexOf(entries.First(e => e.Track == Track))
-                    : 0;
-            }
-            else
-            {
-                index = 0;
-            }
+            index = entries?.Any(e => e.Track == Track) == true
+                ? entries.IndexOf(entries.First(e => e.Track == Track))
+                : 0;
 
             var track = index < entries.Count
                 ? entries[index].Track

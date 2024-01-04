@@ -69,7 +69,7 @@ namespace SportDJ.Tests.StackServiceTests
             var track = stackService.Track;
 
             stackService.Play();
-            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.HasStack);
             Assert.True(stackService.Track == track);
 
             stackService.Next();
@@ -78,7 +78,7 @@ namespace SportDJ.Tests.StackServiceTests
             track = stackService.Track;
 
             stackService.Play();
-            Assert.False(stackService.HasEntries);
+            Assert.False(stackService.HasStack);
             Assert.True(stackService.Track == track);
 
             stackService.Next();
@@ -87,7 +87,7 @@ namespace SportDJ.Tests.StackServiceTests
             track = stackService.Track;
 
             stackService.Play();
-            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.HasStack);
             Assert.True(stackService.Track == track);
         }
 
@@ -122,7 +122,7 @@ namespace SportDJ.Tests.StackServiceTests
             var track = stackService.Track;
 
             stackService.Play();
-            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.HasStack);
             Assert.True(stackService.Track == track);
 
             stackService.Next();
@@ -131,11 +131,11 @@ namespace SportDJ.Tests.StackServiceTests
             track = stackService.Track;
 
             stackService.Play();
-            Assert.False(stackService.HasEntries);
+            Assert.False(stackService.HasStack);
             Assert.True(stackService.Track == track);
 
             stackService.Reset();
-            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.HasStack);
             Assert.True(stackService.Track == track);
         }
 

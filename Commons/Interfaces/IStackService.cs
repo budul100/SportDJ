@@ -7,7 +7,7 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        bool HasEntries { get; }
+        bool HasStack { get; }
 
         Track Track { get; }
 
@@ -32,8 +32,6 @@ namespace SportDJ.Commons.Interfaces
         void Select(Track track);
 
         void Shuffle();
-
-        void Stop();
 
         #endregion Public Methods
     }

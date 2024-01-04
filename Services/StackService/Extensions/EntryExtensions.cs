@@ -1,4 +1,5 @@
-﻿using SportDJ.Services.StackService.Models;
+﻿using SportDJ.Commons.Models.Contents;
+using SportDJ.Services.StackService.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,10 +16,10 @@ namespace SportDJ.Services.StackService.Extensions
             return result;
         }
 
-        public static bool HasUnplayeds(this IEnumerable<Entry> entries)
+        public static bool HasStack(this IEnumerable<Entry> entries, Track track)
         {
-            var result = entries?
-                .Where(t => !t.Played).Count() > 1;
+            var result = entries?.Count(t => !t.Played) > 1
+                || (track != default && entries?.SingleOrDefault(t => !t.Played)?.Track != track);
 
             return result;
         }
