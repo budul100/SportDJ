@@ -7,7 +7,7 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        bool HasMultipleTracks { get; }
+        bool HasEntries { get; }
 
         Track Track { get; }
 
@@ -23,11 +23,17 @@ namespace SportDJ.Commons.Interfaces
 
         void Next();
 
+        void Play();
+
         void Previous();
+
+        void Reset();
 
         void Select(Track track);
 
         void Shuffle();
+
+        void Stop();
 
         #endregion Public Methods
     }

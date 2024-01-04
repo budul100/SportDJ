@@ -3,6 +3,7 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Services.StackService.Extensions;
+using SportDJ.Services.StackService.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,9 @@ namespace SportDJ.Services.StackService
 
         private readonly IEventAggregator eventAggregator;
         private readonly ITrackService trackService;
+
+        private List<Entry> entries;
+        private int index;
 
         #endregion Private Fields
 
@@ -31,7 +35,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Properties
 
-        public bool HasMultipleTracks => Tracks?.Count() > 1;
+        public bool HasEntries => entries.HasUnplayeds();
 
         public Track Track { get; private set; }
 
@@ -46,30 +50,90 @@ namespace SportDJ.Services.StackService
             Tracks = default;
             Track = default;
 
+            SetEntries(Tracks);
+
             eventAggregator.GetEvent<StackUpdatedEvent>().Publish(default);
         }
 
         public void Initialize(string path)
         {
-            var tracks = trackService.GetTracks(path).ToArray();
+            Tracks = trackService.GetTracks(path).ToArray();
 
-            UpdateStack(tracks);
+            SetEntries(Tracks);
         }
 
         public void Next()
         {
-            if (Track?.Next != default)
+            if (entries?.Any() == true)
             {
-                Select(Track.Next);
+                var current = index;
+
+                do
+                {
+                    current++;
+
+                    if (current == entries.Count)
+                    {
+                        current = 0;
+                    }
+
+                    if (!entries[current].Played)
+                    {
+                        index = current;
+                        Select(entries[index].Track);
+
+                        break;
+                    }
+                }
+                while (index != current);
+            }
+        }
+
+        public void Play()
+        {
+            if (Track != default)
+            {
+                trackService.Play(Track);
+
+                entries[index].Played = true;
+
+                if (entries.AllPlayed())
+                {
+                    Reset();
+                }
             }
         }
 
         public void Previous()
         {
-            if (Track?.Previous != default)
+            if (entries?.Any() == true)
             {
-                Select(Track.Previous);
+                var current = index;
+
+                do
+                {
+                    if (current == 0)
+                    {
+                        current = entries.Count;
+                    }
+
+                    current--;
+
+                    if (!entries[current].Played)
+                    {
+                        index = current;
+                        Select(entries[index].Track);
+
+                        break;
+                    }
+                }
+                while (index != current);
             }
+        }
+
+        public void Reset()
+        {
+            entries.Reset();
         }
 
         public void Select(Track track)
@@ -97,7 +161,15 @@ namespace SportDJ.Services.StackService
                     (tracks[i], tracks[count]) = (tracks[count], tracks[i]);
                 }
 
-                UpdateStack(tracks);
+                SetEntries(tracks);
+            }
+        }
+
+        public void Stop()
+        {
+            if (Track != default)
+            {
+                trackService.Stop(Track);
             }
         }
 
@@ -105,11 +177,27 @@ namespace SportDJ.Services.StackService
 
         #region Private Methods
 
-        private void UpdateStack(IEnumerable<Track> tracks)
+        private void SetEntries(IEnumerable<Track> tracks)
         {
-            Tracks = tracks.GetTracks().ToArray();
+            entries = tracks.GetEntries().ToList();
 
-            Select(Tracks?.FirstOrDefault());
+            if (HasEntries
+                && (index >= entries.Count || entries[index].Track != Track))
+            {
+                index = entries.Any(e => e.Track == Track)
+                    ? entries.IndexOf(entries.First(e => e.Track == Track))
+                    : 0;
+            }
+            else
+            {
+                index = 0;
+            }
+
+            var track = index < entries.Count
+                ? entries[index].Track
+                : default;
+
+            Select(track);
         }
 
         #endregion Private Methods

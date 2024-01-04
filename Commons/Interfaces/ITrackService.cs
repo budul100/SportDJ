@@ -7,13 +7,13 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Methods
 
-        void End(Track track);
-
         int GetCount(Track track);
 
         IEnumerable<Track> GetTracks(string path);
 
-        void Start(Track track);
+        void Play(Track track);
+
+        void Stop(Track track);
 
         #endregion Public Methods
     }

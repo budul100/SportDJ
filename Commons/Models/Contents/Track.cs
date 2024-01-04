@@ -25,11 +25,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public TimeSpan Length { get; set; }
 
-        public Track Next { get; set; }
-
         public string Path { get; }
-
-        public Track Previous { get; set; }
 
         public List<Register> Registers { get; } = new List<Register>();
 

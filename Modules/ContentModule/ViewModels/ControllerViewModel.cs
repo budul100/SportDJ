@@ -194,7 +194,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private bool IsNextTrackAvailable()
         {
-            var result = stackService?.HasMultipleTracks == true;
+            var result = stackService?.HasEntries == true;
 
             return result;
         }

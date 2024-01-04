@@ -17,6 +17,7 @@ namespace SportDJ.Tests.StackServiceTests
         private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
+        private readonly Services.TrackService.Service trackService;
 
         #endregion Private Fields
 
@@ -45,6 +46,11 @@ namespace SportDJ.Tests.StackServiceTests
             mockSettingsService
                 .Setup(m => m.Contents)
                 .Returns(new Set());
+
+            trackService = new Services.TrackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                dispatcherService: mockDispatcherService.Object,
+                settingsService: mockSettingsService.Object);
         }
 
         #endregion Public Constructors
@@ -52,25 +58,85 @@ namespace SportDJ.Tests.StackServiceTests
         #region Public Methods
 
         [Fact]
-        public void LoadFiles()
+        public void DecreasePlayeds()
         {
-            var trackService = new Services.TrackService.Service(
-                eventAggregator: mockEventAggregator.Object,
-                dispatcherService: mockDispatcherService.Object,
-                settingsService: mockSettingsService.Object);
-
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
                 trackService: trackService);
 
             stackService.Initialize(@"..\..\..\Samples");
 
-            Assert.True(stackService.Tracks.Count(t => t.Trimmed) == 3);
+            var track = stackService.Track;
+
+            stackService.Play();
+            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
+
+            stackService.Next();
+            Assert.False(stackService.Track == track);
+
+            track = stackService.Track;
+
+            stackService.Play();
+            Assert.False(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
+
+            stackService.Next();
+            Assert.False(stackService.Track == track);
+
+            track = stackService.Track;
+
+            stackService.Play();
+            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
+        }
+
+        [Fact]
+        public void LoadFiles()
+        {
+            var stackService = new Services.StackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                trackService: trackService);
+
+            stackService.Initialize(@"..\..\..\Samples");
+
+            Assert.Equal(
+                expected: 3,
+                actual: stackService.Tracks.Count(t => t.Trimmed));
 
             Assert.True(stackService.Tracks.All(t => t.Start > TimeSpan.Zero));
             Assert.True(stackService.Tracks.All(t => t.Length > TimeSpan.Zero));
 
             Assert.True(stackService.Track != default);
+        }
+
+        [Fact]
+        public void MaintainOnReset()
+        {
+            var stackService = new Services.StackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                trackService: trackService);
+
+            stackService.Initialize(@"..\..\..\Samples");
+
+            var track = stackService.Track;
+
+            stackService.Play();
+            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
+
+            stackService.Next();
+            Assert.False(stackService.Track == track);
+
+            track = stackService.Track;
+
+            stackService.Play();
+            Assert.False(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
+
+            stackService.Reset();
+            Assert.True(stackService.HasEntries);
+            Assert.True(stackService.Track == track);
         }
 
         #endregion Public Methods

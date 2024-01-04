@@ -230,7 +230,7 @@ namespace SportDJ.Services.SignalService
                 State = StateType.None;
             }
 
-            trackService.End(Track);
+            trackService.Stop(Track);
 
             eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
         }
@@ -252,7 +252,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
-            trackService.Start(Track);
+            trackService.Play(Track);
 
             eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }
