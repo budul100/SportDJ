@@ -2,9 +2,9 @@
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Registers;
-using SportDJ.Commons.Events.Signals;
-using SportDJ.Commons.Events.Tracks;
+using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Stack;
+using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -24,7 +24,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly IRegisterService registerService;
+        private readonly ITrackService registerService;
         private string artist;
         private Controller controller;
         private string counter;
@@ -32,15 +32,15 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private Position position;
         private string remaining;
         private ISignalService signalService;
-        private string title;
         private IStackService stackService;
+        private string title;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IRegisterService registerService)
+            ITrackService registerService)
         {
             this.containerProvider = containerProvider;
             this.registerService = registerService;
@@ -59,16 +59,12 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 action: (s) => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<TrackSelectedEvent>().Subscribe(
-                action: (s) => OnTrackUpdated(s),
+            eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
+                action: (s) => OnStackUpdated(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<TracksUpdatedEvent>().Subscribe(
-                action: (s) => OnTrackUpdated(s),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<RegisterUpdatedEvent>().Subscribe(
-                action: () => UpdateCount(),
+            eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
+                action: (t) => OnTrackUpdated(t),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -196,20 +192,19 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private void OnTrackUpdated(IStackService trackService)
+        private void OnStackUpdated(IStackService stackService)
         {
-            if (trackService == this.stackService)
+            if (stackService == this.stackService)
             {
                 UpdateTrack();
             }
         }
 
-        private void UpdateCount()
+        private void OnTrackUpdated(Track track)
         {
-            if (stackService.Track != default)
+            if (track == this.stackService?.Track)
             {
-                var count = registerService.GetCount(stackService.Track);
-                Counter = $"[{count}]";
+                UpdateTrack();
             }
         }
 
@@ -231,7 +226,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 Artist = stackService.Track.Artist;
                 Remaining = stackService.Track.Length.ToString(DurationFormat);
 
-                UpdateCount();
+                var count = registerService.GetCount(stackService.Track);
+                Counter = $"[{count}]";
             }
         }
 

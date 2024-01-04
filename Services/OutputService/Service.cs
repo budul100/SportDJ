@@ -5,7 +5,7 @@ using NAudio.Wave;
 using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Players;
+using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;

@@ -3,7 +3,7 @@ using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Signals;
+using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -19,7 +19,7 @@ namespace SportDJ.Services.SignalService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private readonly IRegisterService registerService;
+        private readonly ITrackService registerService;
         private readonly IStorageService<Set> settingsService;
         private bool isDisposed;
         private FadedControlProvider outputProvider;
@@ -31,7 +31,7 @@ namespace SportDJ.Services.SignalService
         #region Public Constructors
 
         public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-            IRegisterService registerService)
+            ITrackService registerService)
         {
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;

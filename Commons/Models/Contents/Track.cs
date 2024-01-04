@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Contents
 {
@@ -29,6 +30,8 @@ namespace SportDJ.Commons.Models.Contents
         public string Path { get; }
 
         public Track Previous { get; set; }
+
+        public List<Register> Registers { get; } = new List<Register>();
 
         public TimeSpan Start { get; set; }
 

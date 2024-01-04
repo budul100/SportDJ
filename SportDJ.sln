@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DispatcherService", "Servic
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackServiceTests", "Tests\TrackServiceTests\TrackServiceTests.csproj", "{BE76A95D-3B8D-4364-860A-EDED1CCB5031}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StackServiceTests", "Tests\StackServiceTests\StackServiceTests.csproj", "{BE76A95D-3B8D-4364-860A-EDED1CCB5031}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalService", "Services\SignalService\SignalService.csproj", "{F33E81E6-D75B-410D-A6D0-3F54150E7E51}"
 EndProject
@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService", "Services\O
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterService", "Services\RegisterService\RegisterService.csproj", "{19CADD1C-4331-4137-A500-7D1137389C36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackService", "Services\TrackService\TrackService.csproj", "{19CADD1C-4331-4137-A500-7D1137389C36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

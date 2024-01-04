@@ -1,15 +1,14 @@
 using Moq;
 using Prism.Events;
-using SportDJ.Commons.Events.Signals;
-using SportDJ.Commons.Events.Tracks;
+using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Services.StackService;
 using System;
 using System.Linq;
 using Xunit;
 
-namespace SportDJ.Tests.TrackServiceTests
+namespace SportDJ.Tests.StackServiceTests
 {
     public class Tests
     {
@@ -32,9 +31,9 @@ namespace SportDJ.Tests.TrackServiceTests
                 Setup(m => m.GetEvent<SignalUpdatedEvent>()).
                 Returns(mockTrackSelectedEvent.Object);
 
-            var mockTrackUpdatedEvent = new Mock<TracksUpdatedEvent>();
+            var mockTrackUpdatedEvent = new Mock<TrackUpdatedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<TracksUpdatedEvent>()).
+                Setup(m => m.GetEvent<TrackUpdatedEvent>()).
                 Returns(mockTrackUpdatedEvent.Object);
 
             mockDispatcherService = new Mock<IDispatcherService>();
@@ -55,16 +54,23 @@ namespace SportDJ.Tests.TrackServiceTests
         [Fact]
         public void LoadFiles()
         {
-            var trackService = new Service(mockEventAggregator.Object, mockDispatcherService.Object, mockSettingsService.Object);
+            var trackService = new Services.TrackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                dispatcherService: mockDispatcherService.Object,
+                settingsService: mockSettingsService.Object);
 
-            trackService.Initialize(@"..\..\..\Samples");
+            var stackService = new Services.StackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                trackService: trackService);
 
-            Assert.True(trackService.Tracks.Count(t => t.Trimmed) == 3);
+            stackService.Initialize(@"..\..\..\Samples");
 
-            Assert.True(trackService.Tracks.All(t => t.Start > TimeSpan.Zero));
-            Assert.True(trackService.Tracks.All(t => t.Length > TimeSpan.Zero));
+            Assert.True(stackService.Tracks.Count(t => t.Trimmed) == 3);
 
-            Assert.True(trackService.Track != default);
+            Assert.True(stackService.Tracks.All(t => t.Start > TimeSpan.Zero));
+            Assert.True(stackService.Tracks.All(t => t.Length > TimeSpan.Zero));
+
+            Assert.True(stackService.Track != default);
         }
 
         #endregion Public Methods
