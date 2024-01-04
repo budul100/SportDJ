@@ -185,12 +185,7 @@ namespace SportDJ.Services.SignalService
             {
                 playingProvider.Pause();
 
-                if (State != StateType.Pause)
-                {
-                    State = StateType.None;
-                }
-
-                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+                EndSignal();
             }
         }
 
@@ -228,9 +223,21 @@ namespace SportDJ.Services.SignalService
 
         #region Private Methods
 
+        private void EndSignal()
+        {
+            if (State != StateType.Pause)
+            {
+                State = StateType.None;
+            }
+
+            trackService.End(Track);
+
+            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+        }
+
         private void OnSignalEnded(object sender, EventArgs e)
         {
-            trackService.End(Track);
+            EndSignal();
 
             Dispose();
         }
@@ -240,8 +247,6 @@ namespace SportDJ.Services.SignalService
             if (outputProvider?.IsSilent == true)
             {
                 Stop();
-
-                trackService.End(Track);
             }
         }
 

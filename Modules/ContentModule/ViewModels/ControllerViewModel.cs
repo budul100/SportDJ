@@ -51,11 +51,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 canExecuteMethod: () => IsExecuteAvailable());
 
             TrackBackwardCommand = new DelegateCommand(
-                executeMethod: () => stackService?.Previous(),
+                executeMethod: () => UpdateStack(true),
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             TrackForwardCommand = new DelegateCommand(
-                executeMethod: () => stackService?.Next(),
+                executeMethod: () => UpdateStack(false),
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
@@ -194,8 +194,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private bool IsNextTrackAvailable()
         {
-            var result = stackService?.HasMultipleTracks == true
-                && ((signalService?.State != StateType.Play) || (signalService?.IsNextThresholdExceeded == true));
+            var result = stackService?.HasMultipleTracks == true;
 
             return result;
         }
@@ -204,9 +203,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         {
             if (signalService == this.signalService)
             {
-                stackService.Next();
-
-                UpdateCommands();
+                UpdateStack();
             }
         }
 
@@ -225,13 +222,14 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 signalService.Dispose();
 
-                UpdateSignal();
+                UpdateStack();
             }
         }
 
         private void OnSignalUpdate(ISignalService signalService)
         {
-            if (signalService == this.signalService)
+            if (signalService == this.signalService
+                && this.signalService.Track == this.stackService?.Track)
             {
                 Remaining = signalService.Remaining.ToString(DurationFormat);
             }
@@ -268,6 +266,20 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
                 UpdateTrack();
             }
+        }
+
+        private void UpdateStack(bool toPrevious = false)
+        {
+            if (toPrevious)
+            {
+                stackService.Previous();
+            }
+            else
+            {
+                stackService.Next();
+            }
+
+            UpdateSignal();
         }
 
         private void UpdateTrack()
