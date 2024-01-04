@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models.Contents;
+﻿using System;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {
@@ -8,13 +8,21 @@ namespace SportDJ.Modules.ContentModule.DesignTime
         #region Public Constructors
 
         public ControllerViewModel()
-            : this("Player", 0, 0)
+            : this(name: "Player", row: 0, column: 0)
         { }
 
-        public ControllerViewModel(string name, int row, int column)
-            : base(default, default)
+        public ControllerViewModel(string name, int row, int column, string title = default, string artist = default,
+            TimeSpan? remaining = default)
+            : base(containerProvider: default, eventAggregator: default)
         {
-            Initialize(new Controller { Name = name, Row = row, Column = column });
+            this.Name = name;
+            this.Row = row;
+            this.Column = column;
+
+            this.Title = title ?? "Title";
+            this.Artist = artist ?? "Artist";
+            this.Remaining = remaining?.ToString(DurationFormat) ?? "00:05.3";
+            this.Counter = $"[{3}]";
         }
 
         #endregion Public Constructors

@@ -51,7 +51,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         public void Initialize<T>(T grid)
             where T : IGrid
         {
-            if (grid?.Contents?.Any() == true)
+            if (grid?.Contents?.Any() == true
+                && containerProvider != default)
             {
                 Rows = grid.Rows;
                 Columns = grid.Columns;

@@ -3,6 +3,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signals;
+using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -13,15 +14,25 @@ namespace SportDJ.Modules.ContentModule.ViewModels
     public class ControllerViewModel
         : CellViewModel
     {
+        #region Protected Fields
+
+        protected const string DurationFormat = @"mm\:ss\.f";
+
+        #endregion Protected Fields
+
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
 
+        private string artist;
         private Controller controller;
+        private string counter;
         private IPlayerService playerService;
         private Position position;
+        private string remaining;
         private ISignalService signalService;
-        private string state;
+        private string title;
+        private string track;
         private ITrackService trackService;
 
         #endregion Private Fields
@@ -45,18 +56,46 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
                 action: (s) => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
+                action: (t) => OnTrackUpdated(t),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
+        public string Artist
+        {
+            get { return artist; }
+            set { SetProperty(ref artist, value); }
+        }
+
+        public string Counter
+        {
+            get { return counter; }
+            set { SetProperty(ref counter, value); }
+        }
+
         public DelegateCommand ExecuteSignalCommand { get; }
 
-        public string State
+        public string Remaining
         {
-            get { return state; }
-            set { SetProperty(ref state, value); }
+            get { return remaining; }
+            set { SetProperty(ref remaining, value); }
+        }
+
+        public string Title
+        {
+            get { return title; }
+            set { SetProperty(ref title, value); }
+        }
+
+        public string Track
+        {
+            get { return track; }
+            set { SetProperty(ref track, value); }
         }
 
         #endregion Public Properties
@@ -76,7 +115,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             if (trackService?.Tracks?.Any() == true)
             {
-                playerService = containerProvider.Resolve<IPlayerService>(controller.PlayerType.ToString());
+                playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
                 SetSignal();
             }
@@ -158,8 +197,15 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         {
             if (signalService == this.signalService)
             {
-                State = playerService.Volume.ToString();
+                Remaining = signalService.Remaining.ToString(DurationFormat);
             }
+        }
+
+        private void OnTrackUpdated(Track track)
+        {
+            Title = track.Title;
+            Artist = track.Artist;
+            Counter = $"[{track.Counter}]";
         }
 
         private void SetSignal()

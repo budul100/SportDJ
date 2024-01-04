@@ -33,7 +33,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         public void Initialize(Group group)
         {
-            if (group.Contents?.Any() == true)
+            if (group.Contents?.Any() == true
+                && containerProvider != default)
             {
                 var element = containerProvider.Resolve<GridViewModel>();
 

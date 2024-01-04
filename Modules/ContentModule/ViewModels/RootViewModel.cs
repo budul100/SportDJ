@@ -52,10 +52,13 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void LoadSet()
         {
-            var root = settingsService.Contents.Root;
+            if (containerProvider != default)
+            {
+                Element = containerProvider.Resolve<GridViewModel>();
 
-            Element = containerProvider.Resolve<GridViewModel>();
-            Element.Initialize(root);
+                var root = settingsService.Contents.Root;
+                Element.Initialize(root);
+            }
         }
 
         #endregion Private Methods
