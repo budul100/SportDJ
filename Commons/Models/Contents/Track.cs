@@ -22,7 +22,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public bool Checked { get; set; }
 
-        public int Counter { get; }
+        public int Counter { get; private set; }
 
         public TimeSpan Length { get; set; }
 
@@ -39,5 +39,14 @@ namespace SportDJ.Commons.Models.Contents
         public bool Trimmed { get; set; }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Count()
+        {
+            Counter++;
+        }
+
+        #endregion Public Methods
     }
 }

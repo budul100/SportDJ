@@ -213,7 +213,7 @@ namespace SportDJ.Services.PlayerService
                 {
                     var otherSignalServices = signalServices
                         .Where(s => s != signalService
-                            && s.IsStarted).ToArray();
+                            && s.State == StateType.Play).ToArray();
 
                     var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && otherSignalServices.Any()
                         ? settingsService.Contents.Options.FadeOnMixInMilliseconds
@@ -248,7 +248,7 @@ namespace SportDJ.Services.PlayerService
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
-            if (signalServices.Count(s => s.IsStarted) == 1)
+            if (signalServices.Count(s => s.State == StateType.Play) == 1)
             {
                 eventAggregator.GetEvent<PlayerStartedEvent>().Publish(this);
             }

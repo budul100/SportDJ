@@ -59,8 +59,6 @@ namespace SportDJ.Services.SignalService
 
         public bool IsSilent => outputProvider?.IsSilent ?? true;
 
-        public bool IsStarted { get; private set; }
-
         public ISampleProvider Output => outputProvider;
 
         public TimeSpan Position => playingProvider?.Current ?? TimeSpan.Zero;
@@ -166,7 +164,7 @@ namespace SportDJ.Services.SignalService
             {
                 playingProvider.Start();
 
-                var milliSeconds = IsStarted
+                var milliSeconds = State == StateType.Play
                     ? settingsService.Contents.Options.FadeOnPauseMilliseconds
                     : 0;
 
@@ -174,7 +172,6 @@ namespace SportDJ.Services.SignalService
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: milliSeconds);
 
-                IsStarted = true;
                 State = StateType.Play;
             }
         }
@@ -243,6 +240,8 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
+            Track.Count();
+
             eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }
 
@@ -255,7 +254,7 @@ namespace SportDJ.Services.SignalService
             {
                 IsNextThresholdExceeded = true;
 
-                eventAggregator.GetEvent<SignalNextThresholdExceededEvent>().Publish(this);
+                eventAggregator.GetEvent<SignalForwardEvent>().Publish(this);
             }
         }
 

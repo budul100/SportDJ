@@ -49,7 +49,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 action: (s) => OnSignalUpdate(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<SignalNextThresholdExceededEvent>().Subscribe(
+            eventAggregator?.GetEvent<SignalForwardEvent>().Subscribe(
                 action: (s) => OnNextThresholdExceeded(s),
                 keepSubscriberReferenceAlive: true);
 
@@ -57,8 +57,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 action: (s) => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
-                action: (t) => OnTrackUpdated(t),
+            eventAggregator?.GetEvent<TrackSelectedEvent>().Subscribe(
+                action: (t) => OnTrackSelectedEvent(t),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -198,14 +198,17 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             if (signalService == this.signalService)
             {
                 Remaining = signalService.Remaining.ToString(DurationFormat);
+                Counter = $"[{trackService.Track.Counter}]";
             }
         }
 
-        private void OnTrackUpdated(Track track)
+        private void OnTrackSelectedEvent(ITrackService trackService)
         {
-            Title = track.Title;
-            Artist = track.Artist;
-            Counter = $"[{track.Counter}]";
+            if (trackService == this.trackService)
+            {
+                Title = trackService.Track.Title;
+                Artist = trackService.Track.Artist;
+            }
         }
 
         private void SetSignal()

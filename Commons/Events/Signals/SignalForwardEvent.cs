@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Signals
 {
-    public class SignalNextThresholdExceededEvent
+    public class SignalForwardEvent
         : PubSubEvent<ISignalService>
     { }
 }

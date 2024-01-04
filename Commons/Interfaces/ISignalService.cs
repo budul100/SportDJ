@@ -16,8 +16,6 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsSilent { get; }
 
-        bool IsStarted { get; }
-
         ISampleProvider Output { get; }
 
         TimeSpan Position { get; }
