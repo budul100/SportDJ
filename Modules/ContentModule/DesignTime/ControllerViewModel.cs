@@ -13,7 +13,7 @@ namespace SportDJ.Modules.ContentModule.DesignTime
 
         public ControllerViewModel(string name, int row, int column, string title = default, string artist = default,
             TimeSpan? remaining = default)
-            : base(containerProvider: default, eventAggregator: default)
+            : base(containerProvider: default, eventAggregator: default, registerService: default)
         {
             this.Name = name;
             this.Row = row;

@@ -19,8 +19,8 @@ namespace SportDJ.Services.SignalService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IRegisterService registerService;
         private readonly IStorageService<Set> settingsService;
-
         private bool isDisposed;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
@@ -30,10 +30,12 @@ namespace SportDJ.Services.SignalService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+            IRegisterService registerService)
         {
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
+            this.registerService = registerService;
         }
 
         #endregion Public Constructors
@@ -240,7 +242,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
-            Track.Count();
+            registerService.Start(Track);
 
             eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }

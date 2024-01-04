@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Registers;
 using SportDJ.Commons.Events.Signals;
 using SportDJ.Commons.Events.Tracks;
 using SportDJ.Commons.Interfaces;
@@ -23,7 +24,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-
+        private readonly IRegisterService registerService;
         private string artist;
         private Controller controller;
         private string counter;
@@ -32,16 +33,17 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private string remaining;
         private ISignalService signalService;
         private string title;
-        private string track;
         private ITrackService trackService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IRegisterService registerService)
         {
             this.containerProvider = containerProvider;
+            this.registerService = registerService;
 
             ExecuteSignalCommand = new DelegateCommand(ExecuteSignal);
 
@@ -63,6 +65,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
             eventAggregator?.GetEvent<TracksUpdatedEvent>().Subscribe(
                 action: (s) => OnTrackUpdated(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<RegisterUpdatedEvent>().Subscribe(
+                action: () => UpdateCount(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -96,12 +102,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             set { SetProperty(ref title, value); }
         }
 
-        public string Track
-        {
-            get { return track; }
-            set { SetProperty(ref track, value); }
-        }
-
         #endregion Public Properties
 
         #region Public Methods
@@ -114,15 +114,21 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             this.controller = controller;
 
             trackService = containerProvider?.Resolve<ITrackService>();
+            playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
-            InitializeTracks(controller);
+            trackService?.Initialize(controller.Path);
 
-            if (trackService?.Tracks?.Any() == true)
+            if (this.controller.SavePositions)
             {
-                playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
+                position = GetPosition();
 
-                UpdateSignal();
+                var track = trackService.Tracks
+                    .SingleOrDefault(t => t.Path == position.Path);
+
+                trackService.Select(track);
             }
+
+            UpdateSignal();
         }
 
         #endregion Public Methods
@@ -144,7 +150,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private Position GetPosition(Controller controller)
+        private Position GetPosition()
         {
             var sessionService = containerProvider.Resolve<IStorageService<Session>>();
 
@@ -162,21 +168,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 .First(p => p.Name == controller.Name);
 
             return result;
-        }
-
-        private void InitializeTracks(Controller controller)
-        {
-            trackService?.Initialize(controller.Path);
-
-            if (this.controller.SavePositions)
-            {
-                position = GetPosition(controller);
-
-                var track = trackService.Tracks
-                    .SingleOrDefault(t => t.Path == position.Path);
-
-                trackService.Select(track);
-            }
         }
 
         private void OnSignalForward(ISignalService signalService)
@@ -202,7 +193,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             if (signalService == this.signalService)
             {
                 Remaining = signalService.Remaining.ToString(DurationFormat);
-                Counter = $"[{trackService.Track.Counter}]";
             }
         }
 
@@ -210,7 +200,16 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         {
             if (trackService == this.trackService)
             {
-                UpdateTrack(trackService.Track);
+                UpdateTrack();
+            }
+        }
+
+        private void UpdateCount()
+        {
+            if (trackService.Track != default)
+            {
+                var count = registerService.GetCount(trackService.Track);
+                Counter = $"[{count}]";
             }
         }
 
@@ -220,16 +219,20 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 signalService = playerService.Add(trackService.Track);
 
-                UpdateTrack(trackService.Track);
+                UpdateTrack();
             }
         }
 
-        private void UpdateTrack(Track track)
+        private void UpdateTrack()
         {
-            Title = track.Title;
-            Artist = track.Artist;
-            Remaining = track.Length.ToString(DurationFormat);
-            Counter = $"[{track.Counter}]";
+            if (trackService.Track != default)
+            {
+                Title = trackService.Track.Title;
+                Artist = trackService.Track.Artist;
+                Remaining = trackService.Track.Length.ToString(DurationFormat);
+
+                UpdateCount();
+            }
         }
 
         #endregion Private Methods
