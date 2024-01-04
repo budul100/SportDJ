@@ -49,6 +49,22 @@ namespace SportDJ.Services.TrackService
 
         #region Public Methods
 
+        public void End(Track track)
+        {
+            if (track is null)
+            {
+                throw new ArgumentNullException(nameof(track));
+            }
+
+            var register = track.Registers.LastOrDefault();
+
+            if (register.Start != default
+                && register.End == default)
+            {
+                register.End = DateTime.Now;
+            }
+        }
+
         public int GetCount(Track track)
         {
             if (track is null)
@@ -93,7 +109,7 @@ namespace SportDJ.Services.TrackService
 
             var register = new Register
             {
-                Started = DateTime.Now
+                Start = DateTime.Now
             };
 
             track.Registers.Add(register);

@@ -47,11 +47,11 @@ namespace SportDJ.App.ViewModels
         {
             set.Root.Contents.Clear();
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples\Sample1.mp3" });
+            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples\Sample2.mp3" });
+            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\TrackServiceTests\Samples", SavePositions = true });
+            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
 
             var group = new Group
             {

@@ -6,7 +6,9 @@ namespace SportDJ.Commons.Models.Contents
     {
         #region Public Properties
 
-        public DateTime Started { get; set; }
+        public DateTime End { get; set; }
+
+        public DateTime Start { get; set; }
 
         #endregion Public Properties
     }

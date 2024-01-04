@@ -24,7 +24,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly ITrackService registerService;
+        private readonly ITrackService trackService;
         private string artist;
         private Controller controller;
         private string counter;
@@ -40,10 +40,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ITrackService registerService)
+            ITrackService trackService)
         {
             this.containerProvider = containerProvider;
-            this.registerService = registerService;
+            this.trackService = trackService;
 
             ExecuteSignalCommand = new DelegateCommand(ExecuteSignal);
 
@@ -226,7 +226,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 Artist = stackService.Track.Artist;
                 Remaining = stackService.Track.Length.ToString(DurationFormat);
 
-                var count = registerService.GetCount(stackService.Track);
+                var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
             }
         }

@@ -19,23 +19,24 @@ namespace SportDJ.Services.SignalService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private readonly ITrackService registerService;
         private readonly IStorageService<Set> settingsService;
+        private readonly ITrackService trackService;
+
+        private TimeSpan forwardThreshold;
         private bool isDisposed;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
-        private TimeSpan selectNextThreshold;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-            ITrackService registerService)
+            ITrackService trackService)
         {
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
-            this.registerService = registerService;
+            this.trackService = trackService;
         }
 
         #endregion Public Constructors
@@ -106,7 +107,7 @@ namespace SportDJ.Services.SignalService
                     begin: begin,
                     length: length);
 
-                selectNextThreshold = begin.Value.Add(
+                forwardThreshold = begin.Value.Add(
                     ts: TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextSeconds));
 
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
@@ -229,6 +230,8 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalEnded(object sender, EventArgs e)
         {
+            trackService.End(Track);
+
             Dispose();
         }
 
@@ -237,12 +240,14 @@ namespace SportDJ.Services.SignalService
             if (outputProvider?.IsSilent == true)
             {
                 Stop();
+
+                trackService.End(Track);
             }
         }
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
-            registerService.Start(Track);
+            trackService.Start(Track);
 
             eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }
@@ -252,7 +257,7 @@ namespace SportDJ.Services.SignalService
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
             if (!IsNextThresholdExceeded
-                && Position.Ticks > selectNextThreshold.Ticks)
+                && Position.Ticks > forwardThreshold.Ticks)
             {
                 IsNextThresholdExceeded = true;
 
