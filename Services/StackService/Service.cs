@@ -191,7 +191,7 @@ namespace SportDJ.Services.StackService
 
         private void SetTrack()
         {
-            if (Entries?.Any(e => e.Track == Track) != true
+            if (Entries?.Any(e => e.Track.Path == position.Path) != true
                 || position.Index >= Entries.Count)
             {
                 Select(0);
