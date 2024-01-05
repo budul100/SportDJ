@@ -3,16 +3,16 @@ using System;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {
-    public class ControllerViewModel
-        : ViewModels.ControllerViewModel
+    public class PlayerViewModel
+        : ViewModels.PlayerViewModel
     {
         #region Public Constructors
 
-        public ControllerViewModel()
+        public PlayerViewModel()
             : this(name: "Player", row: 0, column: 0)
         { }
 
-        public ControllerViewModel(string name, int row, int column, string title = default, string artist = default,
+        public PlayerViewModel(string name, int row, int column, string title = default, string artist = default,
             TimeSpan? remaining = default)
             : base(containerProvider: default, eventAggregator: default, trackService: default)
         {

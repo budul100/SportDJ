@@ -27,7 +27,7 @@
             {
                 for (int column = 0; column < SideCount; column++)
                 {
-                    var element = new ControllerViewModel(
+                    var element = new PlayerViewModel(
                         name: $"Player {row}{column}",
                         row: row,
                         column: column);

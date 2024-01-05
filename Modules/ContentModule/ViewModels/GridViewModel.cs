@@ -63,7 +63,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                     {
                         case Controller controller:
 
-                            var controllerElement = containerProvider.Resolve<ControllerViewModel>();
+                            var controllerElement = containerProvider.Resolve<PlayerViewModel>();
                             controllerElement.Initialize(controller);
 
                             Elements.Add(controllerElement);

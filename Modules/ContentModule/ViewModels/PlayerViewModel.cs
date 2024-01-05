@@ -11,7 +11,7 @@ using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
-    public class ControllerViewModel
+    public class PlayerViewModel
         : CellViewModel
     {
         #region Private Fields
@@ -31,7 +31,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Constructors
 
-        public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
+        public PlayerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
             ITrackService trackService)
         {
             this.containerProvider = containerProvider;
