@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SportDJ.Commons;
+using System;
 
 namespace SportDJ.Modules.ContentModule.DesignTime
 {
@@ -21,7 +22,7 @@ namespace SportDJ.Modules.ContentModule.DesignTime
 
             this.Title = title ?? "Title";
             this.Artist = artist ?? "Artist";
-            this.Remaining = remaining?.ToString(DurationFormat) ?? "00:05.3";
+            this.Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
             this.Counter = $"[{3}]";
         }
 

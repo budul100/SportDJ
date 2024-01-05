@@ -23,8 +23,6 @@
 
         <CornerRadius x:Key="CornerRadius">3</CornerRadius>
 
-        <Color x:Key="Background">#333333</Color>
-
     </UserControl.Resources>
 
     <Design.DataContext>
@@ -52,6 +50,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="{StaticResource ContentFontSize}"
+                FontWeight="Bold"
                 Text="{Binding Clock}" />
         </Border>
 
@@ -67,9 +66,8 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="{StaticResource ContentFontSize}">
-                Box 1
-            </TextBlock>
+                FontSize="{StaticResource ContentFontSize}"
+                Text="{Binding Content}" />
         </Border>
 
         <Border
@@ -84,9 +82,8 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="{StaticResource ContentFontSize}">
-                Box 1
-            </TextBlock>
+                FontSize="{StaticResource ContentFontSize}"
+                Text="{Binding Remaining}" />
         </Border>
     </Grid>
 </UserControl>

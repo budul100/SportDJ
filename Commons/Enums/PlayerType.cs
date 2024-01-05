@@ -5,5 +5,7 @@
         Music,
 
         Effects,
+
+        PFL,
     }
 }

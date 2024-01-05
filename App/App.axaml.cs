@@ -4,7 +4,6 @@ using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
 using SportDJ.App.Views;
-using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -78,7 +77,7 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
                 name: nameof(PlayerType.Effects));
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: Constants.PlayerNamePFL);
+                name: nameof(PlayerType.PFL));
 
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();

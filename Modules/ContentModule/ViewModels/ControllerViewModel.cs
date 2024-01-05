@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
@@ -13,12 +14,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
     public class ControllerViewModel
         : CellViewModel
     {
-        #region Protected Fields
-
-        protected const string DurationFormat = @"mm\:ss\.f";
-
-        #endregion Protected Fields
-
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
@@ -203,7 +198,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             if (signalService == this.signalService
                 && this.signalService.Track == this.stackService?.Track)
             {
-                Remaining = signalService.Remaining.ToString(DurationFormat);
+                Remaining = signalService.Remaining.ToString(Constants.FormatDuration);
             }
         }
 
@@ -260,7 +255,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 Title = stackService.Track.Title;
                 Artist = stackService.Track.Artist;
-                Remaining = stackService.Track.Length.ToString(DurationFormat);
+                Remaining = stackService.Track.Length.ToString(Constants.FormatDuration);
 
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";

@@ -1,5 +1,11 @@
 ﻿using Avalonia.Threading;
+using Prism.Events;
+using Prism.Ioc;
 using Prism.Mvvm;
+using SportDJ.Commons;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Interfaces;
 using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
@@ -9,27 +15,55 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
     {
         #region Private Fields
 
-        private const string ClockFormat = "HH:mm:ss";
-
         private readonly DispatcherTimer clockTimer;
+        private readonly IPlayerService playerService;
 
+        private string content;
         private bool isDisposed;
+        private string remaining;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public DisplayViewModel()
+        public DisplayViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
+            playerService = containerProvider?.Resolve<IPlayerService>(
+                name: nameof(PlayerType.Music));
+
             clockTimer = GetClockTimer();
             clockTimer.Start();
+
+            eventAggregator?.GetEvent<PlayerStartedEvent>().Subscribe(
+                action: s => OnPlayerStarted(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
+                action: s => OnPlayerUpdated(s),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PlayerStoppedEvent>().Subscribe(
+                action: s => OnPlayerEnded(s),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public static string Clock => DateTime.Now.ToString(ClockFormat);
+        public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
+
+        public string Content
+        {
+            get { return content; }
+            set { SetProperty(ref content, value); }
+        }
+
+        public string Remaining
+        {
+            get { return remaining; }
+            set { SetProperty(ref remaining, value); }
+        }
 
         #endregion Public Properties
 
@@ -70,9 +104,36 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 Interval = TimeSpan.FromSeconds(1)
             };
 
-            result.Tick += (s, e) => RaisePropertyChanged(nameof(ViewModels.DisplayViewModel.Clock));
+            result.Tick += (s, e) => RaisePropertyChanged(nameof(Clock));
 
             return result;
+        }
+
+        private void OnPlayerEnded(IPlayerService playerService)
+        {
+            if (playerService == this.playerService)
+            {
+                Content = default;
+                Remaining = default;
+            }
+        }
+
+        private void OnPlayerStarted(IPlayerService playerService)
+        {
+            if (playerService == this.playerService
+                && playerService.Track != default)
+            {
+                Content = $"{playerService.Track.Artist} - {playerService.Track.Title}";
+            }
+        }
+
+        private void OnPlayerUpdated(IPlayerService playerService)
+        {
+            if (playerService == this.playerService
+                && playerService.Track != default)
+            {
+                Remaining = playerService.Remaining.ToString(Constants.FormatDuration);
+            }
         }
 
         #endregion Private Methods
