@@ -5,5 +5,4 @@
     <Thickness x:Key="ContentMargin">2</Thickness>
 
     <x:Double x:Key="ContentFontSize">20</x:Double>
-
 </ResourceDictionary>

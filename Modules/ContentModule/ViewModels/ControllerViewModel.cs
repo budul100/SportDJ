@@ -21,6 +21,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private string artist;
         private string counter;
+        private bool isActive;
         private IPlayerService playerService;
         private string remaining;
         private ISignalService signalService;
@@ -91,6 +92,12 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         }
 
         public DelegateCommand ExecuteCommand { get; }
+
+        public bool IsActive
+        {
+            get { return isActive; }
+            set { SetProperty(ref isActive, value); }
+        }
 
         public string Remaining
         {
@@ -190,6 +197,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 signalService.Dispose();
 
                 UpdateStack();
+                UpdateCommands();
             }
         }
 
@@ -220,6 +228,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void UpdateCommands()
         {
+            IsActive = this.signalService?.State == StateType.Play;
+
             ExecuteCommand.RaiseCanExecuteChanged();
             TrackBackwardCommand.RaiseCanExecuteChanged();
             TrackForwardCommand.RaiseCanExecuteChanged();
