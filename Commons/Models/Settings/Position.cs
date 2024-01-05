@@ -1,4 +1,6 @@
-﻿namespace SportDJ.Commons.Models.Settings
+﻿using System.Xml.Serialization;
+
+namespace SportDJ.Commons.Models.Settings
 {
     public class Position
     {
@@ -6,6 +8,7 @@
 
         public int Index { get; set; }
 
+        [XmlAttribute]
         public string Name { get; set; }
 
         public string Path { get; set; }
