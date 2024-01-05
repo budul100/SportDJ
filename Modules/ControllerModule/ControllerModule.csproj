@@ -9,6 +9,9 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.0.6" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactions.Custom" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.6" />
 		<PackageReference Include="Material.Icons.Avalonia" Version="2.1.0" />
 	</ItemGroup>
 

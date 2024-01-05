@@ -2,8 +2,10 @@
     x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -34,6 +36,17 @@
         <dt:ControllerViewModel />
     </Design.DataContext>
 
+    <i:Interaction.Behaviors>
+
+        <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VolumeButton">
+            <a:InvokeCommandAction Command="{Binding VolumeLowerCommand}" />
+        </a:EventTriggerBehavior>
+
+        <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VolumeButton">
+            <a:InvokeCommandAction Command="{Binding VolumeRaiseCommand}" />
+        </a:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+
     <Grid Margin="{StaticResource ContentMargin}">
 
         <Grid.ColumnDefinitions>
@@ -55,11 +68,13 @@
         </Button>
 
         <Button
+            Name="VolumeButton"
             Grid.Row="0"
             Grid.Column="1"
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+            VerticalAlignment="Stretch"
+            IsEnabled="{Binding IsPlaying}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"
@@ -78,6 +93,5 @@
                 Height="{StaticResource IconHeight}"
                 Kind="PauseCircle" />
         </Button>
-
     </Grid>
 </UserControl>

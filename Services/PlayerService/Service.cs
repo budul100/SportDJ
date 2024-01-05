@@ -45,7 +45,7 @@ namespace SportDJ.Services.PlayerService
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<SignalStartedEvent>().Subscribe(
-                action: s => FadeToSignal(s),
+                action: s => OnSignalStarted(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
@@ -53,11 +53,11 @@ namespace SportDJ.Services.PlayerService
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SignalStoppedEvent>().Subscribe(
-                action: _ => CheckState(),
+                action: s => OnSignalStopped(s),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
-                action: s => RemoveSignal(s),
+                action: s => OnSignalEnded(s),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -67,7 +67,7 @@ namespace SportDJ.Services.PlayerService
 
         public bool IsLoop => signalService?.IsLoop == true;
 
-        public bool IsPlaying => signalServices?.Any(s => s.IsPlaying) == true;
+        public bool IsPlaying { get; private set; }
 
         public ISampleProvider Output => outputProvider;
 
@@ -125,8 +125,7 @@ namespace SportDJ.Services.PlayerService
                     {
                         var fadingProvider = new FadedControlProvider(result.Output);
 
-                        fadingProvider.FadingStartedEvent += OnSignalStarted;
-                        fadingProvider.FadingEndedEvent += OnSignalFaded;
+                        fadingProvider.FadingEndedEvent += OnFadingEnded;
 
                         fadingProviders.Add(
                             key: result,
@@ -195,17 +194,46 @@ namespace SportDJ.Services.PlayerService
 
         #region Private Methods
 
-        private void CheckState()
+        private void OnFadingEnded(object sender, EventArgs e)
         {
-            if (!signalServices.Any(s => s.State == StateType.Play))
+            if (sender is FadedControlProvider fadingProvider
+                && fadingProvider.IsSilent)
             {
-                eventAggregator.GetEvent<PlayerStoppedEvent>().Publish(this);
+                var signalService = fadingProviders
+                    .SingleOrDefault(p => p.Value == fadingProvider).Key;
+
+                signalService.Stop();
             }
         }
 
-        private void FadeToSignal(ISignalService signalService)
+        private void OnSignalEnded(ISignalService signalService)
         {
-            if (signalService != default)
+            if (signalServices.Contains(signalService))
+            {
+                if (this.signalService == signalService)
+                {
+                    this.signalService = default;
+                }
+
+                if (fadingProviders.ContainsKey(signalService))
+                {
+                    fadingProviders[signalService].FadingEndedEvent -= OnFadingEnded;
+
+                    mixingProvider.Remove(fadingProviders[signalService]);
+                    fadingProviders.Remove(signalService);
+                }
+                else if (signalService.Output != default)
+                {
+                    mixingProvider.Remove(signalService.Output);
+                }
+
+                signalServices.Remove(signalService);
+            }
+        }
+
+        private void OnSignalStarted(ISignalService signalService)
+        {
+            if (signalServices.Contains(signalService))
             {
                 this.signalService = signalService;
 
@@ -231,49 +259,25 @@ namespace SportDJ.Services.PlayerService
                         volumeTarget: Constants.VolumeMin,
                         milliSeconds: fadeOutMilliSeconds));
                 }
+
+                if (!IsPlaying)
+                {
+                    IsPlaying = true;
+
+                    eventAggregator.GetEvent<PlayerStartedEvent>().Publish(this);
+                }
             }
         }
 
-        private void OnSignalFaded(object sender, EventArgs e)
+        private void OnSignalStopped(ISignalService signalService)
         {
-            if (sender is FadedControlProvider fadingProvider
-                && fadingProvider.IsSilent)
+            if (signalServices.Contains(signalService)
+                && !signalServices.Any(s => s.State == StateType.Play)
+                && IsPlaying)
             {
-                var signalService = fadingProviders
-                    .SingleOrDefault(p => p.Value == fadingProvider).Key;
+                IsPlaying = false;
 
-                signalService.Stop();
-            }
-        }
-
-        private void OnSignalStarted(object sender, EventArgs e)
-        {
-            eventAggregator.GetEvent<PlayerStartedEvent>().Publish(this);
-        }
-
-        private void RemoveSignal(ISignalService signalService)
-        {
-            if (signalServices.Contains(signalService))
-            {
-                if (this.signalService == signalService)
-                {
-                    this.signalService = default;
-                }
-
-                if (fadingProviders.ContainsKey(signalService))
-                {
-                    fadingProviders[signalService].FadingStartedEvent -= OnSignalStarted;
-                    fadingProviders[signalService].FadingEndedEvent -= OnSignalFaded;
-
-                    mixingProvider.Remove(fadingProviders[signalService]);
-                    fadingProviders.Remove(signalService);
-                }
-                else if (signalService.Output != default)
-                {
-                    mixingProvider.Remove(signalService.Output);
-                }
-
-                signalServices.Remove(signalService);
+                eventAggregator.GetEvent<PlayerStoppedEvent>().Publish(this);
             }
         }
 

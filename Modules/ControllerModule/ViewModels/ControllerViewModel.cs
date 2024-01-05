@@ -31,11 +31,19 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 action: (s) => OnOutputStopped(s),
                 keepSubscriberReferenceAlive: true);
 
-            outputLiveService = containerProvider.Resolve<IOutputService>(
+            outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
             PauseCommand = new DelegateCommand(
                 executeMethod: () => outputLiveService.Pause(),
+                canExecuteMethod: () => outputLiveService.IsPlaying);
+
+            VolumeLowerCommand = new DelegateCommand(
+                executeMethod: () => outputLiveService.Lower(),
+                canExecuteMethod: () => outputLiveService.IsPlaying);
+
+            VolumeRaiseCommand = new DelegateCommand(
+                executeMethod: () => outputLiveService.Raise(),
                 canExecuteMethod: () => outputLiveService.IsPlaying);
         }
 
@@ -43,7 +51,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #region Public Properties
 
-        public DelegateCommand LowerCommand { get; }
+        public bool IsPlaying => outputLiveService.IsPlaying;
 
         public bool OthersMuted
         {
@@ -53,7 +61,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public DelegateCommand PauseCommand { get; }
 
-        public DelegateCommand RaiseCommand { get; }
+        public DelegateCommand VolumeLowerCommand { get; }
+
+        public DelegateCommand VolumeRaiseCommand { get; }
 
         #endregion Public Properties
 
@@ -77,7 +87,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void UpdateCommands()
         {
+            RaisePropertyChanged(nameof(IsPlaying));
+
             PauseCommand.RaiseCanExecuteChanged();
+            VolumeLowerCommand.RaiseCanExecuteChanged();
+            VolumeRaiseCommand.RaiseCanExecuteChanged();
         }
 
         #endregion Private Methods
