@@ -5,5 +5,7 @@
         ContentRegion,
 
         DisplayRegion,
+
+        ControllerRegion,
     }
 }

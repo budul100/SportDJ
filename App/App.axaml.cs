@@ -40,10 +40,12 @@ namespace SportDJ.App
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            moduleCatalog.AddModule<Modules.DisplayModule.Module>(
-                name: nameof(Modules.DisplayModule));
             moduleCatalog.AddModule<Modules.ContentModule.Module>(
                 name: nameof(Modules.ContentModule));
+            moduleCatalog.AddModule<Modules.DisplayModule.Module>(
+                name: nameof(Modules.DisplayModule));
+            moduleCatalog.AddModule<Modules.ControllerModule.Module>(
+                name: nameof(Modules.ControllerModule));
         }
 
         protected override AvaloniaObject CreateShell()

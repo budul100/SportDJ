@@ -30,7 +30,13 @@
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl DockPanel.Dock="Bottom">
+        <ContentControl Height="100" DockPanel.Dock="Bottom">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+
+        <ContentControl>
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ContentRegion}" />
             </prism:RegionManager.RegionName>

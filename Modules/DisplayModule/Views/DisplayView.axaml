@@ -22,7 +22,6 @@
         <Thickness x:Key="InnerMargin">2</Thickness>
 
         <CornerRadius x:Key="CornerRadius">3</CornerRadius>
-
     </UserControl.Resources>
 
     <Design.DataContext>

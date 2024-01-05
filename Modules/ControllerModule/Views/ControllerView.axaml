@@ -1,0 +1,57 @@
+<UserControl
+    x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    d:DesignHeight="50"
+    d:DesignWidth="300"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+        <Thickness x:Key="InnerMargin">1</Thickness>
+
+        <x:Double x:Key="IconWidth">30</x:Double>
+        <x:Double x:Key="IconHeight">30</x:Double>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
+
+    <Design.DataContext>
+        <dt:ControllerViewModel />
+    </Design.DataContext>
+
+    <Grid Margin="{StaticResource ContentMargin}">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Button
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="{StaticResource InnerMargin}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <mat:MaterialIcon
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="SkipBackward" />
+        </Button>
+    </Grid>
+</UserControl>
