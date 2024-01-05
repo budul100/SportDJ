@@ -16,6 +16,7 @@ namespace SportDJ.Tests.StackServiceTests
 
         private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
+        private readonly Mock<IStorageService<Session>> mockSessionService;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
         private readonly Services.TrackService.Service trackService;
 
@@ -47,6 +48,11 @@ namespace SportDJ.Tests.StackServiceTests
                 .Setup(m => m.Contents)
                 .Returns(new Set());
 
+            mockSessionService = new Mock<IStorageService<Session>>();
+            mockSessionService
+                .Setup(m => m.Contents)
+                .Returns(new Session());
+
             trackService = new Services.TrackService.Service(
                 eventAggregator: mockEventAggregator.Object,
                 dispatcherService: mockDispatcherService.Object,
@@ -62,32 +68,54 @@ namespace SportDJ.Tests.StackServiceTests
         {
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
+                sessionService: mockSessionService.Object,
                 trackService: trackService);
 
-            stackService.Initialize(@"..\..\..\Samples");
+            stackService.Initialize(
+                path: @"..\..\..\Samples",
+                controllerName: default,
+                savePosition: false);
 
             var track = stackService.Track;
 
+            Assert.Equal(
+                expected: 3,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             stackService.Play();
-            Assert.True(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 2,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
 
             stackService.Next();
+
             Assert.False(stackService.Track == track);
 
             track = stackService.Track;
 
             stackService.Play();
-            Assert.False(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 1,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
 
             stackService.Next();
+
             Assert.False(stackService.Track == track);
 
             track = stackService.Track;
 
             stackService.Play();
-            Assert.True(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 3,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
         }
 
@@ -96,16 +124,20 @@ namespace SportDJ.Tests.StackServiceTests
         {
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
+                sessionService: mockSessionService.Object,
                 trackService: trackService);
 
-            stackService.Initialize(@"..\..\..\Samples");
+            stackService.Initialize(
+                path: @"..\..\..\Samples",
+                controllerName: default,
+                savePosition: false);
 
             Assert.Equal(
                 expected: 3,
-                actual: stackService.Tracks.Count(t => t.Trimmed));
+                actual: stackService.Entries.Count(e => e.Track.Trimmed));
 
-            Assert.True(stackService.Tracks.All(t => t.Start > TimeSpan.Zero));
-            Assert.True(stackService.Tracks.All(t => t.Length > TimeSpan.Zero));
+            Assert.True(stackService.Entries.All(e => e.Track.Start > TimeSpan.Zero));
+            Assert.True(stackService.Entries.All(e => e.Track.Length > TimeSpan.Zero));
 
             Assert.True(stackService.Track != default);
         }
@@ -115,27 +147,48 @@ namespace SportDJ.Tests.StackServiceTests
         {
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
+                sessionService: mockSessionService.Object,
                 trackService: trackService);
 
-            stackService.Initialize(@"..\..\..\Samples");
+            stackService.Initialize(
+                path: @"..\..\..\Samples",
+                controllerName: default,
+                savePosition: false);
 
             var track = stackService.Track;
 
+            Assert.Equal(
+                expected: 3,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             stackService.Play();
-            Assert.True(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 2,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
 
             stackService.Next();
+
             Assert.False(stackService.Track == track);
 
             track = stackService.Track;
 
             stackService.Play();
-            Assert.False(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 1,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
 
             stackService.Reset();
-            Assert.True(stackService.HasStack);
+
+            Assert.Equal(
+                expected: 3,
+                actual: stackService.Entries.Count(e => !e.Played));
+
             Assert.True(stackService.Track == track);
         }
 

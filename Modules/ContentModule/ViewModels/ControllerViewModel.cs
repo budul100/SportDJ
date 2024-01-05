@@ -7,8 +7,6 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Models.Settings;
-using System.Linq;
 
 namespace SportDJ.Modules.ContentModule.ViewModels
 {
@@ -27,10 +25,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private readonly ITrackService trackService;
 
         private string artist;
-        private Controller controller;
         private string counter;
         private IPlayerService playerService;
-        private Position position;
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
@@ -126,22 +122,13 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             base.Initialize(
                 cell: controller);
 
-            this.controller = controller;
-
             stackService = containerProvider?.Resolve<IStackService>();
             playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
 
-            stackService?.Initialize(controller.Path);
-
-            if (this.controller.SavePositions)
-            {
-                position = GetPosition();
-
-                var track = stackService.Tracks
-                    .SingleOrDefault(t => t.Path == position.Path);
-
-                stackService.Select(track);
-            }
+            stackService?.Initialize(
+                path: controller.Path,
+                controllerName: controller.Name,
+                savePosition: controller.SavePositions);
 
             UpdateSignal();
         }
@@ -165,26 +152,6 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             }
         }
 
-        private Position GetPosition()
-        {
-            var sessionService = containerProvider.Resolve<IStorageService<Session>>();
-
-            if (!sessionService.Contents.Positions.Any(p => p.Name == controller.Name))
-            {
-                var position = new Position
-                {
-                    Name = controller.Name,
-                };
-
-                sessionService.Contents.Positions.Add(position);
-            }
-
-            var result = sessionService.Contents.Positions
-                .First(p => p.Name == controller.Name);
-
-            return result;
-        }
-
         private bool IsExecuteAvailable()
         {
             var result = stackService?.Track != default;
@@ -194,7 +161,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private bool IsNextTrackAvailable()
         {
-            var result = stackService?.HasStack == true;
+            var result = stackService?.HasUnplayeds == true;
 
             return result;
         }

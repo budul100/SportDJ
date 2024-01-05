@@ -1,8 +1,6 @@
-﻿using SportDJ.Commons.Models.Contents;
-
-namespace SportDJ.Services.StackService.Models
+﻿namespace SportDJ.Commons.Models.Contents
 {
-    internal class Entry
+    public class Entry
     {
         #region Public Properties
 

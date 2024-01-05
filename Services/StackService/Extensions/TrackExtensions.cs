@@ -1,5 +1,4 @@
 ﻿using SportDJ.Commons.Models.Contents;
-using SportDJ.Services.StackService.Models;
 using System.Collections.Generic;
 using System.Linq;
 

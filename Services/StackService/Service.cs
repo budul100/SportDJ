@@ -2,8 +2,8 @@
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
-using SportDJ.Services.StackService.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,18 +16,20 @@ namespace SportDJ.Services.StackService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly IStorageService<Session> sessionService;
         private readonly ITrackService trackService;
 
-        private List<Entry> entries;
-        private int index;
+        private Position position;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, ITrackService trackService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Session> sessionService,
+            ITrackService trackService)
         {
             this.eventAggregator = eventAggregator;
+            this.sessionService = sessionService;
             this.trackService = trackService;
         }
 
@@ -35,57 +37,52 @@ namespace SportDJ.Services.StackService
 
         #region Public Properties
 
-        public bool HasStack => entries.HasStack(Track);
+        public List<Entry> Entries { get; private set; }
+
+        public bool HasUnplayeds => Entries.HasUnplayeds(Track);
 
         public Track Track { get; private set; }
-
-        public IEnumerable<Track> Tracks { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Clear()
+        public void Initialize(string path, string controllerName, bool savePosition)
         {
-            Tracks = default;
-            Track = default;
+            var tracks = trackService
+                .GetTracks(path).ToList();
 
-            SetEntries(Tracks);
+            Entries = tracks.GetEntries().ToList();
 
-            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(default);
-        }
+            position = GetPosition(
+                controllerName: controllerName,
+                savePosition: savePosition);
 
-        public void Initialize(string path)
-        {
-            Tracks = trackService.GetTracks(path).ToArray();
-
-            SetEntries(Tracks);
+            SetTrack();
         }
 
         public void Next()
         {
-            if (entries?.Any() == true)
+            if (Entries?.Any() == true)
             {
-                var current = index;
+                var index = position.Index;
 
                 do
                 {
-                    current++;
+                    index++;
 
-                    if (current == entries.Count)
+                    if (index == Entries.Count)
                     {
-                        current = 0;
+                        index = 0;
                     }
 
-                    if (!entries[current].Played)
+                    if (!Entries[index].Played)
                     {
-                        index = current;
-                        Select(entries[index].Track);
-
+                        Select(index);
                         break;
                     }
                 }
-                while (index != current);
+                while (position.Index != index);
             }
         }
 
@@ -93,9 +90,9 @@ namespace SportDJ.Services.StackService
         {
             if (Track != default)
             {
-                entries[index].Played = true;
+                Entries[position.Index].Played = true;
 
-                if (entries.AllPlayed())
+                if (Entries.AllPlayed())
                 {
                     Reset();
                 }
@@ -104,42 +101,45 @@ namespace SportDJ.Services.StackService
 
         public void Previous()
         {
-            if (entries?.Any() == true)
+            if (Entries?.Any() == true)
             {
-                var current = index;
+                var index = position.Index;
 
                 do
                 {
-                    if (current == 0)
+                    if (index == 0)
                     {
-                        current = entries.Count;
+                        index = Entries.Count;
                     }
 
-                    current--;
+                    index--;
 
-                    if (!entries[current].Played)
+                    if (!Entries[index].Played)
                     {
-                        index = current;
-                        Select(entries[index].Track);
+                        Select(index);
 
                         break;
                     }
                 }
-                while (index != current);
+                while (position.Index != index);
             }
         }
 
         public void Reset()
         {
-            entries.Reset();
+            Entries.Reset();
         }
 
-        public void Select(Track track)
+        public void Select(int index)
         {
-            if (Tracks?.Contains(track) == true
-                && Track != track)
+            if (index < Entries.Count)
             {
-                Track = track;
+                Track = Entries[index].Track;
+
+                position.Index = index;
+                position.Path = Track.Path;
+
+                sessionService.Save();
 
                 eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
             }
@@ -147,19 +147,18 @@ namespace SportDJ.Services.StackService
 
         public void Shuffle()
         {
-            if (Tracks?.Any() == true)
+            if (Entries?.Any() == true)
             {
-                var tracks = Tracks.ToArray();
-                var count = tracks.Length;
+                var count = Entries.Count;
 
                 while (count > 1)
                 {
-                    var i = Random.Shared.Next(count--);
+                    var index = Random.Shared.Next(count--);
 
-                    (tracks[i], tracks[count]) = (tracks[count], tracks[i]);
+                    (Entries[index], Entries[count]) = (Entries[count], Entries[index]);
                 }
 
-                SetEntries(tracks);
+                SetTrack();
             }
         }
 
@@ -167,19 +166,42 @@ namespace SportDJ.Services.StackService
 
         #region Private Methods
 
-        private void SetEntries(IEnumerable<Track> tracks)
+        private Position GetPosition(string controllerName, bool savePosition)
         {
-            entries = tracks.GetEntries().ToList();
+            if (!savePosition)
+            {
+                return new Position();
+            }
+            else
+            {
+                if (!sessionService.Contents.Positions.Any(p => p.Name == controllerName))
+                {
+                    var position = new Position
+                    {
+                        Name = controllerName,
+                    };
 
-            index = entries?.Any(e => e.Track == Track) == true
-                ? entries.IndexOf(entries.First(e => e.Track == Track))
-                : 0;
+                    sessionService.Contents.Positions.Add(position);
+                }
 
-            var track = index < entries.Count
-                ? entries[index].Track
-                : default;
+                return sessionService.Contents.Positions
+                    .First(p => p.Name == controllerName);
+            }
+        }
 
-            Select(track);
+        private void SetTrack()
+        {
+            if (Entries?.Any(e => e.Track == Track) != true
+                || position.Index >= Entries.Count)
+            {
+                Select(0);
+            }
+            else if (Entries[position.Index].Track != Track)
+            {
+                var index = Entries.IndexOf(Entries.First(e => e.Track.Path == position.Path));
+
+                Select(index);
+            }
         }
 
         #endregion Private Methods

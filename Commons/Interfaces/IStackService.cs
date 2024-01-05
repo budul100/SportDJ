@@ -7,19 +7,17 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        bool HasStack { get; }
+        List<Entry> Entries { get; }
+
+        bool HasUnplayeds { get; }
 
         Track Track { get; }
-
-        IEnumerable<Track> Tracks { get; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        void Clear();
-
-        void Initialize(string path);
+        void Initialize(string path, string controllerName, bool savePosition);
 
         void Next();
 
@@ -29,7 +27,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Reset();
 
-        void Select(Track track);
+        void Select(int index);
 
         void Shuffle();
 
