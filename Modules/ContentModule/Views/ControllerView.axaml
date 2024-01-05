@@ -2,6 +2,7 @@
     x:Class="SportDJ.Modules.ContentModule.Views.ControllerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
@@ -25,6 +26,8 @@
 
         <x:Double x:Key="IconWidth">30</x:Double>
         <x:Double x:Key="IconHeight">30</x:Double>
+
+        <co:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -36,53 +39,57 @@
     </Design.DataContext>
 
     <Grid Margin="{StaticResource ContentMargin}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" />
             <RowDefinition Height="4*" />
         </Grid.RowDefinitions>
 
-        <Button
-            Grid.Row="0"
-            Grid.Column="0"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Command="{Binding TrackBackwardCommand}">
-            <mat:MaterialIcon
-                Width="{StaticResource IconWidth}"
-                Height="{StaticResource IconHeight}"
-                Kind="SkipBackward" />
-        </Button>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+            </Grid.ColumnDefinitions>
 
-        <Button
-            Grid.Row="0"
-            Grid.Column="1"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch" />
+            <Button
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackBackwardCommand}"
+                IsVisible="{Binding HasStack}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipBackward" />
+            </Button>
 
-        <Button
-            Grid.Row="0"
-            Grid.Column="2"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Command="{Binding TrackForwardCommand}">
-            <mat:MaterialIcon
-                Width="{StaticResource IconWidth}"
-                Height="{StaticResource IconHeight}"
-                Kind="SkipForward" />
-        </Button>
+            <Button
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="2"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackForwardCommand}"
+                IsVisible="{Binding HasStack}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipForward" />
+            </Button>
+        </Grid>
 
         <Border
             Grid.Row="1"
             Grid.Column="0"
-            Grid.ColumnSpan="3"
             Margin="{StaticResource InnerMargin}"
             Classes.triggered="{Binding IsActive}">
 

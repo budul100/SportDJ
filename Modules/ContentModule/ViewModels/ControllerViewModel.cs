@@ -92,6 +92,8 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         public DelegateCommand ExecuteCommand { get; }
 
+        public bool HasStack => stackService?.Entries?.Count > 1;
+
         public bool IsActive => signalService?.State == StateType.Play || signalService?.IsSilent == false;
 
         public string Remaining
@@ -227,6 +229,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         private void UpdateCommands()
         {
             RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(HasStack));
 
             ExecuteCommand.RaiseCanExecuteChanged();
             TrackBackwardCommand.RaiseCanExecuteChanged();
