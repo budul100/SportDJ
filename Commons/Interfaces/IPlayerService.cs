@@ -12,6 +12,8 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsLoop { get; }
 
+        bool IsPlaying { get; }
+
         ISampleProvider Output { get; }
 
         TimeSpan Position { get; }

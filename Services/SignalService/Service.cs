@@ -60,7 +60,9 @@ namespace SportDJ.Services.SignalService
 
         public bool IsNextThresholdExceeded { get; private set; }
 
-        public bool IsSilent => outputProvider?.IsSilent ?? true;
+        public bool IsPlaying => playingProvider?.State == StateType.Play;
+
+        public bool IsSilent => outputProvider?.IsSilent != false;
 
         public ISampleProvider Output => outputProvider;
 

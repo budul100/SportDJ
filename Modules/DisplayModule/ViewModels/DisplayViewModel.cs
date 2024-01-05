@@ -29,7 +29,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         public DisplayViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
             playerService = containerProvider?.Resolve<IPlayerService>(
-                name: nameof(PlayerType.Music));
+                name: nameof(PlayerType.Background));
 
             clockTimer = GetClockTimer();
             clockTimer.Start();

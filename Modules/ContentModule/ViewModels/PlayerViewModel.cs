@@ -94,7 +94,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         public bool HasStack => stackService?.Entries?.Count > 1;
 
-        public bool IsActive => signalService?.State == StateType.Play || signalService?.IsSilent == false;
+        public bool IsPlaying => signalService?.IsPlaying == true;
 
         public string Remaining
         {
@@ -203,10 +203,9 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void OnSignalUpdate(ISignalService signalService)
         {
-            if (signalService == this.signalService
-                && this.signalService.Track == this.stackService?.Track)
+            if (signalService == this.signalService)
             {
-                Remaining = signalService.Remaining.ToString(Constants.FormatDuration);
+                UpdateRemaining();
             }
         }
 
@@ -228,12 +227,19 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         private void UpdateCommands()
         {
-            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(IsPlaying));
             RaisePropertyChanged(nameof(HasStack));
 
             ExecuteCommand.RaiseCanExecuteChanged();
             TrackBackwardCommand.RaiseCanExecuteChanged();
             TrackForwardCommand.RaiseCanExecuteChanged();
+        }
+
+        private void UpdateRemaining()
+        {
+            Remaining = this.signalService?.Track == this.stackService?.Track
+                ? signalService?.Remaining.ToString(Constants.FormatDuration)
+                : stackService?.Track?.Length.ToString(Constants.FormatDuration);
         }
 
         private void UpdateSignal()
@@ -266,10 +272,11 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 Title = stackService.Track.Title;
                 Artist = stackService.Track.Artist;
-                Remaining = stackService.Track.Length.ToString(Constants.FormatDuration);
 
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
+
+                UpdateRemaining();
             }
 
             UpdateCommands();

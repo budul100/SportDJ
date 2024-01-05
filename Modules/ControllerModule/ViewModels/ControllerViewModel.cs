@@ -1,26 +1,21 @@
-﻿using Avalonia.Threading;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
-using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
-using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
     public class ControllerViewModel
-        : BindableBase, IDisposable
+        : BindableBase
     {
         #region Private Fields
 
-        private readonly DispatcherTimer clockTimer;
-        private readonly IPlayerService playerService;
+        private readonly IOutputService outputLiveService;
 
-        private string content;
-        private bool isDisposed;
-        private string remaining;
+        private bool othersMuted;
 
         #endregion Private Fields
 
@@ -28,112 +23,61 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
-            playerService = containerProvider?.Resolve<IPlayerService>(
-                name: nameof(PlayerType.Music));
-
-            clockTimer = GetClockTimer();
-            clockTimer.Start();
-
-            eventAggregator?.GetEvent<PlayerStartedEvent>().Subscribe(
-                action: s => OnPlayerStarted(s),
+            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+                action: (s) => OnOutputStarted(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
-                action: s => OnPlayerUpdated(s),
+            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+                action: (s) => OnOutputStopped(s),
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<PlayerStoppedEvent>().Subscribe(
-                action: s => OnPlayerEnded(s),
-                keepSubscriberReferenceAlive: true);
+            outputLiveService = containerProvider.Resolve<IOutputService>(
+                name: nameof(OutputType.Live));
+
+            PauseCommand = new DelegateCommand(
+                executeMethod: () => outputLiveService.Pause(),
+                canExecuteMethod: () => outputLiveService.IsPlaying);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
+        public DelegateCommand LowerCommand { get; }
 
-        public string Content
+        public bool OthersMuted
         {
-            get { return content; }
-            set { SetProperty(ref content, value); }
+            get { return othersMuted; }
+            set { SetProperty(ref othersMuted, value); }
         }
 
-        public string Remaining
-        {
-            get { return remaining; }
-            set { SetProperty(ref remaining, value); }
-        }
+        public DelegateCommand PauseCommand { get; }
+
+        public DelegateCommand RaiseCommand { get; }
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(true);
-
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    clockTimer.Stop();
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        #endregion Protected Methods
-
         #region Private Methods
 
-        private DispatcherTimer GetClockTimer()
+        private void OnOutputStarted(IOutputService outputService)
         {
-            var result = new DispatcherTimer
+            if (outputService == outputLiveService)
             {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-
-            result.Tick += (s, e) => RaisePropertyChanged(nameof(Clock));
-
-            return result;
-        }
-
-        private void OnPlayerEnded(IPlayerService playerService)
-        {
-            if (playerService == this.playerService)
-            {
-                Content = default;
-                Remaining = default;
+                UpdateCommands();
             }
         }
 
-        private void OnPlayerStarted(IPlayerService playerService)
+        private void OnOutputStopped(IOutputService outputService)
         {
-            if (playerService == this.playerService
-                && playerService.Track != default)
+            if (outputService == outputLiveService)
             {
-                Content = $"{playerService.Track.Artist} - {playerService.Track.Title}";
+                UpdateCommands();
             }
         }
 
-        private void OnPlayerUpdated(IPlayerService playerService)
+        private void UpdateCommands()
         {
-            if (playerService == this.playerService
-                && playerService.Track != default)
-            {
-                Remaining = playerService.Remaining.ToString(Constants.FormatDuration);
-            }
+            PauseCommand.RaiseCanExecuteChanged();
         }
 
         #endregion Private Methods

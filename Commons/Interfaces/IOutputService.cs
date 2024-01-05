@@ -12,6 +12,8 @@ namespace SportDJ.Commons.Interfaces
 
         WaveFormat Format { get; }
 
+        bool IsPlaying { get; }
+
         OutputType Type { get; }
 
         float Volume { get; set; }
@@ -29,6 +31,8 @@ namespace SportDJ.Commons.Interfaces
         void Initialize(OutputType type);
 
         void Lower();
+
+        void Pause();
 
         void Raise();
 

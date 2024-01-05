@@ -1,159 +1,159 @@
 <UserControl
-	x:Class="SportDJ.Modules.ContentModule.Views.PlayerView"
-	xmlns="https://github.com/avaloniaui"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:co="using:SportDJ.Commons.Converters"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
-	xmlns:mat="using:Material.Icons.Avalonia"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:prism="http://prismlibrary.com/"
-	d:DesignHeight="150"
-	d:DesignWidth="150"
-	prism:ViewModelLocator.AutoWireViewModel="False"
-	mc:Ignorable="d">
+    x:Class="SportDJ.Modules.ContentModule.Views.PlayerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:co="using:SportDJ.Commons.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    d:DesignHeight="150"
+    d:DesignWidth="150"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    mc:Ignorable="d">
 
-	<UserControl.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
 
-		<Thickness x:Key="InnerMargin">1</Thickness>
+        <Thickness x:Key="InnerMargin">1</Thickness>
 
-		<x:Double x:Key="StateFontSize">15</x:Double>
+        <x:Double x:Key="StateFontSize">15</x:Double>
 
-		<x:Double x:Key="IconWidth">30</x:Double>
-		<x:Double x:Key="IconHeight">30</x:Double>
+        <x:Double x:Key="IconWidth">30</x:Double>
+        <x:Double x:Key="IconHeight">30</x:Double>
 
-		<co:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
-	</UserControl.Resources>
+        <co:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
+    </UserControl.Resources>
 
-	<UserControl.Styles>
-		<mat:MaterialIconStyles />
-	</UserControl.Styles>
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
 
-	<Design.DataContext>
-		<dt:PlayerViewModel />
-	</Design.DataContext>
+    <Design.DataContext>
+        <dt:PlayerViewModel />
+    </Design.DataContext>
 
-	<Grid Margin="{StaticResource ContentMargin}">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="1*" />
-			<RowDefinition Height="4*" />
-		</Grid.RowDefinitions>
+    <Grid Margin="{StaticResource ContentMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="4*" />
+        </Grid.RowDefinitions>
 
-		<Grid Grid.Row="0">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
-				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
-			</Grid.ColumnDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+            </Grid.ColumnDefinitions>
 
-			<Button
-				Grid.Row="0"
-				Grid.Column="0"
-				Margin="{StaticResource InnerMargin}"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Stretch"
-				Command="{Binding TrackBackwardCommand}"
-				IsVisible="{Binding HasStack}">
-				<mat:MaterialIcon
-					Width="{StaticResource IconWidth}"
-					Height="{StaticResource IconHeight}"
-					Kind="SkipBackward" />
-			</Button>
+            <Button
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackBackwardCommand}"
+                IsVisible="{Binding HasStack}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipBackward" />
+            </Button>
 
-			<Button
-				Grid.Row="0"
-				Grid.Column="1"
-				Margin="{StaticResource InnerMargin}"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Stretch" />
+            <Button
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
 
-			<Button
-				Grid.Row="0"
-				Grid.Column="2"
-				Margin="{StaticResource InnerMargin}"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Stretch"
-				Command="{Binding TrackForwardCommand}"
-				IsVisible="{Binding HasStack}">
-				<mat:MaterialIcon
-					Width="{StaticResource IconWidth}"
-					Height="{StaticResource IconHeight}"
-					Kind="SkipForward" />
-			</Button>
-		</Grid>
+            <Button
+                Grid.Row="0"
+                Grid.Column="2"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackForwardCommand}"
+                IsVisible="{Binding HasStack}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipForward" />
+            </Button>
+        </Grid>
 
-		<Border
-			Grid.Row="1"
-			Grid.Column="0"
-			Margin="{StaticResource InnerMargin}"
-			Classes.triggered="{Binding IsActive}">
+        <Border
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="{StaticResource InnerMargin}"
+            Classes.triggered="{Binding IsPlaying}">
 
-			<Border.Styles>
-				<Style Selector="Border.triggered">
-					<Setter Property="Background" Value="Purple" />
-				</Style>
-			</Border.Styles>
+            <Border.Styles>
+                <Style Selector="Border.triggered">
+                    <Setter Property="Background" Value="Purple" />
+                </Style>
+            </Border.Styles>
 
-			<Button
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Stretch"
-				Command="{Binding ExecuteCommand}">
+            <Button
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding ExecuteCommand}">
 
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition />
-						<RowDefinition />
-						<RowDefinition />
-						<RowDefinition />
-					</Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
 
-					<TextBlock
-						Grid.Row="0"
-						Grid.Column="0"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						FontSize="{StaticResource ContentFontSize}"
-						Text="{Binding Artist}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource ContentFontSize}"
+                        Text="{Binding Artist}" />
 
-					<TextBlock
-						Grid.Row="1"
-						Grid.Column="0"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center"
-						FontSize="{StaticResource ContentFontSize}"
-						FontWeight="Bold"
-						Text="{Binding Title}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource ContentFontSize}"
+                        FontWeight="Bold"
+                        Text="{Binding Title}" />
 
-					<Grid Grid.Row="2" Grid.Column="0">
+                    <Grid Grid.Row="2" Grid.Column="0">
 
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition />
-							<ColumnDefinition />
-						</Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
 
-						<TextBlock
-							Grid.Row="0"
-							Grid.Column="0"
-							HorizontalAlignment="Left"
-							VerticalAlignment="Center"
-							FontSize="{StaticResource StateFontSize}"
-							Text="{Binding Remaining}" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource StateFontSize}"
+                            Text="{Binding Remaining}" />
 
-						<TextBlock
-							Grid.Row="0"
-							Grid.Column="1"
-							HorizontalAlignment="Right"
-							VerticalAlignment="Center"
-							FontSize="{StaticResource StateFontSize}"
-							Text="{Binding Counter}" />
-					</Grid>
-				</Grid>
-			</Button>
-		</Border>
-	</Grid>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource StateFontSize}"
+                            Text="{Binding Counter}" />
+                    </Grid>
+                </Grid>
+            </Button>
+        </Border>
+    </Grid>
 </UserControl>

@@ -98,29 +98,29 @@ namespace SportDJ.App.ViewModels
         {
             if (outputLive?.Format != default)
             {
-                var playerEffects = containerProvider.Resolve<IPlayerService>(
-                    name: nameof(PlayerType.Effects));
+                var playerBackground = containerProvider.Resolve<IPlayerService>(
+                    name: nameof(PlayerType.Background));
 
-                playerEffects.Initialize(
-                    type: PlayerType.Effects,
-                    waveFormat: outputLive.Format,
-                    isMultiSignalPlayer: true);
-
-                outputLive.Add(
-                    playerService: playerEffects,
-                    isForegroundPlayer: true);
-
-                var playerMusic = containerProvider.Resolve<IPlayerService>(
-                    name: nameof(PlayerType.Music));
-
-                playerMusic.Initialize(
-                    type: PlayerType.Music,
+                playerBackground.Initialize(
+                    type: PlayerType.Background,
                     waveFormat: outputLive.Format,
                     isMultiSignalPlayer: false);
 
                 outputLive.Add(
-                    playerService: playerMusic,
+                    playerService: playerBackground,
                     isForegroundPlayer: false);
+
+                var playerForeground = containerProvider.Resolve<IPlayerService>(
+                    name: nameof(PlayerType.Foreground));
+
+                playerForeground.Initialize(
+                    type: PlayerType.Foreground,
+                    waveFormat: outputLive.Format,
+                    isMultiSignalPlayer: true);
+
+                outputLive.Add(
+                    playerService: playerForeground,
+                    isForegroundPlayer: true);
             }
         }
 

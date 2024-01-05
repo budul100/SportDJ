@@ -65,7 +65,9 @@ namespace SportDJ.Services.PlayerService
 
         #region Public Properties
 
-        public bool IsLoop => signalService?.IsLoop ?? false;
+        public bool IsLoop => signalService?.IsLoop == true;
+
+        public bool IsPlaying => signalServices?.Any(s => s.IsPlaying) == true;
 
         public ISampleProvider Output => outputProvider;
 

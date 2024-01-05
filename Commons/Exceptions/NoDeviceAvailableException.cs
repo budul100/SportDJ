@@ -4,20 +4,20 @@ using System.Runtime.Serialization;
 namespace SportDJ.Commons.Exceptions
 {
     [Serializable]
-    public class DeviceNotDefinedException
+    public class NoDeviceAvailableException
         : Exception
     {
         #region Public Constructors
 
-        public DeviceNotDefinedException()
-            : this("There is no output device defined.")
+        public NoDeviceAvailableException()
+            : this("There is no output device available.")
         { }
 
-        public DeviceNotDefinedException(string message)
+        public NoDeviceAvailableException(string message)
             : base(message)
         { }
 
-        public DeviceNotDefinedException(string message, Exception innerException)
+        public NoDeviceAvailableException(string message, Exception innerException)
             : base(message: message, innerException: innerException)
         { }
 
@@ -25,7 +25,7 @@ namespace SportDJ.Commons.Exceptions
 
         #region Protected Constructors
 
-        protected DeviceNotDefinedException(SerializationInfo info, StreamingContext context)
+        protected NoDeviceAvailableException(SerializationInfo info, StreamingContext context)
             : base(info: info, context: context)
         { }
 

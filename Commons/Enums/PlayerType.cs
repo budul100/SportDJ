@@ -2,9 +2,9 @@
 {
     public enum PlayerType
     {
-        Music,
+        Background,
 
-        Effects,
+        Foreground,
 
         PFL,
     }

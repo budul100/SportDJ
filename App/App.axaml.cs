@@ -75,9 +75,9 @@ namespace SportDJ.App
                 name: nameof(OutputType.PFL));
 
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.Music));
+                name: nameof(PlayerType.Background));
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.Effects));
+                name: nameof(PlayerType.Foreground));
             containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
                 name: nameof(PlayerType.PFL));
 

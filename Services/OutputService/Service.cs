@@ -2,8 +2,10 @@
 using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Exceptions;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
@@ -18,8 +20,9 @@ namespace SportDJ.Services.OutputService
     {
         #region Private Fields
 
-        private readonly List<IPlayerService> foregroundServices = new List<IPlayerService>();
-        private readonly List<IPlayerService> playerServices = new List<IPlayerService>();
+        private readonly List<IPlayerService> backgroundPlayers = new List<IPlayerService>();
+        private readonly IEventAggregator eventAggregator;
+        private readonly List<IPlayerService> foregroundPlayers = new List<IPlayerService>();
         private readonly IStorageService<Set> settingsService;
 
         private FadedControlProvider backgroundFader;
@@ -36,14 +39,15 @@ namespace SportDJ.Services.OutputService
 
         public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
         {
+            this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<PlayerStartedEvent>().Subscribe(
-                action: p => ReduceBackground(p),
+                action: p => OnPlayerStarted(p),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<PlayerStoppedEvent>().Subscribe(
-                action: p => RaiseBackground(p),
+                action: p => OnPlayerStopped(p),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -52,6 +56,8 @@ namespace SportDJ.Services.OutputService
         #region Public Properties
 
         public WaveFormat Format { get; private set; }
+
+        public bool IsPlaying { get; private set; }
 
         public OutputType Type { get; private set; }
 
@@ -115,14 +121,14 @@ namespace SportDJ.Services.OutputService
             {
                 outputMixer.Add(playerService.Output);
 
-                foregroundServices.Add(playerService);
+                foregroundPlayers.Add(playerService);
             }
             else
             {
                 backgroundMixer.Add(playerService.Output);
             }
 
-            playerServices.Add(playerService);
+            backgroundPlayers.Add(playerService);
         }
 
         public void Dispose()
@@ -150,26 +156,29 @@ namespace SportDJ.Services.OutputService
 
             outputOptions = GetOptions(type);
 
-            if (!string.IsNullOrWhiteSpace(outputOptions.DeviceName))
+            var capabilities = GetCapabilities();
+
+            var deviceNumber = default(int?);
+
+            if (string.IsNullOrWhiteSpace(outputOptions.DeviceName))
             {
-                var capabilities = GetCapabilities();
+                deviceNumber = capabilities
+                    .FirstOrDefault(c => c.Value.ProductName == outputOptions.DeviceName).Key;
+            }
 
-                if (capabilities.Any(c => c.Value.ProductName == outputOptions.DeviceName))
-                {
-                    var deviceNumber = capabilities
-                        .First(c => c.Value.ProductName == outputOptions.DeviceName).Key;
+            if (!deviceNumber.HasValue)
+            {
+                deviceNumber = capabilities
+                    .FirstOrDefault().Key;
+            }
 
-                    Set(deviceNumber);
-                }
-                else
-                {
-                    throw new DeviceNotAvailableException(
-                        deviceName: outputOptions.DeviceName);
-                }
+            if (!deviceNumber.HasValue)
+            {
+                throw new NoDeviceAvailableException();
             }
             else
             {
-                throw new DeviceNotDefinedException();
+                Set(deviceNumber.Value);
             }
         }
 
@@ -186,6 +195,12 @@ namespace SportDJ.Services.OutputService
                     volumeTarget: volume,
                     milliSeconds: fadeOnBackgroundMilliseconds);
             }
+        }
+
+        public void Pause()
+        {
+            foregroundPlayers.OnEach(p => p.Pause());
+            backgroundPlayers.OnEach(p => p.Pause());
         }
 
         public void Raise()
@@ -270,7 +285,7 @@ namespace SportDJ.Services.OutputService
 
                 output.Dispose();
 
-                playerServices.Clear();
+                backgroundPlayers.Clear();
             }
         }
 
@@ -312,19 +327,42 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private void RaiseBackground(IPlayerService playerService)
+        private void OnPlayerStarted(IPlayerService playerService)
         {
-            if (foregroundServices.Contains(playerService))
+            if (foregroundPlayers.Contains(playerService)
+                || backgroundPlayers.Contains(playerService))
             {
-                Raise();
+                if (!IsPlaying)
+                {
+                    IsPlaying = true;
+
+                    eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
+                }
+
+                if (foregroundPlayers.Contains(playerService))
+                {
+                    Lower();
+                }
             }
         }
 
-        private void ReduceBackground(IPlayerService playerService)
+        private void OnPlayerStopped(IPlayerService playerService)
         {
-            if (foregroundServices.Contains(playerService))
+            if (foregroundPlayers.Contains(playerService)
+                || backgroundPlayers.Contains(playerService))
             {
-                Lower();
+                if (foregroundPlayers.Contains(playerService))
+                {
+                    Raise();
+                }
+
+                if (!foregroundPlayers.Any(p => p.IsPlaying)
+                    && !backgroundPlayers.Any(p => p.IsPlaying))
+                {
+                    IsPlaying = false;
+
+                    eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
+                }
             }
         }
 

@@ -14,6 +14,8 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsNextThresholdExceeded { get; }
 
+        bool IsPlaying { get; }
+
         bool IsSilent { get; }
 
         ISampleProvider Output { get; }
