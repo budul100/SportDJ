@@ -23,7 +23,14 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         LastChildFill="True">
-        <ContentControl DockPanel.Dock="Top">
+
+        <ContentControl Height="50" DockPanel.Dock="Top">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+
+        <ContentControl DockPanel.Dock="Bottom">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ContentRegion}" />
             </prism:RegionManager.RegionName>

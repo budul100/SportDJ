@@ -3,5 +3,7 @@
     public enum RegionType
     {
         ContentRegion,
+
+        DisplayRegion,
     }
 }

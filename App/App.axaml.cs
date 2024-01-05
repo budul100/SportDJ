@@ -9,7 +9,6 @@ using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Modules.ContentModule.Views;
 using System;
 using System.Linq;
 
@@ -43,7 +42,10 @@ namespace SportDJ.App
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            moduleCatalog.AddModule<Modules.ContentModule.Module>();
+            moduleCatalog.AddModule<Modules.DisplayModule.Module>(
+                name: nameof(Modules.DisplayModule));
+            moduleCatalog.AddModule<Modules.ContentModule.Module>(
+                name: nameof(Modules.ContentModule));
         }
 
         protected override AvaloniaObject CreateShell()
@@ -65,8 +67,12 @@ namespace SportDJ.App
             var regionManager = Container.Resolve<IRegionManager>();
 
             regionManager.RegisterViewWithRegion(
+                regionName: nameof(RegionType.DisplayRegion),
+                viewType: typeof(Modules.DisplayModule.Views.DisplayView));
+
+            regionManager.RegisterViewWithRegion(
                 regionName: nameof(RegionType.ContentRegion),
-                viewType: typeof(RootView));
+                viewType: typeof(Modules.ContentModule.Views.RootView));
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
