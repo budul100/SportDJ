@@ -27,9 +27,9 @@ namespace SportDJ.Modules.DisplayModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RequestNavigate(
+            regionManager.RegisterViewWithRegion(
                 regionName: nameof(RegionType.DisplayRegion),
-                source: typeof(Views.DisplayView).FullName);
+                viewType: typeof(Views.DisplayView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

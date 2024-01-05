@@ -3,7 +3,6 @@ using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Regions;
 using SportDJ.App.Views;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
@@ -60,19 +59,6 @@ namespace SportDJ.App
             //}
 
             return Container.Resolve<MainView>();
-        }
-
-        protected override void OnInitialized()
-        {
-            var regionManager = Container.Resolve<IRegionManager>();
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.DisplayRegion),
-                viewType: typeof(Modules.DisplayModule.Views.DisplayView));
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.ContentRegion),
-                viewType: typeof(Modules.ContentModule.Views.RootView));
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
