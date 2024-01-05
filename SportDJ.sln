@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayModule", "Modules\Di
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerModule", "Modules\ControllerModule\ControllerModule.csproj", "{EA549FCB-05EF-4802-8A1B-6C465D3417E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolumeService", "Services\VolumeService\VolumeService.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{EA549FCB-05EF-4802-8A1B-6C465D3417E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA549FCB-05EF-4802-8A1B-6C465D3417E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA549FCB-05EF-4802-8A1B-6C465D3417E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{19CADD1C-4331-4137-A500-7D1137389C36} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{CC7A2D2D-29E0-4EBB-98F6-D702F85DF411} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 		{EA549FCB-05EF-4802-8A1B-6C465D3417E7} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
+		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}
