@@ -44,7 +44,7 @@ namespace SportDJ.Commons.Providers
 
         public FadeType FadeType { get; private set; }
 
-        public bool IsSilent => Volume == Constants.VolumeMin;
+        public bool IsSilent => volumeCurrent == Constants.VolumeMin;
 
         public float Volume { get; private set; }
 

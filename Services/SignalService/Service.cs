@@ -165,7 +165,7 @@ namespace SportDJ.Services.SignalService
         {
             if (playingProvider != default)
             {
-                var milliSeconds = State == StateType.Play
+                var milliSeconds = State == StateType.Pause
                     ? settingsService.Contents.Options.FadeOnPauseMilliseconds
                     : 0;
 
