@@ -2,7 +2,7 @@
 {
     public enum RegionType
     {
-        ContentRegion,
+        PlayerRegion,
 
         DisplayRegion,
 

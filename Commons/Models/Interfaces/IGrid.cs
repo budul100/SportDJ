@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models.Contents;
+﻿using SportDJ.Commons.Models.Structure;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Interfaces
@@ -9,7 +9,7 @@ namespace SportDJ.Commons.Models.Interfaces
 
         int Columns { get; }
 
-        List<Cell> Contents { get; }
+        List<Element> Contents { get; }
 
         int Rows { get; }
 

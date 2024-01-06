@@ -1,7 +1,7 @@
 ﻿using Prism.Mvvm;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.ContentModule.ViewModels
+namespace SportDJ.Modules.PlayerModule.ViewModels
 {
     public abstract class CellViewModel
         : BindableBase
@@ -53,7 +53,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
         #region Public Methods
 
         public virtual void Initialize<T>(T cell, int rowSpan = 1, int columnSpan = 1)
-            where T : Cell
+            where T : Element
         {
             this.Name = cell.Name;
 

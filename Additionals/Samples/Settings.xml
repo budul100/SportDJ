@@ -1,6 +1,69 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Canvas Columns="4" Rows="2">
+		<Contents>
+			<Element xsi:type="Player" Column="0" Name="Player 1" Row="0">
+				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3</Path>
+				<SavePositions>false</SavePositions>
+				<Type>Background</Type>
+			</Element>
+			<Element xsi:type="Player" Column="1" Name="Player 2" Row="0">
+				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
+				<SavePositions>false</SavePositions>
+				<Type>Background</Type>
+			</Element>
+			<Element xsi:type="Player" Column="0" Name="Player 3" Row="1">
+				<Path>..\..\..\..\Tests\StackServiceTests\Samples</Path>
+				<SavePositions>true</SavePositions>
+				<Type>Background</Type>
+			</Element>
+			<Element xsi:type="Group" Column="2" Name="Group 12" Row="0" Columns="2" Rows="2">
+				<Contents>
+					<Element xsi:type="Group" Column="0" Name="Group 1" Row="0" Columns="2" Rows="2">
+						<Contents>
+							<Element xsi:type="Player" Column="0" Name="Player 11" Row="0">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="0" Name="Player 12" Row="1">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="1" Name="Player 13" Row="0">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="1" Name="Player 14" Row="1">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+						</Contents>
+					</Element>
+					<Element xsi:type="Group" Column="0" Name="Group 2" Row="0" Columns="2" Rows="2">
+						<Contents>
+							<Element xsi:type="Player" Column="0" Name="Player 21" Row="0">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="0" Name="Player 22" Row="1">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="1" Name="Player 23" Row="0">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+							<Element xsi:type="Player" Column="1" Name="Player 24" Row="1">
+								<SavePositions>false</SavePositions>
+								<Type>Background</Type>
+							</Element>
+						</Contents>
+					</Element>
+				</Contents>
+			</Element>
+		</Contents>
+	</Canvas>
 	<Options>
-		<FadeOnBackgroundMilliseconds>50</FadeOnBackgroundMilliseconds>
+		<FadeOnLowerMilliseconds>50</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
@@ -12,54 +75,8 @@
 		<Output Type="Live">
 			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
 			<Volume>1</Volume>
+			<VolumePortionApps>0.5</VolumePortionApps>
 			<VolumePortionBackground>0.5</VolumePortionBackground>
 		</Output>
 	</Outputs>
-	<Root Columns="4" Rows="2">
-		<Contents>
-			<Cell xsi:type="Controller" Column="0" Row="0">
-				<Name>Player 1</Name>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3</Path>
-				<PlayerType>Background</PlayerType>
-				<SavePositions>false</SavePositions>
-			</Cell>
-			<Cell xsi:type="Controller" Column="1" Row="0">
-				<Name>Player 2</Name>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
-				<PlayerType>Background</PlayerType>
-				<SavePositions>false</SavePositions>
-			</Cell>
-			<Cell xsi:type="Controller" Column="0" Row="1">
-				<Name>Player 3</Name>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples</Path>
-				<PlayerType>Background</PlayerType>
-				<SavePositions>true</SavePositions>
-			</Cell>
-			<Cell xsi:type="Group" Column="2" Row="0" Columns="2" Rows="2">
-				<Name>Group1</Name>
-				<Contents>
-					<Cell xsi:type="Controller" Column="0" Row="0">
-						<Name>Player 21</Name>
-						<PlayerType>Background</PlayerType>
-						<SavePositions>false</SavePositions>
-					</Cell>
-					<Cell xsi:type="Controller" Column="0" Row="1">
-						<Name>Player 22</Name>
-						<PlayerType>Background</PlayerType>
-						<SavePositions>false</SavePositions>
-					</Cell>
-					<Cell xsi:type="Controller" Column="1" Row="0">
-						<Name>Player 23</Name>
-						<PlayerType>Background</PlayerType>
-						<SavePositions>false</SavePositions>
-					</Cell>
-					<Cell xsi:type="Controller" Column="1" Row="1">
-						<Name>Player 24</Name>
-						<PlayerType>Background</PlayerType>
-						<SavePositions>false</SavePositions>
-					</Cell>
-				</Contents>
-			</Cell>
-		</Contents>
-	</Root>
 </Set>

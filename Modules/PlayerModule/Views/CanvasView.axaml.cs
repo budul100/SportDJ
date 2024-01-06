@@ -1,12 +1,12 @@
 using Avalonia.Controls;
 
-namespace SportDJ.Modules.ContentModule.Views;
+namespace SportDJ.Modules.PlayerModule.Views;
 
-public partial class GroupView : UserControl
+public partial class CanvasView : UserControl
 {
     #region Public Constructors
 
-    public GroupView()
+    public CanvasView()
     {
         InitializeComponent();
     }

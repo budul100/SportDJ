@@ -1,16 +1,17 @@
 ﻿using System.Xml.Serialization;
 
-namespace SportDJ.Commons.Models.Contents
+namespace SportDJ.Commons.Models.Structure
 {
     [XmlInclude(typeof(Group))]
-    [XmlInclude(typeof(Controller))]
-    public abstract class Cell
+    [XmlInclude(typeof(Player))]
+    public abstract class Element
     {
         #region Public Properties
 
         [XmlAttribute]
         public int Column { get; set; }
 
+        [XmlAttribute]
         public string Name { get; set; }
 
         [XmlAttribute]

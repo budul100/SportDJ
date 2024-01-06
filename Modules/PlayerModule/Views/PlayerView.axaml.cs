@@ -1,12 +1,13 @@
 using Avalonia.Controls;
 
-namespace SportDJ.Modules.ContentModule.Views;
+namespace SportDJ.Modules.PlayerModule.Views;
 
-public partial class RootView : UserControl
+public partial class PlayerView
+    : UserControl
 {
     #region Public Constructors
 
-    public RootView()
+    public PlayerView()
     {
         InitializeComponent();
     }

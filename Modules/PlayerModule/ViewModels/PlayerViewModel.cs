@@ -8,8 +8,9 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.ContentModule.ViewModels
+namespace SportDJ.Modules.PlayerModule.ViewModels
 {
     public class PlayerViewModel
         : CellViewModel
@@ -116,18 +117,18 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Controller controller)
+        public void Initialize(Player player)
         {
             base.Initialize(
-                cell: controller);
+                cell: player);
 
             stackService = containerProvider?.Resolve<IStackService>();
-            playerService = containerProvider?.Resolve<IPlayerService>(controller.PlayerType.ToString());
+            playerService = containerProvider?.Resolve<IPlayerService>(player.Type.ToString());
 
             stackService?.Initialize(
-                path: controller.Path,
-                controllerName: controller.Name,
-                savePosition: controller.SavePositions);
+                path: player.Path,
+                controllerName: player.Name,
+                savePosition: player.SavePositions);
 
             UpdateSignal();
         }

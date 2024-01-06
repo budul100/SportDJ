@@ -1,17 +1,17 @@
 ﻿using SportDJ.Commons.Enums;
 
-namespace SportDJ.Commons.Models.Contents
+namespace SportDJ.Commons.Models.Structure
 {
-    public class Controller
-        : Cell
+    public class Player
+        : Element
     {
         #region Public Properties
 
         public string Path { get; set; }
 
-        public PlayerType PlayerType { get; set; }
-
         public bool SavePositions { get; set; }
+
+        public PlayerType Type { get; set; }
 
         #endregion Public Properties
     }

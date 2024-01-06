@@ -1,4 +1,4 @@
-﻿namespace SportDJ.Modules.ContentModule.DesignTime
+﻿namespace SportDJ.Modules.PlayerModule.DesignTime
 {
     public class GridViewModel
         : ViewModels.GridViewModel

@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace SportDJ.Commons.Models.Contents
+namespace SportDJ.Commons.Models.Structure
 {
-    public class Root
-        : IGrid
+    public class Group
+        : Element, IGrid
     {
         #region Public Properties
 
         [XmlAttribute]
         public int Columns { get; set; }
 
-        public List<Cell> Contents { get; set; } = new List<Cell>();
+        public List<Element> Contents { get; set; } = new List<Element>();
 
         [XmlAttribute]
         public int Rows { get; set; }

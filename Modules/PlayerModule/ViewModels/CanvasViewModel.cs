@@ -6,9 +6,9 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 
-namespace SportDJ.Modules.ContentModule.ViewModels
+namespace SportDJ.Modules.PlayerModule.ViewModels
 {
-    internal class RootViewModel
+    internal class CanvasViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -22,7 +22,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
 
         #region Public Constructors
 
-        public RootViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+        public CanvasViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IStorageService<Set> settingsService)
             : base(regionManager)
         {
@@ -56,7 +56,7 @@ namespace SportDJ.Modules.ContentModule.ViewModels
             {
                 Element = containerProvider.Resolve<GridViewModel>();
 
-                var root = settingsService.Contents.Root;
+                var root = settingsService.Contents.Canvas;
                 Element.Initialize(root);
             }
         }

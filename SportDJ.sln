@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commons", "Commons\Commons.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{0EF6377D-06D6-47DD-BC22-9D864FE340D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContentModule", "Modules\ContentModule\ContentModule.csproj", "{246A7267-287E-4CDE-BBCF-30971D93B7EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerModule", "Modules\PlayerModule\PlayerModule.csproj", "{246A7267-287E-4CDE-BBCF-30971D93B7EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E76B23EF-AB70-4CD9-BC07-44D1EED74641}"
 EndProject
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayModule", "Modules\Di
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerModule", "Modules\ControllerModule\ControllerModule.csproj", "{EA549FCB-05EF-4802-8A1B-6C465D3417E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolumeService", "Services\VolumeService\VolumeService.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService", "Services\VolumeService\VolumeService.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

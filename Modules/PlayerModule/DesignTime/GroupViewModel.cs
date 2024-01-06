@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Models.Contents;
+﻿using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.ContentModule.DesignTime
+namespace SportDJ.Modules.PlayerModule.DesignTime
 {
     public class GroupViewModel
         : ViewModels.GroupViewModel

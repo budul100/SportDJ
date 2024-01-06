@@ -1,10 +1,10 @@
 <UserControl
-    x:Class="SportDJ.Modules.ContentModule.Views.PlayerView"
+    x:Class="SportDJ.Modules.PlayerModule.Views.PlayerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dt="using:SportDJ.Modules.ContentModule.DesignTime"
+    xmlns:dt="using:SportDJ.Modules.PlayerModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"

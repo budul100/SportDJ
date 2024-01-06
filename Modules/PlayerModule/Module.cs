@@ -3,7 +3,7 @@ using Prism.Modularity;
 using Prism.Regions;
 using SportDJ.Commons.Enums;
 
-namespace SportDJ.Modules.ContentModule
+namespace SportDJ.Modules.PlayerModule
 {
     public class Module
         : IModule
@@ -28,14 +28,14 @@ namespace SportDJ.Modules.ContentModule
         public void OnInitialized(IContainerProvider containerProvider)
         {
             regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.ContentRegion),
-                viewType: typeof(Views.RootView));
+                regionName: nameof(RegionType.PlayerRegion),
+                viewType: typeof(Views.CanvasView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.RootView>(
-                name: typeof(Views.RootView).FullName);
+            containerRegistry.RegisterForNavigation<Views.CanvasView>(
+                name: typeof(Views.CanvasView).FullName);
         }
 
         #endregion Public Methods

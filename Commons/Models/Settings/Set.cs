@@ -1,4 +1,4 @@
-﻿using SportDJ.Commons.Models.Contents;
+﻿using SportDJ.Commons.Models.Structure;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Settings
@@ -7,11 +7,11 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
+        public Canvas Canvas { get; set; } = new Canvas();
+
         public Options Options { get; set; } = new Options();
 
         public List<Output> Outputs { get; set; } = new List<Output>();
-
-        public Root Root { get; set; } = new Root();
 
         #endregion Public Properties
     }

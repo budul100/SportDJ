@@ -3,8 +3,8 @@ using Prism.Mvvm;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Commons.Models.Structure;
 using System.Linq;
 
 namespace SportDJ.App.ViewModels
@@ -45,35 +45,64 @@ namespace SportDJ.App.ViewModels
 
         private static void XXXX(Set set)
         {
-            set.Root.Contents.Clear();
+            set.Canvas.Contents.Clear();
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+            set.Canvas.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+            set.Canvas.Contents.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
 
-            set.Root.Contents.Add(new Controller() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
+            set.Canvas.Contents.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
 
-            var group = new Group
+            var group1 = new Group
             {
-                Name = "Group1",
+                Name = "Group 1",
+                Row = 0,
+                Column = 0,
+                Rows = 2,
+                Columns = 2,
+            };
+
+            group1.Contents.Add(new Player() { Name = "Player 11", Row = 0, Column = 0 });
+
+            group1.Contents.Add(new Player() { Name = "Player 12", Row = 1, Column = 0 });
+
+            group1.Contents.Add(new Player() { Name = "Player 13", Row = 0, Column = 1 });
+
+            group1.Contents.Add(new Player() { Name = "Player 14", Row = 1, Column = 1 });
+
+            var group2 = new Group
+            {
+                Name = "Group 2",
+                Row = 0,
+                Column = 0,
+                Rows = 2,
+                Columns = 2,
+            };
+
+            group2.Contents.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
+
+            group2.Contents.Add(new Player() { Name = "Player 22", Row = 1, Column = 0 });
+
+            group2.Contents.Add(new Player() { Name = "Player 23", Row = 0, Column = 1 });
+
+            group2.Contents.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
+
+            var group3 = new Group
+            {
+                Name = "Group 12",
                 Row = 0,
                 Column = 2,
                 Rows = 2,
                 Columns = 2,
             };
 
-            group.Contents.Add(new Controller() { Name = "Player 21", Row = 0, Column = 0 });
+            group3.Contents.Add(group1);
+            group3.Contents.Add(group2);
 
-            group.Contents.Add(new Controller() { Name = "Player 22", Row = 1, Column = 0 });
+            set.Canvas.Contents.Add(group3);
 
-            group.Contents.Add(new Controller() { Name = "Player 23", Row = 0, Column = 1 });
-
-            group.Contents.Add(new Controller() { Name = "Player 24", Row = 1, Column = 1 });
-
-            set.Root.Contents.Add(group);
-
-            set.Root.Rows = 2;
-            set.Root.Columns = 4;
+            set.Canvas.Rows = 2;
+            set.Canvas.Columns = 4;
 
             set.Options.FadeOnLowerMilliseconds = 50;
             set.Options.FadeOnPauseMilliseconds = 500;

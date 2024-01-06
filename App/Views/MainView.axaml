@@ -38,7 +38,7 @@
 
         <ContentControl>
             <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ContentRegion}" />
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
     </DockPanel>

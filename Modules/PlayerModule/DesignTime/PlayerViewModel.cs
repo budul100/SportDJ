@@ -1,7 +1,7 @@
 ﻿using SportDJ.Commons;
 using System;
 
-namespace SportDJ.Modules.ContentModule.DesignTime
+namespace SportDJ.Modules.PlayerModule.DesignTime
 {
     public class PlayerViewModel
         : ViewModels.PlayerViewModel

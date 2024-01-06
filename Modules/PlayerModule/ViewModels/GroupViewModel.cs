@@ -1,9 +1,9 @@
 ﻿using Prism.Ioc;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace SportDJ.Modules.ContentModule.ViewModels
+namespace SportDJ.Modules.PlayerModule.ViewModels
 {
     public class GroupViewModel
         : CellViewModel

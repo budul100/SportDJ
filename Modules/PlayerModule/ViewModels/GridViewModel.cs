@@ -1,11 +1,11 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
-using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Interfaces;
+using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace SportDJ.Modules.ContentModule.ViewModels
+namespace SportDJ.Modules.PlayerModule.ViewModels
 {
     public class GridViewModel
         : BindableBase
@@ -61,10 +61,10 @@ namespace SportDJ.Modules.ContentModule.ViewModels
                 {
                     switch (content)
                     {
-                        case Controller controller:
+                        case Player player:
 
                             var controllerElement = containerProvider.Resolve<PlayerViewModel>();
-                            controllerElement.Initialize(controller);
+                            controllerElement.Initialize(player);
 
                             Elements.Add(controllerElement);
 
