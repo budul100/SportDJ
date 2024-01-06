@@ -46,10 +46,4 @@
 	  <ProjectReference Include="..\Services\VolumeService\VolumeService.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Views\MainView.axaml.cs">
-	    <DependentUpon>MainView.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-
 </Project>
