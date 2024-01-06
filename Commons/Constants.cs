@@ -6,6 +6,9 @@
 
         public const string AppName = nameof(SportDJ);
 
+        // Duration of a volume change step. Should not be greater than 100.
+        public const int FadeStepInMilliSec = 30;
+
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";
 

@@ -75,7 +75,7 @@ namespace SportDJ.App.ViewModels
             set.Root.Rows = 2;
             set.Root.Columns = 4;
 
-            set.Options.FadeOnBackgroundMilliseconds = 50;
+            set.Options.FadeOnLowerMilliseconds = 50;
             set.Options.FadeOnPauseMilliseconds = 500;
             set.Options.FadeOnMixInMilliseconds = 500;
             set.Options.FadeOnMixOutMilliseconds = 500;

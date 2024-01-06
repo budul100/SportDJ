@@ -1,23 +1,24 @@
-﻿using NAudio.CoreAudioApi.Interfaces;
-using SportDJ.Services.VolumeService.Interfaces;
+﻿using SportDJ.Services.VolumeService.Enums;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using static SportDJ.Services.VolumeService.Extensions.AudioUtilities;
 
 namespace SportDJ.Services.VolumeService.Models
 {
-    internal sealed class AudioSession : IDisposable
+    internal sealed class AudioSession
+        : IDisposable
     {
         #region Private Fields
 
-        private Interfaces.IAudioSessionControl2 _ctl;
+        private IAudioSessionControl2 _ctl;
         private Process _process;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public AudioSession(Interfaces.IAudioSessionControl2 ctl)
+        public AudioSession(IAudioSessionControl2 ctl)
         {
             _ctl = ctl;
             VolumeObj = ctl as ISimpleAudioVolume;

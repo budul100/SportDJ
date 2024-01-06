@@ -4,8 +4,8 @@
     {
         None,
 
-        Raise,
-
         Reduce,
+
+        Raise,
     }
 }

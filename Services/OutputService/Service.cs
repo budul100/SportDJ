@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
+using Prism.Ioc;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Output;
@@ -21,6 +22,7 @@ namespace SportDJ.Services.OutputService
         #region Private Fields
 
         private readonly List<IPlayerService> backgroundPlayers = new List<IPlayerService>();
+        private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
         private readonly List<IPlayerService> foregroundPlayers = new List<IPlayerService>();
         private readonly IStorageService<Set> settingsService;
@@ -28,17 +30,20 @@ namespace SportDJ.Services.OutputService
         private FadedControlProvider backgroundFader;
         private ContinuousMixingProvider backgroundMixer;
         private bool isDisposed;
-        private bool isReducedBackground;
+        private bool isLowered;
         private WaveOut output;
         private ContinuousMixingProvider outputMixer;
         private Output outputOptions;
+        private IVolumeService volumeService;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+        public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IStorageService<Set> settingsService)
         {
+            this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
 
@@ -54,6 +59,8 @@ namespace SportDJ.Services.OutputService
         #endregion Public Constructors
 
         #region Public Properties
+
+        public string DeviceName => outputOptions?.DeviceName;
 
         public WaveFormat Format { get; private set; }
 
@@ -86,6 +93,31 @@ namespace SportDJ.Services.OutputService
             }
         }
 
+        public double VolumePortionApps
+        {
+            get
+            {
+                return outputOptions.VolumePortionApps;
+            }
+            set
+            {
+                if (value < 0 || value > 1)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                if (value != outputOptions.VolumePortionApps)
+                {
+                    outputOptions.VolumePortionApps = value;
+
+                    if (isLowered)
+                    {
+                        Lower();
+                    }
+                }
+            }
+        }
+
         public double VolumePortionBackground
         {
             get
@@ -103,7 +135,7 @@ namespace SportDJ.Services.OutputService
                 {
                     outputOptions.VolumePortionBackground = value;
 
-                    if (isReducedBackground)
+                    if (isLowered)
                     {
                         Lower();
                     }
@@ -156,44 +188,34 @@ namespace SportDJ.Services.OutputService
 
             outputOptions = GetOptions(type);
 
-            var capabilities = GetCapabilities();
+            volumeService = containerProvider.Resolve<IVolumeService>(
+                name: type.ToString());
 
-            var deviceNumber = default(int?);
+            var deviceNumber = GetDeviceNumber();
 
-            if (string.IsNullOrWhiteSpace(outputOptions.DeviceName))
-            {
-                deviceNumber = capabilities
-                    .FirstOrDefault(c => c.Value.ProductName == outputOptions.DeviceName).Key;
-            }
-
-            if (!deviceNumber.HasValue)
-            {
-                deviceNumber = capabilities
-                    .FirstOrDefault().Key;
-            }
-
-            if (!deviceNumber.HasValue)
-            {
-                throw new NoDeviceAvailableException();
-            }
-            else
-            {
-                Set(deviceNumber.Value);
-            }
+            Set(
+                deviceNumber: deviceNumber);
         }
 
         public void Lower()
         {
-            if (!isReducedBackground)
+            if (!isLowered)
             {
-                var volume = output.Volume * (float)outputOptions.VolumePortionBackground;
-                var fadeOnBackgroundMilliseconds = settingsService.Contents.Options.FadeOnBackgroundMilliseconds;
+                isLowered = true;
 
-                isReducedBackground = true;
+                var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
+
+                var volumeBackground = output.Volume * (float)outputOptions.VolumePortionBackground;
 
                 backgroundFader.Fade(
-                    volumeTarget: volume,
-                    milliSeconds: fadeOnBackgroundMilliseconds);
+                    volumeTarget: volumeBackground,
+                    milliSeconds: fadeMilliseconds);
+
+                var volumeApps = output.Volume * (float)outputOptions.VolumePortionApps;
+
+                volumeService.Reduce(
+                    volumeTarget: volumeApps,
+                    milliSeconds: fadeMilliseconds);
             }
         }
 
@@ -201,17 +223,27 @@ namespace SportDJ.Services.OutputService
         {
             foregroundPlayers.OnEach(p => p.Pause());
             backgroundPlayers.OnEach(p => p.Pause());
+
+            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
+
+            volumeService.Reduce(
+                volumeTarget: Constants.VolumeMin,
+                milliSeconds: fadeMilliseconds);
         }
 
         public void Raise()
         {
-            var fadeOnBackgroundMilliseconds = settingsService.Contents.Options.FadeOnBackgroundMilliseconds;
+            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-            isReducedBackground = false;
+            isLowered = false;
 
             backgroundFader.Fade(
                 volumeTarget: Constants.VolumeMax,
-                milliSeconds: fadeOnBackgroundMilliseconds);
+                milliSeconds: fadeMilliseconds);
+
+            volumeService.Raise(
+                volumeTarget: Constants.VolumeMax,
+                milliSeconds: fadeMilliseconds);
         }
 
         public void Set(int deviceNumber, int sampleRate = Defaults.SampleRate)
@@ -250,6 +282,14 @@ namespace SportDJ.Services.OutputService
                     waveProvider: waveProvider);
 
                 output.Play();
+
+                volumeService.Set(
+                    deviceNumber: deviceNumber);
+            }
+            else
+            {
+                throw new NoDeviceAvailableException(
+                    deviceNumber: deviceNumber);
             }
         }
 
@@ -285,6 +325,9 @@ namespace SportDJ.Services.OutputService
 
                 output.Dispose();
 
+                volumeService.Deactivate();
+                volumeService.Dispose();
+
                 backgroundPlayers.Clear();
             }
         }
@@ -306,6 +349,32 @@ namespace SportDJ.Services.OutputService
             }
 
             return result;
+        }
+
+        private int GetDeviceNumber()
+        {
+            var result = default(int?);
+
+            var capabilities = GetCapabilities();
+
+            if (string.IsNullOrWhiteSpace(outputOptions.DeviceName))
+            {
+                result = capabilities
+                    .FirstOrDefault(c => c.Value.ProductName == outputOptions.DeviceName).Key;
+            }
+
+            if (!result.HasValue)
+            {
+                result = capabilities
+                    .FirstOrDefault().Key;
+            }
+
+            if (!result.HasValue)
+            {
+                throw new NoDeviceAvailableException();
+            }
+
+            return result.Value;
         }
 
         private Output GetOptions(OutputType type)

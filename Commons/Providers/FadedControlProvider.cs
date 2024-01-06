@@ -71,7 +71,9 @@ namespace SportDJ.Commons.Providers
 
                 Volume = volumeTarget;
 
-                OnFadingStarted();
+                FadingStartedEvent?.Invoke(
+                    sender: this,
+                    e: default);
             }
 
             if (fadeSampleCount == 0 || volumeCurrent == Volume)
@@ -163,13 +165,6 @@ namespace SportDJ.Commons.Providers
                     sender: this,
                     e: default);
             }
-        }
-
-        private void OnFadingStarted()
-        {
-            FadingStartedEvent?.Invoke(
-                sender: this,
-                e: default);
         }
 
         #endregion Private Methods

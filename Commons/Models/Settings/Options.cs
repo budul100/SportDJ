@@ -4,7 +4,7 @@
     {
         #region Public Properties
 
-        public int FadeOnBackgroundMilliseconds { get; set; }
+        public int FadeOnLowerMilliseconds { get; set; }
 
         public int FadeOnMixInMilliseconds { get; set; }
 

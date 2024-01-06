@@ -10,6 +10,8 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
+        string DeviceName { get; }
+
         WaveFormat Format { get; }
 
         bool IsPlaying { get; }

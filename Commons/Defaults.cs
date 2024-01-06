@@ -13,6 +13,7 @@
 
         public const double TrimRearPortion = 0.1;
 
+        public const double VolumePortionApps = 0.5;
         public const double VolumePortionBackground = 0.5;
 
         #endregion Public Fields

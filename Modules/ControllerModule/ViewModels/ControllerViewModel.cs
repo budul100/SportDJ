@@ -14,8 +14,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Private Fields
 
         private readonly IOutputService outputLiveService;
+        private readonly IVolumeService volumeService;
 
         private bool othersMuted;
+        private bool volumeMonitoringActive;
 
         #endregion Private Fields
 
@@ -34,24 +36,27 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
+            volumeService = containerProvider?.Resolve<IVolumeService>(
+                name: nameof(OutputType.Live));
+
             PauseCommand = new DelegateCommand(
                 executeMethod: () => outputLiveService.Pause(),
-                canExecuteMethod: () => outputLiveService.IsPlaying);
+                canExecuteMethod: () => IsActive);
 
             VolumeLowerCommand = new DelegateCommand(
                 executeMethod: () => outputLiveService.Lower(),
-                canExecuteMethod: () => outputLiveService.IsPlaying);
+                canExecuteMethod: () => IsActive);
 
             VolumeRaiseCommand = new DelegateCommand(
                 executeMethod: () => outputLiveService.Raise(),
-                canExecuteMethod: () => outputLiveService.IsPlaying);
+                canExecuteMethod: () => IsActive);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public bool IsPlaying => outputLiveService.IsPlaying;
+        public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
 
         public bool OthersMuted
         {
@@ -62,6 +67,26 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         public DelegateCommand PauseCommand { get; }
 
         public DelegateCommand VolumeLowerCommand { get; }
+
+        public bool VolumeMonitoringActive
+        {
+            get { return volumeService.IsActive; }
+            set
+            {
+                if (value)
+                {
+                    volumeService.Activate();
+                }
+                else
+                {
+                    volumeService.Deactivate();
+                }
+
+                SetProperty(ref volumeMonitoringActive, value);
+
+                UpdateCommands();
+            }
+        }
 
         public DelegateCommand VolumeRaiseCommand { get; }
 
@@ -87,7 +112,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void UpdateCommands()
         {
-            RaisePropertyChanged(nameof(IsPlaying));
+            RaisePropertyChanged(nameof(IsActive));
 
             PauseCommand.RaiseCanExecuteChanged();
             VolumeLowerCommand.RaiseCanExecuteChanged();

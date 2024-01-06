@@ -13,6 +13,10 @@ namespace SportDJ.Commons.Exceptions
             : this("There is no output device available.")
         { }
 
+        public NoDeviceAvailableException(int deviceNumber)
+            : this($"There is no output device with a device number {deviceNumber} available.")
+        { }
+
         public NoDeviceAvailableException(string message)
             : base(message)
         { }

@@ -55,17 +55,18 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Button
+        <ToggleButton
             Grid.Row="0"
             Grid.Column="0"
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+            VerticalAlignment="Stretch"
+            IsChecked="{Binding VolumeMonitoringActive}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"
                 Kind="VolumeMute" />
-        </Button>
+        </ToggleButton>
 
         <Button
             Name="VolumeButton"
@@ -74,7 +75,7 @@
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            IsEnabled="{Binding IsPlaying}">
+            IsEnabled="{Binding IsActive}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"
