@@ -187,7 +187,14 @@ namespace SportDJ.Services.SignalService
             {
                 playingProvider.Pause();
 
-                EndSignal();
+                trackService?.Stop(Track);
+
+                if (State != StateType.Pause)
+                {
+                    State = StateType.None;
+                }
+
+                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
             }
         }
 
@@ -202,14 +209,12 @@ namespace SportDJ.Services.SignalService
                 if (isDisposing
                     && playingProvider != default)
                 {
-                    playingProvider.Stop();
-
-                    eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
-
                     outputProvider.FadingStartedEvent -= OnSignalStarted;
                     outputProvider.FadingEndedEvent -= OnSignalFaded;
 
                     outputProvider.Dispose();
+
+                    playingProvider?.Stop();
 
                     playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
                     playingProvider.SignalEndedEvent -= OnSignalEnded;
@@ -225,23 +230,11 @@ namespace SportDJ.Services.SignalService
 
         #region Private Methods
 
-        private void EndSignal()
-        {
-            if (State != StateType.Pause)
-            {
-                State = StateType.None;
-            }
-
-            trackService.Stop(Track);
-
-            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
-        }
-
         private void OnSignalEnded(object sender, EventArgs e)
         {
-            EndSignal();
+            Stop();
 
-            Dispose();
+            eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
         }
 
         private void OnSignalFaded(object sender, EventArgs e)
