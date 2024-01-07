@@ -4,7 +4,7 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Interfaces;
 using System;
 
@@ -16,7 +16,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         #region Private Fields
 
         private readonly DispatcherTimer clockTimer;
-        private readonly IPlayerService playerService;
+        private readonly IMixerService mixerService;
 
         private string content;
         private bool isDisposed;
@@ -28,23 +28,23 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         public DisplayViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
-            playerService = containerProvider?.Resolve<IPlayerService>(
-                name: nameof(PlayerType.Background));
+            mixerService = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
 
             clockTimer = GetClockTimer();
             clockTimer.Start();
 
-            eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
-                action: s => OnPlayerUpdated(s),
+            eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
+                action: s => OnMixerUpdated(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
+                filter: m => mixerService == m);
 
-            eventAggregator?.GetEvent<PlayerStoppedEvent>().Subscribe(
-                action: _ => OnPlayerEnded(),
+            eventAggregator?.GetEvent<MixerStoppedEvent>().Subscribe(
+                action: _ => OnMixerStopped(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
+                filter: m => mixerService == m);
         }
 
         #endregion Public Constructors
@@ -109,18 +109,18 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             return result;
         }
 
-        private void OnPlayerEnded()
+        private void OnMixerStopped()
         {
             Content = default;
             Remaining = default;
         }
 
-        private void OnPlayerUpdated(IPlayerService playerService)
+        private void OnMixerUpdated(IMixerService mixerService)
         {
-            if (playerService.Track != default)
+            if (mixerService.Track != default)
             {
-                Content = $"{playerService.Track.Artist} - {playerService.Track.Title}";
-                Remaining = playerService.Remaining.ToString(Constants.FormatDuration);
+                Content = $"{mixerService.Track.Artist} - {mixerService.Track.Title}";
+                Remaining = mixerService.Remaining.ToString(Constants.FormatDuration);
             }
         }
 

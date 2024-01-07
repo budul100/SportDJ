@@ -15,7 +15,6 @@ namespace SportDJ.App.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private IOutputService outputLive;
 
         #endregion Private Fields
 
@@ -31,78 +30,103 @@ namespace SportDJ.App.ViewModels
 
             var set = settingsService.Contents;
 
-            InitializeOutput();
-            InitializePlayersLive();
-
             XXXX(set);
-
             settingsService.Save();
+
+            InitializeOutput(
+                type: OutputType.Live);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Background,
+                onForeground: false);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Foreground,
+                onForeground: true);
+
+            InitializeOutput(
+                type: OutputType.PFL);
+
+            InitializeMixer(
+                outputType: OutputType.PFL,
+                mixerType: MixerType.PFL,
+                onForeground: true);
         }
 
         #endregion Public Constructors
 
         #region Private Methods
 
-        private static void XXXX(Set set)
+        private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
         {
-            set.Grid.Contents.Clear();
+            var outputService = containerProvider.Resolve<IOutputService>(
+                name: outputType.ToString());
 
-            set.Grid.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+            if (outputService?.Format != default)
+            {
+                var mixerService = containerProvider.Resolve<IMixerService>(
+                    name: mixerType.ToString());
 
-            set.Grid.Contents.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+                mixerService.Initialize(
+                    type: mixerType,
+                    waveFormat: outputService.Format,
+                    playsMultipleSignals: onForeground);
 
-            set.Grid.Contents.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
+                outputService.Add(
+                    mixerService: mixerService,
+                    onForeground: onForeground);
+            }
+        }
 
-            var group1 = new Group
+        private void InitializeOutput(OutputType type)
+        {
+            var outputService = containerProvider.Resolve<IOutputService>(
+                name: type.ToString());
+
+            outputService.Initialize(
+                type: type);
+        }
+
+        private void XXXX(Set set)
+        {
+            set.Grid.Cells.Clear();
+
+            set.Grid.Cells.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+            set.Grid.Cells.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+            set.Grid.Cells.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
+
+            var grid1 = new Grid
             {
                 Name = "Group 1",
-                Row = 0,
-                Column = 0,
-                Rows = 2,
-                Columns = 2,
             };
 
-            group1.Contents.Add(new Player() { Name = "Player 11", Row = 0, Column = 0 });
+            grid1.Cells.Add(new Player() { Name = "Player 11", Row = 0, Column = 0 });
+            grid1.Cells.Add(new Player() { Name = "Player 12", Row = 1, Column = 0 });
+            grid1.Cells.Add(new Player() { Name = "Player 13", Row = 0, Column = 1 });
+            grid1.Cells.Add(new Player() { Name = "Player 14", Row = 1, Column = 1 });
 
-            group1.Contents.Add(new Player() { Name = "Player 12", Row = 1, Column = 0 });
-
-            group1.Contents.Add(new Player() { Name = "Player 13", Row = 0, Column = 1 });
-
-            group1.Contents.Add(new Player() { Name = "Player 14", Row = 1, Column = 1 });
-
-            var group2 = new Group
+            var grid2 = new Grid
             {
                 Name = "Group 2",
-                Row = 0,
-                Column = 0,
-                Rows = 2,
-                Columns = 2,
             };
 
-            group2.Contents.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
+            grid2.Cells.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
+            grid2.Cells.Add(new Player() { Name = "Player 22", Row = 0, Column = 1 });
+            grid2.Cells.Add(new Player() { Name = "Player 23", Row = 0, Column = 2 });
+            grid2.Cells.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
 
-            group2.Contents.Add(new Player() { Name = "Player 22", Row = 1, Column = 0 });
-
-            group2.Contents.Add(new Player() { Name = "Player 23", Row = 0, Column = 1 });
-
-            group2.Contents.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
-
-            var group3 = new Group
+            var group = new Group
             {
-                Name = "Group 12",
                 Row = 0,
                 Column = 2,
-                Rows = 2,
-                Columns = 2,
             };
 
-            group3.Contents.Add(group1);
-            group3.Contents.Add(group2);
+            group.Grids.Add(grid1);
+            group.Grids.Add(grid2);
 
-            set.Grid.Contents.Add(group3);
-
-            set.Grid.Rows = 2;
-            set.Grid.Columns = 4;
+            set.Grid.Cells.Add(group);
 
             set.Options.FadeOnLowerMilliseconds = 50;
             set.Options.FadeOnPauseMilliseconds = 500;
@@ -112,45 +136,6 @@ namespace SportDJ.App.ViewModels
 
             set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
             //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";
-        }
-
-        private void InitializeOutput()
-        {
-            outputLive = containerProvider.Resolve<IOutputService>(
-                name: nameof(OutputType.Live));
-
-            outputLive.Initialize(
-                type: OutputType.Live);
-        }
-
-        private void InitializePlayersLive()
-        {
-            if (outputLive?.Format != default)
-            {
-                var playerBackground = containerProvider.Resolve<IPlayerService>(
-                    name: nameof(PlayerType.Background));
-
-                playerBackground.Initialize(
-                    type: PlayerType.Background,
-                    waveFormat: outputLive.Format,
-                    isMultiSignalPlayer: false);
-
-                outputLive.Add(
-                    playerService: playerBackground,
-                    isForegroundPlayer: false);
-
-                var playerForeground = containerProvider.Resolve<IPlayerService>(
-                    name: nameof(PlayerType.Foreground));
-
-                playerForeground.Initialize(
-                    type: PlayerType.Foreground,
-                    waveFormat: outputLive.Format,
-                    isMultiSignalPlayer: true);
-
-                outputLive.Add(
-                    playerService: playerForeground,
-                    isForegroundPlayer: true);
-            }
         }
 
         #endregion Private Methods

@@ -67,23 +67,22 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
-
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
 
-            containerRegistry.RegisterSingleton<IOutputService, Services.OutputService.Service>(
-                name: nameof(OutputType.Live));
-            containerRegistry.RegisterSingleton<IOutputService, Services.OutputService.Service>(
-                name: nameof(OutputType.PFL));
+            RegisterTypes<OutputType>(
+                containerRegistry: containerRegistry,
+                from: typeof(IOutputService),
+                to: typeof(Services.OutputService.Service));
 
-            containerRegistry.RegisterSingleton<IVolumeService, Services.VolumeService.Service>(
-                name: nameof(OutputType.Live));
+            RegisterTypes<OutputType>(
+                containerRegistry: containerRegistry,
+                from: typeof(IVolumeService),
+                to: typeof(Services.VolumeService.Service));
 
-            containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.Background));
-            containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.Foreground));
-            containerRegistry.RegisterSingleton<IPlayerService, Services.PlayerService.Service>(
-                name: nameof(PlayerType.PFL));
+            RegisterTypes<MixerType>(
+                containerRegistry: containerRegistry,
+                from: typeof(IMixerService),
+                to: typeof(Services.MixerService.Service));
 
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
@@ -92,5 +91,24 @@ namespace SportDJ.App
         }
 
         #endregion Protected Methods
+
+        #region Private Methods
+
+        private static void RegisterTypes<TEnum>(IContainerRegistry containerRegistry, Type from, Type to)
+            where TEnum : struct, Enum
+        {
+            var names = Enum.GetValues(typeof(TEnum))
+                .Cast<TEnum>().Select(t => t.ToString()).ToArray();
+
+            foreach (var name in names)
+            {
+                containerRegistry.RegisterSingleton(
+                    from: from,
+                    to: to,
+                    name: name);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

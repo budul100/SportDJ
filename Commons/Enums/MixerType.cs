@@ -1,6 +1,6 @@
 ﻿namespace SportDJ.Commons.Enums
 {
-    public enum PlayerType
+    public enum MixerType
     {
         Background,
 

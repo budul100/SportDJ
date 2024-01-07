@@ -1,21 +1,16 @@
-﻿using SportDJ.Commons.Models.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Structure
 {
     public class Grid
-        : IGrid
     {
         #region Public Properties
 
-        [XmlAttribute]
-        public int Columns { get; set; }
-
-        public List<Element> Contents { get; set; } = new List<Element>();
+        public List<Cell> Cells { get; set; } = new List<Cell>();
 
         [XmlAttribute]
-        public int Rows { get; set; }
+        public string Name { get; set; }
 
         #endregion Public Properties
     }

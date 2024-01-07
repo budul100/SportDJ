@@ -3,7 +3,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -14,10 +14,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SportDJ.Services.PlayerService
+namespace SportDJ.Services.MixerService
 {
     public class Service
-        : IPlayerService
+        : IMixerService
     {
         #region Private Fields
 
@@ -28,9 +28,9 @@ namespace SportDJ.Services.PlayerService
         private readonly HashSet<ISignalService> signalServices = new();
 
         private bool isDisposed;
-        private bool isMultiSignalPlayer;
         private ContinuousMixingProvider mixingProvider;
         private FadedControlProvider outputProvider;
+        private bool playsMultipleSignals;
         private ISignalService signalService;
 
         #endregion Private Fields
@@ -85,7 +85,7 @@ namespace SportDJ.Services.PlayerService
 
         public Track Track => signalService?.Track;
 
-        public PlayerType Type { get; private set; }
+        public MixerType Type { get; private set; }
 
         public float Volume
         {
@@ -125,7 +125,7 @@ namespace SportDJ.Services.PlayerService
 
                     ISampleProvider signalProvider;
 
-                    if (isMultiSignalPlayer)
+                    if (playsMultipleSignals)
                     {
                         signalProvider = result.Output;
                     }
@@ -157,11 +157,11 @@ namespace SportDJ.Services.PlayerService
             GC.SuppressFinalize(this);
         }
 
-        public void Initialize(PlayerType type, WaveFormat waveFormat, bool isMultiSignalPlayer)
+        public void Initialize(MixerType type, WaveFormat waveFormat, bool playsMultipleSignals)
         {
             Type = type;
 
-            this.isMultiSignalPlayer = isMultiSignalPlayer;
+            this.playsMultipleSignals = playsMultipleSignals;
 
             mixingProvider = new ContinuousMixingProvider(waveFormat);
 
@@ -187,7 +187,7 @@ namespace SportDJ.Services.PlayerService
                 {
                     Pause();
 
-                    eventAggregator.GetEvent<PlayerEndedEvent>().Publish(this);
+                    eventAggregator.GetEvent<MixerEndedEvent>().Publish(this);
 
                     mixingProvider.Dispose();
 
@@ -269,7 +269,7 @@ namespace SportDJ.Services.PlayerService
             {
                 IsPlaying = true;
 
-                eventAggregator.GetEvent<PlayerStartedEvent>().Publish(this);
+                eventAggregator.GetEvent<MixerStartedEvent>().Publish(this);
             }
         }
 
@@ -280,15 +280,15 @@ namespace SportDJ.Services.PlayerService
             {
                 IsPlaying = false;
 
-                eventAggregator.GetEvent<PlayerStoppedEvent>().Publish(this);
+                eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
             }
         }
 
         private void OnSignalUpdated()
         {
-            if (!isMultiSignalPlayer)
+            if (!playsMultipleSignals)
             {
-                eventAggregator.GetEvent<PlayerUpdatedEvent>().Publish(this);
+                eventAggregator.GetEvent<MixerUpdatedEvent>().Publish(this);
             }
         }
 

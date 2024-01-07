@@ -15,7 +15,7 @@
     <ContentControl
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Content="{Binding Element}">
+        Content="{Binding Grid}">
 
         <ContentControl.ContentTemplate>
             <DataTemplate>

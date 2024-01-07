@@ -5,7 +5,7 @@ using System;
 
 namespace SportDJ.Commons.Interfaces
 {
-    public interface IPlayerService
+    public interface IMixerService
         : IDisposable
     {
         #region Public Properties
@@ -22,7 +22,7 @@ namespace SportDJ.Commons.Interfaces
 
         Track Track { get; }
 
-        PlayerType Type { get; }
+        MixerType Type { get; }
 
         float Volume { get; set; }
 
@@ -32,7 +32,7 @@ namespace SportDJ.Commons.Interfaces
 
         ISignalService Add(Track track);
 
-        void Initialize(PlayerType type, WaveFormat waveFormat, bool isMultiSignalPlayer);
+        void Initialize(MixerType type, WaveFormat waveFormat, bool playsMultipleSignals);
 
         void Pause();
 

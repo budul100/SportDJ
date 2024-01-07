@@ -1,6 +1,5 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
-using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,8 +13,7 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
 
-        private int columns;
-        private int rows;
+        private string name;
 
         #endregion Private Fields
 
@@ -30,57 +28,78 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         #region Public Properties
 
-        public int Columns
+        public ObservableCollection<CellViewModel> Cells { get; } = new ObservableCollection<CellViewModel>();
+
+        public int Columns { get; private set; }
+
+        public string Name
         {
-            get { return columns; }
-            set { SetProperty(ref columns, value); }
+            get { return name; }
+            set { SetProperty(ref name, value); }
         }
 
-        public ObservableCollection<CellViewModel> Elements { get; } = new ObservableCollection<CellViewModel>();
-
-        public int Rows
-        {
-            get { return rows; }
-            set { SetProperty(ref rows, value); }
-        }
+        public int Rows { get; private set; }
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Initialize<T>(T grid)
-            where T : IGrid
+        public void Initialize(Grid grid)
         {
-            if (grid?.Contents?.Any() == true
-                && containerProvider != default)
-            {
-                Rows = grid.Rows;
-                Columns = grid.Columns;
+            Name = grid.Name;
 
-                foreach (var content in grid.Contents)
+            var rows = 0;
+            var columns = 0;
+
+            if (containerProvider != default
+                && grid?.Cells?.Any() == true)
+            {
+                foreach (var element in grid.Cells)
                 {
-                    switch (content)
+                    switch (element)
                     {
                         case Player player:
 
-                            var controllerElement = containerProvider.Resolve<PlayerViewModel>();
-                            controllerElement.Initialize(player);
+                            var playerCell = containerProvider.Resolve<PlayerViewModel>();
+                            playerCell.Initialize(player);
 
-                            Elements.Add(controllerElement);
+                            Cells.Add(playerCell);
+
+                            rows = element.Row + 1 > rows
+                                ? element.Row + 1
+                                : rows;
+
+                            columns = element.Column + 1 > columns
+                                ? element.Column + 1
+                                : columns;
 
                             break;
 
                         case Group group:
 
-                            var groupElement = containerProvider.Resolve<GroupViewModel>();
-                            groupElement.Initialize(group);
+                            var groupCell = containerProvider.Resolve<GroupViewModel>();
+                            groupCell.Initialize(group);
 
-                            Elements.Add(groupElement);
+                            Cells.Add(groupCell);
+
+                            rows = groupCell.Row + groupCell.Rows > rows
+                                ? groupCell.Row + groupCell.Rows
+                                : rows;
+
+                            columns = groupCell.Column + groupCell.Columns > columns
+                                ? groupCell.Column + groupCell.Columns
+                                : columns;
 
                             break;
                     }
                 }
             }
+
+            Rows = rows;
+            RaisePropertyChanged(nameof(Rows));
+
+            Columns = columns;
+            RaisePropertyChanged(nameof(Columns));
         }
 
         #endregion Public Methods

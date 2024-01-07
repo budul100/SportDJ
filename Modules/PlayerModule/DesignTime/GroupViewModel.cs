@@ -27,9 +27,9 @@ namespace SportDJ.Modules.PlayerModule.DesignTime
         {
             for (int index = 0; index < ElementsCount; index += 2)
             {
-                Elements.Add(new GridViewModel());
+                Tabs.Add(new GridViewModel());
 
-                this.Initialize(new Group() { Column = index, Row = 0, Rows = 2, Columns = 2, Name = $"Group {index}" });
+                this.Initialize(new Group() { Column = index, Row = 0 });
             }
         }
 

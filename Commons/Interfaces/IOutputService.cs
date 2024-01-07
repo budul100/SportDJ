@@ -26,7 +26,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Add(IPlayerService playerService, bool isForegroundPlayer);
+        void Add(IMixerService mixerService, bool onForeground);
 
         Dictionary<int, string> GetDevices();
 

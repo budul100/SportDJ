@@ -25,7 +25,11 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<GridViewModel> Elements { get; } = new ObservableCollection<GridViewModel>();
+        public int Columns { get; private set; }
+
+        public int Rows { get; private set; }
+
+        public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
 
         #endregion Public Properties
 
@@ -33,20 +37,35 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         public void Initialize(Group group)
         {
-            if (group.Contents?.Any() == true
-                && containerProvider != default)
+            var rows = 0;
+            var columns = 0;
+
+            if (containerProvider != default
+                && group.Grids?.Any() == true)
             {
-                var element = containerProvider.Resolve<GridViewModel>();
+                foreach (var grid in group.Grids)
+                {
+                    var gridTab = containerProvider.Resolve<GridViewModel>();
 
-                element.Initialize(group);
+                    gridTab.Initialize(grid);
 
-                Elements.Add(element);
+                    Tabs.Add(gridTab);
+                }
+
+                rows = Tabs.Max(t => t.Rows);
+                columns = Tabs.Max(t => t.Columns);
             }
+
+            Rows = rows;
+            RaisePropertyChanged(nameof(Rows));
+
+            Columns = columns;
+            RaisePropertyChanged(nameof(Columns));
 
             base.Initialize(
                 cell: group,
-                rowSpan: group.Rows,
-                columnSpan: group.Columns);
+                rowSpan: rows,
+                columnSpan: columns);
         }
 
         #endregion Public Methods

@@ -3,8 +3,8 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
-using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -23,8 +23,8 @@ namespace SportDJ.Services.OutputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly HashSet<IPlayerService> playerServices = new HashSet<IPlayerService>();
-        private readonly HashSet<IPlayerService> playerServicesForeground = new HashSet<IPlayerService>();
+        private readonly HashSet<IMixerService> mixerServicesAll = new HashSet<IMixerService>();
+        private readonly HashSet<IMixerService> mixerServicesForeground = new HashSet<IMixerService>();
         private readonly IStorageService<Set> settingsService;
 
         private FadedControlProvider backgroundFader;
@@ -47,23 +47,23 @@ namespace SportDJ.Services.OutputService
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
 
-            eventAggregator.GetEvent<PlayerStartedEvent>().Subscribe(
-                action: p => OnPlayerStarted(p),
+            eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
+                action: p => OnMixerStarted(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerServices.Contains(p));
+                filter: p => mixerServicesAll.Contains(p));
 
-            eventAggregator.GetEvent<PlayerStoppedEvent>().Subscribe(
-                action: p => OnPlayerStopped(p),
+            eventAggregator.GetEvent<MixerStoppedEvent>().Subscribe(
+                action: p => OnMixerStopped(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerServices.Contains(p));
+                filter: p => mixerServicesAll.Contains(p));
 
-            eventAggregator.GetEvent<PlayerEndedEvent>().Subscribe(
-                action: p => OnPlayerEnded(p),
+            eventAggregator.GetEvent<MixerEndedEvent>().Subscribe(
+                action: p => OnMixerEnded(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerServices.Contains(p));
+                filter: p => mixerServicesAll.Contains(p));
         }
 
         #endregion Public Constructors
@@ -157,20 +157,20 @@ namespace SportDJ.Services.OutputService
 
         #region Public Methods
 
-        public void Add(IPlayerService playerService, bool isForegroundPlayer)
+        public void Add(IMixerService mixerService, bool onForeground)
         {
-            if (isForegroundPlayer)
+            if (onForeground)
             {
-                outputMixer.Add(playerService.Output);
+                mixerServicesForeground.Add(mixerService);
 
-                playerServicesForeground.Add(playerService);
+                outputMixer.Add(mixerService.Output);
             }
             else
             {
-                backgroundMixer.Add(playerService.Output);
+                backgroundMixer.Add(mixerService.Output);
             }
 
-            playerServices.Add(playerService);
+            mixerServicesAll.Add(mixerService);
         }
 
         public void Dispose()
@@ -230,7 +230,7 @@ namespace SportDJ.Services.OutputService
 
         public void Pause()
         {
-            playerServices.OnEach(p => p.Pause());
+            mixerServicesAll.OnEach(p => p.Pause());
 
             PauseVolume();
         }
@@ -329,8 +329,8 @@ namespace SportDJ.Services.OutputService
                 volumeService.Deactivate();
                 volumeService.Dispose();
 
-                playerServicesForeground.Clear();
-                playerServices.Clear();
+                mixerServicesForeground.Clear();
+                mixerServicesAll.Clear();
             }
         }
 
@@ -405,17 +405,17 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private void OnPlayerEnded(IPlayerService playerService)
+        private void OnMixerEnded(IMixerService mixerService)
         {
-            if (playerServicesForeground.Contains(playerService))
+            if (mixerServicesForeground.Contains(mixerService))
             {
-                playerServicesForeground.Remove(playerService);
+                mixerServicesForeground.Remove(mixerService);
             }
 
-            playerServices.Remove(playerService);
+            mixerServicesAll.Remove(mixerService);
         }
 
-        private void OnPlayerStarted(IPlayerService playerService)
+        private void OnMixerStarted(IMixerService mixerService)
         {
             if (!IsPlaying)
             {
@@ -424,7 +424,7 @@ namespace SportDJ.Services.OutputService
                 eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
             }
 
-            if (playerServicesForeground.Contains(playerService))
+            if (mixerServicesForeground.Contains(mixerService))
             {
                 Lower();
             }
@@ -434,14 +434,14 @@ namespace SportDJ.Services.OutputService
             }
         }
 
-        private void OnPlayerStopped(IPlayerService playerService)
+        private void OnMixerStopped(IMixerService mixerService)
         {
-            if (playerServicesForeground.Contains(playerService))
+            if (mixerServicesForeground.Contains(mixerService))
             {
                 Raise();
             }
 
-            if (!playerServices.Any(p => p.IsPlaying))
+            if (!mixerServicesAll.Any(p => p.IsPlaying))
             {
                 IsPlaying = false;
 

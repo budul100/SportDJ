@@ -29,7 +29,7 @@
         <dt:GridViewModel />
     </Design.DataContext>
 
-    <ItemsControl x:DataType="vm:GridViewModel" ItemsSource="{Binding Elements}">
+    <ItemsControl x:DataType="vm:GridViewModel" ItemsSource="{Binding Cells}">
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate x:DataType="vm:GridViewModel">
@@ -67,4 +67,5 @@
             </DataTemplate>
         </ItemsControl.DataTemplates>
     </ItemsControl>
+
 </UserControl>

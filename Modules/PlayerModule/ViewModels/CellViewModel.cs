@@ -30,12 +30,6 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             set { SetProperty(ref columnSpan, value); }
         }
 
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
-
         public int Row
         {
             get { return row; }
@@ -53,10 +47,8 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
         #region Public Methods
 
         public virtual void Initialize<T>(T cell, int rowSpan = 1, int columnSpan = 1)
-            where T : Element
+            where T : Cell
         {
-            this.Name = cell.Name;
-
             this.Row = cell.Row;
             this.Column = cell.Column;
 

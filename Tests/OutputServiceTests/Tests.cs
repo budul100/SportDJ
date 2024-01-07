@@ -1,7 +1,7 @@
 ﻿using Moq;
 using Prism.Events;
 using Prism.Ioc;
-using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System.Linq;
@@ -31,15 +31,20 @@ namespace SportDJ.Tests.OutputServiceTests
 
             mockDispatcherService = new Mock<IDispatcherService>();
 
-            var mockPlayerStartedEvent = new Mock<PlayerStartedEvent>();
+            var mockMixerStartedEvent = new Mock<MixerStartedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<PlayerStartedEvent>()).
-                Returns(mockPlayerStartedEvent.Object);
+                Setup(m => m.GetEvent<MixerStartedEvent>()).
+                Returns(mockMixerStartedEvent.Object);
 
-            var mockPlayerStoppedEvent = new Mock<PlayerStoppedEvent>();
+            var mockMixerStoppedEvent = new Mock<MixerStoppedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<PlayerStoppedEvent>()).
-                Returns(mockPlayerStoppedEvent.Object);
+                Setup(m => m.GetEvent<MixerStoppedEvent>()).
+                Returns(mockMixerStoppedEvent.Object);
+
+            var mockMixerEndedEvent = new Mock<MixerEndedEvent>();
+            mockEventAggregator.
+                Setup(m => m.GetEvent<MixerEndedEvent>()).
+                Returns(mockMixerEndedEvent.Object);
 
             mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService

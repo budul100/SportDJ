@@ -30,17 +30,17 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
-                action: LoadSet,
+                action: Initialize,
                 keepSubscriberReferenceAlive: true);
 
-            LoadSet();
+            Initialize();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public GridViewModel Element
+        public GridViewModel Grid
         {
             get { return element; }
             set { SetProperty(ref element, value); }
@@ -50,14 +50,13 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         #region Private Methods
 
-        private void LoadSet()
+        private void Initialize()
         {
             if (containerProvider != default)
             {
-                Element = containerProvider.Resolve<GridViewModel>();
+                Grid = containerProvider.Resolve<GridViewModel>();
 
-                var root = settingsService.Contents.Grid;
-                Element.Initialize(root);
+                Grid.Initialize(settingsService.Contents.Grid);
             }
         }
 

@@ -14,6 +14,8 @@
         public GridViewModel()
             : base(default)
         {
+            Name = "Group";
+
             SetElements();
         }
 
@@ -32,7 +34,7 @@
                         row: row,
                         column: column);
 
-                    Elements.Add(element);
+                    Cells.Add(element);
                 }
             }
         }

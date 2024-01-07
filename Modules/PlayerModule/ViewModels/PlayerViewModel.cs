@@ -21,7 +21,11 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         private string artist;
         private string counter;
-        private IPlayerService playerService;
+        private IMixerService mixerServiceBackground;
+        private IMixerService mixerServiceForeground;
+        private IMixerService mixerServicePFL;
+        private string name;
+        private bool onForeground;
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
@@ -80,10 +84,10 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
                 filter: s => signalService == s);
 
             eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
-                action: (t) => UpdateTrack(),
+                action: _ => UpdateTrack(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: t => this.stackService?.Track == t);
+                filter: t => stackService?.Track == t);
         }
 
         #endregion Public Constructors
@@ -107,6 +111,18 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
         public bool HasStack => stackService?.Entries?.Count > 1;
 
         public bool IsPlaying => signalService?.IsPlaying == true;
+
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+        public bool OnForeground
+        {
+            get { return onForeground; }
+            set { SetProperty(ref onForeground, value); }
+        }
 
         public string Remaining
         {
@@ -133,8 +149,17 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             base.Initialize(
                 cell: player);
 
+            Name = player.Name;
+            OnForeground = player.OnForeground;
+
             stackService = containerProvider?.Resolve<IStackService>();
-            playerService = containerProvider?.Resolve<IPlayerService>(player.Type.ToString());
+
+            mixerServiceBackground = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
+            mixerServiceForeground = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Foreground));
+            mixerServicePFL = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.PFL));
 
             stackService?.Initialize(
                 path: player.Path,
@@ -161,6 +186,15 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
                     signalService.Start();
                 }
             }
+        }
+
+        private IMixerService GetMixerService()
+        {
+            var result = OnForeground
+                ? mixerServiceForeground
+                : mixerServiceBackground;
+
+            return result;
         }
 
         private bool IsExecuteAvailable()
@@ -220,7 +254,8 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
         {
             if (stackService.Track != default)
             {
-                signalService = playerService.Add(stackService.Track);
+                var mixerService = GetMixerService();
+                signalService = mixerService?.Add(stackService.Track);
 
                 UpdateTrack();
             }

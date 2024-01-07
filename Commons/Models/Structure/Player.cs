@@ -1,17 +1,20 @@
-﻿using SportDJ.Commons.Enums;
+﻿using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Structure
 {
     public class Player
-        : Element
+        : Cell
     {
         #region Public Properties
+
+        [XmlAttribute]
+        public string Name { get; set; }
+
+        public bool OnForeground { get; set; }
 
         public string Path { get; set; }
 
         public bool SavePositions { get; set; }
-
-        public PlayerType Type { get; set; }
 
         #endregion Public Properties
     }
