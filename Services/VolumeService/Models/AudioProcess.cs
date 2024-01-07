@@ -1,23 +1,25 @@
-﻿namespace SportDJ.Services.VolumeService.Models
+﻿using NAudio.CoreAudioApi;
+
+namespace SportDJ.Services.VolumeService.Models
 {
     internal class AudioProcess
     {
         #region Public Constructors
 
-        public AudioProcess(string processName, AudioSession session, float volumeGiven)
+        public AudioProcess(AudioSessionControl session, float volumeGiven, bool isBaseSession)
         {
-            ProcessName = processName;
             Session = session;
             VolumeGiven = volumeGiven;
+            IsBaseSession = isBaseSession;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public string ProcessName { get; }
+        public bool IsBaseSession { get; }
 
-        public AudioSession Session { get; }
+        public AudioSessionControl Session { get; }
 
         public float VolumeGiven { get; }
 

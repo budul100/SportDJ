@@ -15,6 +15,7 @@ namespace SportDJ.Tests.OutputServiceTests
 
         private readonly Mock<IContainerProvider> mockContainerProvider;
 
+        private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
 
@@ -27,6 +28,8 @@ namespace SportDJ.Tests.OutputServiceTests
             mockContainerProvider = new Mock<IContainerProvider>();
 
             mockEventAggregator = new Mock<IEventAggregator>();
+
+            mockDispatcherService = new Mock<IDispatcherService>();
 
             var mockPlayerStartedEvent = new Mock<PlayerStartedEvent>();
             mockEventAggregator.

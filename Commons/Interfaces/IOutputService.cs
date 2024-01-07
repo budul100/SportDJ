@@ -38,7 +38,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Raise();
 
-        void Set(int deviceNumber, int sampleRate = Defaults.SampleRate);
+        void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false);
 
         #endregion Public Methods
     }

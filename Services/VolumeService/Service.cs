@@ -1,11 +1,12 @@
-﻿using SportDJ.Commons;
+﻿using NAudio.CoreAudioApi;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Services.VolumeService.Extensions;
 using SportDJ.Services.VolumeService.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -16,13 +17,11 @@ namespace SportDJ.Services.VolumeService
     {
         #region Private Fields
 
-        private readonly string baseProcess;
+        private readonly int baseProcessId;
         private readonly IDispatcherService dispatcherService;
-
         private IEnumerable<AudioProcess> audioProcesses;
         private CancellationTokenSource cancellationTokenSource;
-        private int? deviceNumber;
-        private bool isActive;
+        private string deviceName;
         private bool isDisposed;
         private float volumeTarget;
 
@@ -34,7 +33,7 @@ namespace SportDJ.Services.VolumeService
         {
             this.dispatcherService = dispatcherService;
 
-            baseProcess = AppExtensions.GetProcessName();
+            baseProcessId = Process.GetCurrentProcess().Id;
         }
 
         #endregion Public Constructors
@@ -83,7 +82,9 @@ namespace SportDJ.Services.VolumeService
                     cancellationTokenSource?.Cancel();
                 }
 
-                var relevantProcesses = GetUnchangedProcesses().ToArray();
+                var relevantProcesses = audioProcesses
+                    .Where(p => !p.IsBaseSession
+                        && p.Session.SimpleAudioVolume.Volume != p.VolumeGiven).ToArray();
 
                 if (relevantProcesses.Any())
                 {
@@ -129,7 +130,7 @@ namespace SportDJ.Services.VolumeService
                     audioProcesses = GetAudioProcesses().ToArray();
                 }
 
-                if (audioProcesses?.Any(p => p.ProcessName != baseProcess) == true)
+                if (audioProcesses?.Any(p => !p.IsBaseSession) == true)
                 {
                     if (VolumeType == VolumeType.Raise)
                     {
@@ -146,7 +147,7 @@ namespace SportDJ.Services.VolumeService
                         : 1F;
 
                     var relevantProcesses = audioProcesses
-                        .Where(p => p.ProcessName != baseProcess
+                        .Where(p => !p.IsBaseSession
                             && p.VolumeGiven > volume).ToArray();
 
                     if (relevantProcesses.Any())
@@ -163,11 +164,11 @@ namespace SportDJ.Services.VolumeService
             }
         }
 
-        public void Set(int deviceNumber)
+        public void Set(string deviceName)
         {
             Reset();
 
-            this.deviceNumber = deviceNumber;
+            this.deviceName = deviceName;
         }
 
         #endregion Public Methods
@@ -193,46 +194,35 @@ namespace SportDJ.Services.VolumeService
 
         private IEnumerable<AudioProcess> GetAudioProcesses()
         {
-            if (deviceNumber.HasValue)
+            if (!string.IsNullOrWhiteSpace(deviceName))
             {
-                var sessions = AudioUtilities.GetAllSessions(
-                    deviceNumber: deviceNumber.Value).ToArray();
+                var deviceEnumerator = new MMDeviceEnumerator();
 
-                var relevants = sessions
-                    .Where(s => s.Process != default).ToArray();
+                var devices = deviceEnumerator.EnumerateAudioEndPoints(
+                    dataFlow: DataFlow.Render,
+                    dwStateMask: DeviceState.Active);
 
-                foreach (var relevant in relevants)
+                if (devices.Any(d => d.FriendlyName == deviceName))
                 {
-                    var processName = relevant.Process.ProcessName;
+                    var sessions = devices.FirstOrDefault(d => d.FriendlyName == deviceName)?
+                        .AudioSessionManager.Sessions;
 
-                    relevant.VolumeObj.GetMasterVolume(
-                        pfLevel: out var volume);
-
-                    var result = new AudioProcess(
-                        processName: processName,
-                        session: relevant,
-                        volumeGiven: volume);
-
-                    yield return result;
-                }
-            }
-        }
-
-        private IEnumerable<AudioProcess> GetUnchangedProcesses()
-        {
-            if (audioProcesses?.Any() == true)
-            {
-                var relevantProcesses = audioProcesses
-                    .Where(p => p.ProcessName != baseProcess).ToArray();
-
-                foreach (var relevantProcess in relevantProcesses)
-                {
-                    relevantProcess.Session.VolumeObj.GetMasterVolume(
-                        pfLevel: out var volume);
-
-                    if (volume == relevantProcess.VolumeLower)
+                    if (sessions?.Count > 1)
                     {
-                        yield return relevantProcess;
+                        for (var index = 0; index < sessions.Count; index++)
+                        {
+                            var session = sessions[index];
+
+                            if (session.GetProcessID.ProcessExists())
+                            {
+                                var result = new AudioProcess(
+                                    session: session,
+                                    volumeGiven: session.SimpleAudioVolume.Volume,
+                                    isBaseSession: session.GetProcessID == baseProcessId);
+
+                                yield return result;
+                            }
+                        }
                     }
                 }
             }
@@ -255,13 +245,9 @@ namespace SportDJ.Services.VolumeService
 
                 foreach (var process in processes)
                 {
-                    var volumeProcess = volumeCurrent > process.VolumeGiven
+                    process.Session.SimpleAudioVolume.Volume = volumeCurrent > process.VolumeGiven
                         ? process.VolumeGiven
                         : volumeCurrent;
-
-                    process.Session.VolumeObj.SetMasterVolume(
-                        fLevel: volumeProcess,
-                        EventContext: Guid.Empty);
 
                     process.VolumeLower = volumeCurrent;
                 }
@@ -297,9 +283,7 @@ namespace SportDJ.Services.VolumeService
 
                 foreach (var relevantProcess in relevantProcesses)
                 {
-                    relevantProcess.Session.VolumeObj.SetMasterVolume(
-                        fLevel: volumeCurrent,
-                        EventContext: Guid.Empty);
+                    relevantProcess.Session.SimpleAudioVolume.Volume = volumeCurrent;
 
                     relevantProcess.VolumeLower = volumeCurrent;
                 }
@@ -322,7 +306,7 @@ namespace SportDJ.Services.VolumeService
                 VolumeType = VolumeType.Raise;
 
                 var relevantProcesses = audioProcesses
-                    .Where(p => p.ProcessName != baseProcess).ToArray();
+                    .Where(p => !p.IsBaseSession).ToArray();
 
                 RaiseVolume(
                     processes: relevantProcesses,

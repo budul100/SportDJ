@@ -191,10 +191,9 @@ namespace SportDJ.Services.OutputService
             volumeService = containerProvider.Resolve<IVolumeService>(
                 name: type.ToString());
 
-            var deviceNumber = GetDeviceNumber();
-
             Set(
-                deviceNumber: deviceNumber);
+                deviceName: outputOptions.DeviceName,
+                takeDefaultIfMissing: true);
         }
 
         public void Lower()
@@ -224,11 +223,7 @@ namespace SportDJ.Services.OutputService
             foregroundPlayers.OnEach(p => p.Pause());
             backgroundPlayers.OnEach(p => p.Pause());
 
-            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
-
-            volumeService.Reduce(
-                volumeTarget: Constants.VolumeMin,
-                milliSeconds: fadeMilliseconds);
+            PauseVolume();
         }
 
         public void Raise()
@@ -246,51 +241,48 @@ namespace SportDJ.Services.OutputService
                 milliSeconds: fadeMilliseconds);
         }
 
-        public void Set(int deviceNumber, int sampleRate = Defaults.SampleRate)
+        public void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false)
         {
             var capabilities = GetCapabilities();
 
-            if (capabilities.ContainsKey(deviceNumber))
+            var deviceNumber = GetDeviceNumber(
+                capabilities: capabilities,
+                deviceName: deviceName,
+                takeDefaultIfMissing: takeDefaultIfMissing);
+
+            CloseOutput();
+
+            outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
+
+            Format = WaveFormat.CreateIeeeFloatWaveFormat(
+                sampleRate: sampleRate,
+                channels: capabilities[deviceNumber].Channels);
+
+            backgroundMixer = new ContinuousMixingProvider(Format);
+
+            backgroundFader = new FadedControlProvider(
+                sourceProvider: backgroundMixer,
+                volume: Constants.VolumeMax);
+
+            outputMixer = new ContinuousMixingProvider(Format);
+
+            outputMixer.Add(backgroundFader);
+
+            var waveProvider = new NAudio.Wave.SampleProviders.SampleToWaveProvider(outputMixer);
+
+            output = new WaveOut
             {
-                CloseOutput();
+                DeviceNumber = deviceNumber,
+                Volume = outputOptions.Volume,
+            };
 
-                Format = WaveFormat.CreateIeeeFloatWaveFormat(
-                    sampleRate: sampleRate,
-                    channels: capabilities[deviceNumber].Channels);
+            output.Init(
+                waveProvider: waveProvider);
 
-                backgroundMixer = new ContinuousMixingProvider(Format);
+            output.Play();
 
-                backgroundFader = new FadedControlProvider(
-                    sourceProvider: backgroundMixer,
-                    volume: Constants.VolumeMax);
-
-                outputMixer = new ContinuousMixingProvider(Format);
-
-                outputMixer.Add(backgroundFader);
-
-                var waveProvider = new NAudio.Wave.SampleProviders.SampleToWaveProvider(outputMixer);
-
-                output = new WaveOut
-                {
-                    DeviceNumber = deviceNumber,
-                    Volume = outputOptions.Volume,
-                };
-
-                outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
-
-                output.Init(
-                    waveProvider: waveProvider);
-
-                output.Play();
-
-                volumeService.Set(
-                    deviceNumber: deviceNumber);
-            }
-            else
-            {
-                throw new NoDeviceAvailableException(
-                    deviceNumber: deviceNumber);
-            }
+            volumeService.Set(
+                deviceName: deviceName);
         }
 
         #endregion Public Methods
@@ -351,22 +343,29 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private int GetDeviceNumber()
+        private int GetDeviceNumber(Dictionary<int, WaveOutCapabilities> capabilities, string deviceName,
+            bool takeDefaultIfMissing)
         {
             var result = default(int?);
 
-            var capabilities = GetCapabilities();
-
-            if (string.IsNullOrWhiteSpace(outputOptions.DeviceName))
+            if (string.IsNullOrWhiteSpace(deviceName))
             {
                 result = capabilities
-                    .FirstOrDefault(c => c.Value.ProductName == outputOptions.DeviceName).Key;
+                    .FirstOrDefault(c => c.Value.ProductName == deviceName).Key;
             }
 
             if (!result.HasValue)
             {
-                result = capabilities
-                    .FirstOrDefault().Key;
+                if (takeDefaultIfMissing)
+                {
+                    result = capabilities
+                        .FirstOrDefault().Key;
+                }
+                else
+                {
+                    throw new NoDeviceAvailableException(
+                        message: $"There is no device {deviceName} available.");
+                }
             }
 
             if (!result.HasValue)
@@ -403,6 +402,8 @@ namespace SportDJ.Services.OutputService
             {
                 if (!IsPlaying)
                 {
+                    PauseVolume();
+
                     IsPlaying = true;
 
                     eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
@@ -433,6 +434,15 @@ namespace SportDJ.Services.OutputService
                     eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
                 }
             }
+        }
+
+        private void PauseVolume()
+        {
+            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
+
+            volumeService.Reduce(
+                volumeTarget: Constants.VolumeMin,
+                milliSeconds: fadeMilliseconds);
         }
 
         #endregion Private Methods

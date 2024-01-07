@@ -24,7 +24,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Reduce(float? volumeTarget = default, int? milliSeconds = default);
 
-        void Set(int deviceNumber);
+        void Set(string deviceName);
 
         #endregion Public Methods
     }

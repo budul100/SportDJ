@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Services\OutputService\OutputService.csproj" />
+	  <ProjectReference Include="..\..\Services\VolumeService\VolumeService.csproj" />
 	</ItemGroup>
 
 </Project>
