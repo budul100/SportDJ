@@ -34,17 +34,17 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             clockTimer = GetClockTimer();
             clockTimer.Start();
 
-            eventAggregator?.GetEvent<PlayerStartedEvent>().Subscribe(
-                action: s => OnPlayerStarted(s),
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
                 action: s => OnPlayerUpdated(s),
-                keepSubscriberReferenceAlive: true);
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerService == p);
 
             eventAggregator?.GetEvent<PlayerStoppedEvent>().Subscribe(
-                action: s => OnPlayerEnded(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => OnPlayerEnded(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerService == p);
         }
 
         #endregion Public Constructors
@@ -109,29 +109,17 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             return result;
         }
 
-        private void OnPlayerEnded(IPlayerService playerService)
+        private void OnPlayerEnded()
         {
-            if (playerService == this.playerService)
-            {
-                Content = default;
-                Remaining = default;
-            }
-        }
-
-        private void OnPlayerStarted(IPlayerService playerService)
-        {
-            if (playerService == this.playerService
-                && playerService.Track != default)
-            {
-                Content = $"{playerService.Track.Artist} - {playerService.Track.Title}";
-            }
+            Content = default;
+            Remaining = default;
         }
 
         private void OnPlayerUpdated(IPlayerService playerService)
         {
-            if (playerService == this.playerService
-                && playerService.Track != default)
+            if (playerService.Track != default)
             {
+                Content = $"{playerService.Track.Artist} - {playerService.Track.Title}";
                 Remaining = playerService.Remaining.ToString(Constants.FormatDuration);
             }
         }
