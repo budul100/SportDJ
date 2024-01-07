@@ -40,8 +40,8 @@ namespace SportDJ.App
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            moduleCatalog.AddModule<Modules.PlayerModule.Module>(
-                name: nameof(Modules.PlayerModule));
+            moduleCatalog.AddModule<Modules.GridModule.Module>(
+                name: nameof(Modules.GridModule));
             moduleCatalog.AddModule<Modules.DisplayModule.Module>(
                 name: nameof(Modules.DisplayModule));
             moduleCatalog.AddModule<Modules.ControllerModule.Module>(

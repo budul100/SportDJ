@@ -9,7 +9,7 @@ using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.PlayerModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class PlayerViewModel
         : CellViewModel

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commons", "Commons\Commons.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{0EF6377D-06D6-47DD-BC22-9D864FE340D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerModule", "Modules\PlayerModule\PlayerModule.csproj", "{246A7267-287E-4CDE-BBCF-30971D93B7EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GridModule", "Modules\GridModule\GridModule.csproj", "{246A7267-287E-4CDE-BBCF-30971D93B7EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E76B23EF-AB70-4CD9-BC07-44D1EED74641}"
 EndProject

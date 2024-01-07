@@ -4,7 +4,7 @@ using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace SportDJ.Modules.PlayerModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GridViewModel
         : BindableBase
@@ -13,7 +13,9 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
 
+        private int columns;
         private string name;
+        private int rows;
 
         #endregion Private Fields
 
@@ -30,7 +32,11 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         public ObservableCollection<CellViewModel> Cells { get; } = new ObservableCollection<CellViewModel>();
 
-        public int Columns { get; private set; }
+        public int Columns
+        {
+            get { return columns; }
+            set { SetProperty(ref columns, value); }
+        }
 
         public string Name
         {
@@ -38,7 +44,11 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             set { SetProperty(ref name, value); }
         }
 
-        public int Rows { get; private set; }
+        public int Rows
+        {
+            get { return rows; }
+            set { SetProperty(ref rows, value); }
+        }
 
         #endregion Public Properties
 
@@ -48,12 +58,12 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
         {
             Name = grid.Name;
 
-            var rows = 0;
-            var columns = 0;
-
             if (containerProvider != default
                 && grid?.Cells?.Any() == true)
             {
+                var rowsCount = 0;
+                var columnsCount = 0;
+
                 foreach (var element in grid.Cells)
                 {
                     switch (element)
@@ -65,13 +75,13 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
                             Cells.Add(playerCell);
 
-                            rows = element.Row + 1 > rows
+                            rowsCount = element.Row + 1 > rowsCount
                                 ? element.Row + 1
-                                : rows;
+                                : rowsCount;
 
-                            columns = element.Column + 1 > columns
+                            columnsCount = element.Column + 1 > columnsCount
                                 ? element.Column + 1
-                                : columns;
+                                : columnsCount;
 
                             break;
 
@@ -82,24 +92,21 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
                             Cells.Add(groupCell);
 
-                            rows = groupCell.Row + groupCell.Rows > rows
+                            rowsCount = groupCell.Row + groupCell.Rows > rowsCount
                                 ? groupCell.Row + groupCell.Rows
-                                : rows;
+                                : rowsCount;
 
-                            columns = groupCell.Column + groupCell.Columns > columns
+                            columnsCount = groupCell.Column + groupCell.Columns > columnsCount
                                 ? groupCell.Column + groupCell.Columns
-                                : columns;
+                                : columnsCount;
 
                             break;
                     }
                 }
+
+                Rows = rowsCount;
+                Columns = columnsCount;
             }
-
-            Rows = rows;
-            RaisePropertyChanged(nameof(Rows));
-
-            Columns = columns;
-            RaisePropertyChanged(nameof(Columns));
         }
 
         #endregion Public Methods

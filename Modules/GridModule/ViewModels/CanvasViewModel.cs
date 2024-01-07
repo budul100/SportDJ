@@ -6,7 +6,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 
-namespace SportDJ.Modules.PlayerModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels
 {
     internal class CanvasViewModel
         : RegionViewModelBase

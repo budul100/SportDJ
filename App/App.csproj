@@ -33,7 +33,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Commons\Commons.csproj" />
-	  <ProjectReference Include="..\Modules\PlayerModule\PlayerModule.csproj" />
+	  <ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
 	  <ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
 	  <ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />

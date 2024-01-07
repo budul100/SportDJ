@@ -3,7 +3,7 @@ using Prism.Modularity;
 using Prism.Regions;
 using SportDJ.Commons.Enums;
 
-namespace SportDJ.Modules.PlayerModule
+namespace SportDJ.Modules.GridModule
 {
     public class Module
         : IModule

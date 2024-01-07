@@ -1,7 +1,7 @@
 ﻿using Prism.Mvvm;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.PlayerModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels
 {
     public abstract class CellViewModel
         : BindableBase

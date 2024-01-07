@@ -3,7 +3,7 @@ using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace SportDJ.Modules.PlayerModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GroupViewModel
         : CellViewModel
@@ -37,8 +37,8 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
 
         public void Initialize(Group group)
         {
-            var rows = 0;
-            var columns = 0;
+            Rows = 0;
+            Columns = 0;
 
             if (containerProvider != default
                 && group.Grids?.Any() == true)
@@ -52,20 +52,23 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
                     Tabs.Add(gridTab);
                 }
 
-                rows = Tabs.Max(t => t.Rows);
-                columns = Tabs.Max(t => t.Columns);
+                Rows = Tabs.Max(t => t.Rows);
+                Columns = Tabs.Max(t => t.Columns);
+
+                foreach (var tab in Tabs)
+                {
+                    tab.Rows = Rows;
+                    tab.Columns = Columns;
+                }
             }
 
-            Rows = rows;
             RaisePropertyChanged(nameof(Rows));
-
-            Columns = columns;
             RaisePropertyChanged(nameof(Columns));
 
             base.Initialize(
                 cell: group,
-                rowSpan: rows,
-                columnSpan: columns);
+                rowSpan: Rows,
+                columnSpan: Columns);
         }
 
         #endregion Public Methods
