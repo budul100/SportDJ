@@ -1,5 +1,4 @@
 ﻿using Prism.Events;
-using SportDJ.Commons;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using System;
@@ -29,9 +28,7 @@ namespace SportDJ.Services.StorageService
         private readonly IEventAggregator eventAggregator;
         private readonly SemaphoreSlim saveLock = new(1, 1);
         private readonly XmlSerializer serializer = new(typeof(T));
-
         private string filePath;
-        private string folderPath;
         private bool isDisposed;
 
         #endregion Private Fields
@@ -62,13 +59,20 @@ namespace SportDJ.Services.StorageService
                 obj: this);
         }
 
-        public void Load(string fileName)
+        public string GetPath(string appName, string fileName)
         {
-            this.folderPath = GetSettingsFolderPath();
-            this.filePath = Path.Combine(
-                path1: folderPath,
-                path2: fileName);
+            var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
+            var result = Path.Combine(
+                path1: appDataFolder,
+                path2: appName,
+                path3: fileName);
+
+            return result;
+        }
+
+        public void Load(string filePath)
+        {
             LoadSettings(filePath);
 
             if (Contents is default(T))
@@ -105,19 +109,10 @@ namespace SportDJ.Services.StorageService
 
         #region Private Methods
 
-        private static string GetSettingsFolderPath()
-        {
-            var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            var result = Path.Combine(
-                path1: appDataFolder,
-                path2: Constants.AppName);
-
-            return result;
-        }
-
         private void LoadSettings(string filePath)
         {
+            this.filePath = Path.GetFullPath(filePath);
+
             if (!File.Exists(filePath))
             {
                 SaveSettings();
@@ -134,6 +129,8 @@ namespace SportDJ.Services.StorageService
 
         private void SaveSettings()
         {
+            var folderPath = Path.GetDirectoryName(filePath);
+
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);

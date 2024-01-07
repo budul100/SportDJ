@@ -14,7 +14,9 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Load(string fileName);
+        string GetPath(string appName, string fileName);
+
+        void Load(string filePath);
 
         void Save();
 

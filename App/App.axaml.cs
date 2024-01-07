@@ -4,6 +4,7 @@ using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
 using SportDJ.App.Views;
+using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -17,8 +18,8 @@ namespace SportDJ.App
     {
         #region Public Properties
 
-        public static bool IsSingleViewLifetime => Environment
-            .GetCommandLineArgs().Any(a => a == "--fbdev" || a == "--drm");
+        public static bool IsSingleViewLifetime => Environment.GetCommandLineArgs()
+            .Any(a => a == "--fbdev" || a == "--drm");
 
         #endregion Public Properties
 
@@ -50,6 +51,8 @@ namespace SportDJ.App
 
         protected override AvaloniaObject CreateShell()
         {
+            LoadSettings();
+
             //if (IsSingleViewLifetime)
             //{
             //    return Container.Resolve<MainControl>(); // For Linux Framebuffer or DRM
@@ -107,6 +110,19 @@ namespace SportDJ.App
                     to: to,
                     name: name);
             }
+        }
+
+        private void LoadSettings()
+        {
+            var settingsService = Container.Resolve<IStorageService<Set>>();
+
+            var settingsPath = Environment.GetCommandLineArgs().Length > 1
+                ? Environment.GetCommandLineArgs()[1]
+                : settingsService.GetPath(
+                    appName: Constants.AppName,
+                    fileName: Defaults.FileNameSettings);
+
+            settingsService.Load(settingsPath);
         }
 
         #endregion Private Methods

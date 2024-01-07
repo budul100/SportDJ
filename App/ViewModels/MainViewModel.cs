@@ -25,8 +25,11 @@ namespace SportDJ.App.ViewModels
         {
             this.containerProvider = containerProvider;
 
-            settingsService.Load(Defaults.FileNameSettings);
-            sessionService.Load(Defaults.FileNameSession);
+            var sessionPath = settingsService.GetPath(
+                appName: Constants.AppName,
+                fileName: Defaults.FileNameSession);
+
+            sessionService.Load(sessionPath);
 
             var set = settingsService.Contents;
 

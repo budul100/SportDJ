@@ -1,67 +1,67 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<Canvas Columns="4" Rows="2">
-		<Contents>
-			<Element xsi:type="Player" Column="0" Name="Player 1" Row="0">
+	<Grid>
+		<Cells>
+			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
+				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3</Path>
 				<SavePositions>false</SavePositions>
-				<Type>Background</Type>
-			</Element>
-			<Element xsi:type="Player" Column="1" Name="Player 2" Row="0">
+			</Cell>
+			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
+				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
 				<SavePositions>false</SavePositions>
-				<Type>Background</Type>
-			</Element>
-			<Element xsi:type="Player" Column="0" Name="Player 3" Row="1">
+			</Cell>
+			<Cell xsi:type="Player" Column="0" Row="1" Name="Player 3">
+				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples</Path>
 				<SavePositions>true</SavePositions>
-				<Type>Background</Type>
-			</Element>
-			<Element xsi:type="Group" Column="2" Name="Group 12" Row="0" Columns="2" Rows="2">
-				<Contents>
-					<Element xsi:type="Group" Column="0" Name="Group 1" Row="0" Columns="2" Rows="2">
-						<Contents>
-							<Element xsi:type="Player" Column="0" Name="Player 11" Row="0">
+			</Cell>
+			<Cell xsi:type="Group" Column="2" Row="0">
+				<Grids>
+					<Grid Name="Group 1">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 11">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="0" Name="Player 12" Row="1">
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="1" Name="Player 12">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="1" Name="Player 13" Row="0">
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 13">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="1" Name="Player 14" Row="1">
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 14">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-						</Contents>
-					</Element>
-					<Element xsi:type="Group" Column="0" Name="Group 2" Row="0" Columns="2" Rows="2">
-						<Contents>
-							<Element xsi:type="Player" Column="0" Name="Player 21" Row="0">
+							</Cell>
+						</Cells>
+					</Grid>
+					<Grid Name="Group 2">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 21">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="0" Name="Player 22" Row="1">
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 22">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="1" Name="Player 23" Row="0">
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="0" Name="Player 23">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-							<Element xsi:type="Player" Column="1" Name="Player 24" Row="1">
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 24">
+								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
-								<Type>Background</Type>
-							</Element>
-						</Contents>
-					</Element>
-				</Contents>
-			</Element>
-		</Contents>
-	</Canvas>
+							</Cell>
+						</Cells>
+					</Grid>
+				</Grids>
+			</Cell>
+		</Cells>
+	</Grid>
 	<Options>
 		<FadeOnLowerMilliseconds>50</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
