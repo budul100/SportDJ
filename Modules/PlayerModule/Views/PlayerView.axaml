@@ -110,6 +110,7 @@
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
 
                     <TextBlock
@@ -118,7 +119,8 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource ContentFontSize}"
-                        Text="{Binding Artist}" />
+                        FontWeight="Bold"
+                        Text="{Binding Name}" />
 
                     <TextBlock
                         Grid.Row="1"
@@ -126,10 +128,17 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource ContentFontSize}"
-                        FontWeight="Bold"
+                        Text="{Binding Artist}" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource ContentFontSize}"
                         Text="{Binding Title}" />
 
-                    <Grid Grid.Row="2" Grid.Column="0">
+                    <Grid Grid.Row="3" Grid.Column="0">
 
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />

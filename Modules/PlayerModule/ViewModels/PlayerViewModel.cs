@@ -7,7 +7,6 @@ using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.PlayerModule.ViewModels
@@ -51,28 +50,40 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
-                action: (s) => OnSignalStarted(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => OnSignalStarted(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
-                action: (s) => OnSignalStopped(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => OnSignalStopped(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
-                action: (s) => OnSignalUpdate(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => UpdateRemaining(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
-                action: (s) => OnSignalNext(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => UpdateStack(false),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
-                action: (s) => OnStackUpdated(s),
-                keepSubscriberReferenceAlive: true);
+                action: _ => UpdateTrack(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
 
             eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
-                action: (t) => OnTrackUpdated(t),
-                keepSubscriberReferenceAlive: true);
+                action: (t) => UpdateTrack(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: t => this.stackService?.Track == t);
         }
 
         #endregion Public Constructors
@@ -166,64 +177,26 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             return result;
         }
 
-        private void OnSignalNext(ISignalService signalService)
+        private void OnSignalStarted()
         {
-            if (signalService == this.signalService)
+            if (this.signalService.Track == this.stackService?.Track)
             {
+                this.stackService.Play();
+            }
+
+            UpdateCommands();
+        }
+
+        private void OnSignalStopped()
+        {
+            if (signalService.State == StateType.None || signalService.IsNextThresholdExceeded)
+            {
+                signalService.Dispose();
+
                 UpdateStack();
             }
-        }
 
-        private void OnSignalStarted(ISignalService signalService)
-        {
-            if (signalService == this.signalService)
-            {
-                if (this.signalService.Track == this.stackService?.Track)
-                {
-                    this.stackService.Play();
-                }
-
-                UpdateCommands();
-            }
-        }
-
-        private void OnSignalStopped(ISignalService signalService)
-        {
-            if (signalService == this.signalService)
-            {
-                if (signalService.State == StateType.None || signalService.IsNextThresholdExceeded)
-                {
-                    signalService.Dispose();
-
-                    UpdateStack();
-                }
-
-                UpdateCommands();
-            }
-        }
-
-        private void OnSignalUpdate(ISignalService signalService)
-        {
-            if (signalService == this.signalService)
-            {
-                UpdateRemaining();
-            }
-        }
-
-        private void OnStackUpdated(IStackService stackService)
-        {
-            if (stackService == this.stackService)
-            {
-                UpdateTrack();
-            }
-        }
-
-        private void OnTrackUpdated(Track track)
-        {
-            if (track == this.stackService?.Track)
-            {
-                UpdateTrack();
-            }
+            UpdateCommands();
         }
 
         private void UpdateCommands()
