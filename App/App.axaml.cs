@@ -119,8 +119,12 @@ namespace SportDJ.App
         {
             var settingsService = Container.Resolve<IStorageService<Set>>();
 
-            var settingsPath = Environment.GetCommandLineArgs().Length > 1
+            var commandLinePath = Environment.GetCommandLineArgs().Length > 1
                 ? Environment.GetCommandLineArgs()[1]
+                : default;
+
+            var settingsPath = commandLinePath?.StartsWith("--") == true
+                ? commandLinePath
                 : settingsService.GetPath(
                     appName: Constants.AppName,
                     fileName: Defaults.FileNameSettings);
