@@ -25,14 +25,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
         {
-            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
-                action: (s) => OnOutputStarted(s),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
-                action: (s) => OnOutputStopped(s),
-                keepSubscriberReferenceAlive: true);
-
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
@@ -50,6 +42,18 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             VolumeRaiseCommand = new DelegateCommand(
                 executeMethod: () => outputLiveService.Raise(),
                 canExecuteMethod: () => IsActive);
+
+            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+                action: _ => UpdateCommands(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => outputLiveService == o);
+
+            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+                action: _ => UpdateCommands(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => outputLiveService == o);
         }
 
         #endregion Public Constructors
@@ -93,22 +97,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #endregion Public Properties
 
         #region Private Methods
-
-        private void OnOutputStarted(IOutputService outputService)
-        {
-            if (outputService == outputLiveService)
-            {
-                UpdateCommands();
-            }
-        }
-
-        private void OnOutputStopped(IOutputService outputService)
-        {
-            if (outputService == outputLiveService)
-            {
-                UpdateCommands();
-            }
-        }
 
         private void UpdateCommands()
         {
