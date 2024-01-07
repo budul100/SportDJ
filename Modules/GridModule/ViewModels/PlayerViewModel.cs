@@ -22,6 +22,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly TaskPoolGlobalHook hook;
         private readonly ITrackService trackService;
+
         private string artist;
         private string counter;
         private bool isDisposed;
@@ -47,7 +48,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.trackService = trackService;
             this.hook = hook;
 
-            hook.KeyPressed += OnKeyPressed;
+            if (hook != default)
+            {
+                hook.KeyPressed += OnKeyPressed;
+            }
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecuteSignal,
@@ -115,6 +119,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public DelegateCommand ExecuteCommand { get; }
+
+        public bool HasKey => Key.HasValue;
 
         public bool HasStack => stackService?.Entries?.Count > 1;
 

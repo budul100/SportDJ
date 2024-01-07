@@ -1,7 +1,6 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
-using SharpHook;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
@@ -24,10 +23,8 @@ namespace SportDJ.Services.OutputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly TaskPoolGlobalHook hook;
         private readonly HashSet<IMixerService> mixerServicesAll = new HashSet<IMixerService>();
         private readonly HashSet<IMixerService> mixerServicesForeground = new HashSet<IMixerService>();
-        private readonly Options options;
         private readonly IStorageService<Set> settingsService;
 
         private FadedControlProvider backgroundFader;
@@ -44,17 +41,11 @@ namespace SportDJ.Services.OutputService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService, TaskPoolGlobalHook hook)
+            IStorageService<Set> settingsService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
-            this.hook = hook;
-
-            this.options = settingsService.Contents.Options;
-
-            hook.KeyPressed += OnKeyPressed;
-            hook.KeyReleased += OnKeyReleased;
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
                 action: p => OnMixerStarted(p),
@@ -314,9 +305,6 @@ namespace SportDJ.Services.OutputService
                 if (isDisposing)
                 {
                     CloseOutput();
-
-                    hook.KeyPressed += OnKeyPressed;
-                    hook.KeyReleased += OnKeyReleased;
                 }
 
                 isDisposed = true;
@@ -415,29 +403,6 @@ namespace SportDJ.Services.OutputService
                 .Single(s => s.Type == type);
 
             return result;
-        }
-
-        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
-        {
-            if (options.KeyPauseOutput.HasValue
-                && e?.Data.KeyCode == options.KeyPauseOutput)
-            {
-                Pause();
-            }
-            else if (options.KeyLowerVolume.HasValue
-                && e?.Data.KeyCode == options.KeyLowerVolume)
-            {
-                Lower();
-            }
-        }
-
-        private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
-        {
-            if (options.KeyLowerVolume.HasValue
-                && e?.Data.KeyCode == options.KeyLowerVolume)
-            {
-                Raise();
-            }
         }
 
         private void OnMixerEnded(IMixerService mixerService)

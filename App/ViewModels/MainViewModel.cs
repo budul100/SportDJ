@@ -30,8 +30,8 @@ namespace SportDJ.App.ViewModels
         public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
             IStorageService<Session> sessionService, TaskPoolGlobalHook hook)
         {
-            XXXX(settingsService.Contents);
-            settingsService.Save();
+            //XXXX(settingsService?.Contents);
+            //settingsService?.Save();
 
             this.containerProvider = containerProvider;
             this.hook = hook;
@@ -61,7 +61,10 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.PFL,
                 onForeground: true);
 
-            Task.Run(() => hook.Run());
+            if (hook != default)
+            {
+                Task.Run(() => hook.Run());
+            }
         }
 
         #endregion Public Constructors
@@ -99,13 +102,14 @@ namespace SportDJ.App.ViewModels
 
         #region Private Methods
 
-        private static void LoadSessionService(IStorageService<Set> settingsService, IStorageService<Session> sessionService)
+        private static void LoadSessionService(IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService)
         {
-            var sessionPath = settingsService.GetPath(
+            var sessionPath = settingsService?.GetPath(
                 appName: Constants.AppName,
                 fileName: Defaults.FileNameSession);
 
-            sessionService.Load(sessionPath);
+            sessionService?.Load(sessionPath);
         }
 
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
@@ -131,64 +135,67 @@ namespace SportDJ.App.ViewModels
 
         private void InitializeOutput(OutputType type)
         {
-            var outputService = containerProvider.Resolve<IOutputService>(
+            var outputService = containerProvider?.Resolve<IOutputService>(
                 name: type.ToString());
 
-            outputService.Initialize(
+            outputService?.Initialize(
                 type: type);
         }
 
         private void XXXX(Set set)
         {
-            set.Grid.Cells.Clear();
-
-            set.Grid.Cells.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Key = KeyCode.Vc0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
-            set.Grid.Cells.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Key = KeyCode.Vc1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
-            set.Grid.Cells.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Key = KeyCode.Vc2, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
-
-            var grid1 = new Grid
+            if (set != default)
             {
-                Name = "Group 1",
-            };
+                set.Grid.Cells.Clear();
 
-            grid1.Cells.Add(new Player() { Name = "Player 11", Row = 0, Column = 0 });
-            grid1.Cells.Add(new Player() { Name = "Player 12", Row = 1, Column = 0 });
-            grid1.Cells.Add(new Player() { Name = "Player 13", Row = 0, Column = 1 });
-            grid1.Cells.Add(new Player() { Name = "Player 14", Row = 1, Column = 1 });
+                set.Grid.Cells.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Key = KeyCode.Vc0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+                set.Grid.Cells.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Key = KeyCode.Vc1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+                set.Grid.Cells.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Key = KeyCode.Vc2, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
 
-            var grid2 = new Grid
-            {
-                Name = "Group 2",
-            };
+                var grid1 = new Grid
+                {
+                    Name = "Group 1",
+                };
 
-            grid2.Cells.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
-            grid2.Cells.Add(new Player() { Name = "Player 22", Row = 0, Column = 1 });
-            grid2.Cells.Add(new Player() { Name = "Player 23", Row = 0, Column = 2 });
-            grid2.Cells.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
+                grid1.Cells.Add(new Player() { Name = "Player 11", Row = 0, Column = 0 });
+                grid1.Cells.Add(new Player() { Name = "Player 12", Row = 1, Column = 0 });
+                grid1.Cells.Add(new Player() { Name = "Player 13", Row = 0, Column = 1 });
+                grid1.Cells.Add(new Player() { Name = "Player 14", Row = 1, Column = 1 });
 
-            var group = new Group
-            {
-                Row = 0,
-                Column = 2,
-            };
+                var grid2 = new Grid
+                {
+                    Name = "Group 2",
+                };
 
-            group.Grids.Add(grid1);
-            group.Grids.Add(grid2);
+                grid2.Cells.Add(new Player() { Name = "Player 21", Row = 0, Column = 0 });
+                grid2.Cells.Add(new Player() { Name = "Player 22", Row = 0, Column = 1 });
+                grid2.Cells.Add(new Player() { Name = "Player 23", Row = 0, Column = 2 });
+                grid2.Cells.Add(new Player() { Name = "Player 24", Row = 1, Column = 1 });
 
-            set.Grid.Cells.Add(group);
+                var group = new Group
+                {
+                    Row = 0,
+                    Column = 2,
+                };
 
-            set.Options.KeyLowerVolume = KeyCode.VcSpace;
-            set.Options.KeyPauseOutput = KeyCode.VcEnter;
+                group.Grids.Add(grid1);
+                group.Grids.Add(grid2);
 
-            set.Options.FadeOnLowerMilliseconds = 50;
-            set.Options.FadeOnPauseMilliseconds = 500;
-            set.Options.FadeOnMixInMilliseconds = 500;
-            set.Options.FadeOnMixOutMilliseconds = 500;
+                set.Grid.Cells.Add(group);
 
-            set.Options.SelectNextSeconds = 5;
+                set.Options.KeyLowerVolume = KeyCode.VcSpace;
+                set.Options.KeyPauseOutput = KeyCode.VcEnter;
 
-            set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
-            //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";
+                set.Options.FadeOnLowerMilliseconds = 50;
+                set.Options.FadeOnPauseMilliseconds = 500;
+                set.Options.FadeOnMixInMilliseconds = 500;
+                set.Options.FadeOnMixOutMilliseconds = 500;
+
+                set.Options.SelectNextSeconds = 5;
+
+                set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
+                //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";
+            }
         }
 
         #endregion Private Methods

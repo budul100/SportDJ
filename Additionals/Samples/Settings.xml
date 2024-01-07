@@ -8,7 +8,6 @@
 				<SavePositions>false</SavePositions>
 			</Cell>
 			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
-				<Key>Vc1</Key>
 				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
 				<SavePositions>false</SavePositions>

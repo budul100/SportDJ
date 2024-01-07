@@ -2,21 +2,27 @@
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using SharpHook;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
     public class ControllerViewModel
-        : RegionViewModelBase
+        : RegionViewModelBase, IDisposable
     {
         #region Private Fields
 
+        private readonly TaskPoolGlobalHook hook;
+        private readonly Options options;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
 
+        private bool isDisposed;
         private bool othersMuted;
         private bool volumeMonitoringActive;
 
@@ -25,9 +31,15 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator, IStorageService<Set> settingsService, TaskPoolGlobalHook hook)
             : base(regionManager)
         {
+            this.hook = hook;
+            this.options = settingsService.Contents.Options;
+
+            hook.KeyPressed += OnKeyPressed;
+            hook.KeyReleased += OnKeyReleased;
+
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
@@ -99,7 +111,61 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #endregion Public Properties
 
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(
+                disposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    hook.KeyPressed += OnKeyPressed;
+                    hook.KeyReleased += OnKeyReleased;
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
+
         #region Private Methods
+
+        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
+        {
+            if (options.KeyPauseOutput.HasValue
+                && e?.Data.KeyCode == options.KeyPauseOutput)
+            {
+                outputLiveService.Pause();
+            }
+            else if (options.KeyLowerVolume.HasValue
+                && e?.Data.KeyCode == options.KeyLowerVolume)
+            {
+                outputLiveService.Lower();
+            }
+        }
+
+        private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
+        {
+            if (options.KeyLowerVolume.HasValue
+                && e?.Data.KeyCode == options.KeyLowerVolume)
+            {
+                outputLiveService.Raise();
+            }
+        }
 
         private void UpdateCommands()
         {

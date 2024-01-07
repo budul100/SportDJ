@@ -56,7 +56,6 @@ namespace SportDJ.Tests.StackServiceTests
 
             trackService = new Services.TrackService.Service(
                 eventAggregator: mockEventAggregator.Object,
-                dispatcherService: mockDispatcherService.Object,
                 settingsService: mockSettingsService.Object);
         }
 

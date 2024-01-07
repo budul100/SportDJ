@@ -12,6 +12,8 @@
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";
 
+        public const int IsEndingInSec = 10;
+
         public const int MixerSourcesMax = 1024;
 
         public const float VolumeMax = 1f;

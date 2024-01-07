@@ -1,4 +1,5 @@
-﻿using SportDJ.Commons;
+﻿using SharpHook.Native;
+using SportDJ.Commons;
 using System;
 
 namespace SportDJ.Modules.GridModule.DesignTime
@@ -24,6 +25,7 @@ namespace SportDJ.Modules.GridModule.DesignTime
             this.Artist = artist ?? "Artist";
             this.Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
             this.Counter = $"[{3}]";
+            this.Key = KeyCode.VcA;
         }
 
         #endregion Public Constructors

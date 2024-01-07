@@ -10,6 +10,7 @@
         {
             Content = "Example - Example";
             Remaining = "00:05.3";
+            IsEnding = true;
         }
 
         #endregion Public Constructors

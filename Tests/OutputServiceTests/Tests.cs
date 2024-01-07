@@ -15,7 +15,6 @@ namespace SportDJ.Tests.OutputServiceTests
 
         private readonly Mock<IContainerProvider> mockContainerProvider;
 
-        private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
 
@@ -28,8 +27,6 @@ namespace SportDJ.Tests.OutputServiceTests
             mockContainerProvider = new Mock<IContainerProvider>();
 
             mockEventAggregator = new Mock<IEventAggregator>();
-
-            mockDispatcherService = new Mock<IDispatcherService>();
 
             var mockMixerStartedEvent = new Mock<MixerStartedEvent>();
             mockEventAggregator.
@@ -60,9 +57,9 @@ namespace SportDJ.Tests.OutputServiceTests
         public void GetDevices()
         {
             var service = new Services.OutputService.Service(
-                mockContainerProvider.Object,
-                mockEventAggregator.Object,
-                mockSettingsService.Object);
+                containerProvider: mockContainerProvider.Object,
+                eventAggregator: mockEventAggregator.Object,
+                settingsService: mockSettingsService.Object);
 
             var devices = service.GetDevices();
 

@@ -2,8 +2,10 @@
     x:Class="SportDJ.Modules.DisplayModule.Views.DisplayView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.DisplayModule.DesignTime"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     d:DesignHeight="50"
@@ -70,6 +72,7 @@
         </Border>
 
         <Border
+            Name="RemainingBorder"
             Grid.Row="0"
             Grid.Column="2"
             Margin="{StaticResource InnerMargin}"
@@ -77,6 +80,27 @@
             VerticalAlignment="Stretch"
             Background="{StaticResource Background}"
             CornerRadius="{StaticResource CornerRadius}">
+
+            <i:Interaction.Behaviors>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsEnding}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="RemainingBorder"
+                        Value="{StaticResource BackgroundIsEnding}" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsEnding}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction
+                        PropertyName="Background"
+                        TargetObject="RemainingBorder"
+                        Value="{StaticResource Background}" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
 
             <TextBlock
                 HorizontalAlignment="Center"

@@ -21,6 +21,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private string content;
         private bool isDisposed;
+        private bool isEnding;
         private string remaining;
 
         #endregion Private Fields
@@ -60,6 +61,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             get { return content; }
             set { SetProperty(ref content, value); }
+        }
+
+        public bool IsEnding
+        {
+            get { return isEnding; }
+            set { SetProperty(ref isEnding, value); }
         }
 
         public string Remaining
@@ -116,6 +123,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             Content = default;
             Remaining = default;
+            IsEnding = false;
         }
 
         private void OnMixerUpdated(IMixerService mixerService)
@@ -124,6 +132,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             {
                 Content = $"{mixerService.Track.Artist} - {mixerService.Track.Title}";
                 Remaining = mixerService.Remaining.ToString(Constants.FormatDuration);
+                IsEnding = mixerService.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingInSec);
             }
         }
 

@@ -2,7 +2,8 @@
     x:Class="SportDJ.Modules.GridModule.Views.PlayerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:co="using:SportDJ.Commons.Converters"
+    xmlns:coc="using:SportDJ.Commons.Converters"
+    xmlns:com="using:SportDJ.Modules.GridModule.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
@@ -27,7 +28,8 @@
         <x:Double x:Key="IconWidth">30</x:Double>
         <x:Double x:Key="IconHeight">30</x:Double>
 
-        <co:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
+        <coc:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
+        <com:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -42,13 +44,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" />
             <RowDefinition Height="4*" />
+            <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+                <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeConverter}}" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Button
@@ -56,35 +59,47 @@
                 Grid.Column="0"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Command="{Binding TrackBackwardCommand}"
-                IsVisible="{Binding HasStack}">
+                VerticalAlignment="Stretch">
                 <mat:MaterialIcon
                     Width="{StaticResource IconWidth}"
                     Height="{StaticResource IconHeight}"
-                    Kind="SkipBackward" />
+                    Kind="Headphones" />
             </Button>
 
-            <Button
+            <Border
                 Grid.Row="0"
                 Grid.Column="1"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch" />
+                VerticalAlignment="Stretch"
+                Background="{StaticResource Background}"
+                CornerRadius="{StaticResource CornerRadius}"
+                IsVisible="{Binding HasKey}">
+
+                <Border
+                    Width="{Binding $self.Bounds.Height}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource BackgroundKey}"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource CornerRadius}">
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource ContentFontSize}"
+                        FontWeight="Bold"
+                        Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
+                </Border>
+            </Border>
 
             <Button
                 Grid.Row="0"
                 Grid.Column="2"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Command="{Binding TrackForwardCommand}"
-                IsVisible="{Binding HasStack}">
-                <mat:MaterialIcon
-                    Width="{StaticResource IconWidth}"
-                    Height="{StaticResource IconHeight}"
-                    Kind="SkipForward" />
-            </Button>
+                VerticalAlignment="Stretch" />
         </Grid>
 
         <Border
@@ -164,5 +179,38 @@
                 </Grid>
             </Button>
         </Border>
+
+        <Grid Grid.Row="2" IsVisible="{Binding HasStack}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackBackwardCommand}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipBackward" />
+            </Button>
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding TrackForwardCommand}">
+                <mat:MaterialIcon
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="SkipForward" />
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>
