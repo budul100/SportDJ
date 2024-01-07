@@ -1,15 +1,16 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Mvvm;
+using Prism.Regions;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Prism;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
     public class ControllerViewModel
-        : BindableBase
+        : RegionViewModelBase
     {
         #region Private Fields
 
@@ -23,7 +24,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #region Public Constructors
 
-        public ControllerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+            IEventAggregator eventAggregator)
+            : base(regionManager)
         {
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));

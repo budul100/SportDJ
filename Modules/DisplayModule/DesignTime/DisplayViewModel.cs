@@ -6,7 +6,7 @@
         #region Public Constructors
 
         public DisplayViewModel()
-            : base(containerProvider: default, eventAggregator: default)
+            : base(regionManager: default, containerProvider: default, eventAggregator: default)
         {
             Content = "Example - Example";
             Remaining = "00:05.3";

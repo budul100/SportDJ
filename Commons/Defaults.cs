@@ -1,4 +1,6 @@
-﻿namespace SportDJ.Commons
+﻿using SharpHook.Native;
+
+namespace SportDJ.Commons
 {
     public static class Defaults
     {
@@ -6,6 +8,9 @@
 
         public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
+
+        public const KeyCode KeyCodeLowerVolume = KeyCode.VcSpace;
+        public const KeyCode KeyPauseOutput = KeyCode.VcEnter;
 
         public const int SampleRate = 44100;
 

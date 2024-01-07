@@ -1,4 +1,6 @@
-﻿namespace SportDJ.Commons.Models.Settings
+﻿using SharpHook.Native;
+
+namespace SportDJ.Commons.Models.Settings
 {
     public class Options
     {
@@ -12,7 +14,11 @@
 
         public int FadeOnPauseMilliseconds { get; set; }
 
-        public int SelectNextSeconds { get; set; } = 10;
+        public KeyCode? KeyLowerVolume { get; set; } = Defaults.KeyCodeLowerVolume;
+
+        public KeyCode? KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
+
+        public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;
 
         public double TrimRearPortion { get; set; } = Defaults.TrimRearPortion;
 

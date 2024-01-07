@@ -6,6 +6,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -131,6 +132,8 @@ namespace SportDJ.Tests.StackServiceTests
                 path: @"..\..\..\Samples",
                 controllerName: default,
                 savePosition: false);
+
+            Task.Delay(1000).Wait();
 
             Assert.Equal(
                 expected: 3,

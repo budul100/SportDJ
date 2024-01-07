@@ -2,16 +2,19 @@
 	<Grid>
 		<Cells>
 			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
+				<Key>Vc0</Key>
 				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3</Path>
 				<SavePositions>false</SavePositions>
 			</Cell>
 			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
+				<Key>Vc1</Key>
 				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
 				<SavePositions>false</SavePositions>
 			</Cell>
 			<Cell xsi:type="Player" Column="0" Row="1" Name="Player 3">
+				<Key>Vc2</Key>
 				<OnForeground>false</OnForeground>
 				<Path>..\..\..\..\Tests\StackServiceTests\Samples</Path>
 				<SavePositions>true</SavePositions>
@@ -21,18 +24,22 @@
 					<Grid Name="Group 1">
 						<Cells>
 							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 11">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="1" Name="Player 12">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 13">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 14">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
@@ -41,18 +48,22 @@
 					<Grid Name="Group 2">
 						<Cells>
 							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 21">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 22">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="0" Name="Player 23">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 24">
+								<Key xsi:nil="true" />
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
@@ -67,6 +78,8 @@
 		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
+		<KeyLowerVolume>VcSpace</KeyLowerVolume>
+		<KeyPauseOutput>VcEnter</KeyPauseOutput>
 		<SelectNextSeconds>5</SelectNextSeconds>
 		<TrimRearPortion>0.1</TrimRearPortion>
 		<TrimVolume>0</TrimVolume>
@@ -75,8 +88,8 @@
 		<Output Type="Live">
 			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
 			<Volume>1</Volume>
-			<VolumePortionApps>0.5</VolumePortionApps>
-			<VolumePortionBackground>0.5</VolumePortionBackground>
+			<VolumePortionApps>0.2</VolumePortionApps>
+			<VolumePortionBackground>0.2</VolumePortionBackground>
 		</Output>
 	</Outputs>
 </Set>

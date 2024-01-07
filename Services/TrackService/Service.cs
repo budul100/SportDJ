@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService
 {
@@ -19,7 +20,6 @@ namespace SportDJ.Services.TrackService
         #region Private Fields
 
         private readonly AudioDataIOFactory audioDataIOFactory;
-        private readonly IDispatcherService dispatcherService;
         private readonly IEventAggregator eventAggregator;
         private readonly IEnumerable<ATL.Format> formatsAudio;
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
@@ -31,11 +31,9 @@ namespace SportDJ.Services.TrackService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService,
-            IStorageService<Set> settingsService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
         {
             this.eventAggregator = eventAggregator;
-            this.dispatcherService = dispatcherService;
             this.settingsService = settingsService;
 
             playlistIOFactory = PlaylistIOFactory.GetInstance();
@@ -138,7 +136,7 @@ namespace SportDJ.Services.TrackService
                         artist: atlTrack.Artist,
                         length: length);
 
-                    dispatcherService.InvokeAsync(() => TrimTrack(result));
+                    Task.Run(() => TrimTrack(result));
 
                     tracks.Add(
                         key: file,

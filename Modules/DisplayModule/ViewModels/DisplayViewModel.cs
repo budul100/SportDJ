@@ -1,17 +1,18 @@
 ﻿using Avalonia.Threading;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Mvvm;
+using Prism.Regions;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Prism;
 using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
 {
     public class DisplayViewModel
-        : BindableBase, IDisposable
+        : RegionViewModelBase, IDisposable
     {
         #region Private Fields
 
@@ -26,7 +27,9 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         #region Public Constructors
 
-        public DisplayViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator)
+        public DisplayViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+            IEventAggregator eventAggregator)
+            : base(regionManager)
         {
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));

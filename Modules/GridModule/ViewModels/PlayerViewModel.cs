@@ -1,6 +1,8 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
+using SharpHook;
+using SharpHook.Native;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
@@ -8,19 +10,22 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class PlayerViewModel
-        : CellViewModel
+        : CellViewModel, IDisposable
     {
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly TaskPoolGlobalHook hook;
         private readonly ITrackService trackService;
-
         private string artist;
         private string counter;
+        private bool isDisposed;
+        private KeyCode? key;
         private IMixerService mixerServiceBackground;
         private IMixerService mixerServiceForeground;
         private IMixerService mixerServicePFL;
@@ -36,10 +41,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ITrackService trackService)
+            ITrackService trackService, TaskPoolGlobalHook hook)
         {
             this.containerProvider = containerProvider;
             this.trackService = trackService;
+            this.hook = hook;
+
+            hook.KeyPressed += OnKeyPressed;
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecuteSignal,
@@ -112,6 +120,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsPlaying => signalService?.IsPlaying == true;
 
+        public KeyCode? Key
+        {
+            get { return key; }
+            set { SetProperty(ref key, value); }
+        }
+
         public string Name
         {
             get { return name; }
@@ -144,12 +158,22 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Methods
 
+        public void Dispose()
+        {
+            Dispose(
+                disposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
         public void Initialize(Player player)
         {
             base.Initialize(
                 cell: player);
 
             Name = player.Name;
+            Key = player.Key;
             OnForeground = player.OnForeground;
 
             stackService = containerProvider?.Resolve<IStackService>();
@@ -170,6 +194,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    hook.KeyPressed -= OnKeyPressed;
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
 
         #region Private Methods
 
@@ -209,6 +250,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
             var result = stackService?.HasUnplayeds == true;
 
             return result;
+        }
+
+        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
+        {
+            if (Key.HasValue
+                && e?.Data.KeyCode == Key)
+            {
+                ExecuteSignal();
+            }
         }
 
         private void OnSignalStarted()

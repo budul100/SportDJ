@@ -1,40 +1,44 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
+using SharpHook;
+using SharpHook.Native;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.App.ViewModels
 {
     public class MainViewModel
-        : BindableBase
+        : BindableBase, IDisposable
     {
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private TaskPoolGlobalHook hook;
+
+        private bool isDisposed;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService)
+            IStorageService<Session> sessionService, TaskPoolGlobalHook hook)
         {
-            this.containerProvider = containerProvider;
-
-            var sessionPath = settingsService.GetPath(
-                appName: Constants.AppName,
-                fileName: Defaults.FileNameSession);
-
-            sessionService.Load(sessionPath);
-
-            var set = settingsService.Contents;
-
-            XXXX(set);
+            XXXX(settingsService.Contents);
             settingsService.Save();
+
+            this.containerProvider = containerProvider;
+            this.hook = hook;
+
+            LoadSessionService(
+                settingsService: settingsService,
+                sessionService: sessionService);
 
             InitializeOutput(
                 type: OutputType.Live);
@@ -56,11 +60,53 @@ namespace SportDJ.App.ViewModels
                 outputType: OutputType.PFL,
                 mixerType: MixerType.PFL,
                 onForeground: true);
+
+            Task.Run(() => hook.Run());
         }
 
         #endregion Public Constructors
 
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(
+                disposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    hook.Dispose();
+                    hook = default;
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
+
         #region Private Methods
+
+        private static void LoadSessionService(IStorageService<Set> settingsService, IStorageService<Session> sessionService)
+        {
+            var sessionPath = settingsService.GetPath(
+                appName: Constants.AppName,
+                fileName: Defaults.FileNameSession);
+
+            sessionService.Load(sessionPath);
+        }
 
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
         {
@@ -96,9 +142,9 @@ namespace SportDJ.App.ViewModels
         {
             set.Grid.Cells.Clear();
 
-            set.Grid.Cells.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
-            set.Grid.Cells.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
-            set.Grid.Cells.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
+            set.Grid.Cells.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Key = KeyCode.Vc0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+            set.Grid.Cells.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Key = KeyCode.Vc1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+            set.Grid.Cells.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Key = KeyCode.Vc2, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
 
             var grid1 = new Grid
             {
@@ -131,10 +177,14 @@ namespace SportDJ.App.ViewModels
 
             set.Grid.Cells.Add(group);
 
+            set.Options.KeyLowerVolume = KeyCode.VcSpace;
+            set.Options.KeyPauseOutput = KeyCode.VcEnter;
+
             set.Options.FadeOnLowerMilliseconds = 50;
             set.Options.FadeOnPauseMilliseconds = 500;
             set.Options.FadeOnMixInMilliseconds = 500;
             set.Options.FadeOnMixOutMilliseconds = 500;
+
             set.Options.SelectNextSeconds = 5;
 
             set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";

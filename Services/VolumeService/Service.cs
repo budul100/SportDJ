@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.VolumeService
 {
@@ -18,7 +19,7 @@ namespace SportDJ.Services.VolumeService
         #region Private Fields
 
         private readonly int baseProcessId;
-        private readonly IDispatcherService dispatcherService;
+
         private IEnumerable<AudioProcess> audioProcesses;
         private CancellationTokenSource cancellationTokenSource;
         private string deviceName;
@@ -29,11 +30,9 @@ namespace SportDJ.Services.VolumeService
 
         #region Public Constructors
 
-        public Service(IDispatcherService dispatcherService)
+        public Service()
         {
-            this.dispatcherService = dispatcherService;
-
-            baseProcessId = Process.GetCurrentProcess().Id;
+            baseProcessId = Environment.ProcessId;
         }
 
         #endregion Public Constructors
@@ -100,7 +99,7 @@ namespace SportDJ.Services.VolumeService
                     cancellationTokenSource = new CancellationTokenSource();
                     var cancellationToken = cancellationTokenSource.Token;
 
-                    dispatcherService.InvokeAsync(() => RaiseVolume(
+                    Task.Run(() => RaiseVolume(
                         processes: relevantProcesses,
                         fadeStep: fadeStep,
                         cancellationToken: cancellationToken));
@@ -155,7 +154,7 @@ namespace SportDJ.Services.VolumeService
                         cancellationTokenSource = new CancellationTokenSource();
                         var cancellationToken = cancellationTokenSource.Token;
 
-                        dispatcherService.InvokeAsync(() => ReduceVolume(
+                        Task.Run(() => ReduceVolume(
                             processes: relevantProcesses,
                             fadeStep: fadeStep,
                             cancellationToken: cancellationToken));

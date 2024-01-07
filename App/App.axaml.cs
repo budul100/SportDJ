@@ -3,6 +3,7 @@ using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
+using SharpHook;
 using SportDJ.App.Views;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
@@ -67,6 +68,8 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            containerRegistry.RegisterSingleton<TaskPoolGlobalHook>();
+
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
