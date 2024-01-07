@@ -45,13 +45,13 @@ namespace SportDJ.App.ViewModels
 
         private static void XXXX(Set set)
         {
-            set.Canvas.Contents.Clear();
+            set.Grid.Contents.Clear();
 
-            set.Canvas.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
+            set.Grid.Contents.Add(new Player() { Name = "Player 1", Row = 0, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3" });
 
-            set.Canvas.Contents.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
+            set.Grid.Contents.Add(new Player() { Name = "Player 2", Row = 0, Column = 1, Path = @"..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3" });
 
-            set.Canvas.Contents.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
+            set.Grid.Contents.Add(new Player() { Name = "Player 3", Row = 1, Column = 0, Path = @"..\..\..\..\Tests\StackServiceTests\Samples", SavePositions = true });
 
             var group1 = new Group
             {
@@ -99,10 +99,10 @@ namespace SportDJ.App.ViewModels
             group3.Contents.Add(group1);
             group3.Contents.Add(group2);
 
-            set.Canvas.Contents.Add(group3);
+            set.Grid.Contents.Add(group3);
 
-            set.Canvas.Rows = 2;
-            set.Canvas.Columns = 4;
+            set.Grid.Rows = 2;
+            set.Grid.Columns = 4;
 
             set.Options.FadeOnLowerMilliseconds = 50;
             set.Options.FadeOnPauseMilliseconds = 500;

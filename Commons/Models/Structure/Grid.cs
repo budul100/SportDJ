@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Structure
 {
-    public class Canvas
+    public class Grid
         : IGrid
     {
         #region Public Properties

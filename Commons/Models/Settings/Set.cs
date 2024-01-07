@@ -7,7 +7,7 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        public Canvas Canvas { get; set; } = new Canvas();
+        public Grid Grid { get; set; } = new Grid();
 
         public Options Options { get; set; } = new Options();
 

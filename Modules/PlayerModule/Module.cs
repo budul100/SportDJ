@@ -29,13 +29,13 @@ namespace SportDJ.Modules.PlayerModule
         {
             regionManager.RegisterViewWithRegion(
                 regionName: nameof(RegionType.PlayerRegion),
-                viewType: typeof(Views.CanvasView));
+                viewType: typeof(Views.GridView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterForNavigation<Views.CanvasView>(
-                name: typeof(Views.CanvasView).FullName);
+            containerRegistry.RegisterForNavigation<Views.GridView>(
+                name: typeof(Views.GridView).FullName);
         }
 
         #endregion Public Methods

@@ -56,7 +56,7 @@ namespace SportDJ.Modules.PlayerModule.ViewModels
             {
                 Element = containerProvider.Resolve<GridViewModel>();
 
-                var root = settingsService.Contents.Canvas;
+                var root = settingsService.Contents.Grid;
                 Element.Initialize(root);
             }
         }
