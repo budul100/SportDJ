@@ -21,10 +21,10 @@ namespace SportDJ.Services.OutputService
     {
         #region Private Fields
 
-        private readonly List<IPlayerService> backgroundPlayers = new List<IPlayerService>();
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly List<IPlayerService> foregroundPlayers = new List<IPlayerService>();
+        private readonly HashSet<IPlayerService> playerServices = new HashSet<IPlayerService>();
+        private readonly HashSet<IPlayerService> playerServicesForeground = new HashSet<IPlayerService>();
         private readonly IStorageService<Set> settingsService;
 
         private FadedControlProvider backgroundFader;
@@ -49,11 +49,21 @@ namespace SportDJ.Services.OutputService
 
             eventAggregator.GetEvent<PlayerStartedEvent>().Subscribe(
                 action: p => OnPlayerStarted(p),
-                keepSubscriberReferenceAlive: true);
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerServices.Contains(p));
 
             eventAggregator.GetEvent<PlayerStoppedEvent>().Subscribe(
                 action: p => OnPlayerStopped(p),
-                keepSubscriberReferenceAlive: true);
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerServices.Contains(p));
+
+            eventAggregator.GetEvent<PlayerEndedEvent>().Subscribe(
+                action: p => OnPlayerEnded(p),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerServices.Contains(p));
         }
 
         #endregion Public Constructors
@@ -153,14 +163,14 @@ namespace SportDJ.Services.OutputService
             {
                 outputMixer.Add(playerService.Output);
 
-                foregroundPlayers.Add(playerService);
+                playerServicesForeground.Add(playerService);
             }
             else
             {
                 backgroundMixer.Add(playerService.Output);
             }
 
-            backgroundPlayers.Add(playerService);
+            playerServices.Add(playerService);
         }
 
         public void Dispose()
@@ -220,8 +230,7 @@ namespace SportDJ.Services.OutputService
 
         public void Pause()
         {
-            foregroundPlayers.OnEach(p => p.Pause());
-            backgroundPlayers.OnEach(p => p.Pause());
+            playerServices.OnEach(p => p.Pause());
 
             PauseVolume();
         }
@@ -320,7 +329,8 @@ namespace SportDJ.Services.OutputService
                 volumeService.Deactivate();
                 volumeService.Dispose();
 
-                backgroundPlayers.Clear();
+                playerServicesForeground.Clear();
+                playerServices.Clear();
             }
         }
 
@@ -395,44 +405,47 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
+        private void OnPlayerEnded(IPlayerService playerService)
+        {
+            if (playerServicesForeground.Contains(playerService))
+            {
+                playerServicesForeground.Remove(playerService);
+            }
+
+            playerServices.Remove(playerService);
+        }
+
         private void OnPlayerStarted(IPlayerService playerService)
         {
-            if (foregroundPlayers.Contains(playerService)
-                || backgroundPlayers.Contains(playerService))
+            if (!IsPlaying)
             {
-                if (!IsPlaying)
-                {
-                    PauseVolume();
+                IsPlaying = true;
 
-                    IsPlaying = true;
+                eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
+            }
 
-                    eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
-                }
-
-                if (foregroundPlayers.Contains(playerService))
-                {
-                    Lower();
-                }
+            if (playerServicesForeground.Contains(playerService))
+            {
+                Lower();
+            }
+            else
+            {
+                PauseVolume();
             }
         }
 
         private void OnPlayerStopped(IPlayerService playerService)
         {
-            if (foregroundPlayers.Contains(playerService)
-                || backgroundPlayers.Contains(playerService))
+            if (playerServicesForeground.Contains(playerService))
             {
-                if (foregroundPlayers.Contains(playerService))
-                {
-                    Raise();
-                }
+                Raise();
+            }
 
-                if (!foregroundPlayers.Any(p => p.IsPlaying)
-                    && !backgroundPlayers.Any(p => p.IsPlaying))
-                {
-                    IsPlaying = false;
+            if (!playerServices.Any(p => p.IsPlaying))
+            {
+                IsPlaying = false;
 
-                    eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
-                }
+                eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
             }
         }
 

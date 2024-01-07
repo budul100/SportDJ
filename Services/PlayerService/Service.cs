@@ -179,6 +179,8 @@ namespace SportDJ.Services.PlayerService
                 {
                     Pause();
 
+                    eventAggregator.GetEvent<PlayerEndedEvent>().Publish(this);
+
                     mixingProvider.Dispose();
 
                     signalServices.OnEach(s => s.Dispose());
