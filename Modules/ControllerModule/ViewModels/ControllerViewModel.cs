@@ -151,8 +151,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             {
                 outputLiveService.Pause();
             }
-            else if (options.KeyLowerVolume.HasValue
-                && e?.Data.KeyCode == options.KeyLowerVolume)
+            else if (options.KeyTalkVolume.HasValue
+                && e?.Data.KeyCode == options.KeyTalkVolume)
             {
                 outputLiveService.Lower();
             }
@@ -160,8 +160,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
-            if (options.KeyLowerVolume.HasValue
-                && e?.Data.KeyCode == options.KeyLowerVolume)
+            if (options.KeyTalkVolume.HasValue
+                && e?.Data.KeyCode == options.KeyTalkVolume)
             {
                 outputLiveService.Raise();
             }

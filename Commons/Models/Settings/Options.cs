@@ -14,7 +14,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public int FadeOnPauseMilliseconds { get; set; }
 
-        public KeyCode? KeyLowerVolume { get; set; } = Defaults.KeyCodeLowerVolume;
+        public KeyCode? KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
 
         public KeyCode? KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
 

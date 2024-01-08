@@ -1,69 +1,247 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid>
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
-				<Key>Vc0</Key>
-				<OnForeground>false</OnForeground>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample1.mp3</Path>
-				<SavePositions>false</SavePositions>
-			</Cell>
-			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
-				<OnForeground>false</OnForeground>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples\Sample2.mp3</Path>
-				<SavePositions>false</SavePositions>
-			</Cell>
-			<Cell xsi:type="Player" Column="0" Row="1" Name="Player 3">
-				<Key>Vc2</Key>
-				<OnForeground>false</OnForeground>
-				<Path>..\..\..\..\Tests\StackServiceTests\Samples</Path>
-				<SavePositions>true</SavePositions>
-			</Cell>
-			<Cell xsi:type="Group" Column="2" Row="0">
+			<Cell xsi:type="Group" Column="0" Row="0">
 				<Grids>
-					<Grid Name="Group 1">
+					<Grid Name="Damen">
 						<Cells>
-							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 11">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="0" Row="0" Name="Sonstiges">
+								<Key>Vc7</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="0" Row="1" Name="Player 12">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="1" Row="0" Name="Sonstiges">
+								<Key>Vc8</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 13">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="2" Row="0" Name="Warm-Up">
+								<Key>Vc9</Key>
 								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Sky News Theme.mp3</Path>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 14">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="0" Row="1" Name="Gast">
+								<Key>Vc4</Key>
 								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Heim">
+								<Key>Vc5</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2021 - Heim.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="1" Name="Warten">
+								<Key>Vc6</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Start_Damen.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="2" Name="Einlauf">
+								<Key>Vc1</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - 300 Violin Orchestra.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="2" Name="Start">
+								<Key>Vc2</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Ready To Rumble.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="2" Name="Warten">
+								<Key>Vc3</Key>
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
 								<SavePositions>false</SavePositions>
 							</Cell>
 						</Cells>
 					</Grid>
-					<Grid Name="Group 2">
+					<Grid Name="Herren">
 						<Cells>
-							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 21">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="0" Row="0" Name="Sonstiges">
+								<Key>Vc7</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="0" Name="Player 22">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="1" Row="0" Name="Sonstiges">
+								<Key>Vc8</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="2" Row="0" Name="Player 23">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Player" Column="2" Row="0" Name="Warm-Up">
+								<Key>Vc9</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Home With a Vengeance.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="1" Name="Gast">
+								<Key>Vc4</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2017 - Gast.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Heim">
+								<Key>Vc5</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2021 - Heim.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="1" Name="Warten">
+								<Key>Vc6</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Start_Herren.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="2" Name="Einlauf">
+								<Key>Vc1</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Run Boy Run - Kurz.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="2" Name="Start">
+								<Key>Vc2</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Get Ready.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="2" Name="Warten">
+								<Key>Vc3</Key>
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+						</Cells>
+					</Grid>
+					<Grid Name="Spiel">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" Name="TO Normal">
+								<Key>VcNumPadAdd</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_TO-Normal.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="0" Name="TO Knapp">
+								<Key>VcNumPadSubtract</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_TO-Knapp.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="0" Name="Sonstiges">
+								<Key>Vc7</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="1" Name="Player 24">
-								<Key xsi:nil="true" />
+							<Cell xsi:type="Group" Column="0" Row="1">
+								<Grids>
+									<Grid Name="Tor Damen">
+										<Cells>
+											<Cell xsi:type="Player" Column="0" Row="0" Name="Tor">
+												<Key>Vc7</Key>
+												<OnForeground>false</OnForeground>
+												<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Tor - The Concert.mp3</Path>
+												<SavePositions>false</SavePositions>
+											</Cell>
+										</Cells>
+									</Grid>
+									<Grid Name="Tor Herren">
+										<Cells>
+											<Cell xsi:type="Player" Column="0" Row="0" Name="Tor">
+												<Key>Vc7</Key>
+												<OnForeground>false</OnForeground>
+												<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3</Path>
+												<SavePositions>false</SavePositions>
+											</Cell>
+										</Cells>
+									</Grid>
+								</Grids>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Weiter">
+								<Key>Vc8</Key>
 								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="1" Name="Ende">
+								<Key>Vc9</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="2" Name="Anheizen">
+								<Key>Vc4</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="2" Name="Gegner">
+								<Key>Vc5</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Gegner.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="2" Name="Team">
+								<Key>Vc6</Key>
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Team.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="3" Name="Attacke">
+								<Key>Vc1</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Angriff.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="3" Name="Klatschen Kurz">
+								<Key>Vc2</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="3" Name="Klatschen Lang">
+								<Key>Vc3</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Lang.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+						</Cells>
+					</Grid>
+					<Grid Name="Ende">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" Name="Gewonnen">
+								<Key>Vc7</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende_Gewonnen.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="0" Name="Unentschieden">
+								<Key>Vc8</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="0" Name="Verloren">
+								<Key>Vc9</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende_Verloren.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="3" Name="Sonstiges">
+								<Key>Vc1</Key>
+								<OnForeground>false</OnForeground>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="3" Name="Sonstiges">
+								<Key>Vc2</Key>
+								<OnForeground>false</OnForeground>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="3" Name="Abschied">
+								<Key>Vc3</Key>
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3</Path>
 								<SavePositions>false</SavePositions>
 							</Cell>
 						</Cells>
@@ -77,7 +255,7 @@
 		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
-		<KeyLowerVolume>VcSpace</KeyLowerVolume>
+		<KeyTalkVolume>VcSpace</KeyTalkVolume>
 		<KeyPauseOutput>VcEnter</KeyPauseOutput>
 		<SelectNextSeconds>5</SelectNextSeconds>
 		<TrimRearPortion>0.1</TrimRearPortion>

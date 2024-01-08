@@ -59,6 +59,11 @@ namespace SportDJ.Services.StackService
                 savePosition: savePosition);
 
             SetTrack();
+
+            if (savePosition)
+            {
+                Next();
+            }
         }
 
         public void Next()
@@ -96,6 +101,8 @@ namespace SportDJ.Services.StackService
                 {
                     Reset();
                 }
+
+                sessionService.Save();
             }
         }
 
@@ -138,8 +145,6 @@ namespace SportDJ.Services.StackService
 
                 position.Index = index;
                 position.Path = Track.Path;
-
-                sessionService.Save();
 
                 eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
             }
@@ -184,8 +189,10 @@ namespace SportDJ.Services.StackService
                     sessionService.Contents.Positions.Add(position);
                 }
 
-                return sessionService.Contents.Positions
+                var result = sessionService.Contents.Positions
                     .First(p => p.Name == controllerName);
+
+                return result;
             }
         }
 
