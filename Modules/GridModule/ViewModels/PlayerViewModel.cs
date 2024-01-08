@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using Avalonia.Media.Imaging;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using SharpHook;
@@ -26,7 +27,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
-        private string artist;
+        private Bitmap bitmap;
+        private string content;
         private string counter;
         private bool isDisposed;
         private KeyCode? key;
@@ -38,7 +40,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
-        private string title;
 
         #endregion Private Fields
 
@@ -110,10 +111,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        public string Artist
+        public Bitmap Bitmap
         {
-            get { return artist; }
-            set { SetProperty(ref artist, value); }
+            get { return bitmap; }
+            set { SetProperty(ref bitmap, value); }
+        }
+
+        public string Content
+        {
+            get { return content; }
+            set { SetProperty(ref content, value); }
         }
 
         public string Counter
@@ -156,12 +163,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             get { return remaining; }
             set { SetProperty(ref remaining, value); }
-        }
-
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
         }
 
         public DelegateCommand TrackBackwardCommand { get; }
@@ -350,11 +351,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (stackService.Track != default)
             {
-                Title = stackService.Track.Title;
-                Artist = stackService.Track.Artist;
+                Content = stackService.Track.Info;
+                Bitmap = stackService.Track.Bitmap;
 
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
+
+                trackService?.Update(stackService.Track);
 
                 UpdateRemaining();
             }

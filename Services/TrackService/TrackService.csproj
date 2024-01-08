@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
 	</PropertyGroup>
 
@@ -12,7 +12,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="z440.atl.core" Version="5.13.0" />
+		<PackageReference Include="NAudio.WaveFormRenderer" Version="2.0.0" />
+		<PackageReference Include="z440.atl.core" Version="5.15.0" />
 	</ItemGroup>
 
 </Project>

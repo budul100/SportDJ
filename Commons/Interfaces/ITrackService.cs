@@ -15,6 +15,8 @@ namespace SportDJ.Commons.Interfaces
 
         void Stop(Track track);
 
+        void Update(Track track);
+
         #endregion Public Methods
     }
 }

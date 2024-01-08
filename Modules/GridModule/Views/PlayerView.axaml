@@ -162,9 +162,8 @@
                     VerticalAlignment="Stretch"
                     Command="{Binding ExecuteCommand}">
 
-                    <Grid>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
-                            <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
@@ -186,17 +185,9 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="{StaticResource ContentFontSize}"
-                            Text="{Binding Artist}" />
+                            Text="{Binding Content}" />
 
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource ContentFontSize}"
-                            Text="{Binding Title}" />
-
-                        <Grid Grid.Row="3" Grid.Column="0">
+                        <Grid Grid.Row="2" Grid.Column="0">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -219,6 +210,14 @@
                                 FontSize="{StaticResource StateFontSize}"
                                 Text="{Binding Counter}" />
                         </Grid>
+
+                        <Image
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Source="{Binding Bitmap}"
+                            Stretch="Fill" />
                     </Grid>
                 </Button>
             </Border>

@@ -25,7 +25,7 @@ namespace SportDJ.Services.TrackService
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
         private readonly PlaylistIOFactory playlistIOFactory;
         private readonly IStorageService<Set> settingsService;
-        private readonly Dictionary<string, Track> tracks = new();
+        private readonly Dictionary<string, Track> tracks = new Dictionary<string, Track>();
 
         #endregion Private Fields
 
@@ -115,6 +115,12 @@ namespace SportDJ.Services.TrackService
             }
         }
 
+        public void Update(Track track)
+        {
+            Task.Run(() => TrimTrack(track));
+            Task.Run(() => RenderTrack(track));
+        }
+
         #endregion Public Methods
 
         #region Private Methods
@@ -128,12 +134,14 @@ namespace SportDJ.Services.TrackService
 
                 if (atlTrack != default)
                 {
+                    var info = atlTrack.GetInfo();
                     var length = TimeSpan.FromSeconds(atlTrack.Duration);
 
                     var result = new Track(
                         path: file,
                         title: atlTrack.Title,
                         artist: atlTrack.Artist,
+                        info: info,
                         length: length);
 
                     Task.Run(() => TrimTrack(result));
@@ -201,6 +209,19 @@ namespace SportDJ.Services.TrackService
                 .Where(f => f.Readable).ToArray();
 
             return result;
+        }
+
+        private void RenderTrack(Track track)
+        {
+            if (track.Bitmap == default)
+            {
+                track.Render();
+
+                if (track.Bitmap != default)
+                {
+                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                }
+            }
         }
 
         private void TrimTrack(Track track)

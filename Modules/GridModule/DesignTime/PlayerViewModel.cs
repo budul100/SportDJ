@@ -1,4 +1,5 @@
-﻿using SharpHook.Native;
+﻿using Avalonia.Media.Imaging;
+using SharpHook.Native;
 using SportDJ.Commons;
 using System;
 
@@ -21,18 +22,22 @@ namespace SportDJ.Modules.GridModule.DesignTime
             this.Row = row;
             this.Column = column;
 
-            this.Title = title ?? "Title";
-            this.Artist = artist ?? "Artist";
+            artist ??= "Artist";
+            title ??= "Title";
+
+            this.Content = $"{artist} - {title}";
             this.Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
             this.Counter = $"[{3}]";
             this.Key = KeyCode.VcA;
+
+            this.Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public override bool IsActive => true;
+        public override bool IsActive => false;
 
         public override bool IsPlaying => true;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Media.Imaging;
+using System;
 using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Contents
@@ -7,9 +8,10 @@ namespace SportDJ.Commons.Models.Contents
     {
         #region Public Constructors
 
-        public Track(string path, string title, string artist, TimeSpan length)
+        public Track(string path, string title, string artist, string info, TimeSpan length)
         {
             Artist = artist;
+            Info = info;
             Length = length;
             Path = path;
             Title = title;
@@ -21,7 +23,11 @@ namespace SportDJ.Commons.Models.Contents
 
         public string Artist { get; }
 
+        public Bitmap Bitmap { get; set; }
+
         public bool Checked { get; set; }
+
+        public string Info { get; }
 
         public TimeSpan Length { get; set; }
 

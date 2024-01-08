@@ -30,8 +30,8 @@ namespace SportDJ.App.ViewModels
         public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
             IStorageService<Session> sessionService, TaskPoolGlobalHook hook)
         {
-            XXXX(settingsService?.Contents);
-            settingsService?.Save();
+            //XXXX(settingsService?.Contents);
+            //settingsService?.Save();
 
             this.containerProvider = containerProvider;
             this.hook = hook;
@@ -144,7 +144,7 @@ namespace SportDJ.App.ViewModels
 
         private void XXXX(Set set)
         {
-            if (set != default)
+            if (set?.Grid?.Cells != default)
             {
                 set.Grid.Cells.Clear();
 
