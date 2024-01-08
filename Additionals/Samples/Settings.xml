@@ -228,17 +228,17 @@
 								<Path>C:\Users\mgr\SportDJ\Ende_Verloren.m3u</Path>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="0" Row="3" Name="Sonstiges">
+							<Cell xsi:type="Player" Column="0" Row="1" Name="Sonstiges">
 								<Key>Vc1</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="3" Name="Sonstiges">
+							<Cell xsi:type="Player" Column="1" Row="1" Name="Sonstiges">
 								<Key>Vc2</Key>
 								<OnForeground>false</OnForeground>
 								<SavePositions>false</SavePositions>
 							</Cell>
-							<Cell xsi:type="Player" Column="2" Row="3" Name="Abschied">
+							<Cell xsi:type="Player" Column="2" Row="1" Name="Abschied">
 								<Key>Vc3</Key>
 								<OnForeground>false</OnForeground>
 								<Path>C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3</Path>

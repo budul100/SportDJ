@@ -244,9 +244,9 @@ namespace SportDJ.App.ViewModels
                 gridEnde.Cells.Add(new Player() { Name = "Unentschieden", Row = 0, Column = 1, Key = KeyCode.Vc8, Path = @"C:\Users\mgr\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3" });
                 gridEnde.Cells.Add(new Player() { Name = "Verloren", Row = 0, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Ende_Verloren.m3u" });
 
-                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 3, Column = 0, Key = KeyCode.Vc1 });
-                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 3, Column = 1, Key = KeyCode.Vc2 });
-                gridEnde.Cells.Add(new Player() { Name = "Abschied", Row = 3, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3" });
+                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 1, Column = 0, Key = KeyCode.Vc1 });
+                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 1, Column = 1, Key = KeyCode.Vc2 });
+                gridEnde.Cells.Add(new Player() { Name = "Abschied", Row = 1, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3" });
 
                 set.Options.KeyTalkVolume = KeyCode.VcSpace;
                 set.Options.KeyPauseOutput = KeyCode.VcEnter;

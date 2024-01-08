@@ -56,7 +56,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 Grid = containerProvider.Resolve<GridViewModel>();
 
-                Grid.Initialize(settingsService.Contents.Grid);
+                Grid.Initialize(
+                    grid: settingsService.Contents.Grid,
+                    isOnCanvas: true);
             }
         }
 

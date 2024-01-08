@@ -54,7 +54,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Grid grid)
+        public void Initialize(Grid grid, bool isOnCanvas)
         {
             Name = grid.Name;
 
@@ -87,8 +87,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                         case Group group:
 
+                            isOnCanvas = isOnCanvas
+                                && grid.Cells.Count == 1;
+
                             var groupCell = containerProvider.Resolve<GroupViewModel>();
-                            groupCell.Initialize(group);
+
+                            groupCell.Initialize(
+                                group: group,
+                                isOnCanvas: isOnCanvas);
 
                             Cells.Add(groupCell);
 

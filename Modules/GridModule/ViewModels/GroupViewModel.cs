@@ -35,10 +35,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Methods
 
-        public void Initialize(Group group)
+        public void Initialize(Group group, bool isOnCanvas)
         {
-            Rows = 0;
-            Columns = 0;
+            Rows = 1;
+            Columns = 1;
 
             if (containerProvider != default
                 && group.Grids?.Any() == true)
@@ -47,18 +47,21 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 {
                     var gridTab = containerProvider.Resolve<GridViewModel>();
 
-                    gridTab.Initialize(grid);
+                    gridTab.Initialize(grid, false);
 
                     Tabs.Add(gridTab);
                 }
 
-                Rows = Tabs.Max(t => t.Rows);
-                Columns = Tabs.Max(t => t.Columns);
-
-                foreach (var tab in Tabs)
+                if (!isOnCanvas)
                 {
-                    tab.Rows = Rows;
-                    tab.Columns = Columns;
+                    Rows = Tabs.Max(t => t.Rows);
+                    Columns = Tabs.Max(t => t.Columns);
+
+                    foreach (var tab in Tabs)
+                    {
+                        tab.Rows = Rows;
+                        tab.Columns = Columns;
+                    }
                 }
             }
 
