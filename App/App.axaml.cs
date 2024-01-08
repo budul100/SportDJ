@@ -123,7 +123,7 @@ namespace SportDJ.App
                 ? Environment.GetCommandLineArgs()[1]
                 : default;
 
-            var settingsPath = commandLinePath?.StartsWith("--") == true
+            var settingsPath = commandLinePath?.StartsWith("--") == false
                 ? commandLinePath
                 : settingsService.GetPath(
                     appName: Constants.AppName,

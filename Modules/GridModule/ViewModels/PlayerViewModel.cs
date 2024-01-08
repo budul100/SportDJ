@@ -11,6 +11,8 @@ using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -34,6 +36,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private bool onForeground;
         private string remaining;
         private ISignalService signalService;
+        private HashSet<ISignalService> signalServices = new HashSet<ISignalService>();
         private IStackService stackService;
         private string title;
 
@@ -66,16 +69,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
-                action: _ => OnSignalStarted(),
+                action: s => OnSignalStarted(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
-                action: _ => OnSignalStopped(),
+                action: s => OnSignalStopped(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalService == s);
+                filter: s => signalServices.Contains(s));
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
                 action: _ => UpdateRemaining(),
@@ -124,7 +127,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool HasStack => stackService?.Entries?.Count > 1;
 
-        public bool IsPlaying => signalService?.IsPlaying == true;
+        public virtual bool IsActive => signalService?.IsPlaying == true;
+
+        public virtual bool IsPlaying => signalServices?.Any() == true;
 
         public KeyCode? Key
         {
@@ -267,30 +272,36 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private void OnSignalStarted()
+        private void OnSignalStarted(ISignalService signalService)
         {
             if (this.signalService.Track == this.stackService?.Track)
             {
                 this.stackService.Play();
             }
 
+            signalServices.Add(signalService);
+
             UpdateCommands();
         }
 
-        private void OnSignalStopped()
+        private void OnSignalStopped(ISignalService signalService)
         {
-            if (signalService.State == StateType.None || signalService.IsNextThresholdExceeded)
+            if ((signalService == this.signalService)
+                && (signalService.State == StateType.None || signalService.IsNextThresholdExceeded))
             {
                 signalService.Dispose();
 
                 UpdateStack();
             }
 
+            signalServices.Remove(signalService);
+
             UpdateCommands();
         }
 
         private void UpdateCommands()
         {
+            RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(IsPlaying));
             RaisePropertyChanged(nameof(HasStack));
 

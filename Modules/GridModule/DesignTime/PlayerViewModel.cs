@@ -29,5 +29,13 @@ namespace SportDJ.Modules.GridModule.DesignTime
         }
 
         #endregion Public Constructors
+
+        #region Public Properties
+
+        public override bool IsActive => true;
+
+        public override bool IsPlaying => true;
+
+        #endregion Public Properties
     }
 }

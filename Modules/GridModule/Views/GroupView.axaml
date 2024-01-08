@@ -40,7 +40,5 @@
                 <v:GridView />
             </DataTemplate>
         </TabControl.ContentTemplate>
-
     </TabControl>
-
 </UserControl>

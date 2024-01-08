@@ -67,5 +67,4 @@
             </DataTemplate>
         </ItemsControl.DataTemplates>
     </ItemsControl>
-
 </UserControl>
