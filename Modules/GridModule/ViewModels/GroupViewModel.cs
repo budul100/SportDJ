@@ -12,6 +12,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
 
+        private GridViewModel tab;
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -28,6 +30,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public int Columns { get; private set; }
 
         public int Rows { get; private set; }
+
+        public GridViewModel Tab
+        {
+            get { return tab; }
+            set
+            {
+                SetCellVisibility(value);
+                tab = value;
+            }
+        }
 
         public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
 
@@ -75,5 +87,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void SetCellVisibility(GridViewModel value)
+        {
+            foreach (var tab in Tabs)
+            {
+                var players = tab.Cells
+                    .OfType<PlayerViewModel>().ToArray();
+
+                foreach (var player in players)
+                {
+                    player.IsVisible = tab == value;
+                }
+            }
+        }
+
+        #endregion Private Methods
     }
 }

@@ -73,7 +73,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                controllerName: default,
+                playerName: default,
                 savePosition: false);
 
             var track = stackService.Track;
@@ -129,7 +129,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                controllerName: default,
+                playerName: default,
                 savePosition: false);
 
             Task.Delay(1000).Wait();
@@ -154,7 +154,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                controllerName: default,
+                playerName: default,
                 savePosition: false);
 
             var track = stackService.Track;

@@ -27,7 +27,10 @@
         <dt:GroupViewModel />
     </Design.DataContext>
 
-    <TabControl Margin="{DynamicResource ContentMargin}" ItemsSource="{Binding Tabs}">
+    <TabControl
+        Margin="{DynamicResource ContentMargin}"
+        ItemsSource="{Binding Tabs}"
+        SelectedItem="{Binding Tab}">
 
         <TabControl.ItemTemplate>
             <DataTemplate>

@@ -47,7 +47,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(string path, string controllerName, bool savePosition)
+        public void Initialize(string path, string playerName, bool savePosition)
         {
             var tracks = trackService
                 .GetTracks(path).ToList();
@@ -55,7 +55,7 @@ namespace SportDJ.Services.StackService
             Entries = tracks.GetEntries().ToList();
 
             position = GetPosition(
-                controllerName: controllerName,
+                playerName: playerName,
                 savePosition: savePosition);
 
             SetTrack();
@@ -171,7 +171,7 @@ namespace SportDJ.Services.StackService
 
         #region Private Methods
 
-        private Position GetPosition(string controllerName, bool savePosition)
+        private Position GetPosition(string playerName, bool savePosition)
         {
             if (!savePosition)
             {
@@ -179,18 +179,18 @@ namespace SportDJ.Services.StackService
             }
             else
             {
-                if (!sessionService.Contents.Positions.Any(p => p.Name == controllerName))
+                if (!sessionService.Contents.Positions.Any(p => p.Name == playerName))
                 {
                     var position = new Position
                     {
-                        Name = controllerName,
+                        Name = playerName,
                     };
 
                     sessionService.Contents.Positions.Add(position);
                 }
 
                 var result = sessionService.Contents.Positions
-                    .First(p => p.Name == controllerName);
+                    .First(p => p.Name == playerName);
 
                 return result;
             }

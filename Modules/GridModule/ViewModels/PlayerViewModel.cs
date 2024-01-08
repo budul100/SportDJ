@@ -131,6 +131,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => signalServices?.Any() == true;
 
+        public bool IsVisible { get; set; }
+
         public KeyCode? Key
         {
             get { return key; }
@@ -198,7 +200,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             stackService?.Initialize(
                 path: player.Path,
-                controllerName: player.Name,
+                playerName: player.Name,
                 savePosition: player.SavePositions);
 
             UpdateSignal();
@@ -265,7 +267,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            if (Key.HasValue
+            if (IsVisible
+                && Key.HasValue
                 && e?.Data.KeyCode == Key)
             {
                 ExecuteSignal();
