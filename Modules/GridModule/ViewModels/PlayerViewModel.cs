@@ -23,6 +23,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly TaskPoolGlobalHook hook;
+        private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
         private string artist;
@@ -36,7 +37,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private bool onForeground;
         private string remaining;
         private ISignalService signalService;
-        private HashSet<ISignalService> signalServices = new HashSet<ISignalService>();
         private IStackService stackService;
         private string title;
 
@@ -90,7 +90,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 action: _ => UpdateStack(false),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalService == s);
+                filter: s => signalService == s
+                    && !OnForeground);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => UpdateTrack(),
