@@ -223,7 +223,7 @@ namespace SportDJ.App.ViewModels
                 gridTorHerren.Cells.Add(new Player() { Name = "Tor", Key = KeyCode.Vc7, Path = @"C:\Users\mgr\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3" });
 
                 gridSpiel.Cells.Add(new Player() { Name = "Weiter", Row = 1, Column = 1, Key = KeyCode.Vc8, Path = @"C:\Users\mgr\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3" });
-                gridSpiel.Cells.Add(new Player() { Name = "Ende", Row = 1, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3" });
+                gridSpiel.Cells.Add(new Player() { Name = "Ende", Row = 1, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3", OnForeground = true });
 
                 gridSpiel.Cells.Add(new Player() { Name = "Anheizen", Row = 2, Column = 0, Key = KeyCode.Vc4, Path = @"C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u", SavePositions = true });
                 gridSpiel.Cells.Add(new Player() { Name = "Gegner", Row = 2, Column = 1, Key = KeyCode.Vc5, Path = @"C:\Users\mgr\SportDJ\Spiel_Gegner.m3u", SavePositions = true });

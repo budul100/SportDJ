@@ -166,7 +166,7 @@
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" Name="Ende">
 								<Key>Vc9</Key>
-								<OnForeground>false</OnForeground>
+								<OnForeground>true</OnForeground>
 								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
 								<SavePositions>false</SavePositions>
 							</Cell>
