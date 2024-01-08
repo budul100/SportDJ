@@ -291,7 +291,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private void OnSignalStopped(ISignalService signalService)
         {
             if ((signalService == this.signalService)
-                && (signalService.State == StateType.None || signalService.IsNextThresholdExceeded))
+                && (signalService.State == StateType.None || OnForeground || signalService.IsNextThresholdExceeded))
             {
                 signalService.Dispose();
 
