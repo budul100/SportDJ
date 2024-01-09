@@ -33,6 +33,7 @@
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate x:DataType="vm:GridViewModel">
+
                 <Grid
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -40,6 +41,7 @@
                     gd:GridDefinitionBehavior.RowCount="{Binding Rows}"
                     gd:GridDefinitionBehavior.StarColumns=".*"
                     gd:GridDefinitionBehavior.StarRows=".*" />
+
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 

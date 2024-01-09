@@ -52,7 +52,7 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="{StaticResource ContentFontSize}"
+                FontSize="{StaticResource FontSizeDisplay}"
                 FontWeight="Bold"
                 Text="{Binding Clock}" />
         </Border>
@@ -68,7 +68,7 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="{StaticResource ContentFontSize}"
+                FontSize="{StaticResource FontSizeDisplay}"
                 Text="{Binding Content}" />
         </Border>
 
@@ -163,7 +163,7 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="{StaticResource ContentFontSize}"
+                FontSize="{StaticResource FontSizeDisplay}"
                 Text="{Binding Remaining}" />
         </Border>
     </Grid>

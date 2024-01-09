@@ -34,7 +34,7 @@
 
         <TabControl.ItemTemplate>
             <DataTemplate>
-                <TextBlock FontSize="{DynamicResource ContentFontSize}" Text="{Binding Name}" />
+                <TextBlock FontSize="{DynamicResource FontSizeContent}" Text="{Binding Name}" />
             </DataTemplate>
         </TabControl.ItemTemplate>
 

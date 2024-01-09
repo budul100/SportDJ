@@ -19,27 +19,31 @@
         <co:EnumToStringConverter x:Key="EnumToStringConverter" />
     </Window.Resources>
 
-    <DockPanel
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        LastChildFill="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" MinHeight="60" />
+            <RowDefinition Height="15*" />
+            <RowDefinition Height="2*" MinHeight="120" />
+        </Grid.RowDefinitions>
 
-        <ContentControl Height="50" DockPanel.Dock="Top">
+        <ContentControl Grid.Row="0">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl Height="100" DockPanel.Dock="Bottom">
+        <ContentControl Grid.Row="1">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+
+        <ContentControl Grid.Row="2">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl>
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
-    </DockPanel>
+    </Grid>
+
 </Window>
