@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -19,10 +20,13 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private readonly DispatcherTimer clockTimer;
         private readonly IMixerService mixerService;
 
+        private Bitmap bitmap;
         private string content;
         private bool isDisposed;
         private bool isEnding;
         private string remaining;
+        private long widthPosition;
+        private long widthRemaining;
 
         #endregion Private Fields
 
@@ -57,6 +61,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
 
+        public Bitmap Bitmap
+        {
+            get { return bitmap; }
+            set { SetProperty(ref bitmap, value); }
+        }
+
         public string Content
         {
             get { return content; }
@@ -73,6 +83,18 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             get { return remaining; }
             set { SetProperty(ref remaining, value); }
+        }
+
+        public long WidthPosition
+        {
+            get { return widthPosition; }
+            set { SetProperty(ref widthPosition, value); }
+        }
+
+        public long WidthRemaining
+        {
+            get { return widthRemaining; }
+            set { SetProperty(ref widthRemaining, value); }
         }
 
         #endregion Public Properties
@@ -122,17 +144,32 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private void OnMixerStopped()
         {
             Content = default;
+
             Remaining = default;
             IsEnding = false;
+
+            Bitmap = default;
+
+            WidthPosition = default;
+            WidthRemaining = default;
         }
 
         private void OnMixerUpdated(IMixerService mixerService)
         {
             if (mixerService.Track != default)
             {
-                Content = $"{mixerService.Track.Artist} - {mixerService.Track.Title}";
-                Remaining = mixerService.Remaining.ToString(Constants.FormatDuration);
-                IsEnding = mixerService.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingInSec);
+                Content = mixerService.Track.Info;
+
+                Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
+                IsEnding = mixerService.IsEnding;
+
+                Bitmap = mixerService.Track.Bitmap;
+
+                if (mixerService?.Duration?.Ticks > 0)
+                {
+                    WidthPosition = mixerService.Position.Value.Ticks;
+                    WidthRemaining = mixerService.Remaining.Value.Ticks;
+                }
             }
         }
 

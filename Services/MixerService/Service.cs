@@ -73,15 +73,19 @@ namespace SportDJ.Services.MixerService
 
         #region Public Properties
 
+        public TimeSpan? Duration => signalService?.Duration;
+
+        public bool IsEnding => signalService?.IsEnding == true;
+
         public bool IsLoop => signalService?.IsLoop == true;
 
         public bool IsPlaying { get; private set; }
 
         public ISampleProvider Output => outputProvider;
 
-        public TimeSpan Position => signalService?.Position ?? TimeSpan.Zero;
+        public TimeSpan? Position => signalService?.Position;
 
-        public TimeSpan Remaining => signalService?.Remaining ?? TimeSpan.Zero;
+        public TimeSpan? Remaining => signalService?.Remaining;
 
         public Track Track => signalService?.Track;
 

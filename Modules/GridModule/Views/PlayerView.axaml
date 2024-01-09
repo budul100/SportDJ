@@ -24,13 +24,12 @@
         </ResourceDictionary>
 
         <Thickness x:Key="InnerMargin">1</Thickness>
-
         <x:Double x:Key="StateFontSize">15</x:Double>
-
         <x:Double x:Key="IconWidth">30</x:Double>
         <x:Double x:Key="IconHeight">30</x:Double>
 
-        <coc:BoolToGridSizeConverter x:Key="BoolToGridSizeConverter" />
+        <coc:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
+        <coc:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
         <com:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
@@ -45,7 +44,8 @@
     <Border
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
-        BorderBrush="Purple">
+        BorderBrush="Transparent"
+        CornerRadius="4">
 
         <i:Interaction.Behaviors>
             <a:DataTriggerBehavior
@@ -55,7 +55,7 @@
                 <a:ChangePropertyAction
                     PropertyName="BorderThickness"
                     TargetObject="PlayingBorder"
-                    Value="{StaticResource BorderPlaying}" />
+                    Value="{StaticResource ThicknessPlaying}" />
             </a:DataTriggerBehavior>
             <a:DataTriggerBehavior
                 Binding="{Binding IsPlaying}"
@@ -64,22 +64,34 @@
                 <a:ChangePropertyAction
                     PropertyName="BorderThickness"
                     TargetObject="PlayingBorder"
-                    Value="{StaticResource BorderPlayingNot}" />
+                    Value="{StaticResource ThicknessPlayingNot}" />
+            </a:DataTriggerBehavior>
+        </i:Interaction.Behaviors>
+
+        <i:Interaction.Behaviors>
+            <a:DataTriggerBehavior
+                Binding="{Binding IsPlaying}"
+                ComparisonCondition="Equal"
+                Value="True">
+                <a:ChangePropertyAction
+                    PropertyName="BorderBrush"
+                    TargetObject="PlayingBorder"
+                    Value="{StaticResource ColorPlaying}" />
             </a:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="4*" />
-                <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeConverter}}" />
+                <RowDefinition Height="*" MinHeight="40" />
+                <RowDefinition Height="5*" />
+                <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeConverter}}" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                    <ColumnDefinition Width="3*" />
                 </Grid.ColumnDefinitions>
 
                 <Button
@@ -98,28 +110,21 @@
                     Grid.Row="0"
                     Grid.Column="1"
                     Margin="{StaticResource InnerMargin}"
+                    Padding="15,0,15,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="{StaticResource Background}"
+                    Background="{StaticResource ColorKey}"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
                     CornerRadius="{StaticResource CornerRadius}"
                     IsVisible="{Binding HasKey}">
 
-                    <Border
-                        Width="{Binding $self.Bounds.Height}"
+                    <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Background="{StaticResource BackgroundKey}"
-                        BorderBrush="LightGray"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadius}">
-
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource ContentFontSize}"
-                            FontWeight="Bold"
-                            Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
-                    </Border>
+                        FontSize="{StaticResource ContentFontSize}"
+                        FontWeight="Bold"
+                        Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
                 </Border>
 
                 <Button
@@ -131,89 +136,80 @@
             </Grid>
 
             <Border
-                Name="ExecutionBorder"
                 Grid.Row="1"
-                Grid.Column="0"
-                Margin="{StaticResource InnerMargin}">
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                CornerRadius="{StaticResource ButtonRadius}">
 
                 <i:Interaction.Behaviors>
                     <a:DataTriggerBehavior
                         Binding="{Binding IsActive}"
                         ComparisonCondition="Equal"
                         Value="True">
-                        <a:ChangePropertyAction
-                            PropertyName="Background"
-                            TargetObject="ExecutionBorder"
-                            Value="{StaticResource BackgroundPlaying}" />
+                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorPlaying}" />
                     </a:DataTriggerBehavior>
                     <a:DataTriggerBehavior
                         Binding="{Binding IsActive}"
                         ComparisonCondition="NotEqual"
                         Value="True">
-                        <a:ChangePropertyAction
-                            PropertyName="Background"
-                            TargetObject="ExecutionBorder"
-                            Value="Transparent" />
+                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
                     </a:DataTriggerBehavior>
                 </i:Interaction.Behaviors>
 
                 <Button
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    Background="Transparent"
                     Command="{Binding ExecuteCommand}">
 
-                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource ContentFontSize}"
-                            FontWeight="Bold"
-                            Text="{Binding Name}" />
+                        <Grid Grid.Row="0">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource StateFontSize}"
+                                Text="{Binding Counter}" />
+
+                            <TextBlock
+                                Grid.Column="1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource ContentFontSize}"
+                                FontWeight="Bold"
+                                Text="{Binding Name}" />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource StateFontSize}"
+                                Text="{Binding Remaining}" />
+                        </Grid>
 
                         <TextBlock
                             Grid.Row="1"
-                            Grid.Column="0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="{StaticResource ContentFontSize}"
                             Text="{Binding Content}" />
 
-                        <Grid Grid.Row="2" Grid.Column="0">
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource StateFontSize}"
-                                Text="{Binding Remaining}" />
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource StateFontSize}"
-                                Text="{Binding Counter}" />
-                        </Grid>
-
                         <Image
-                            Grid.Row="3"
-                            Grid.Column="0"
+                            Grid.Row="2"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Source="{Binding Bitmap}"

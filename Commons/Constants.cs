@@ -19,6 +19,8 @@
         public const float VolumeMax = 1f;
         public const float VolumeMin = 0f;
 
+        public const int WidthBase = 1000;
+
         #endregion Public Fields
     }
 }

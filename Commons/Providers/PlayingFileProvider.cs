@@ -58,7 +58,7 @@ namespace SportDJ.Commons.Providers
 
         #region Public Properties
 
-        public TimeSpan Current => (position - start).ToDuration(averageBytesPerSecond);
+        public TimeSpan Position => (position - start).ToDuration(averageBytesPerSecond);
 
         public TimeSpan Duration { get; }
 

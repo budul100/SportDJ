@@ -99,6 +99,11 @@ namespace SportDJ.Services.TrackService
             eventAggregator.GetEvent<TrackUpdatedEvent>()?.Publish(track);
         }
 
+        public void Render(Track track)
+        {
+            Task.Run(() => RenderTrack(track));
+        }
+
         public void Stop(Track track)
         {
             if (track is null)
@@ -113,12 +118,6 @@ namespace SportDJ.Services.TrackService
             {
                 register.End = DateTime.Now;
             }
-        }
-
-        public void Update(Track track)
-        {
-            Task.Run(() => TrimTrack(track));
-            Task.Run(() => RenderTrack(track));
         }
 
         #endregion Public Methods

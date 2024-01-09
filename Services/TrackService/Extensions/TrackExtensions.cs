@@ -25,10 +25,7 @@ namespace SportDJ.Services.TrackService.Extensions
             if (track != default
                 && File.Exists(track.Path))
             {
-                var renderer = new WaveFormRenderer();
-                var peakProvider = new MaxPeakProvider();
-
-                var rendererSettings = new StandardWaveFormRendererSettings
+                var settings = new StandardWaveFormRendererSettings
                 {
                     BackgroundColor = Color.Transparent,
                     TopPeakPen = new Pen(Color.LightGreen),
@@ -37,12 +34,44 @@ namespace SportDJ.Services.TrackService.Extensions
 
                 using var input = new AudioFileReader(track.Path);
 
+                var renderer = new WaveFormRenderer();
+                var peakProvider = new MaxPeakProvider();
+
                 var image = renderer.Render(
                     waveStream: input,
                     peakProvider: peakProvider,
-                    settings: rendererSettings);
+                    settings: settings);
 
-                track.Bitmap = image.GetBitmap();
+                if (image != default)
+                {
+                    var temporary = new Bitmap(image);
+
+                    var rectangle = new Rectangle(
+                        x: 0,
+                        y: 0,
+                        width: temporary.Width,
+                        height: temporary.Height);
+
+                    var bitmapdata = temporary.LockBits(
+                        rect: rectangle,
+                        flags: ImageLockMode.ReadWrite,
+                        format: PixelFormat.Format32bppArgb);
+
+                    var size = new Avalonia.PixelSize(
+                        width: bitmapdata.Width,
+                        height: bitmapdata.Height);
+
+                    track.Bitmap = new Avalonia.Media.Imaging.Bitmap(
+                        format: Avalonia.Platform.PixelFormat.Bgra8888,
+                        alphaFormat: Avalonia.Platform.AlphaFormat.Premul,
+                        data: bitmapdata.Scan0,
+                        size: size,
+                        dpi: dpi,
+                        stride: bitmapdata.Stride);
+
+                    temporary.UnlockBits(bitmapdata);
+                    temporary.Dispose();
+                }
             }
         }
 
@@ -117,47 +146,5 @@ namespace SportDJ.Services.TrackService.Extensions
         }
 
         #endregion Public Methods
-
-        #region Private Methods
-
-        private static Avalonia.Media.Imaging.Bitmap GetBitmap(this Image image)
-        {
-            var result = default(Avalonia.Media.Imaging.Bitmap);
-
-            if (image != default)
-            {
-                var temporary = new Bitmap(image);
-
-                var rectangle = new Rectangle(
-                    x: 0,
-                    y: 0,
-                    width: temporary.Width,
-                    height: temporary.Height);
-
-                var bitmapdata = temporary.LockBits(
-                    rect: rectangle,
-                    flags: ImageLockMode.ReadWrite,
-                    format: PixelFormat.Format32bppArgb);
-
-                var size = new Avalonia.PixelSize(
-                    width: bitmapdata.Width,
-                    height: bitmapdata.Height);
-
-                result = new Avalonia.Media.Imaging.Bitmap(
-                    format: Avalonia.Platform.PixelFormat.Bgra8888,
-                    alphaFormat: Avalonia.Platform.AlphaFormat.Premul,
-                    data: bitmapdata.Scan0,
-                    size: size,
-                    dpi: dpi,
-                    stride: bitmapdata.Stride);
-
-                temporary.UnlockBits(bitmapdata);
-                temporary.Dispose();
-            }
-
-            return result;
-        }
-
-        #endregion Private Methods
     }
 }

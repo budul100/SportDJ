@@ -43,6 +43,11 @@ namespace SportDJ.Services.SignalService
 
         #region Public Properties
 
+        public TimeSpan? Duration => playingProvider?.Duration;
+
+        public bool IsEnding => playingProvider != default
+            && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingInSec);
+
         public bool IsLoop
         {
             get
@@ -63,12 +68,11 @@ namespace SportDJ.Services.SignalService
         public bool IsPlaying => playingProvider?.State == StateType.Play;
 
         public bool IsSilent => outputProvider?.IsSilent != false;
-
         public ISampleProvider Output => outputProvider;
 
-        public TimeSpan Position => playingProvider?.Current ?? TimeSpan.Zero;
+        public TimeSpan? Position => playingProvider?.Position;
 
-        public TimeSpan Remaining => playingProvider?.Remaining ?? TimeSpan.Zero;
+        public TimeSpan? Remaining => playingProvider?.Remaining;
 
         public StateType State { get; private set; }
 
@@ -257,7 +261,7 @@ namespace SportDJ.Services.SignalService
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
             if (!IsNextThresholdExceeded
-                && Position.Ticks > nextThreshold.Ticks)
+                && Position?.Ticks > nextThreshold.Ticks)
             {
                 IsNextThresholdExceeded = true;
 

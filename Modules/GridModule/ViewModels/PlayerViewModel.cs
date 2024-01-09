@@ -31,6 +31,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string content;
         private string counter;
         private bool isDisposed;
+        private bool isEnding;
         private KeyCode? key;
         private IMixerService mixerServiceBackground;
         private IMixerService mixerServiceForeground;
@@ -40,6 +41,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
+        private long widthPosition;
+        private long widthRemaining;
 
         #endregion Private Fields
 
@@ -137,6 +140,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsActive => signalService?.IsPlaying == true;
 
+        public bool IsEnding
+        {
+            get { return isEnding; }
+            set { SetProperty(ref isEnding, value); }
+        }
+
         public virtual bool IsPlaying => signalServices?.Any() == true;
 
         public bool IsVisible { get; set; }
@@ -168,6 +177,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public DelegateCommand TrackBackwardCommand { get; }
 
         public DelegateCommand TrackForwardCommand { get; }
+
+        public long WidthPosition
+        {
+            get { return widthPosition; }
+            set { SetProperty(ref widthPosition, value); }
+        }
+
+        public long WidthRemaining
+        {
+            get { return widthRemaining; }
+            set { SetProperty(ref widthRemaining, value); }
+        }
 
         #endregion Public Properties
 
@@ -317,9 +338,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateRemaining()
         {
-            Remaining = this.signalService?.Track == this.stackService?.Track
-                ? signalService?.Remaining.ToString(Constants.FormatDuration)
+            Remaining = signalService?.Track == stackService?.Track
+                ? signalService?.Remaining?.ToString(Constants.FormatDuration)
                 : stackService?.Track?.Length.ToString(Constants.FormatDuration);
+
+            IsEnding = signalService?.IsEnding == true;
+
+            if (signalService?.Duration?.Ticks > 0)
+            {
+                WidthPosition = signalService.Position.Value.Ticks;
+                WidthRemaining = signalService.Position.Value.Ticks;
+            }
         }
 
         private void UpdateSignal()
@@ -357,7 +386,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
 
-                trackService?.Update(stackService.Track);
+                trackService?.Render(stackService.Track);
 
                 UpdateRemaining();
             }

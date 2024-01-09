@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:coc="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.DisplayModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -22,8 +23,9 @@
         </ResourceDictionary>
 
         <Thickness x:Key="InnerMargin">2</Thickness>
-
         <CornerRadius x:Key="CornerRadius">3</CornerRadius>
+
+        <coc:LongToGridLengthConverter x:Key="LongToGridLengthConverter" />
     </UserControl.Resources>
 
     <Design.DataContext>
@@ -34,17 +36,17 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="5*" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
 
         <Border
-            Grid.Row="0"
             Grid.Column="0"
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="{StaticResource Background}"
+            Background="{StaticResource ColorBackground}"
             CornerRadius="{StaticResource CornerRadius}">
 
             <TextBlock
@@ -56,12 +58,11 @@
         </Border>
 
         <Border
-            Grid.Row="0"
             Grid.Column="1"
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="{StaticResource Background}"
+            Background="{StaticResource ColorBackground}"
             CornerRadius="{StaticResource CornerRadius}">
 
             <TextBlock
@@ -72,13 +73,11 @@
         </Border>
 
         <Border
-            Name="RemainingBorder"
-            Grid.Row="0"
             Grid.Column="2"
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="{StaticResource Background}"
+            Background="{StaticResource ColorBackground}"
             CornerRadius="{StaticResource CornerRadius}">
 
             <i:Interaction.Behaviors>
@@ -86,19 +85,78 @@
                     Binding="{Binding IsEnding}"
                     ComparisonCondition="Equal"
                     Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="RemainingBorder"
-                        Value="{StaticResource BackgroundIsEnding}" />
+                    <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
                 </a:DataTriggerBehavior>
                 <a:DataTriggerBehavior
                     Binding="{Binding IsEnding}"
                     ComparisonCondition="NotEqual"
                     Value="True">
-                    <a:ChangePropertyAction
-                        PropertyName="Background"
-                        TargetObject="RemainingBorder"
-                        Value="{StaticResource Background}" />
+                    <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
+                </a:DataTriggerBehavior>
+            </i:Interaction.Behaviors>
+
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding WidthPosition, Converter={StaticResource LongToGridLengthConverter}}" />
+                    <ColumnDefinition Width="{Binding WidthRemaining, Converter={StaticResource LongToGridLengthConverter}}" />
+                </Grid.ColumnDefinitions>
+
+                <Image
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Source="{Binding Bitmap}"
+                    Stretch="Fill" />
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="{StaticResource ColorBackground}"
+                    CornerRadius="{StaticResource CornerRadius}">
+
+                    <i:Interaction.Behaviors>
+                        <a:DataTriggerBehavior
+                            Binding="{Binding IsEnding}"
+                            ComparisonCondition="Equal"
+                            Value="True">
+                            <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
+                        </a:DataTriggerBehavior>
+                        <a:DataTriggerBehavior
+                            Binding="{Binding IsEnding}"
+                            ComparisonCondition="NotEqual"
+                            Value="True">
+                            <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
+                        </a:DataTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border
+            Grid.Column="3"
+            Margin="{StaticResource InnerMargin}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="{StaticResource ColorBackground}"
+            CornerRadius="{StaticResource CornerRadius}">
+
+            <i:Interaction.Behaviors>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsEnding}"
+                    ComparisonCondition="Equal"
+                    Value="True">
+                    <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
+                </a:DataTriggerBehavior>
+                <a:DataTriggerBehavior
+                    Binding="{Binding IsEnding}"
+                    ComparisonCondition="NotEqual"
+                    Value="True">
+                    <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
                 </a:DataTriggerBehavior>
             </i:Interaction.Behaviors>
 

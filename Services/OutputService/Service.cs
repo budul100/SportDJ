@@ -13,6 +13,7 @@ using SportDJ.Commons.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
@@ -288,7 +289,7 @@ namespace SportDJ.Services.OutputService
             output.Init(
                 waveProvider: waveProvider);
 
-            output.Play();
+            Task.Run(() => output.Play());
 
             volumeService.Set(
                 deviceName: deviceName);

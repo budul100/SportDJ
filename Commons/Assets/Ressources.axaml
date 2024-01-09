@@ -1,13 +1,16 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Color x:Key="Background">#333333</Color>
-    <Color x:Key="BackgroundPlaying">Purple</Color>
-    <Color x:Key="BackgroundIsEnding">Red</Color>
-    <Color x:Key="BackgroundKey">DimGray</Color>
+    <Color x:Key="ColorBackground">#333333</Color>
+    <Color x:Key="ColorPlaying">Purple</Color>
+    <Color x:Key="ColorIsEnding">DarkRed</Color>
+    <Color x:Key="ColorKey">DimGray</Color>
 
     <Thickness x:Key="ContentMargin">4</Thickness>
-    <Thickness x:Key="BorderPlaying">2</Thickness>
-    <Thickness x:Key="BorderPlayingNot">0</Thickness>
+    <Thickness x:Key="ThicknessPlaying">2</Thickness>
+    <Thickness x:Key="ThicknessPlayingNot">0</Thickness>
+
+    <CornerRadius x:Key="ButtonRadius">4</CornerRadius>
 
     <x:Double x:Key="ContentFontSize">20</x:Double>
+
 </ResourceDictionary>

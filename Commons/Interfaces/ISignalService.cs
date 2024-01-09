@@ -10,6 +10,10 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
+        TimeSpan? Duration { get; }
+
+        bool IsEnding { get; }
+
         bool IsLoop { get; set; }
 
         bool IsNextThresholdExceeded { get; }
@@ -20,9 +24,9 @@ namespace SportDJ.Commons.Interfaces
 
         ISampleProvider Output { get; }
 
-        TimeSpan Position { get; }
+        TimeSpan? Position { get; }
 
-        TimeSpan Remaining { get; }
+        TimeSpan? Remaining { get; }
 
         StateType State { get; }
 

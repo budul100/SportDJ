@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace SportDJ.Commons.Converters
 {
-    public class BoolToGridSizeConverter
+    public class BoolToGridSizeStarConverter
         : OneWayValueConverter
     {
         #region Public Methods

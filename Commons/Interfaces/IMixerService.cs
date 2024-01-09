@@ -10,15 +10,19 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
+        TimeSpan? Duration { get; }
+
+        bool IsEnding { get; }
+
         bool IsLoop { get; }
 
         bool IsPlaying { get; }
 
         ISampleProvider Output { get; }
 
-        TimeSpan Position { get; }
+        TimeSpan? Position { get; }
 
-        TimeSpan Remaining { get; }
+        TimeSpan? Remaining { get; }
 
         Track Track { get; }
 

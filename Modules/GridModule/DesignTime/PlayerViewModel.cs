@@ -18,26 +18,29 @@ namespace SportDJ.Modules.GridModule.DesignTime
             TimeSpan? remaining = default)
             : base(containerProvider: default, eventAggregator: default, trackService: default, hook: default)
         {
-            this.Name = name;
-            this.Row = row;
-            this.Column = column;
+            Name = name;
+            Row = row;
+            Column = column;
 
             artist ??= "Artist";
             title ??= "Title";
 
-            this.Content = $"{artist} - {title}";
-            this.Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
-            this.Counter = $"[{3}]";
-            this.Key = KeyCode.VcA;
+            Content = $"{artist} - {title}";
+            Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
+            Counter = $"[{3}]";
+            Key = KeyCode.VcA;
 
-            this.Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
+            Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
+
+            WidthPosition = 20;
+            WidthRemaining = 80;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public override bool IsActive => false;
+        public override bool IsActive => true;
 
         public override bool IsPlaying => true;
 
