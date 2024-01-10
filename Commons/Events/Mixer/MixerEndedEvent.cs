@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Mixer
 {
-    public class MixerCompletedEvent
+    public class MixerEndedEvent
         : PubSubEvent<IMixerService>
     { }
 }

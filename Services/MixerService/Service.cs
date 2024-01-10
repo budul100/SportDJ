@@ -63,7 +63,7 @@ namespace SportDJ.Services.MixerService
                 filter: s => s == signalService);
 
             eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
-                action: s => OnSignalCompleted(s),
+                action: s => OnSignalEnded(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalServices.Contains(s));
@@ -191,7 +191,7 @@ namespace SportDJ.Services.MixerService
                 {
                     Pause();
 
-                    eventAggregator.GetEvent<MixerCompletedEvent>().Publish(this);
+                    eventAggregator.GetEvent<MixerEndedEvent>().Publish(this);
 
                     mixingProvider.Dispose();
 
@@ -231,7 +231,7 @@ namespace SportDJ.Services.MixerService
             }
         }
 
-        private void OnSignalCompleted(ISignalService signalService)
+        private void OnSignalEnded(ISignalService signalService)
         {
             if (this.signalService == signalService)
             {

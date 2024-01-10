@@ -38,10 +38,10 @@ namespace SportDJ.Tests.OutputServiceTests
                 Setup(m => m.GetEvent<MixerStoppedEvent>()).
                 Returns(mockMixerStoppedEvent.Object);
 
-            var mockMixerCompletedEvent = new Mock<MixerCompletedEvent>();
+            var mockMixerEndedEvent = new Mock<MixerEndedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<MixerCompletedEvent>()).
-                Returns(mockMixerCompletedEvent.Object);
+                Setup(m => m.GetEvent<MixerEndedEvent>()).
+                Returns(mockMixerEndedEvent.Object);
 
             mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService
