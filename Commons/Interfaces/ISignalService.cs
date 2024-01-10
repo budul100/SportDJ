@@ -16,7 +16,7 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsLoop { get; set; }
 
-        bool IsNextThresholdExceeded { get; }
+        bool IsOverNextThreshold { get; }
 
         bool IsPlaying { get; }
 
@@ -36,13 +36,13 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void End();
-
         void Initialize(Track track, WaveFormat waveFormat);
 
         void Pause();
 
         void Start();
+
+        void Stop();
 
         #endregion Public Methods
     }

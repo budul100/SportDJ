@@ -62,7 +62,7 @@ namespace SportDJ.Services.MixerService
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == signalService);
 
-            eventAggregator.GetEvent<SignalCompletedEvent>().Subscribe(
+            eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
                 action: s => OnSignalCompleted(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
@@ -227,7 +227,7 @@ namespace SportDJ.Services.MixerService
                 var signalService = fadingProviders
                     .SingleOrDefault(p => p.Value == fadingProvider).Key;
 
-                signalService.End();
+                signalService.Stop();
             }
         }
 
@@ -241,7 +241,7 @@ namespace SportDJ.Services.MixerService
             EndMixer();
 
             signalServices
-                .Where(s => s == signalService || s.IsNextThresholdExceeded)
+                .Where(s => s == signalService || s.IsOverNextThreshold)
                 .OnEach(s => RemoveSignal(s));
         }
 
@@ -252,8 +252,7 @@ namespace SportDJ.Services.MixerService
             if (fadingProviders.ContainsKey(signalService))
             {
                 var playingServices = signalServices
-                    .Where(s => s != signalService
-                        && s.State.IsPlaying()).ToArray();
+                    .Where(s => s != signalService && s.IsPlaying).ToArray();
 
                 var pausingServices = signalServices
                     .Where(s => s != signalService
@@ -271,7 +270,7 @@ namespace SportDJ.Services.MixerService
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeInMilliseconds);
 
-                pausingServices.OnEach(s => s.End());
+                pausingServices.OnEach(s => s.Stop());
 
                 playingServices.OnEach(s => fadingProviders[s].Fade(
                     volumeTarget: Constants.VolumeMin,

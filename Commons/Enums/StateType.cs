@@ -6,7 +6,7 @@
 
         Play,
 
-        Cue,
+        Stop,
 
         Pause,
     }

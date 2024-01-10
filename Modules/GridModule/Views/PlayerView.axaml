@@ -43,7 +43,7 @@
     <Border
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
-        BorderBrush="Transparent"
+        BorderBrush="{StaticResource ColorPlaying}"
         CornerRadius="4">
 
         <i:Interaction.Behaviors>
@@ -58,24 +58,12 @@
             </a:DataTriggerBehavior>
             <a:DataTriggerBehavior
                 Binding="{Binding IsPlaying}"
-                ComparisonCondition="NotEqual"
-                Value="True">
+                ComparisonCondition="Equal"
+                Value="False">
                 <a:ChangePropertyAction
                     PropertyName="BorderThickness"
                     TargetObject="PlayingBorder"
                     Value="{StaticResource ThicknessPlayingNot}" />
-            </a:DataTriggerBehavior>
-        </i:Interaction.Behaviors>
-
-        <i:Interaction.Behaviors>
-            <a:DataTriggerBehavior
-                Binding="{Binding IsPlaying}"
-                ComparisonCondition="Equal"
-                Value="True">
-                <a:ChangePropertyAction
-                    PropertyName="BorderBrush"
-                    TargetObject="PlayingBorder"
-                    Value="{StaticResource ColorPlaying}" />
             </a:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 

@@ -9,7 +9,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
@@ -33,7 +32,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string content;
         private string counter;
         private bool isDisposed;
-        private bool isEnding;
         private KeyCode? key;
         private IMixerService mixerServiceBackground;
         private IMixerService mixerServiceForeground;
@@ -92,8 +90,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalServices.Contains(s));
 
-            eventAggregator?.GetEvent<SignalCompletedEvent>().Subscribe(
-                action: s => OnSignalCompleted(s),
+            eventAggregator?.GetEvent<SignalEndedEvent>().Subscribe(
+                action: s => OnSignalEnded(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalServices.Contains(s));
@@ -148,13 +146,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsActive => signalService?.IsPlaying == true;
 
-        public bool IsEnding
-        {
-            get { return isEnding; }
-            set { SetProperty(ref isEnding, value); }
-        }
+        public bool IsEnding => signalService?.IsEnding == true;
 
-        public virtual bool IsPlaying => signalServices?.Any() == true;
+        public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
 
         public bool IsVisible { get; set; }
 
@@ -262,11 +256,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (signalService != default)
             {
-                if (signalService.State.IsPlaying())
+                if (signalService.State == StateType.Play)
                 {
                     signalService.Pause();
                 }
-                else
+                else if (signalService.State != StateType.Stop)
                 {
                     signalService.Start();
                 }
@@ -306,7 +300,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private void OnSignalCompleted(ISignalService signalService)
+        private void OnSignalEnded(ISignalService signalService)
         {
             if (signalService.State == StateType.None)
             {
@@ -315,7 +309,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalServices.Remove(signalService);
             }
 
-            UpdateCommands();
+            UpdateStack();
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -333,11 +327,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private void OnSignalStopped(ISignalService signalService)
         {
             if ((signalService == this.signalService)
-                && (signalService.State == StateType.None || OnForeground || signalService.IsNextThresholdExceeded))
+                && (signalService.State == StateType.None || OnForeground || signalService.IsOverNextThreshold))
             {
-                signalService.End();
-
-                UpdateStack();
+                signalService.Stop();
             }
 
             UpdateCommands();
@@ -347,6 +339,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(IsPlaying));
+            RaisePropertyChanged(nameof(IsEnding));
             RaisePropertyChanged(nameof(HasStack));
 
             ExecuteCommand.RaiseCanExecuteChanged();
@@ -360,8 +353,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 ? signalService?.Remaining?.ToString(Constants.FormatDuration)
                 : stackService?.Track?.Length.ToString(Constants.FormatDuration);
 
-            IsEnding = signalService?.IsEnding == true;
-
             if (signalService?.Duration?.Ticks > 0)
             {
                 WidthPosition = signalService.Position.Value.Ticks;
@@ -373,8 +364,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (stackService.Track != default)
             {
+                if (this.signalService?.State == StateType.Pause)
+                {
+                    this.signalService?.Stop();
+                }
+
                 var mixerService = GetMixerService();
-                signalService = mixerService?.Add(stackService.Track);
+                this.signalService = mixerService?.Add(stackService.Track);
 
                 UpdateTrack();
             }

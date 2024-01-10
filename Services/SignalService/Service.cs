@@ -4,7 +4,6 @@ using Prism.Events;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -46,7 +45,8 @@ namespace SportDJ.Services.SignalService
 
         public TimeSpan? Duration => playingProvider?.Duration;
 
-        public bool IsEnding => playingProvider?.State.IsPlaying() == true
+        public bool IsEnding => playingProvider != default
+            && (playingProvider.PlayType == PlayType.Play || playingProvider.PlayType == PlayType.Stop)
             && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingInSec);
 
         public bool IsLoop
@@ -64,9 +64,9 @@ namespace SportDJ.Services.SignalService
             }
         }
 
-        public bool IsNextThresholdExceeded { get; private set; }
+        public bool IsOverNextThreshold { get; private set; }
 
-        public bool IsPlaying => playingProvider?.State == StateType.Play;
+        public bool IsPlaying => playingProvider?.PlayType == PlayType.Play;
 
         public bool IsSilent => outputProvider?.IsSilent != false;
 
@@ -92,13 +92,6 @@ namespace SportDJ.Services.SignalService
             GC.SuppressFinalize(this);
         }
 
-        public void End()
-        {
-            State = StateType.None;
-
-            StopSignal();
-        }
-
         public void Initialize(Track track, WaveFormat waveFormat)
         {
             if (track == default)
@@ -106,7 +99,8 @@ namespace SportDJ.Services.SignalService
                 throw new ArgumentNullException(nameof(track));
             }
 
-            if (File.Exists(track.Path))
+            if (File.Exists(track.Path)
+                && State == StateType.None)
             {
                 Track = track;
 
@@ -119,9 +113,10 @@ namespace SportDJ.Services.SignalService
                 nextThreshold = playingProvider.Position.Add(
                     ts: TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextSeconds));
 
-                playingProvider.SignalUpdatedEvent += OnSignalUpdated;
+                playingProvider.SignalPausedEvent += OnSignalPaused;
                 playingProvider.SignalStoppedEvent += OnSignalStopped;
-                playingProvider.SignalCompletedEvent += OnSignalCompleted;
+                playingProvider.SignalEndedEvent += OnSignalEnded;
+                playingProvider.SignalUpdatedEvent += OnSignalUpdated;
 
                 var channelProvider = default(ISampleProvider);
 
@@ -159,11 +154,9 @@ namespace SportDJ.Services.SignalService
         public void Pause()
         {
             if (playingProvider != default
-                && State.IsPlaying())
+                && State == StateType.Play)
             {
                 var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
-
-                State = StateType.Pause;
 
                 outputProvider.Fade(
                     volumeTarget: Constants.VolumeMin,
@@ -173,7 +166,8 @@ namespace SportDJ.Services.SignalService
 
         public void Start()
         {
-            if (playingProvider != default)
+            if (playingProvider != default
+                && (State == StateType.None || State == StateType.Pause))
             {
                 var milliSeconds = State == StateType.Pause
                     ? settingsService.Contents.Options.FadeOnPauseMilliseconds
@@ -181,12 +175,17 @@ namespace SportDJ.Services.SignalService
 
                 playingProvider.Start();
 
-                State = StateType.Play;
-
                 outputProvider.Fade(
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: milliSeconds);
             }
+        }
+
+        public void Stop()
+        {
+            State = StateType.None;
+
+            playingProvider?.End();
         }
 
         #endregion Public Methods
@@ -205,11 +204,10 @@ namespace SportDJ.Services.SignalService
 
                     outputProvider.Dispose();
 
-                    playingProvider?.Stop();
-
-                    playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
+                    playingProvider.SignalPausedEvent -= OnSignalPaused;
                     playingProvider.SignalStoppedEvent -= OnSignalStopped;
-                    playingProvider.SignalCompletedEvent -= OnSignalCompleted;
+                    playingProvider.SignalEndedEvent -= OnSignalEnded;
+                    playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
 
                     playingProvider.Dispose();
                 }
@@ -222,32 +220,51 @@ namespace SportDJ.Services.SignalService
 
         #region Private Methods
 
-        private void OnSignalCompleted(object sender, EventArgs e)
+        private void OnSignalEnded(object sender, EventArgs e)
         {
-            eventAggregator.GetEvent<SignalCompletedEvent>().Publish(this);
+            State = StateType.None;
+
+            eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
         }
 
         private void OnSignalFaded(object sender, EventArgs e)
         {
             if (outputProvider?.IsSilent == true)
             {
-                StopSignal();
+                playingProvider.Pause();
+            }
+        }
+
+        private void OnSignalPaused(object sender, EventArgs e)
+        {
+            trackService?.End(Track);
+
+            if (IsOverNextThreshold)
+            {
+                Stop();
+            }
+            else
+            {
+                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
             }
         }
 
         private void OnSignalStarted(object sender, EventArgs e)
         {
-            trackService.Play(Track);
+            trackService.Begin(Track);
+
+            State = State == StateType.Play
+                ? StateType.Pause
+                : StateType.Play;
 
             eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }
 
         private void OnSignalStopped(object sender, EventArgs e)
         {
-            if (State != StateType.Pause || IsNextThresholdExceeded)
-            {
-                State = StateType.None;
-            }
+            trackService?.End(Track);
+
+            State = StateType.Stop;
 
             eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
         }
@@ -256,19 +273,13 @@ namespace SportDJ.Services.SignalService
         {
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
-            if (!IsNextThresholdExceeded
+            if (!IsOverNextThreshold
                 && Position?.Ticks > nextThreshold.Ticks)
             {
-                IsNextThresholdExceeded = true;
+                IsOverNextThreshold = true;
 
                 eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
             }
-        }
-
-        private void StopSignal()
-        {
-            playingProvider?.Pause();
-            trackService?.Stop(Track);
         }
 
         #endregion Private Methods

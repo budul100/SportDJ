@@ -82,7 +82,7 @@ namespace SportDJ.Services.TrackService
             }
         }
 
-        public void Play(Track track)
+        public void Begin(Track track)
         {
             if (track is null)
             {
@@ -104,7 +104,7 @@ namespace SportDJ.Services.TrackService
             Task.Run(() => RenderTrack(track));
         }
 
-        public void Stop(Track track)
+        public void End(Track track)
         {
             if (track is null)
             {
