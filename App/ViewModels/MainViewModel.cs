@@ -27,14 +27,15 @@ namespace SportDJ.App.ViewModels
     {
         #region Private Fields
 
+        private readonly string assemblyTitle;
+        private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
+        private readonly IDispatcherService dispatcherService;
         private readonly HashSet<IOutputService> liveServices = new HashSet<IOutputService>();
         private readonly IMessageBoxService messageBoxService;
         private readonly HashSet<IOutputService> outputServices = new HashSet<IOutputService>();
         private readonly IStorageService<Session> sessionService;
 
-        private string assemblyTitle;
-        private IMixerService backgroundMixer;
         private TaskPoolGlobalHook hook;
         private bool isDisposed;
         private string title;
@@ -46,17 +47,18 @@ namespace SportDJ.App.ViewModels
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
-            IMessageBoxService messageBoxService, TaskPoolGlobalHook hook)
+            IDispatcherService dispatcherService, IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService, IMessageBoxService messageBoxService, TaskPoolGlobalHook hook)
         {
             this.containerProvider = containerProvider;
+            this.dispatcherService = dispatcherService;
             this.sessionService = sessionService;
             this.messageBoxService = messageBoxService;
             this.hook = hook;
 
             assemblyTitle = GetAssemblyTitle();
 
-            OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
+            OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
 
             LoadSessionService(
                 settingsService: settingsService);
@@ -228,6 +230,19 @@ namespace SportDJ.App.ViewModels
             return result;
         }
 
+        private async void CheckClosing(IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var result = await messageBoxService.GetMessageBoxResultAsync(
+                contentMessage: "Shall the application be closed?",
+                contentTitle: "Close application");
+
+            if (result == ButtonResult.Yes)
+            {
+                userWantsToQuit = true;
+                desktop.Shutdown();
+            }
+        }
+
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
         {
             var outputService = containerProvider.Resolve<IOutputService>(
@@ -274,7 +289,7 @@ namespace SportDJ.App.ViewModels
             sessionService?.Load(sessionPath);
         }
 
-        private async void OnClosingAsync(CancelEventArgs eventArgs)
+        private void OnClosing(CancelEventArgs eventArgs)
         {
             userWantsToQuit = userWantsToQuit || !liveServices.Any(s => s.IsPlaying);
 
@@ -283,16 +298,9 @@ namespace SportDJ.App.ViewModels
             {
                 eventArgs.Cancel = true;
 
-                var result = await messageBoxService.GetMessageBoxResultAsync(
-                    contentMessage: "Shall the application be closed?",
-                    contentTitle: "Close application");
-
-                if (result == ButtonResult.Yes)
+                if (Constants.MessageBoxOnClosing)
                 {
-                    eventArgs.Cancel = false;
-
-                    userWantsToQuit = true;
-                    desktop.Shutdown();
+                    dispatcherService.Post(() => CheckClosing(desktop));
                 }
             }
 

@@ -10,7 +10,7 @@ namespace SportDJ.Commons.Interfaces
 
         Task<ButtonResult> GetMessageBoxResultAsync(string contentMessage, string contentTitle,
             ButtonEnum buttonDefinitions = ButtonEnum.YesNo, ClickEnum enterDefaultButton = ClickEnum.Yes,
-            ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool ShowInCenter = true,
+            ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool showInCenter = true,
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);
 
         Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,

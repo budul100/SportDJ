@@ -14,9 +14,10 @@ namespace SportDJ.Commons
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";
 
-        public const int IsEndingInSec = 10;
-
+        public const bool MessageBoxOnClosing = false;
         public const int MixerSourcesMax = 1024;
+
+        public const int SecondsIsEnding = 10;
 
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
