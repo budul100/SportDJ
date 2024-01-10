@@ -18,6 +18,9 @@ namespace SportDJ.Commons
 
         public const int MixerSourcesMax = 1024;
 
+        public const string SplitterTitle = " | ";
+        public const char SplitterVersion = '.';
+
         public const float VolumeMax = 1f;
         public const float VolumeMin = 0f;
 

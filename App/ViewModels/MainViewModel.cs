@@ -1,14 +1,23 @@
-﻿using Prism.Ioc;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using MsBox.Avalonia.Enums;
+using Prism.Commands;
+using Prism.Events;
+using Prism.Ioc;
 using Prism.Mvvm;
 using SharpHook;
-using SharpHook.Native;
 using SportDJ.Commons;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Models.Structure;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SportDJ.App.ViewModels
@@ -19,26 +28,38 @@ namespace SportDJ.App.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private TaskPoolGlobalHook hook;
+        private readonly HashSet<IOutputService> liveServices = new HashSet<IOutputService>();
+        private readonly IMessageBoxService messageBoxService;
+        private readonly HashSet<IOutputService> outputServices = new HashSet<IOutputService>();
+        private readonly IStorageService<Session> sessionService;
 
+        private string assemblyTitle;
+        private IMixerService backgroundMixer;
+        private TaskPoolGlobalHook hook;
         private bool isDisposed;
+        private string title;
+
+        private bool userWantsToQuit;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public MainViewModel(IContainerProvider containerProvider, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService, TaskPoolGlobalHook hook)
+        public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
+            IMessageBoxService messageBoxService, TaskPoolGlobalHook hook)
         {
-            //XXXX(settingsService?.Contents);
-            //settingsService?.Save();
-
             this.containerProvider = containerProvider;
+            this.sessionService = sessionService;
+            this.messageBoxService = messageBoxService;
             this.hook = hook;
 
+            assemblyTitle = GetAssemblyTitle();
+
+            OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosingAsync);
+
             LoadSessionService(
-                settingsService: settingsService,
-                sessionService: sessionService);
+                settingsService: settingsService);
 
             InitializeOutput(
                 type: OutputType.Live);
@@ -61,13 +82,93 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.PFL,
                 onForeground: true);
 
+            backgroundMixer = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
+
+            eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
+                action: _ => UpdateTitle(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => backgroundMixer == m);
+
             if (hook != default)
             {
                 Task.Run(() => hook.Run());
             }
+
+            UpdateTitle();
         }
 
         #endregion Public Constructors
+
+        #region Public Properties
+
+        public int Height
+        {
+            get
+            {
+                return sessionService.Contents.Height;
+            }
+            set
+            {
+                if (sessionService.Contents.Height != value)
+                {
+                    sessionService.Contents.Height = value;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(Height));
+                }
+            }
+        }
+
+        public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
+
+        public string Title
+        {
+            get { return title; }
+            set { SetProperty(ref title, value); }
+        }
+
+        public int Width
+        {
+            get
+            {
+                return sessionService.Contents.Width;
+            }
+            set
+            {
+                if (sessionService.Contents.Width != value)
+                {
+                    sessionService.Contents.Width = value;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(Width));
+                }
+            }
+        }
+
+        public WindowState WindowState
+        {
+            get
+            {
+                return Enum.Parse<WindowState>(sessionService.Contents.WindowState);
+            }
+            set
+            {
+                if (sessionService.Contents.WindowState != value.ToString())
+                {
+                    sessionService.Contents.WindowState = value.ToString();
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(WindowState));
+                }
+            }
+        }
+
+        #endregion Public Properties
 
         #region Public Methods
 
@@ -90,6 +191,8 @@ namespace SportDJ.App.ViewModels
             {
                 if (disposing)
                 {
+                    outputServices.OnEach(s => s.Dispose());
+
                     hook.Dispose();
                     hook = default;
                 }
@@ -102,14 +205,27 @@ namespace SportDJ.App.ViewModels
 
         #region Private Methods
 
-        private static void LoadSessionService(IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService)
+        private static string GetAssemblyTitle()
         {
-            var sessionPath = settingsService?.GetPath(
-                appName: Constants.AppName,
-                fileName: Defaults.FileNameSession);
+            var assembly = Assembly.GetExecutingAssembly().GetName();
 
-            sessionService?.Load(sessionPath);
+            var version = new StringBuilder();
+
+            version.Append(assembly.Version.Major);
+
+            version.Append(Constants.SplitterVersion);
+            version.Append(assembly.Version.Minor);
+
+            if (version.Length > 0
+                && assembly.Version.Build > 0)
+            {
+                version.Append(Constants.SplitterVersion);
+                version.Append(assembly.Version.Build);
+            }
+
+            var result = $"{Constants.AppName} ({version})";
+
+            return result;
         }
 
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
@@ -140,127 +256,79 @@ namespace SportDJ.App.ViewModels
 
             outputService?.Initialize(
                 type: type);
+
+            outputServices.Add(outputService);
+
+            if (type != OutputType.PFL)
+            {
+                liveServices.Add(outputService);
+            }
         }
 
-        private void XXXX(Set set)
+        private void LoadSessionService(IStorageService<Set> settingsService)
         {
-            if (set?.Grid?.Cells != default)
+            var sessionPath = settingsService?.GetPath(
+                appName: Constants.AppName,
+                fileName: Defaults.FileNameSession);
+
+            sessionService?.Load(sessionPath);
+        }
+
+        private async void OnClosingAsync(CancelEventArgs eventArgs)
+        {
+            userWantsToQuit = userWantsToQuit || !liveServices.Any(s => s.IsPlaying);
+
+            if (!userWantsToQuit
+                && App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                set.Grid.Cells.Clear();
+                eventArgs.Cancel = true;
 
-                var group = new Group();
-                set.Grid.Cells.Add(group);
+                var result = await messageBoxService.GetMessageBoxResultAsync(
+                    contentMessage: "Shall the application be closed?",
+                    contentTitle: "Close application");
 
-                var gridDamen = new Grid
+                if (result == ButtonResult.Yes)
                 {
-                    Name = "Damen",
-                };
+                    eventArgs.Cancel = false;
 
-                group.Grids.Add(gridDamen);
-
-                gridDamen.Cells.Add(new Player() { Name = "Sonstiges", Row = 0, Column = 0, Key = KeyCode.Vc7 });
-                gridDamen.Cells.Add(new Player() { Name = "Sonstiges", Row = 0, Column = 1, Key = KeyCode.Vc8 });
-                gridDamen.Cells.Add(new Player() { Name = "Warm-Up", Row = 0, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Sky News Theme.mp3" });
-
-                gridDamen.Cells.Add(new Player() { Name = "Gast", Row = 1, Column = 0, Key = KeyCode.Vc4, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3" });
-                gridDamen.Cells.Add(new Player() { Name = "Heim", Row = 1, Column = 1, Key = KeyCode.Vc5, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2021 - Heim.mp3" });
-                gridDamen.Cells.Add(new Player() { Name = "Warten", Row = 1, Column = 2, Key = KeyCode.Vc6, Path = @"C:\Users\mgr\SportDJ\Start_Damen.m3u" });
-
-                gridDamen.Cells.Add(new Player() { Name = "Einlauf", Row = 2, Column = 0, Key = KeyCode.Vc1, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - 300 Violin Orchestra.mp3" });
-                gridDamen.Cells.Add(new Player() { Name = "Start", Row = 2, Column = 1, Key = KeyCode.Vc2, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Ready To Rumble.mp3" });
-                gridDamen.Cells.Add(new Player() { Name = "Warten", Row = 2, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3", OnForeground = true });
-
-                var gridHerren = new Grid
-                {
-                    Name = "Herren",
-                };
-
-                group.Grids.Add(gridHerren);
-
-                gridHerren.Cells.Add(new Player() { Name = "Sonstiges", Row = 0, Column = 0, Key = KeyCode.Vc7 });
-                gridHerren.Cells.Add(new Player() { Name = "Sonstiges", Row = 0, Column = 1, Key = KeyCode.Vc8 });
-                gridHerren.Cells.Add(new Player() { Name = "Warm-Up", Row = 0, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Home With a Vengeance.mp3" });
-
-                gridHerren.Cells.Add(new Player() { Name = "Gast", Row = 1, Column = 0, Key = KeyCode.Vc4, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2017 - Gast.mp3" });
-                gridHerren.Cells.Add(new Player() { Name = "Heim", Row = 1, Column = 1, Key = KeyCode.Vc5, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2021 - Heim.mp3" });
-                gridHerren.Cells.Add(new Player() { Name = "Warten", Row = 1, Column = 2, Key = KeyCode.Vc6, Path = @"C:\Users\mgr\SportDJ\Start_Herren.m3u" });
-
-                gridHerren.Cells.Add(new Player() { Name = "Einlauf", Row = 2, Column = 0, Key = KeyCode.Vc1, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Run Boy Run - Kurz.mp3" });
-                gridHerren.Cells.Add(new Player() { Name = "Start", Row = 2, Column = 1, Key = KeyCode.Vc2, Path = @"C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Get Ready.mp3" });
-                gridHerren.Cells.Add(new Player() { Name = "Warten", Row = 2, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3", OnForeground = true });
-
-                var gridSpiel = new Grid
-                {
-                    Name = "Spiel",
-                };
-
-                group.Grids.Add(gridSpiel);
-
-                gridSpiel.Cells.Add(new Player() { Name = "TO Normal", Row = 0, Column = 0, Key = KeyCode.VcNumPadAdd, Path = @"C:\Users\mgr\SportDJ\Spiel_TO-Normal.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "TO Knapp", Row = 0, Column = 1, Key = KeyCode.VcNumPadSubtract, Path = @"C:\Users\mgr\SportDJ\Spiel_TO-Knapp.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "Sonstiges", Row = 0, Column = 2, Key = KeyCode.Vc7 });
-
-                var groupTor = new Group { Column = 0, Row = 1 };
-
-                gridSpiel.Cells.Add(groupTor);
-
-                var gridTorDamen = new Grid
-                {
-                    Name = "Tor Damen",
-                };
-
-                groupTor.Grids.Add(gridTorDamen);
-
-                gridTorDamen.Cells.Add(new Player() { Name = "Tor", Key = KeyCode.Vc7, Path = @"C:\Users\mgr\SportDJ\Spiel_Tor\Tor - The Concert.mp3" });
-
-                var gridTorHerren = new Grid
-                {
-                    Name = "Tor Herren",
-                };
-
-                groupTor.Grids.Add(gridTorHerren);
-
-                gridTorHerren.Cells.Add(new Player() { Name = "Tor", Key = KeyCode.Vc7, Path = @"C:\Users\mgr\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3" });
-
-                gridSpiel.Cells.Add(new Player() { Name = "Weiter", Row = 1, Column = 1, Key = KeyCode.Vc8, Path = @"C:\Users\mgr\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3" });
-                gridSpiel.Cells.Add(new Player() { Name = "Ende", Row = 1, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3", OnForeground = true });
-
-                gridSpiel.Cells.Add(new Player() { Name = "Anheizen", Row = 2, Column = 0, Key = KeyCode.Vc4, Path = @"C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "Gegner", Row = 2, Column = 1, Key = KeyCode.Vc5, Path = @"C:\Users\mgr\SportDJ\Spiel_Gegner.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "Team", Row = 2, Column = 2, Key = KeyCode.Vc6, Path = @"C:\Users\mgr\SportDJ\Spiel_Team.m3u", SavePositions = true, OnForeground = true });
-
-                gridSpiel.Cells.Add(new Player() { Name = "Attacke", Row = 3, Column = 0, Key = KeyCode.Vc1, Path = @"C:\Users\mgr\SportDJ\Spiel_Angriff.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "Klatschen Kurz", Row = 3, Column = 1, Key = KeyCode.Vc2, Path = @"C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u", SavePositions = true });
-                gridSpiel.Cells.Add(new Player() { Name = "Klatschen Lang", Row = 3, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Spiel_Klatschen-Lang.m3u", SavePositions = true });
-
-                var gridEnde = new Grid
-                {
-                    Name = "Ende",
-                };
-
-                group.Grids.Add(gridEnde);
-
-                gridEnde.Cells.Add(new Player() { Name = "Gewonnen", Row = 0, Column = 0, Key = KeyCode.Vc7, Path = @"C:\Users\mgr\SportDJ\Ende_Gewonnen.m3u" });
-                gridEnde.Cells.Add(new Player() { Name = "Unentschieden", Row = 0, Column = 1, Key = KeyCode.Vc8, Path = @"C:\Users\mgr\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3" });
-                gridEnde.Cells.Add(new Player() { Name = "Verloren", Row = 0, Column = 2, Key = KeyCode.Vc9, Path = @"C:\Users\mgr\SportDJ\Ende_Verloren.m3u" });
-
-                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 1, Column = 0, Key = KeyCode.Vc1 });
-                gridEnde.Cells.Add(new Player() { Name = "Sonstiges", Row = 1, Column = 1, Key = KeyCode.Vc2 });
-                gridEnde.Cells.Add(new Player() { Name = "Abschied", Row = 1, Column = 2, Key = KeyCode.Vc3, Path = @"C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3" });
-
-                set.Options.KeyTalkVolume = KeyCode.VcSpace;
-                set.Options.KeyPauseOutput = KeyCode.VcEnter;
-
-                set.Options.FadeOnLowerMilliseconds = 50;
-                set.Options.FadeOnPauseMilliseconds = 500;
-                set.Options.FadeOnMixInMilliseconds = 500;
-                set.Options.FadeOnMixOutMilliseconds = 500;
-
-                set.Options.SelectNextSeconds = 5;
-
-                set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Lautsprecher (Realtek(R) Audio)";
-                //set.Outputs.Single(o => o.Type == OutputType.Live).DeviceName = "Kopfhoerer (Realtek(R) Audio)";
+                    userWantsToQuit = true;
+                    desktop.Shutdown();
+                }
             }
+
+            if (!eventArgs.Cancel)
+            {
+                Dispose();
+            }
+        }
+
+        private void UpdateTitle()
+        {
+            var result = new StringBuilder();
+
+            result.Append(assemblyTitle);
+
+            if (!string.IsNullOrWhiteSpace(backgroundMixer?.Track?.Info))
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append(backgroundMixer.Track.Info);
+            }
+
+            if (backgroundMixer?.Remaining.HasValue == true)
+            {
+                if (result.Length > 0)
+                {
+                    result.Append(Constants.SplitterTitle);
+                }
+
+                result.Append(backgroundMixer.Remaining?.ToString(Constants.FormatDuration));
+            }
+
+            Title = result.ToString();
         }
 
         #endregion Private Methods

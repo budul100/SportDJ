@@ -6,6 +6,9 @@ namespace SportDJ.Commons
     {
         #region Public Fields
 
+        public const int AppHeightDefault = 800;
+        public const int AppWidthDefault = 1200;
+
         public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
 

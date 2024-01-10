@@ -68,9 +68,12 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterSingleton<TaskPoolGlobalHook>();
+            var messageBoxService = new MessageBoxService.Service(App.Current);
+            containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
 
+            containerRegistry.RegisterSingleton<TaskPoolGlobalHook>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
+
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();

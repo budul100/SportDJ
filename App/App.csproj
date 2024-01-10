@@ -18,6 +18,8 @@
 		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.0.6" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
 		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.6" />
 		<PackageReference Include="Prism.DryIoc.Avalonia" Version="8.1.97.11000" />
 
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
@@ -30,6 +32,7 @@
 	  <ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
 	  <ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
+	  <ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
 	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
 	  <ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
 	  <ProjectReference Include="..\Services\StackService\StackService.csproj" />
