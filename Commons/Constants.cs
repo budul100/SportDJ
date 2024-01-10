@@ -1,4 +1,6 @@
-﻿namespace SportDJ.Commons
+﻿using System.Drawing;
+
+namespace SportDJ.Commons
 {
     public static class Constants
     {
@@ -20,6 +22,9 @@
         public const float VolumeMin = 0f;
 
         public const int WidthBase = 1000;
+
+        public static Color ColorPeakBottom = Color.DarkGreen;
+        public static Color ColorPeakTop = Color.Green;
 
         #endregion Public Fields
     }

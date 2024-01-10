@@ -27,6 +27,22 @@ namespace SportDJ.Tests.StackServiceTests
 
         public Tests()
         {
+            var options = new Options
+            {
+                TrimRearPortion = 0.5,
+                VolumeCue = 0.3F,
+            };
+
+            var set = new Set
+            {
+                Options = options,
+            };
+
+            mockSettingsService = new Mock<IStorageService<Set>>();
+            mockSettingsService
+                .Setup(m => m.Contents)
+                .Returns(set);
+
             mockEventAggregator = new Mock<IEventAggregator>();
 
             var mockTrackSelectedEvent = new Mock<SignalUpdatedEvent>();
@@ -43,11 +59,6 @@ namespace SportDJ.Tests.StackServiceTests
             mockDispatcherService
                 .Setup(m => m.InvokeAsync(It.IsAny<Action>()))
                 .Callback<Action>(a => a.Invoke());
-
-            mockSettingsService = new Mock<IStorageService<Set>>();
-            mockSettingsService
-                .Setup(m => m.Contents)
-                .Returns(new Set());
 
             mockSessionService = new Mock<IStorageService<Session>>();
             mockSessionService
@@ -73,7 +84,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                playerName: default,
+                name: default,
                 savePosition: false);
 
             var track = stackService.Track;
@@ -129,17 +140,18 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                playerName: default,
+                name: default,
                 savePosition: false);
 
-            Task.Delay(1000).Wait();
+            Task.Delay(3000).Wait();
 
             Assert.Equal(
                 expected: 3,
-                actual: stackService.Entries.Count(e => e.Track.Trimmed));
+                actual: stackService.Entries.Count);
 
-            Assert.True(stackService.Entries.All(e => e.Track.Start > TimeSpan.Zero));
-            Assert.True(stackService.Entries.All(e => e.Track.Length > TimeSpan.Zero));
+            Assert.True(stackService.Entries.All(e => e.Track.Start > 0));
+            Assert.True(stackService.Entries.All(e => e.Track.End > 0));
+            Assert.True(stackService.Entries.All(e => e.Track.Cue < e.Track.End));
 
             Assert.True(stackService.Track != default);
         }
@@ -154,7 +166,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             stackService.Initialize(
                 path: @"..\..\..\Samples",
-                playerName: default,
+                name: default,
                 savePosition: false);
 
             var track = stackService.Track;

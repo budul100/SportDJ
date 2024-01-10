@@ -9,11 +9,13 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -78,17 +80,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s);
 
+            eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
+                action: _ => UpdateRemaining(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => signalService == s);
+
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
                 action: s => OnSignalStopped(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalServices.Contains(s));
 
-            eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
-                action: _ => UpdateRemaining(),
+            eventAggregator?.GetEvent<SignalCompletedEvent>().Subscribe(
+                action: s => OnSignalCompleted(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalService == s);
+                filter: s => signalServices.Contains(s));
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
                 action: _ => UpdateStack(false),
@@ -98,10 +106,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     && !OnForeground);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
-                action: _ => UpdateTrack(),
+                action: _ => UpdateSignal(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalService == s);
+                filter: s => stackService == s);
 
             eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
                 action: _ => UpdateTrack(),
@@ -221,10 +229,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             mixerServicePFL = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.PFL));
 
-            stackService?.Initialize(
+            Task.Run(() => stackService?.Initialize(
                 path: player.Path,
-                playerName: player.Name,
-                savePosition: player.SavePositions);
+                name: player.Name,
+                savePosition: player.SavePositions));
 
             UpdateSignal();
         }
@@ -254,7 +262,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (signalService != default)
             {
-                if (signalService.State == StateType.Play)
+                if (signalService.State.IsPlaying())
                 {
                     signalService.Pause();
                 }
@@ -298,6 +306,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private void OnSignalCompleted(ISignalService signalService)
+        {
+            if (signalService.State == StateType.None)
+            {
+                signalService.Dispose();
+
+                signalServices.Remove(signalService);
+            }
+
+            UpdateCommands();
+        }
+
         private void OnSignalStarted(ISignalService signalService)
         {
             if (this.signalService.Track == this.stackService?.Track)
@@ -315,12 +335,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if ((signalService == this.signalService)
                 && (signalService.State == StateType.None || OnForeground || signalService.IsNextThresholdExceeded))
             {
-                signalService.Dispose();
+                signalService.End();
 
                 UpdateStack();
             }
-
-            signalServices.Remove(signalService);
 
             UpdateCommands();
         }

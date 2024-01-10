@@ -259,7 +259,7 @@
 		<KeyPauseOutput>VcEnter</KeyPauseOutput>
 		<SelectNextSeconds>5</SelectNextSeconds>
 		<TrimRearPortion>0.1</TrimRearPortion>
-		<TrimVolume>0</TrimVolume>
+		<TrimVolume>0.1</TrimVolume>
 	</Options>
 	<Outputs>
 		<Output Type="Live">

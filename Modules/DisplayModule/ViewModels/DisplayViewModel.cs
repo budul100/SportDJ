@@ -43,7 +43,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             clockTimer.Start();
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
-                action: s => OnMixerUpdated(s),
+                action: _ => OnMixerUpdated(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => mixerService == m);
@@ -143,23 +143,20 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private void OnMixerStopped()
         {
-            Content = default;
-
-            Remaining = default;
-            IsEnding = false;
-
-            Bitmap = default;
-
-            WidthPosition = default;
-            WidthRemaining = default;
+            UpdateDisplay();
         }
 
-        private void OnMixerUpdated(IMixerService mixerService)
+        private void OnMixerUpdated()
         {
-            if (mixerService.Track != default)
+            UpdateDisplay();
+        }
+
+        private void UpdateDisplay()
+        {
+            if (mixerService.Track != default
+                && mixerService.IsPlaying)
             {
                 Content = mixerService.Track.Info;
-
                 Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
                 IsEnding = mixerService.IsEnding;
 
@@ -170,6 +167,17 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                     WidthPosition = mixerService.Position.Value.Ticks;
                     WidthRemaining = mixerService.Remaining.Value.Ticks;
                 }
+            }
+            else
+            {
+                Content = default;
+                Remaining = default;
+                IsEnding = false;
+
+                Bitmap = default;
+
+                WidthPosition = default;
+                WidthRemaining = default;
             }
         }
 

@@ -143,11 +143,14 @@ namespace SportDJ.Services.TrackService
                         info: info,
                         length: length);
 
-                    Task.Run(() => TrimTrack(result));
+                    lock (tracks)
+                    {
+                        tracks.Add(
+                            key: file,
+                            value: result);
+                    }
 
-                    tracks.Add(
-                        key: file,
-                        value: result);
+                    Task.Run(() => TrimTrack(result));
                 }
             }
         }
@@ -225,19 +228,16 @@ namespace SportDJ.Services.TrackService
 
         private void TrimTrack(Track track)
         {
-            if (!track.Checked)
+            if (!track.IsChecked)
             {
-                var trimVolume = settingsService.Contents.Options.TrimVolume;
+                var trimVolume = settingsService.Contents.Options.VolumeCue;
                 var trimRearPortion = settingsService.Contents.Options.TrimRearPortion;
 
                 track.Trim(
-                    trimVolume: trimVolume,
+                    cueVolume: trimVolume,
                     trimRearPortion: trimRearPortion);
 
-                if (track.Trimmed)
-                {
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-                }
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
             }
         }
 

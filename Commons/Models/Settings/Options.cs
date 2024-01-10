@@ -14,15 +14,15 @@ namespace SportDJ.Commons.Models.Settings
 
         public int FadeOnPauseMilliseconds { get; set; }
 
-        public KeyCode? KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
-
         public KeyCode? KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
+
+        public KeyCode? KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
 
         public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;
 
         public double TrimRearPortion { get; set; } = Defaults.TrimRearPortion;
 
-        public float TrimVolume { get; set; }
+        public float VolumeCue { get; set; }
 
         #endregion Public Properties
     }

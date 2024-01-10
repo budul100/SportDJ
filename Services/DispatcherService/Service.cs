@@ -24,15 +24,15 @@ namespace SportDJ.Services.DispatcherService
             return result;
         }
 
-        public async Task InvokeAsync(Action action)
+        public async Task InvokeAsync(Action callback)
         {
-            if (action is null)
+            if (callback is null)
             {
-                throw new ArgumentNullException(nameof(action));
+                throw new ArgumentNullException(nameof(callback));
             }
 
             await Dispatcher.UIThread.InvokeAsync(
-                action,
+                callback: callback,
                 priority: DispatcherPriority.Background);
         }
 

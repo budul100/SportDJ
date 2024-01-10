@@ -17,7 +17,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Initialize(string path, string playerName, bool savePosition);
+        void Initialize(string path, string name, bool savePosition);
 
         void Next();
 

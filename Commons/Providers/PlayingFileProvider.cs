@@ -11,46 +11,33 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
-        private readonly long end;
         private readonly AudioFileReader sourceProvider;
-        private readonly long start;
-
+        private long end;
+        private bool isCue;
+        private bool isPause;
         private long position;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public PlayingFileProvider(AudioFileReader sourceProvider, Track track, TimeSpan? begin = default,
-            TimeSpan? length = default)
+        public PlayingFileProvider(AudioFileReader sourceProvider, Track track)
             : base(waveFormat: sourceProvider.WaveFormat)
         {
             this.sourceProvider = sourceProvider;
 
             Track = track;
-            start = begin.ToSeconds(averageBytesPerSecond);
-            end = start + length.ToSeconds(averageBytesPerSecond);
 
-            if (start > end)
-            {
-                throw new ArgumentException(
-                    message: "Playing start cannot be greater than playing end.",
-                    paramName: nameof(begin));
-            }
-
-            if (end > this.sourceProvider.Length)
-            {
-                end = this.sourceProvider.Length;
-            }
-
-            Duration = (end - start).ToDuration(averageBytesPerSecond);
+            UpdateTime();
         }
 
         #endregion Public Constructors
 
         #region Public Events
 
-        public event EventHandler SignalEndedEvent;
+        public event EventHandler SignalCompletedEvent;
+
+        public event EventHandler SignalStoppedEvent;
 
         public event EventHandler SignalUpdatedEvent;
 
@@ -58,11 +45,11 @@ namespace SportDJ.Commons.Providers
 
         #region Public Properties
 
-        public TimeSpan Position => (position - start).ToDuration(averageBytesPerSecond);
-
-        public TimeSpan Duration { get; }
+        public TimeSpan Duration { get; private set; }
 
         public bool IsLoop { get; set; }
+
+        public TimeSpan Position => (position - Track.Start).ToDuration(averageBytesPerSecond);
 
         public TimeSpan Remaining => (end - position).ToDuration(averageBytesPerSecond);
 
@@ -89,62 +76,111 @@ namespace SportDJ.Commons.Providers
                 {
                     if (State == StateType.Pause)
                     {
-                        read = sourceProvider.Read(
-                            buffer: buffer,
-                            offset: offset,
-                            count: count);
+                        if (!isPause)
+                        {
+                            SignalStoppedEvent?.Invoke(
+                                sender: this,
+                                e: default);
 
-                        MuteBuffer(
-                            buffer: buffer,
-                            offset: offset,
-                            count: count);
+                            isPause = true;
+                        }
+                        else
+                        {
+                            read = sourceProvider.Read(
+                                buffer: buffer,
+                                offset: offset,
+                                count: count);
 
-                        sourceProvider.Position = position;
+                            MuteBuffer(
+                                buffer: buffer,
+                                offset: offset,
+                                count: count);
+
+                            sourceProvider.Position = position;
+                        }
                     }
-                    else if (State == StateType.Play)
+                    else
                     {
-                        if (sourceProvider.Position < start)
-                        {
-                            sourceProvider.Position = start;
-                        }
+                        isPause = false;
 
-                        if (IsLoop)
+                        if (State.IsPlaying())
                         {
-                            while (read < count)
+                            if (sourceProvider.Position < Track.Start)
                             {
-                                var required = count - read;
-                                var readThisTime = sourceProvider.Read(buffer, offset + read, required);
+                                sourceProvider.Position = Track.Start;
+                            }
 
-                                if (readThisTime < required || sourceProvider.Position >= end)
+                            if (IsLoop)
+                            {
+                                while (read < count)
                                 {
-                                    sourceProvider.Position = start;
+                                    var required = count - read;
+
+                                    var readThisTime = sourceProvider.Read(
+                                        buffer: buffer,
+                                        offset: offset + read,
+                                        count: required);
+
+                                    if (readThisTime < required || sourceProvider.Position >= end)
+                                    {
+                                        sourceProvider.Position = Track.Start;
+                                    }
+
+                                    read += readThisTime;
                                 }
-                                read += readThisTime;
                             }
-                        }
-                        else
-                        {
-                            var lastPosition = sourceProvider.Position;
-
-                            read = sourceProvider.Read(buffer, offset, count);
-
-                            if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
+                            else
                             {
-                                State = StateType.None;
+                                var lastPosition = sourceProvider.Position;
+
+                                read = sourceProvider.Read(
+                                    buffer: buffer,
+                                    offset: offset,
+                                    count: count);
+
+                                if (Track.Cue.HasValue
+                                    && sourceProvider.Position >= Track.Cue
+                                    && !isCue)
+                                {
+                                    State = StateType.Cue;
+
+                                    SignalStoppedEvent?.Invoke(
+                                        sender: this,
+                                        e: default);
+
+                                    isCue = true;
+                                }
+                                else if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
+                                {
+                                    State = StateType.None;
+                                }
                             }
-                        }
 
-                        if (State == StateType.None)
-                        {
-                            position = end;
+                            if (State == StateType.None)
+                            {
+                                position = end;
 
-                            OnSignalEnded();
-                        }
-                        else
-                        {
-                            position = sourceProvider.Position;
+                                if (!isCue)
+                                {
+                                    SignalStoppedEvent?.Invoke(
+                                        sender: this,
+                                        e: default);
 
-                            OnSignalUpdated();
+                                    isCue = true;
+                                }
+
+                                SignalCompletedEvent?.Invoke(
+                                    sender: this,
+                                    e: default);
+                            }
+                            else
+                            {
+                                position = sourceProvider.Position;
+
+                                SignalUpdatedEvent?.Invoke(
+                                    sender: this,
+                                    e: default);
+                            }
                         }
                     }
                 }
@@ -157,6 +193,8 @@ namespace SportDJ.Commons.Providers
 
         public void Start()
         {
+            UpdateTime();
+
             State = StateType.Play;
         }
 
@@ -194,18 +232,13 @@ namespace SportDJ.Commons.Providers
             }
         }
 
-        private void OnSignalEnded()
+        private void UpdateTime()
         {
-            SignalEndedEvent?.Invoke(
-                sender: this,
-                e: default);
-        }
+            end = (Track.End ?? 0) > this.sourceProvider.Length
+                ? Track.End.Value
+                : this.sourceProvider.Length;
 
-        private void OnSignalUpdated()
-        {
-            SignalUpdatedEvent?.Invoke(
-                sender: this,
-                e: default);
+            Duration = (end - Track.Start).ToDuration(averageBytesPerSecond);
         }
 
         #endregion Private Methods

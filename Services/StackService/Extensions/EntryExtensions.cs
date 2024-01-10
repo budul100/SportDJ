@@ -11,15 +11,15 @@ namespace SportDJ.Services.StackService.Extensions
         public static bool AllPlayed(this IEnumerable<Entry> entries)
         {
             var result = entries?
-                .All(t => t.Played) == true;
+                .All(e => !e.CanBePlayed()) == true;
 
             return result;
         }
 
         public static bool HasUnplayeds(this IEnumerable<Entry> entries, Track track)
         {
-            var result = entries?.Count(t => !t.Played) > 1
-                || (track != default && entries?.SingleOrDefault(t => !t.Played)?.Track != track);
+            var result = entries?.Count(e => e.CanBePlayed()) > 1
+                || (track != default && entries?.SingleOrDefault(e => e.CanBePlayed())?.Track != track);
 
             return result;
         }
@@ -36,5 +36,15 @@ namespace SportDJ.Services.StackService.Extensions
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private static bool CanBePlayed(this Entry entry)
+        {
+            return !entry.Played
+                && !entry.Track.IsSilent;
+        }
+
+        #endregion Private Methods
     }
 }

@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Signal
 {
-    public class SignalEndedEvent
+    public class SignalCompletedEvent
         : PubSubEvent<ISignalService>
     { }
 }

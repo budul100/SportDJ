@@ -60,10 +60,10 @@ namespace SportDJ.Services.MixerService
                 action: _ => OnSignalStopped(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalServices.Contains(s));
+                filter: s => s == signalService);
 
-            eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
-                action: s => OnSignalEnded(s),
+            eventAggregator.GetEvent<SignalCompletedEvent>().Subscribe(
+                action: s => OnSignalCompleted(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalServices.Contains(s));
@@ -115,7 +115,7 @@ namespace SportDJ.Services.MixerService
         {
             var result = default(ISignalService);
 
-            if (track != default)
+            if (track?.IsSilent == false)
             {
                 result = containerProvider.Resolve<ISignalService>();
 
@@ -191,7 +191,7 @@ namespace SportDJ.Services.MixerService
                 {
                     Pause();
 
-                    eventAggregator.GetEvent<MixerEndedEvent>().Publish(this);
+                    eventAggregator.GetEvent<MixerCompletedEvent>().Publish(this);
 
                     mixingProvider.Dispose();
 
@@ -208,6 +208,17 @@ namespace SportDJ.Services.MixerService
 
         #region Private Methods
 
+        private void EndMixer()
+        {
+            if (IsPlaying
+                && !signalServices.Any(s => s.IsPlaying))
+            {
+                IsPlaying = false;
+
+                eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
+            }
+        }
+
         private void OnFadingEnded(object sender, EventArgs e)
         {
             if (sender is FadedControlProvider fadingProvider
@@ -216,30 +227,22 @@ namespace SportDJ.Services.MixerService
                 var signalService = fadingProviders
                     .SingleOrDefault(p => p.Value == fadingProvider).Key;
 
-                signalService.Stop();
+                signalService.End();
             }
         }
 
-        private void OnSignalEnded(ISignalService signalService)
+        private void OnSignalCompleted(ISignalService signalService)
         {
             if (this.signalService == signalService)
             {
                 this.signalService = default;
             }
 
-            if (fadingProviders.ContainsKey(signalService))
-            {
-                fadingProviders[signalService].FadingEndedEvent -= OnFadingEnded;
+            EndMixer();
 
-                mixingProvider.Remove(fadingProviders[signalService]);
-                fadingProviders.Remove(signalService);
-            }
-            else if (signalService.Output != default)
-            {
-                mixingProvider.Remove(signalService.Output);
-            }
-
-            signalServices.Remove(signalService);
+            signalServices
+                .Where(s => s == signalService || s.IsNextThresholdExceeded)
+                .OnEach(s => RemoveSignal(s));
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -248,15 +251,19 @@ namespace SportDJ.Services.MixerService
 
             if (fadingProviders.ContainsKey(signalService))
             {
-                var otherSignalServices = signalServices
+                var playingServices = signalServices
                     .Where(s => s != signalService
-                        && s.State == StateType.Play).ToArray();
+                        && s.State.IsPlaying()).ToArray();
 
-                var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && otherSignalServices.Any()
+                var pausingServices = signalServices
+                    .Where(s => s != signalService
+                        && s.State == StateType.Pause).ToArray();
+
+                var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && playingServices.Any()
                     ? settingsService.Contents.Options.FadeOnMixInMilliseconds
                     : 0;
 
-                var fadeOutMilliSeconds = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0 && otherSignalServices.Any()
+                var fadeOutMilliSeconds = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0 && playingServices.Any()
                     ? settingsService.Contents.Options.FadeOnMixOutMilliseconds
                     : 0;
 
@@ -264,7 +271,9 @@ namespace SportDJ.Services.MixerService
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeInMilliseconds);
 
-                otherSignalServices.OnEach(s => fadingProviders[s].Fade(
+                pausingServices.OnEach(s => s.End());
+
+                playingServices.OnEach(s => fadingProviders[s].Fade(
                     volumeTarget: Constants.VolumeMin,
                     milliSeconds: fadeOutMilliSeconds));
             }
@@ -279,13 +288,7 @@ namespace SportDJ.Services.MixerService
 
         private void OnSignalStopped()
         {
-            if (IsPlaying
-                && !signalServices.Any(s => s.State == StateType.Play))
-            {
-                IsPlaying = false;
-
-                eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
-            }
+            EndMixer();
         }
 
         private void OnSignalUpdated()
@@ -294,6 +297,23 @@ namespace SportDJ.Services.MixerService
             {
                 eventAggregator.GetEvent<MixerUpdatedEvent>().Publish(this);
             }
+        }
+
+        private void RemoveSignal(ISignalService signalService)
+        {
+            if (fadingProviders.ContainsKey(signalService))
+            {
+                fadingProviders[signalService].FadingEndedEvent -= OnFadingEnded;
+
+                mixingProvider.Remove(fadingProviders[signalService]);
+                fadingProviders.Remove(signalService);
+            }
+            else if (signalService.Output != default)
+            {
+                mixingProvider.Remove(signalService.Output);
+            }
+
+            signalServices.Remove(signalService);
         }
 
         #endregion Private Methods

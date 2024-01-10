@@ -60,8 +60,8 @@ namespace SportDJ.Services.OutputService
                 keepSubscriberReferenceAlive: true,
                 filter: p => mixerServicesAll.Contains(p));
 
-            eventAggregator.GetEvent<MixerEndedEvent>().Subscribe(
-                action: p => OnMixerEnded(p),
+            eventAggregator.GetEvent<MixerCompletedEvent>().Subscribe(
+                action: p => OnMixerCompleted(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => mixerServicesAll.Contains(p));
@@ -406,7 +406,7 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private void OnMixerEnded(IMixerService mixerService)
+        private void OnMixerCompleted(IMixerService mixerService)
         {
             if (mixerServicesForeground.Contains(mixerService))
             {

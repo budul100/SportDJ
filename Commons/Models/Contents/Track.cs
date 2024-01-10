@@ -25,9 +25,15 @@ namespace SportDJ.Commons.Models.Contents
 
         public Bitmap Bitmap { get; set; }
 
-        public bool Checked { get; set; }
+        public long? Cue { get; set; }
+
+        public long? End { get; set; }
 
         public string Info { get; }
+
+        public bool IsChecked { get; set; }
+
+        public bool IsSilent { get; set; }
 
         public TimeSpan Length { get; set; }
 
@@ -35,11 +41,9 @@ namespace SportDJ.Commons.Models.Contents
 
         public List<Register> Registers { get; } = new List<Register>();
 
-        public TimeSpan Start { get; set; }
+        public long Start { get; set; }
 
         public string Title { get; }
-
-        public bool Trimmed { get; set; }
 
         #endregion Public Properties
     }
