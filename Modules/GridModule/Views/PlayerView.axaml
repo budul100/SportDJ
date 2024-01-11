@@ -32,6 +32,7 @@
         <coc:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <coc:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
         <com:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
+
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -78,9 +79,9 @@
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
-                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Button
@@ -95,33 +96,44 @@
                         Kind="Headphones" />
                 </Button>
 
-                <Border
+                <Panel
                     Grid.Row="0"
                     Grid.Column="1"
                     Margin="{StaticResource InnerMargin}"
-                    Padding="15,0,15,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="{StaticResource ColorKey}"
-                    BorderBrush="LightGray"
-                    BorderThickness="1"
-                    CornerRadius="{StaticResource CornerRadius}"
-                    IsVisible="{Binding HasKey}">
+                    Background="{StaticResource ColorBackground}">
 
-                    <TextBlock
+                    <Border
+                        Padding="15,0,15,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContent}"
-                        FontWeight="Bold"
-                        Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
-                </Border>
+                        Background="{StaticResource ColorKey}"
+                        BorderBrush="LightGray"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource CornerRadius}"
+                        IsVisible="{Binding HasKey}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeContent}"
+                            FontWeight="Bold"
+                            Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
+                    </Border>
+
+                </Panel>
 
                 <Button
                     Grid.Row="0"
                     Grid.Column="2"
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch" />
+                    VerticalAlignment="Stretch">
+                    <mat:MaterialIcon
+                        Width="{StaticResource IconWidth}"
+                        Height="{StaticResource IconHeight}"
+                        Kind="Restore" />
+                </Button>
             </Grid>
 
             <Border
