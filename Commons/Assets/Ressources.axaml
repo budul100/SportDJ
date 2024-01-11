@@ -2,7 +2,7 @@
 
     <Color x:Key="ColorBackground">#333333</Color>
     <Color x:Key="ColorPlaying">Purple</Color>
-    <Color x:Key="ColorIsEnding">Red</Color>
+    <Color x:Key="ColorIsEnding">DarkRed</Color>
     <Color x:Key="ColorKey">DimGray</Color>
 
     <Thickness x:Key="ContentMargin">4</Thickness>

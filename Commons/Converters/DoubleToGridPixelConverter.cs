@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace SportDJ.Commons.Converters
 {
-    public class LongToGridPixelConverter
+    public class DoubleToGridPixelConverter
         : IValueConverter
     {
 
