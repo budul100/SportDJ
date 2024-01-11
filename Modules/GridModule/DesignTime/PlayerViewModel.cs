@@ -1,6 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using SharpHook.Native;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using System;
 
 namespace SportDJ.Modules.GridModule.DesignTime

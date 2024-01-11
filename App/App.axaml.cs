@@ -5,7 +5,7 @@ using Prism.Ioc;
 using Prism.Modularity;
 using SharpHook;
 using SportDJ.App.Views;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -48,6 +48,8 @@ namespace SportDJ.App
                 name: nameof(Modules.DisplayModule));
             moduleCatalog.AddModule<Modules.ControllerModule.Module>(
                 name: nameof(Modules.ControllerModule));
+            moduleCatalog.AddModule<Modules.SettingsModule.Module>(
+                name: nameof(Modules.SettingsModule));
         }
 
         protected override AvaloniaObject CreateShell()

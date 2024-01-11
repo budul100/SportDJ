@@ -255,15 +255,23 @@
 		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
-		<KeyTalkVolume>VcSpace</KeyTalkVolume>
 		<KeyPauseOutput>VcEnter</KeyPauseOutput>
+		<KeyTalkVolume>VcSpace</KeyTalkVolume>
 		<SelectNextSeconds>5</SelectNextSeconds>
 		<TrimRearPortion>0.1</TrimRearPortion>
-		<TrimVolume>0.1</TrimVolume>
+		<VolumeCue>0</VolumeCue>
 	</Options>
 	<Outputs>
 		<Output Type="Live">
 			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
+			<SampleRate>44100</SampleRate>
+			<Volume>1</Volume>
+			<VolumePortionApps>0.14589665653495443</VolumePortionApps>
+			<VolumePortionBackground>0.13373860182370825</VolumePortionBackground>
+		</Output>
+		<Output Type="PFL">
+			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
+			<SampleRate>44100</SampleRate>
 			<Volume>1</Volume>
 			<VolumePortionApps>0.2</VolumePortionApps>
 			<VolumePortionBackground>0.2</VolumePortionBackground>

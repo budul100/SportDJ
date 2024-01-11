@@ -4,7 +4,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SharpHook;
 using SharpHook.Native;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;

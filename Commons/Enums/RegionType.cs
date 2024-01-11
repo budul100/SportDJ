@@ -7,5 +7,7 @@
         DisplayRegion,
 
         ControllerRegion,
+
+        SettingsRegion,
     }
 }

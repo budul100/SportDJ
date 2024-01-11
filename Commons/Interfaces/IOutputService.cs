@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,8 @@ namespace SportDJ.Commons.Interfaces
         OutputType Type { get; }
 
         float Volume { get; set; }
+
+        double VolumePortionApps { get; set; }
 
         double VolumePortionBackground { get; set; }
 

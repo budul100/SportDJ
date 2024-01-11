@@ -6,7 +6,7 @@ using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SharpHook;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Extensions;
@@ -35,6 +35,7 @@ namespace SportDJ.App.ViewModels
         private readonly IMessageBoxService messageBoxService;
         private readonly HashSet<IOutputService> outputServices = new HashSet<IOutputService>();
         private readonly IStorageService<Session> sessionService;
+        private readonly IStorageService<Set> settingsService;
 
         private TaskPoolGlobalHook hook;
         private bool isDisposed;
@@ -52,6 +53,7 @@ namespace SportDJ.App.ViewModels
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
+            this.settingsService = settingsService;
             this.sessionService = sessionService;
             this.messageBoxService = messageBoxService;
             this.hook = hook;
@@ -193,6 +195,9 @@ namespace SportDJ.App.ViewModels
             {
                 if (disposing)
                 {
+                    settingsService.Save();
+                    sessionService.Save();
+
                     outputServices.OnEach(s => s.Dispose());
 
                     hook.Dispose();

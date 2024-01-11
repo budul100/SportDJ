@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Signal;
@@ -125,28 +125,31 @@ namespace SportDJ.Services.MixerService
 
                 if (result.Output != default)
                 {
-                    signalServices.Add(result);
-
-                    ISampleProvider signalProvider;
-
-                    if (playsMultipleSignals)
+                    lock (mixingProvider)
                     {
-                        signalProvider = result.Output;
+                        signalServices.Add(result);
+
+                        ISampleProvider signalProvider;
+
+                        if (playsMultipleSignals)
+                        {
+                            signalProvider = result.Output;
+                        }
+                        else
+                        {
+                            var fadingProvider = new FadedControlProvider(result.Output);
+
+                            fadingProvider.FadingEndedEvent += OnFadingEnded;
+
+                            fadingProviders.Add(
+                                key: result,
+                                value: fadingProvider);
+
+                            signalProvider = fadingProvider;
+                        }
+
+                        mixingProvider.Add(signalProvider);
                     }
-                    else
-                    {
-                        var fadingProvider = new FadedControlProvider(result.Output);
-
-                        fadingProvider.FadingEndedEvent += OnFadingEnded;
-
-                        fadingProviders.Add(
-                            key: result,
-                            value: fadingProvider);
-
-                        signalProvider = fadingProvider;
-                    }
-
-                    mixingProvider.Add(signalProvider);
                 }
             }
 
@@ -176,7 +179,7 @@ namespace SportDJ.Services.MixerService
 
         public void Pause()
         {
-            signalServices.OnEach(s => s.Pause());
+            signalServices.OnEach(s => s?.Pause());
         }
 
         #endregion Public Methods

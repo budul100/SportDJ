@@ -25,7 +25,5 @@
                 </DataTemplate>
             </ContentControl.ContentTemplate>
         </ContentControl>
-
     </Viewbox>
-
 </UserControl>

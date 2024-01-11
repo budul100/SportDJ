@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 using NAudio.WaveFormRenderer;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Models.Contents;
 using System;
 using System.Drawing;

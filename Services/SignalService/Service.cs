@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;

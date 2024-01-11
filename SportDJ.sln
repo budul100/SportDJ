@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService", "Services\V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{48C41C91-3465-46EE-8632-3B506D6EF24F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsModule", "Modules\SettingsModule\SettingsModule.csproj", "{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,10 @@ Global
 		{48C41C91-3465-46EE-8632-3B506D6EF24F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48C41C91-3465-46EE-8632-3B506D6EF24F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48C41C91-3465-46EE-8632-3B506D6EF24F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +136,7 @@ Global
 		{EA549FCB-05EF-4802-8A1B-6C465D3417E7} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 		{1ED5C243-CF16-42E1-89E4-D60AC564D6B0} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{48C41C91-3465-46EE-8632-3B506D6EF24F} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

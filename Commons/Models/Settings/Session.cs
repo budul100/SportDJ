@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {

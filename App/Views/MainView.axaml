@@ -32,25 +32,49 @@
     </i:Interaction.Behaviors>
 
     <Grid>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" MinHeight="60" />
             <RowDefinition Height="15*" />
             <RowDefinition Height="2*" MinHeight="120" />
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="3" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <ContentControl
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="3">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl Grid.Row="1">
+        <ContentControl Grid.Row="1" Grid.Column="0">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl Grid.Row="2">
+        <GridSplitter
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch" />
+
+        <ContentControl Grid.Row="1" Grid.Column="2">
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.SettingsRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+
+        <ContentControl
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
             </prism:RegionManager.RegionName>

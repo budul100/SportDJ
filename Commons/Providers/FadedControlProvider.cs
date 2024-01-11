@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using System;
 
@@ -22,7 +23,7 @@ namespace SportDJ.Commons.Providers
         #region Public Constructors
 
         public FadedControlProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
-            : base(waveFormat: sourceProvider.WaveFormat)
+            : base(waveFormat: sourceProvider?.WaveFormat)
         {
             this.sourceProvider = sourceProvider;
 

@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
@@ -13,6 +13,7 @@ using SportDJ.Commons.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
@@ -24,17 +25,19 @@ namespace SportDJ.Services.OutputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly HashSet<IMixerService> mixerServicesAll = new HashSet<IMixerService>();
-        private readonly HashSet<IMixerService> mixerServicesForeground = new HashSet<IMixerService>();
+        private readonly HashSet<IMixerService> mixersAll = new HashSet<IMixerService>();
+        private readonly HashSet<IMixerService> mixersBackground = new HashSet<IMixerService>();
+        private readonly HashSet<IMixerService> mixersForeground = new HashSet<IMixerService>();
         private readonly IStorageService<Set> settingsService;
 
-        private FadedControlProvider backgroundFader;
-        private ContinuousMixingProvider backgroundMixer;
+        private CancellationTokenSource cancellationTokenSource;
         private bool isDisposed;
         private bool isLowered;
-        private WaveOut output;
-        private ContinuousMixingProvider outputMixer;
         private Output outputOptions;
+        private ContinuousMixingProvider providerBackground;
+        private FadedControlProvider providerFader;
+        private ContinuousMixingProvider providerForeground;
+        private WaveOut providerOutput;
         private IVolumeService volumeService;
 
         #endregion Private Fields
@@ -52,19 +55,19 @@ namespace SportDJ.Services.OutputService
                 action: p => OnMixerStarted(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixerServicesAll.Contains(p));
+                filter: p => mixersAll.Contains(p));
 
             eventAggregator.GetEvent<MixerStoppedEvent>().Subscribe(
                 action: p => OnMixerStopped(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixerServicesAll.Contains(p));
+                filter: p => mixersAll.Contains(p));
 
             eventAggregator.GetEvent<MixerEndedEvent>().Subscribe(
                 action: p => OnMixerEnded(p),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixerServicesAll.Contains(p));
+                filter: p => mixersAll.Contains(p));
         }
 
         #endregion Public Constructors
@@ -96,9 +99,9 @@ namespace SportDJ.Services.OutputService
                 {
                     outputOptions.Volume = value;
 
-                    if (output != default)
+                    if (providerOutput != default)
                     {
-                        output.Volume = outputOptions.Volume;
+                        providerOutput.Volume = outputOptions.Volume;
                     }
                 }
             }
@@ -162,16 +165,18 @@ namespace SportDJ.Services.OutputService
         {
             if (onForeground)
             {
-                mixerServicesForeground.Add(mixerService);
+                mixersForeground.Add(mixerService);
 
-                outputMixer.Add(mixerService.Output);
+                providerForeground.Add(mixerService.Output);
             }
             else
             {
-                backgroundMixer.Add(mixerService.Output);
+                mixersBackground.Add(mixerService);
+
+                providerBackground.Add(mixerService.Output);
             }
 
-            mixerServicesAll.Add(mixerService);
+            mixersAll.Add(mixerService);
         }
 
         public void Dispose()
@@ -215,13 +220,13 @@ namespace SportDJ.Services.OutputService
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = output.Volume * (float)outputOptions.VolumePortionBackground;
+                var volumeBackground = providerOutput.Volume * (float)outputOptions.VolumePortionBackground;
 
-                backgroundFader.Fade(
+                providerFader.Fade(
                     volumeTarget: volumeBackground,
                     milliSeconds: fadeMilliseconds);
 
-                var volumeApps = output.Volume * (float)outputOptions.VolumePortionApps;
+                var volumeApps = providerOutput.Volume * (float)outputOptions.VolumePortionApps;
 
                 volumeService.Reduce(
                     volumeTarget: volumeApps,
@@ -231,7 +236,7 @@ namespace SportDJ.Services.OutputService
 
         public void Pause()
         {
-            mixerServicesAll.OnEach(p => p.Pause());
+            mixersAll.OnEach(p => p.Pause());
 
             PauseVolume();
         }
@@ -242,7 +247,7 @@ namespace SportDJ.Services.OutputService
 
             isLowered = false;
 
-            backgroundFader.Fade(
+            providerFader.Fade(
                 volumeTarget: Constants.VolumeMax,
                 milliSeconds: fadeMilliseconds);
 
@@ -253,46 +258,39 @@ namespace SportDJ.Services.OutputService
 
         public void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false)
         {
-            var capabilities = GetCapabilities();
-
-            var deviceNumber = GetDeviceNumber(
-                capabilities: capabilities,
-                deviceName: deviceName,
-                takeDefaultIfMissing: takeDefaultIfMissing);
-
-            CloseOutput();
-
-            outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
-
-            Format = WaveFormat.CreateIeeeFloatWaveFormat(
-                sampleRate: sampleRate,
-                channels: capabilities[deviceNumber].Channels);
-
-            backgroundMixer = new ContinuousMixingProvider(Format);
-
-            backgroundFader = new FadedControlProvider(
-                sourceProvider: backgroundMixer,
-                volume: Constants.VolumeMax);
-
-            outputMixer = new ContinuousMixingProvider(Format);
-
-            outputMixer.Add(backgroundFader);
-
-            var waveProvider = new NAudio.Wave.SampleProviders.SampleToWaveProvider(outputMixer);
-
-            output = new WaveOut
+            if (providerOutput == default
+                || outputOptions.DeviceName != deviceName
+                || outputOptions.SampleRate != sampleRate)
             {
-                DeviceNumber = deviceNumber,
-                Volume = outputOptions.Volume,
-            };
+                var capabilities = GetCapabilities();
 
-            output.Init(
-                waveProvider: waveProvider);
+                var deviceNumber = GetDeviceNumber(
+                    capabilities: capabilities,
+                    deviceName: deviceName,
+                    takeDefaultIfMissing: takeDefaultIfMissing);
 
-            Task.Run(() => output.Play());
+                CloseOutput();
 
-            volumeService.Set(
-                deviceName: deviceName);
+                outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
+                outputOptions.SampleRate = sampleRate;
+
+                Format = WaveFormat.CreateIeeeFloatWaveFormat(
+                    sampleRate: sampleRate,
+                    channels: capabilities[deviceNumber].Channels);
+
+                UpdateBackground();
+                UpdateForeground();
+                UpdateOutput(deviceNumber);
+
+                cancellationTokenSource = new CancellationTokenSource();
+
+                Task.Run(
+                    action: () => providerOutput.Play(),
+                    cancellationToken: cancellationTokenSource.Token);
+
+                volumeService.Set(
+                    deviceName: deviceName);
+            }
         }
 
         #endregion Public Methods
@@ -306,6 +304,12 @@ namespace SportDJ.Services.OutputService
                 if (isDisposing)
                 {
                     CloseOutput();
+
+                    volumeService.Deactivate();
+                    volumeService.Dispose();
+
+                    mixersForeground.Clear();
+                    mixersAll.Clear();
                 }
 
                 isDisposed = true;
@@ -318,20 +322,15 @@ namespace SportDJ.Services.OutputService
 
         private void CloseOutput()
         {
-            if (output != default)
+            if (providerOutput != default)
             {
-                output.Stop();
+                cancellationTokenSource?.Cancel();
 
-                outputMixer.Dispose();
-                backgroundMixer.Dispose();
+                providerOutput.Stop();
 
-                output.Dispose();
-
-                volumeService.Deactivate();
-                volumeService.Dispose();
-
-                mixerServicesForeground.Clear();
-                mixerServicesAll.Clear();
+                providerForeground.Dispose();
+                providerBackground.Dispose();
+                providerOutput.Dispose();
             }
         }
 
@@ -339,7 +338,7 @@ namespace SportDJ.Services.OutputService
         {
             var result = new Dictionary<int, WaveOutCapabilities>();
 
-            for (var index = -1; index < WaveOut.DeviceCount; index++)
+            for (var index = Constants.IndexAudioDeviceMin; index < WaveOut.DeviceCount; index++)
             {
                 var capabilities = WaveOut.GetCapabilities(index);
 
@@ -359,7 +358,7 @@ namespace SportDJ.Services.OutputService
         {
             var result = default(int?);
 
-            if (string.IsNullOrWhiteSpace(deviceName))
+            if (!string.IsNullOrWhiteSpace(deviceName))
             {
                 result = capabilities
                     .FirstOrDefault(c => c.Value.ProductName == deviceName).Key;
@@ -408,12 +407,12 @@ namespace SportDJ.Services.OutputService
 
         private void OnMixerEnded(IMixerService mixerService)
         {
-            if (mixerServicesForeground.Contains(mixerService))
+            if (mixersForeground.Contains(mixerService))
             {
-                mixerServicesForeground.Remove(mixerService);
+                mixersForeground.Remove(mixerService);
             }
 
-            mixerServicesAll.Remove(mixerService);
+            mixersAll.Remove(mixerService);
         }
 
         private void OnMixerStarted(IMixerService mixerService)
@@ -425,7 +424,7 @@ namespace SportDJ.Services.OutputService
                 eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
             }
 
-            if (mixerServicesForeground.Contains(mixerService))
+            if (mixersForeground.Contains(mixerService))
             {
                 Lower();
             }
@@ -437,12 +436,12 @@ namespace SportDJ.Services.OutputService
 
         private void OnMixerStopped(IMixerService mixerService)
         {
-            if (mixerServicesForeground.Contains(mixerService))
+            if (mixersForeground.Contains(mixerService))
             {
                 Raise();
             }
 
-            if (!mixerServicesAll.Any(p => p.IsPlaying))
+            if (!mixersAll.Any(p => p.IsPlaying))
             {
                 IsPlaying = false;
 
@@ -457,6 +456,47 @@ namespace SportDJ.Services.OutputService
             volumeService.Reduce(
                 volumeTarget: Constants.VolumeMin,
                 milliSeconds: fadeMilliseconds);
+        }
+
+        private void UpdateBackground()
+        {
+            providerBackground = new ContinuousMixingProvider(Format);
+
+            foreach (var mixerBackground in mixersBackground)
+            {
+                providerBackground.Add(mixerBackground.Output);
+            }
+        }
+
+        private void UpdateForeground()
+        {
+            providerForeground = new ContinuousMixingProvider(Format);
+
+            providerFader = new FadedControlProvider(
+                sourceProvider: providerBackground,
+                volume: Constants.VolumeMax);
+
+            providerForeground.Add(providerFader);
+
+            foreach (var mixerForeground in mixersForeground)
+            {
+                providerForeground.Add(mixerForeground.Output);
+            }
+        }
+
+        private void UpdateOutput(int deviceNumber)
+        {
+            providerOutput = new WaveOut
+            {
+                DeviceNumber = deviceNumber,
+                Volume = outputOptions.Volume,
+            };
+
+            var waveProvider = new NAudio.Wave.SampleProviders
+                .SampleToWaveProvider(providerForeground);
+
+            providerOutput.Init(
+                waveProvider: waveProvider);
         }
 
         #endregion Private Methods

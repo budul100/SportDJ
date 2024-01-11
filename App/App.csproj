@@ -31,6 +31,7 @@
 	  <ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
 	  <ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
 	  <ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
+	  <ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 	  <ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
 	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />

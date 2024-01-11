@@ -1,6 +1,6 @@
 ﻿using SharpHook.Native;
 
-namespace SportDJ.Commons
+namespace SportDJ.Commons.Assets
 {
     public static class Defaults
     {

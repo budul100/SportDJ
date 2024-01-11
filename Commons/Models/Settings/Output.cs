@@ -1,4 +1,5 @@
-﻿using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Assets;
+using SportDJ.Commons.Enums;
 using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings
@@ -8,6 +9,8 @@ namespace SportDJ.Commons.Models.Settings
         #region Public Properties
 
         public string DeviceName { get; set; }
+
+        public int SampleRate { get; set; }
 
         [XmlAttribute]
         public OutputType Type { get; set; }

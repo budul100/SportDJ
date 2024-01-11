@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace SportDJ.Commons
+namespace SportDJ.Commons.Assets
 {
     public static class Constants
     {
@@ -14,9 +14,12 @@ namespace SportDJ.Commons
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";
 
-        public const bool MessageBoxOnClosing = false;
-        public const int MixerSourcesMax = 1024;
+        public const int IndexAudioDeviceMin = 0;
+        public const int IndexAudioSessionMin = 0;
 
+        public const bool MessageBoxOnClosing = false;
+
+        public const int MixerSourcesMax = 1024;
         public const int SecondsIsEnding = 10;
 
         public const string SplitterTitle = " | ";

@@ -1,12 +1,11 @@
 ﻿using NAudio.CoreAudioApi;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Services.VolumeService.Extensions;
 using SportDJ.Services.VolumeService.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -208,7 +207,7 @@ namespace SportDJ.Services.VolumeService
 
                     if (sessions?.Count > 1)
                     {
-                        for (var index = 0; index < sessions.Count; index++)
+                        for (var index = Constants.IndexAudioSessionMin; index < sessions.Count; index++)
                         {
                             var session = sessions[index];
 

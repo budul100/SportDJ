@@ -3,7 +3,7 @@ using Avalonia.Threading;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using SportDJ.Commons;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Interfaces;
