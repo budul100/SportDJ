@@ -19,6 +19,8 @@ namespace SportDJ.Commons.Assets
 
         public const int SelectNextSeconds = 10;
 
+        public const int SettingsWidth = 200;
+
         public const double TrimRearPortion = 0.1;
 
         public const double VolumePortionApps = 0.2;

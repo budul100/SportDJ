@@ -8,7 +8,8 @@ namespace SportDJ.Modules.DisplayModule.DesignTime
         #region Public Constructors
 
         public DisplayViewModel()
-            : base(regionManager: default, containerProvider: default, eventAggregator: default)
+            : base(regionManager: default, containerProvider: default, eventAggregator: default,
+                  sessionService: default)
         {
             Content = "Example - Example";
             Remaining = "00:05.3";

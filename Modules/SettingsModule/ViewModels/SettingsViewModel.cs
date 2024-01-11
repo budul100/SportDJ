@@ -22,9 +22,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private string device;
         private bool devicesNotAvailable;
         private bool isUpdate;
-        private double volume;
-        private double volumePortionApps;
-        private double volumePortionBackground;
 
         #endregion Private Fields
 
@@ -87,19 +84,18 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public DelegateCommand UpdateDevicesCommand { get; }
 
-        public double Volume
+        public float Volume
         {
             get { return outputSettings.Volume; }
             set
             {
-                if (value != volume)
+                if (value != outputService.Volume)
                 {
-                    SetProperty(ref volume, value);
-
-                    outputService.Volume = (float)value;
-                    outputSettings.Volume = outputSettings.Volume;
+                    outputService.Volume = value;
 
                     settingsService.Save();
+
+                    RaisePropertyChanged(nameof(Volume));
                 }
             }
         }
@@ -109,14 +105,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             get { return outputSettings.VolumePortionApps; }
             set
             {
-                if (value != volumePortionApps)
+                if (value != outputSettings.VolumePortionApps)
                 {
-                    SetProperty(ref volumePortionApps, value);
-
                     outputService.VolumePortionApps = value;
-                    outputSettings.VolumePortionApps = outputService.VolumePortionApps;
 
                     settingsService.Save();
+
+                    RaisePropertyChanged(nameof(VolumePortionApps));
                 }
             }
         }
@@ -126,14 +121,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             get { return outputSettings.VolumePortionBackground; }
             set
             {
-                if (value != volumePortionBackground)
+                if (value != outputService.VolumePortionBackground)
                 {
-                    SetProperty(ref volumePortionBackground, value);
-
-                    outputService.VolumePortionBackground = value;
-                    outputSettings.VolumePortionBackground = outputService.VolumePortionBackground;
+                    outputService.VolumePortionApps = value;
 
                     settingsService.Save();
+
+                    RaisePropertyChanged(nameof(VolumePortionBackground));
                 }
             }
         }

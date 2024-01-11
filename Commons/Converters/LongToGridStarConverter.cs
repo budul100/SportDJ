@@ -4,14 +4,14 @@ using System.Globalization;
 
 namespace SportDJ.Commons.Converters
 {
-    public class LongToGridLengthConverter
+    public class LongToGridStarConverter
         : OneWayValueConverter
     {
         #region Public Methods
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is long units
+            if (value is int units
                 && units >= 0)
             {
                 return new GridLength(

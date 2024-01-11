@@ -6,7 +6,9 @@ using Prism.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 using System;
 
@@ -18,8 +20,9 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         #region Private Fields
 
         private readonly DispatcherTimer clockTimer;
+        private readonly IEventAggregator eventAggregator;
         private readonly IMixerService mixerService;
-
+        private readonly IStorageService<Session> sessionService;
         private Bitmap bitmap;
         private string content;
         private bool isDisposed;
@@ -33,9 +36,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         #region Public Constructors
 
         public DisplayViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator, IStorageService<Session> sessionService)
             : base(regionManager)
         {
+            this.eventAggregator = eventAggregator;
+            this.sessionService = sessionService;
+
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
@@ -83,6 +89,27 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             get { return remaining; }
             set { SetProperty(ref remaining, value); }
+        }
+
+        public bool SettingsVisible
+        {
+            get
+            {
+                return sessionService.Contents.SettingsVisible;
+            }
+            set
+            {
+                if (sessionService.Contents.SettingsVisible != value)
+                {
+                    sessionService.Contents.SettingsVisible = value;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(SettingsVisible));
+
+                    eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
+                }
+            }
         }
 
         public long WidthPosition

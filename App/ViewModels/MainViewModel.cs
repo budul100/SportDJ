@@ -9,6 +9,7 @@ using SharpHook;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -86,6 +87,10 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.PFL,
                 onForeground: true);
 
+            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+                action: UpdateAttributes,
+                keepSubscriberReferenceAlive: true);
+
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
@@ -127,6 +132,30 @@ namespace SportDJ.App.ViewModels
         }
 
         public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
+
+        public double SettingsWidth
+        {
+            get
+            {
+                return sessionService.Contents.SettingsVisible
+                    ? sessionService.Contents.SettingsWidth
+                    : 0;
+            }
+            set
+            {
+                if (sessionService.Contents.SettingsVisible
+                    && value != sessionService.Contents.SettingsWidth)
+                {
+                    sessionService.Contents.SettingsWidth = value > 0
+                        ? value
+                        : Defaults.SettingsWidth;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(SettingsWidth));
+                }
+            }
+        }
 
         public string Title
         {
@@ -313,6 +342,14 @@ namespace SportDJ.App.ViewModels
             {
                 Dispose();
             }
+        }
+
+        private void UpdateAttributes()
+        {
+            RaisePropertyChanged(nameof(Height));
+            RaisePropertyChanged(nameof(SettingsWidth));
+            RaisePropertyChanged(nameof(Width));
+            RaisePropertyChanged(nameof(WindowState));
         }
 
         private void UpdateTitle()

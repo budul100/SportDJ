@@ -23,6 +23,7 @@
 
     <Window.Resources>
         <co:EnumToStringConverter x:Key="EnumToStringConverter" />
+        <co:LongToGridPixelConverter x:Key="LongToGridPixelConverter" />
     </Window.Resources>
 
     <i:Interaction.Behaviors>
@@ -42,7 +43,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
             <ColumnDefinition Width="3" />
-            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="{Binding SettingsWidth, Converter={StaticResource LongToGridPixelConverter}, Mode=TwoWay}" />
         </Grid.ColumnDefinitions>
 
         <ContentControl
