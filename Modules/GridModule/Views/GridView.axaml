@@ -41,7 +41,6 @@
                     gd:GridDefinitionBehavior.RowCount="{Binding Rows}"
                     gd:GridDefinitionBehavior.StarColumns=".*"
                     gd:GridDefinitionBehavior.StarRows=".*" />
-
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 

@@ -11,8 +11,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
-
         private int columns;
         private string name;
         private int rows;
@@ -21,9 +19,64 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public GridViewModel(IContainerProvider containerProvider)
+        public GridViewModel(IContainerProvider containerProvider, Grid grid, bool isOnCanvas)
         {
-            this.containerProvider = containerProvider;
+            Name = grid.Name;
+
+            if (grid?.Cells?.Any() == true)
+            {
+                var rowsCount = 0;
+                var columnsCount = 0;
+
+                foreach (var element in grid.Cells)
+                {
+                    switch (element)
+                    {
+                        case Player player:
+
+                            var playerCell = new PlayerViewModel(
+                                containerProvider: containerProvider,
+                                player: player);
+
+                            Cells.Add(playerCell);
+
+                            rowsCount = element.Row + 1 > rowsCount
+                                ? element.Row + 1
+                                : rowsCount;
+
+                            columnsCount = element.Column + 1 > columnsCount
+                                ? element.Column + 1
+                                : columnsCount;
+
+                            break;
+
+                        case Group group:
+
+                            isOnCanvas = isOnCanvas
+                                && grid.Cells.Count == 1;
+
+                            var groupCell = new GroupViewModel(
+                                containerProvider: containerProvider,
+                                group: group,
+                                isOnCanvas: isOnCanvas);
+
+                            Cells.Add(groupCell);
+
+                            rowsCount = groupCell.Row + groupCell.Rows > rowsCount
+                                ? groupCell.Row + groupCell.Rows
+                                : rowsCount;
+
+                            columnsCount = groupCell.Column + groupCell.Columns > columnsCount
+                                ? groupCell.Column + groupCell.Columns
+                                : columnsCount;
+
+                            break;
+                    }
+                }
+
+                Rows = rowsCount;
+                Columns = columnsCount;
+            }
         }
 
         #endregion Public Constructors
@@ -51,70 +104,5 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Properties
-
-        #region Public Methods
-
-        public void Initialize(Grid grid, bool isOnCanvas)
-        {
-            Name = grid.Name;
-
-            if (containerProvider != default
-                && grid?.Cells?.Any() == true)
-            {
-                var rowsCount = 0;
-                var columnsCount = 0;
-
-                foreach (var element in grid.Cells)
-                {
-                    switch (element)
-                    {
-                        case Player player:
-
-                            var playerCell = containerProvider.Resolve<PlayerViewModel>();
-                            playerCell.Initialize(player);
-
-                            Cells.Add(playerCell);
-
-                            rowsCount = element.Row + 1 > rowsCount
-                                ? element.Row + 1
-                                : rowsCount;
-
-                            columnsCount = element.Column + 1 > columnsCount
-                                ? element.Column + 1
-                                : columnsCount;
-
-                            break;
-
-                        case Group group:
-
-                            isOnCanvas = isOnCanvas
-                                && grid.Cells.Count == 1;
-
-                            var groupCell = containerProvider.Resolve<GroupViewModel>();
-
-                            groupCell.Initialize(
-                                group: group,
-                                isOnCanvas: isOnCanvas);
-
-                            Cells.Add(groupCell);
-
-                            rowsCount = groupCell.Row + groupCell.Rows > rowsCount
-                                ? groupCell.Row + groupCell.Rows
-                                : rowsCount;
-
-                            columnsCount = groupCell.Column + groupCell.Columns > columnsCount
-                                ? groupCell.Column + groupCell.Columns
-                                : columnsCount;
-
-                            break;
-                    }
-                }
-
-                Rows = rowsCount;
-                Columns = columnsCount;
-            }
-        }
-
-        #endregion Public Methods
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Prism.Events;
 using SportDJ.Commons.Events.Stack;
+using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -39,9 +40,11 @@ namespace SportDJ.Services.StackService
 
         public List<Entry> Entries { get; private set; }
 
+        public Entry Entry { get; private set; }
+
         public bool HasUnplayeds => Entries.HasUnplayeds(Track);
 
-        public Track Track { get; private set; }
+        public Track Track => Entry?.Track;
 
         #endregion Public Properties
 
@@ -64,6 +67,8 @@ namespace SportDJ.Services.StackService
             {
                 Next();
             }
+
+            eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);
         }
 
         public void Next()
@@ -96,7 +101,7 @@ namespace SportDJ.Services.StackService
         {
             if (Track != default)
             {
-                Entries[position.Index].Played = true;
+                Entry.Played = true;
 
                 if (Entries.AllPlayed())
                 {
@@ -104,6 +109,8 @@ namespace SportDJ.Services.StackService
                 }
 
                 sessionService.Save();
+
+                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
             }
         }
 
@@ -137,13 +144,23 @@ namespace SportDJ.Services.StackService
         public void Reset()
         {
             Entries.Reset();
+
+            eventAggregator.GetEvent<EntriesUpdatedEvent>()?.Publish(Entries);
         }
 
         public void Select(int index)
         {
             if (index < Entries.Count)
             {
-                Track = Entries[index].Track;
+                if (Entry != default)
+                {
+                    Entry.Selected = false;
+                }
+
+                Entry = Entries[index];
+                Entry.Selected = true;
+
+                eventAggregator.GetEvent<EntriesUpdatedEvent>()?.Publish(Entries);
 
                 position.Index = index;
                 position.Path = Track.Path;
@@ -164,6 +181,8 @@ namespace SportDJ.Services.StackService
 
                     (Entries[index], Entries[count]) = (Entries[count], Entries[index]);
                 }
+
+                eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);
 
                 SetTrack();
             }

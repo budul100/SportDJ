@@ -10,11 +10,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private int column;
         private int columnSpan;
-        private string name;
         private int row;
         private int rowSpan;
 
         #endregion Private Fields
+
+        #region Protected Constructors
+
+        protected CellViewModel(Cell cell)
+        {
+            Row = cell.Row;
+            Column = cell.Column;
+
+            RowSpan = 1;
+            ColumnSpan = 1;
+        }
+
+        #endregion Protected Constructors
 
         #region Public Properties
 
@@ -43,19 +55,5 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Properties
-
-        #region Public Methods
-
-        public virtual void Initialize<T>(T cell, int rowSpan = 1, int columnSpan = 1)
-            where T : Cell
-        {
-            this.Row = cell.Row;
-            this.Column = cell.Column;
-
-            this.RowSpan = rowSpan;
-            this.ColumnSpan = columnSpan;
-        }
-
-        #endregion Public Methods
     }
 }

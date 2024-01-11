@@ -25,14 +25,14 @@ public partial class ControllerView
             .FindControl<Button>("VolumeButton");
 
         volumeButton.AddHandler(
-            Button.PointerPressedEvent,
-            (_, __) => OnVolumeLower(),
+            routedEvent: Button.PointerPressedEvent,
+            handler: (_, __) => OnVolumeLower(),
             routes: RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
             handledEventsToo: true);
 
         volumeButton.AddHandler(
-            Button.PointerReleasedEvent,
-            (_, __) => OnVolumeRaise(),
+            routedEvent: Button.PointerReleasedEvent,
+            handler: (_, __) => OnVolumeRaise(),
             routes: RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
             handledEventsToo: true);
     }

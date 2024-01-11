@@ -1,6 +1,4 @@
-﻿using SportDJ.Commons.Models.Structure;
-
-namespace SportDJ.Modules.GridModule.DesignTime
+﻿namespace SportDJ.Modules.GridModule.DesignTime
 {
     public class GroupViewModel
         : ViewModels.GroupViewModel
@@ -14,25 +12,14 @@ namespace SportDJ.Modules.GridModule.DesignTime
         #region Public Constructors
 
         public GroupViewModel()
-            : base(default)
-        {
-            SetElements();
-        }
-
-        #endregion Public Constructors
-
-        #region Private Methods
-
-        private void SetElements()
+            : base(default, default, false)
         {
             for (int index = 0; index < ElementsCount; index += 2)
             {
                 Tabs.Add(new GridViewModel());
-
-                this.Initialize(new Group() { Column = index, Row = 0 });
             }
         }
 
-        #endregion Private Methods
+        #endregion Public Constructors
     }
 }

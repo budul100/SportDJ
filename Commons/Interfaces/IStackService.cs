@@ -9,6 +9,8 @@ namespace SportDJ.Commons.Interfaces
 
         List<Entry> Entries { get; }
 
+        Entry Entry { get; }
+
         bool HasUnplayeds { get; }
 
         Track Track { get; }

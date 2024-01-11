@@ -1,0 +1,26 @@
+<UserControl
+    x:Class="SportDJ.Modules.GridModule.Views.MenuView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:coc="using:SportDJ.Commons.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    d:DesignHeight="150"
+    d:DesignWidth="150"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <coc:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter" />
+        <coc:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
+    </UserControl.Resources>
+
+    <MenuItem
+        Command="{Binding Command}"
+        FontStyle="{Binding IsPlayed, Converter={StaticResource BoolToFontStyleConverter}}"
+        FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}}"
+        Header="{Binding Header}" />
+</UserControl>

@@ -10,26 +10,57 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
-
         private GridViewModel tab;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public GroupViewModel(IContainerProvider containerProvider)
+        public GroupViewModel(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+            : base(group)
         {
-            this.containerProvider = containerProvider;
+            Rows = 1;
+            Columns = 1;
+
+            if (group.Grids?.Any() == true)
+            {
+                foreach (var grid in group.Grids)
+                {
+                    var gridTab = new GridViewModel(
+                        containerProvider: containerProvider,
+                        grid: grid,
+                        isOnCanvas: false);
+
+                    Tabs.Add(gridTab);
+                }
+
+                if (!isOnCanvas)
+                {
+                    Rows = Tabs.Max(t => t.Rows);
+                    Columns = Tabs.Max(t => t.Columns);
+
+                    foreach (var currentTab in Tabs)
+                    {
+                        currentTab.Rows = Rows;
+                        currentTab.Columns = Columns;
+                    }
+                }
+            }
+
+            this.RowSpan = Rows;
+            this.ColumnSpan = Columns;
+
+            RaisePropertyChanged(nameof(Rows));
+            RaisePropertyChanged(nameof(Columns));
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public int Columns { get; private set; }
+        public int Columns { get; }
 
-        public int Rows { get; private set; }
+        public int Rows { get; }
 
         public GridViewModel Tab
         {
@@ -44,49 +75,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
 
         #endregion Public Properties
-
-        #region Public Methods
-
-        public void Initialize(Group group, bool isOnCanvas)
-        {
-            Rows = 1;
-            Columns = 1;
-
-            if (containerProvider != default
-                && group.Grids?.Any() == true)
-            {
-                foreach (var grid in group.Grids)
-                {
-                    var gridTab = containerProvider.Resolve<GridViewModel>();
-
-                    gridTab.Initialize(grid, false);
-
-                    Tabs.Add(gridTab);
-                }
-
-                if (!isOnCanvas)
-                {
-                    Rows = Tabs.Max(t => t.Rows);
-                    Columns = Tabs.Max(t => t.Columns);
-
-                    foreach (var tab in Tabs)
-                    {
-                        tab.Rows = Rows;
-                        tab.Columns = Columns;
-                    }
-                }
-            }
-
-            RaisePropertyChanged(nameof(Rows));
-            RaisePropertyChanged(nameof(Columns));
-
-            base.Initialize(
-                cell: group,
-                rowSpan: Rows,
-                columnSpan: Columns);
-        }
-
-        #endregion Public Methods
 
         #region Private Methods
 

@@ -14,10 +14,8 @@ namespace SportDJ.Services.StackService.Extensions
             {
                 foreach (var track in tracks)
                 {
-                    var result = new Entry
-                    {
-                        Track = track,
-                    };
+                    var result = new Entry(
+                        track: track);
 
                     yield return result;
                 }

@@ -11,6 +11,8 @@
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:SportDJ.Modules.GridModule.Views"
+    xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
@@ -202,6 +204,17 @@
                             Source="{Binding Bitmap}"
                             Stretch="Fill" />
                     </Grid>
+
+                    <Button.ContextMenu>
+                        <ContextMenu Name="ContextMenu" ItemsSource="{Binding Menus}">
+
+                            <ContextMenu.ItemTemplate>
+                                <DataTemplate>
+                                    <v:MenuView />
+                                </DataTemplate>
+                            </ContextMenu.ItemTemplate>
+                        </ContextMenu>
+                    </Button.ContextMenu>
                 </Button>
             </Border>
 

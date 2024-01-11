@@ -50,9 +50,9 @@ namespace SportDJ.Tests.StackServiceTests
                 Setup(m => m.GetEvent<SignalUpdatedEvent>()).
                 Returns(mockTrackSelectedEvent.Object);
 
-            var mockTrackUpdatedEvent = new Mock<TrackUpdatedEvent>();
+            var mockTrackUpdatedEvent = new Mock<EntryUpdatedEvent>();
             mockEventAggregator.
-                Setup(m => m.GetEvent<TrackUpdatedEvent>()).
+                Setup(m => m.GetEvent<EntryUpdatedEvent>()).
                 Returns(mockTrackUpdatedEvent.Object);
 
             mockDispatcherService = new Mock<IDispatcherService>();

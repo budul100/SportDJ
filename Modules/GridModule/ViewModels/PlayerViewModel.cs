@@ -13,6 +13,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,6 +26,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly TaskPoolGlobalHook hook;
+        private readonly IMixerService mixerServiceBackground;
+        private readonly IMixerService mixerServiceForeground;
+        private readonly IMixerService mixerServicePFL;
+        private readonly bool savePositions;
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
@@ -33,9 +38,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string counter;
         private bool isDisposed;
         private KeyCode? key;
-        private IMixerService mixerServiceBackground;
-        private IMixerService mixerServiceForeground;
-        private IMixerService mixerServicePFL;
         private string name;
         private bool onForeground;
         private string remaining;
@@ -48,17 +50,25 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public PlayerViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            ITrackService trackService, TaskPoolGlobalHook hook)
+        public PlayerViewModel(IContainerProvider containerProvider, Player player)
+            : base(player)
         {
             this.containerProvider = containerProvider;
-            this.trackService = trackService;
-            this.hook = hook;
 
-            if (hook != default)
-            {
-                hook.KeyPressed += OnKeyPressed;
-            }
+            Name = player.Name;
+            Key = player.Key;
+            OnForeground = player.OnForeground;
+
+            savePositions = player.SavePositions;
+
+            mixerServiceBackground = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
+            mixerServiceForeground = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Foreground));
+            mixerServicePFL = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.PFL));
+
+            trackService = containerProvider.Resolve<ITrackService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecuteSignal,
@@ -71,6 +81,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             TrackForwardCommand = new DelegateCommand(
                 executeMethod: () => UpdateStack(false),
                 canExecuteMethod: () => IsNextTrackAvailable());
+
+            var eventAggregator = containerProvider.Resolve<IEventAggregator>();
 
             eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
                 action: s => OnSignalStarted(s),
@@ -103,6 +115,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: s => signalService == s
                     && !OnForeground);
 
+            eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
+                action: _ => UpdateTracks(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => stackService == s);
+
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => UpdateSignal(),
                 threadOption: ThreadOption.PublisherThread,
@@ -114,9 +132,25 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: t => stackService?.Track == t);
+
+            hook = containerProvider.Resolve<TaskPoolGlobalHook>();
+
+            if (hook != default)
+            {
+                hook.KeyPressed += OnKeyPressed;
+            }
+
+            UpdateStack(
+                path: player.Path);
         }
 
         #endregion Public Constructors
+
+        #region Public Events
+
+        public event EventHandler ClosingContextMenuEvent;
+
+        #endregion Public Events
 
         #region Public Properties
 
@@ -157,6 +191,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             get { return key; }
             set { SetProperty(ref key, value); }
         }
+
+        public ObservableCollection<MenuViewModel> Menus { get; private set; }
 
         public string Name
         {
@@ -205,32 +241,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 obj: this);
         }
 
-        public void Initialize(Player player)
-        {
-            base.Initialize(
-                cell: player);
-
-            Name = player.Name;
-            Key = player.Key;
-            OnForeground = player.OnForeground;
-
-            stackService = containerProvider?.Resolve<IStackService>();
-
-            mixerServiceBackground = containerProvider?.Resolve<IMixerService>(
-                name: nameof(MixerType.Background));
-            mixerServiceForeground = containerProvider?.Resolve<IMixerService>(
-                name: nameof(MixerType.Foreground));
-            mixerServicePFL = containerProvider?.Resolve<IMixerService>(
-                name: nameof(MixerType.PFL));
-
-            Task.Run(() => stackService?.Initialize(
-                path: player.Path,
-                name: player.Name,
-                savePosition: player.SavePositions));
-
-            UpdateSignal();
-        }
-
         #endregion Public Methods
 
         #region Protected Methods
@@ -267,6 +277,26 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private IEnumerable<MenuViewModel> GetMenus()
+        {
+            if (stackService?.Entries?.Any() == true)
+            {
+                for (var index = 0; index < stackService.Entries.Count; index++)
+                {
+                    var current = index;
+
+                    var result = new MenuViewModel(
+                        containerProvider: containerProvider,
+                        entry: stackService.Entries[index],
+                        callback: () => stackService.Select(current));
+
+                    result.ClosingEvent += OnClosingContextMenu;
+
+                    yield return result;
+                }
+            }
+        }
+
         private IMixerService GetMixerService()
         {
             var result = OnForeground
@@ -288,6 +318,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
             var result = stackService?.HasUnplayeds == true;
 
             return result;
+        }
+
+        private void OnClosingContextMenu(object sender, EventArgs e)
+        {
+            ClosingContextMenuEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
@@ -376,6 +413,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private void UpdateStack(string path)
+        {
+            stackService = containerProvider?.Resolve<IStackService>();
+
+            Task.Run(() => stackService?.Initialize(
+                path: path,
+                name: Name,
+                savePosition: savePositions));
+        }
+
         private void UpdateStack(bool toPrevious = false)
         {
             if (toPrevious)
@@ -406,6 +453,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
 
             UpdateCommands();
+        }
+
+        private void UpdateTracks()
+        {
+            if (stackService?.Entries?.Any() == true)
+            {
+                Menus = new ObservableCollection<MenuViewModel>(GetMenus().ToArray());
+            }
+
+            UpdateSignal();
         }
 
         #endregion Private Methods
