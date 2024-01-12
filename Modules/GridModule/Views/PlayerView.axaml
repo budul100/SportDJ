@@ -46,8 +46,9 @@
     <Border
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
-        BorderBrush="{StaticResource ColorPlaying}"
-        CornerRadius="4">
+        BorderBrush="Transparent"
+        BorderThickness="{StaticResource PlayerBorderThickness}"
+        CornerRadius="{StaticResource PlayerCornerRadius}">
 
         <i:Interaction.Behaviors>
             <a:DataTriggerBehavior
@@ -55,18 +56,18 @@
                 ComparisonCondition="Equal"
                 Value="True">
                 <a:ChangePropertyAction
-                    PropertyName="BorderThickness"
+                    PropertyName="BorderBrush"
                     TargetObject="PlayingBorder"
-                    Value="{StaticResource ThicknessPlaying}" />
+                    Value="{StaticResource ColorIsPlaying}" />
             </a:DataTriggerBehavior>
             <a:DataTriggerBehavior
                 Binding="{Binding IsPlaying}"
                 ComparisonCondition="Equal"
                 Value="False">
                 <a:ChangePropertyAction
-                    PropertyName="BorderThickness"
+                    PropertyName="BorderBrush"
                     TargetObject="PlayingBorder"
-                    Value="{StaticResource ThicknessPlayingNot}" />
+                    Value="Transparent" />
             </a:DataTriggerBehavior>
         </i:Interaction.Behaviors>
 
@@ -144,14 +145,14 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                CornerRadius="{StaticResource ButtonRadius}">
+                CornerRadius="{StaticResource PlayerCornerRadius}">
 
                 <i:Interaction.Behaviors>
                     <a:DataTriggerBehavior
                         Binding="{Binding IsActive}"
                         ComparisonCondition="Equal"
                         Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorPlaying}" />
+                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsPlaying}" />
                     </a:DataTriggerBehavior>
                     <a:DataTriggerBehavior
                         Binding="{Binding IsActive}"

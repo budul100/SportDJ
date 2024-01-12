@@ -214,13 +214,13 @@
 		</Cells>
 	</Grid>
 	<Options>
-		<FadeOnLowerMilliseconds>100</FadeOnLowerMilliseconds>
+		<FadeOnLowerMilliseconds>1006666666</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
 		<KeyPauseOutput>VcNumPadEnter</KeyPauseOutput>
 		<KeyTalkVolume>VcNumPad0</KeyTalkVolume>
-		<SelectNextSeconds>5</SelectNextSeconds>
+		<SelectNextSeconds>20</SelectNextSeconds>
 		<TrimRearPercentage>15</TrimRearPercentage>
 		<TrimVolumePercentage>5</TrimVolumePercentage>
 	</Options>
