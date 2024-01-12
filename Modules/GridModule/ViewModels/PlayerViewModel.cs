@@ -74,6 +74,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: ExecuteSignal,
                 canExecuteMethod: () => IsExecuteAvailable());
 
+            ResetCommand = new DelegateCommand(
+                executeMethod: ResetStack,
+                canExecuteMethod: () => IsResetAvailable());
+
             TrackBackwardCommand = new DelegateCommand(
                 executeMethod: () => UpdateStack(true),
                 canExecuteMethod: () => IsNextTrackAvailable());
@@ -212,6 +216,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref remaining, value); }
         }
 
+        public DelegateCommand ResetCommand { get; }
+
         public DelegateCommand TrackBackwardCommand { get; }
 
         public DelegateCommand TrackForwardCommand { get; }
@@ -320,6 +326,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return result;
         }
 
+        private bool IsResetAvailable()
+        {
+            var result = stackService?.HasPlayeds == true;
+
+            return result;
+        }
+
         private void OnClosingContextMenu(object sender, EventArgs e)
         {
             ClosingContextMenuEvent?.Invoke(
@@ -372,6 +385,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
             UpdateCommands();
         }
 
+        private void ResetStack()
+        {
+            stackService?.Reset();
+        }
+
         private void UpdateCommands()
         {
             RaisePropertyChanged(nameof(IsActive));
@@ -380,6 +398,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(HasStack));
 
             ExecuteCommand.RaiseCanExecuteChanged();
+            ResetCommand.RaiseCanExecuteChanged();
+
             TrackBackwardCommand.RaiseCanExecuteChanged();
             TrackForwardCommand.RaiseCanExecuteChanged();
         }

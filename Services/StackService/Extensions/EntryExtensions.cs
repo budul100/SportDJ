@@ -16,6 +16,13 @@ namespace SportDJ.Services.StackService.Extensions
             return result;
         }
 
+        public static bool HasPlayeds(this IEnumerable<Entry> entries)
+        {
+            var result = entries?.Any(e => !e.Played) == true;
+
+            return result;
+        }
+
         public static bool HasUnplayeds(this IEnumerable<Entry> entries, Track track)
         {
             var result = entries?.Count(e => e.CanBePlayed()) > 1

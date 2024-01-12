@@ -11,6 +11,8 @@ namespace SportDJ.Commons.Interfaces
 
         Entry Entry { get; }
 
+        bool HasPlayeds { get; }
+
         bool HasUnplayeds { get; }
 
         Track Track { get; }

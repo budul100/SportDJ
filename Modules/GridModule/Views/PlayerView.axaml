@@ -32,7 +32,6 @@
         <coc:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <coc:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
         <com:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
-
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -120,7 +119,6 @@
                             FontWeight="Bold"
                             Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
                     </Border>
-
                 </Panel>
 
                 <Button
@@ -128,12 +126,14 @@
                     Grid.Column="2"
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch">
+                    VerticalAlignment="Stretch"
+                    Command="{Binding ResetCommand}">
                     <mat:MaterialIcon
                         Width="{StaticResource IconWidth}"
                         Height="{StaticResource IconHeight}"
                         Kind="Restore" />
                 </Button>
+
             </Grid>
 
             <Border

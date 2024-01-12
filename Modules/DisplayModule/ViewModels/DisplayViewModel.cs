@@ -107,16 +107,17 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                     if (value)
                     {
                         lastWindowState = sessionService.Contents.WindowState;
-                        sessionService.Contents.WindowState = WindowState.FullScreen.ToString();
+                        sessionService.Contents.WindowState = nameof(WindowState.FullScreen);
                     }
-                    else if (lastWindowState != WindowState.FullScreen.ToString()
-                        && lastWindowState != WindowState.Minimized.ToString())
+                    else if (!string.IsNullOrWhiteSpace(lastWindowState)
+                        && lastWindowState != nameof(WindowState.FullScreen)
+                        && lastWindowState != nameof(WindowState.Minimized))
                     {
                         sessionService.Contents.WindowState = lastWindowState;
                     }
                     else
                     {
-                        sessionService.Contents.WindowState = WindowState.Normal.ToString();
+                        sessionService.Contents.WindowState = nameof(WindowState.Normal);
                     }
 
                     RaisePropertyChanged(nameof(ShowFullscreen));
@@ -205,7 +206,10 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private bool IsFullScreen()
         {
-            return Enum.Parse<WindowState>(sessionService.Contents.WindowState) == WindowState.FullScreen;
+            var result = !string.IsNullOrWhiteSpace(sessionService.Contents.WindowState)
+                && Enum.Parse<WindowState>(sessionService.Contents.WindowState) == WindowState.FullScreen;
+
+            return result;
         }
 
         private void OnMixerStopped()

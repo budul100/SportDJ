@@ -42,6 +42,8 @@ namespace SportDJ.Services.StackService
 
         public Entry Entry { get; private set; }
 
+        public bool HasPlayeds => Entries.HasPlayeds();
+
         public bool HasUnplayeds => Entries.HasUnplayeds(Track);
 
         public Track Track => Entry?.Track;
