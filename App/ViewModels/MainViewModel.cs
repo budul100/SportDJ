@@ -32,9 +32,9 @@ namespace SportDJ.App.ViewModels
         private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
         private readonly IDispatcherService dispatcherService;
-        private readonly HashSet<IOutputService> liveServices = new HashSet<IOutputService>();
+        private readonly HashSet<IOutputService> liveServices = new();
         private readonly IMessageBoxService messageBoxService;
-        private readonly HashSet<IOutputService> outputServices = new HashSet<IOutputService>();
+        private readonly HashSet<IOutputService> outputServices = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 

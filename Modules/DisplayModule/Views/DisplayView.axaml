@@ -29,6 +29,8 @@
         <x:Double x:Key="IconWidth">30</x:Double>
         <x:Double x:Key="IconHeight">30</x:Double>
 
+        <coc:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
+        <coc:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
         <coc:LongToGridStarConverter x:Key="LongToGridStarConverter" />
     </UserControl.Resources>
 
@@ -47,7 +49,20 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             DockPanel.Dock="Right"
-            IsChecked="{Binding SettingsVisible}">
+            IsChecked="{Binding ShowFullscreen}">
+            <mat:MaterialIcon
+                Grid.Column="0"
+                Width="{StaticResource IconWidth}"
+                Height="{StaticResource IconHeight}"
+                Kind="Fullscreen" />
+        </ToggleButton>
+
+        <ToggleButton
+            Margin="{StaticResource ContentMargin}"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            DockPanel.Dock="Right"
+            IsChecked="{Binding ShowSettings}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"

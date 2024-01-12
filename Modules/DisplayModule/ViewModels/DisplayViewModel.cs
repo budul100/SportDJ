@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Prism.Events;
 using Prism.Ioc;
@@ -23,10 +24,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly IMixerService mixerService;
         private readonly IStorageService<Session> sessionService;
+
         private Bitmap bitmap;
         private string content;
         private bool isDisposed;
         private bool isEnding;
+        private string lastWindowState;
         private string remaining;
         private long widthPosition;
         private long widthRemaining;
@@ -91,7 +94,39 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             set { SetProperty(ref remaining, value); }
         }
 
-        public bool SettingsVisible
+        public bool ShowFullscreen
+        {
+            get
+            {
+                return IsFullScreen();
+            }
+            set
+            {
+                if (IsFullScreen() != value)
+                {
+                    if (value)
+                    {
+                        lastWindowState = sessionService.Contents.WindowState;
+                        sessionService.Contents.WindowState = WindowState.FullScreen.ToString();
+                    }
+                    else if (lastWindowState != WindowState.FullScreen.ToString()
+                        && lastWindowState != WindowState.Minimized.ToString())
+                    {
+                        sessionService.Contents.WindowState = lastWindowState;
+                    }
+                    else
+                    {
+                        sessionService.Contents.WindowState = WindowState.Normal.ToString();
+                    }
+
+                    RaisePropertyChanged(nameof(ShowFullscreen));
+
+                    eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
+                }
+            }
+        }
+
+        public bool ShowSettings
         {
             get
             {
@@ -105,7 +140,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
                     sessionService.Save();
 
-                    RaisePropertyChanged(nameof(SettingsVisible));
+                    RaisePropertyChanged(nameof(ShowSettings));
 
                     eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
                 }
@@ -166,6 +201,11 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             result.Tick += (s, e) => RaisePropertyChanged(nameof(Clock));
 
             return result;
+        }
+
+        private bool IsFullScreen()
+        {
+            return Enum.Parse<WindowState>(sessionService.Contents.WindowState) == WindowState.FullScreen;
         }
 
         private void OnMixerStopped()
