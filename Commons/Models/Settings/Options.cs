@@ -1,4 +1,5 @@
-﻿using SharpHook.Native;
+﻿using PropertyModels.ComponentModel;
+using SharpHook.Native;
 using SportDJ.Commons.Assets;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -35,13 +36,15 @@ namespace SportDJ.Commons.Models.Settings
         [DisplayName("Select next (s)")]
         public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;
 
-        [Range(0, 1)]
-        [DisplayName("Trim rear")]
-        public double TrimRearPortion { get; set; } = Defaults.TrimRearPortion;
+        [Range(0, 100)]
+        [Trackable(min: 0, max: Constants.PercentageMax, Increment = Constants.PercentageIncrement)]
+        [DisplayName("Trim rear (%)")]
+        public int TrimRearPercentage { get; set; } = Defaults.TrimRearPercentage;
 
-        [Range(0, 1)]
-        [DisplayName("Cue volume")]
-        public float VolumeCue { get; set; }
+        [Range(0, 100)]
+        [Trackable(min: 0, max: Constants.PercentageMax, Increment = Constants.PercentageIncrement)]
+        [DisplayName("Cue volume (%)")]
+        public int TrimVolumePercentage { get; set; } = Defaults.TrimVolumePercentage;
 
         #endregion Public Properties
     }

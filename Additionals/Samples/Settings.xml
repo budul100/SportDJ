@@ -265,8 +265,8 @@
 		<KeyPauseOutput>VcEnter</KeyPauseOutput>
 		<KeyTalkVolume>VcSpace</KeyTalkVolume>
 		<SelectNextSeconds>5</SelectNextSeconds>
-		<TrimRearPortion>0.15</TrimRearPortion>
-		<VolumeCue>0.1</VolumeCue>
+		<TrimRearPercentage>15</TrimRearPercentage>
+		<TrimVolumePercentage>5</TrimVolumePercentage>
 	</Options>
 	<Outputs>
 		<Output Type="Live">

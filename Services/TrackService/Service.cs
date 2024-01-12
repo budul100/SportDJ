@@ -1,6 +1,7 @@
 ﻿using ATL.AudioData;
 using ATL.Playlist;
 using Prism.Events;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -230,8 +231,8 @@ namespace SportDJ.Services.TrackService
         {
             if (!track.IsChecked)
             {
-                var trimVolume = settingsService.Contents.Options.VolumeCue;
-                var trimRearPortion = settingsService.Contents.Options.TrimRearPortion;
+                var trimVolume = settingsService.Contents.Options.TrimVolumePercentage / (float)Constants.PercentageMax;
+                var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage / Constants.PercentageMax;
 
                 track.Trim(
                     cueVolume: trimVolume,

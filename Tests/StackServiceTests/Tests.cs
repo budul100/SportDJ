@@ -29,8 +29,8 @@ namespace SportDJ.Tests.StackServiceTests
         {
             var options = new Options
             {
-                TrimRearPortion = 0.5,
-                VolumeCue = 0.3F,
+                TrimRearPercentage = 50,
+                TrimVolumePercentage = 30,
             };
 
             var set = new Set

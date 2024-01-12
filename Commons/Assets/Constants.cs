@@ -20,6 +20,10 @@ namespace SportDJ.Commons.Assets
         public const bool MessageBoxOnClosing = false;
 
         public const int MixerSourcesMax = 1024;
+
+        public const double PercentageIncrement = 1;
+        public const double PercentageMax = 100;
+
         public const int SecondsIsEnding = 10;
 
         public const string SplitterTitle = " | ";

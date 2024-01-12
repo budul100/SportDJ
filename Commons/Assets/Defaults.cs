@@ -21,7 +21,8 @@ namespace SportDJ.Commons.Assets
 
         public const int SettingsWidth = 200;
 
-        public const double TrimRearPortion = 0.1;
+        public const int TrimRearPercentage = 10;
+        public const int TrimVolumePercentage = 0;
 
         public const double VolumePortionApps = 0.2;
         public const double VolumePortionBackground = 0.2;
