@@ -49,6 +49,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             DockPanel.Dock="Right"
+            Focusable="False"
             IsChecked="{Binding ShowFullscreen}">
             <mat:MaterialIcon
                 Grid.Column="0"
@@ -62,6 +63,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             DockPanel.Dock="Right"
+            Focusable="False"
             IsChecked="{Binding ShowSettings}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"

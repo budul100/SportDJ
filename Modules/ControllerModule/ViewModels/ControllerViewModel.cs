@@ -37,8 +37,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             this.hook = hook;
             this.options = settingsService.Contents.Options;
 
-            hook.KeyPressed += OnKeyPressed;
-            hook.KeyReleased += OnKeyReleased;
+            if (hook != default)
+            {
+                hook.KeyPressed += OnKeyPressed;
+                hook.KeyReleased += OnKeyReleased;
+            }
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));

@@ -61,6 +61,7 @@
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
+            Focusable="False"
             IsChecked="{Binding VolumeMonitoringActive}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -75,6 +76,7 @@
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
+            Focusable="False"
             IsEnabled="{Binding IsActive}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
@@ -88,7 +90,9 @@
             Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Command="{Binding PauseCommand}">
+            Command="{Binding PauseCommand}"
+            Focusable="False"
+            IsEnabled="{Binding IsActive}">
             <mat:MaterialIcon
                 Width="{StaticResource IconWidth}"
                 Height="{StaticResource IconHeight}"

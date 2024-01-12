@@ -89,7 +89,8 @@
                     Grid.Column="0"
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch">
+                    VerticalAlignment="Stretch"
+                    Focusable="False">
                     <mat:MaterialIcon
                         Width="{StaticResource IconWidth}"
                         Height="{StaticResource IconHeight}"
@@ -102,7 +103,8 @@
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Command="{Binding ResetCommand}">
+                    Command="{Binding ResetCommand}"
+                    Focusable="False">
                     <mat:MaterialIcon
                         Width="{StaticResource IconWidth}"
                         Height="{StaticResource IconHeight}"
@@ -163,7 +165,8 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Background="Transparent"
-                    Command="{Binding ExecuteCommand}">
+                    Command="{Binding ExecuteCommand}"
+                    Focusable="False">
 
                     <Grid>
                         <Grid.RowDefinitions>
@@ -243,7 +246,8 @@
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Command="{Binding TrackBackwardCommand}">
+                    Command="{Binding TrackBackwardCommand}"
+                    Focusable="False">
                     <mat:MaterialIcon
                         Width="{StaticResource IconWidth}"
                         Height="{StaticResource IconHeight}"
@@ -256,7 +260,8 @@
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Command="{Binding TrackForwardCommand}">
+                    Command="{Binding TrackForwardCommand}"
+                    Focusable="False">
                     <mat:MaterialIcon
                         Width="{StaticResource IconWidth}"
                         Height="{StaticResource IconHeight}"
