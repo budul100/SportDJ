@@ -58,6 +58,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 						</Cells>
+						<Key xsi:nil="true" />
 					</Grid>
 					<Grid Name="Herren">
 						<Cells>
@@ -114,6 +115,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 						</Cells>
+						<Key xsi:nil="true" />
 					</Grid>
 					<Grid Name="Spiel">
 						<Cells>
@@ -145,6 +147,7 @@
 												<SavePositions>false</SavePositions>
 											</Cell>
 										</Cells>
+										<Key xsi:nil="true" />
 									</Grid>
 									<Grid Name="Tor Herren">
 										<Cells>
@@ -155,6 +158,7 @@
 												<SavePositions>false</SavePositions>
 											</Cell>
 										</Cells>
+										<Key xsi:nil="true" />
 									</Grid>
 								</Grids>
 							</Cell>
@@ -207,6 +211,7 @@
 								<SavePositions>true</SavePositions>
 							</Cell>
 						</Cells>
+						<Key xsi:nil="true" />
 					</Grid>
 					<Grid Name="Ende">
 						<Cells>
@@ -245,10 +250,12 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 						</Cells>
+						<Key xsi:nil="true" />
 					</Grid>
 				</Grids>
 			</Cell>
 		</Cells>
+		<Key xsi:nil="true" />
 	</Grid>
 	<Options>
 		<FadeOnLowerMilliseconds>50</FadeOnLowerMilliseconds>

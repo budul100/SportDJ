@@ -193,7 +193,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public KeyCode? Key
         {
             get { return key; }
-            set { SetProperty(ref key, value); }
+            set
+            {
+                SetProperty(ref key, value);
+
+                RaisePropertyChanged(nameof(HasKey));
+            }
         }
 
         public ObservableCollection<MenuViewModel> Menus { get; private set; }

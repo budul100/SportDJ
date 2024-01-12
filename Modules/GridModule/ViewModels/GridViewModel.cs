@@ -1,5 +1,6 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
+using SharpHook.Native;
 using SportDJ.Commons.Models.Structure;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private int columns;
+        private KeyCode? key;
         private string name;
         private int rows;
 
@@ -22,6 +24,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public GridViewModel(IContainerProvider containerProvider, Grid grid, bool isOnCanvas)
         {
             Name = grid.Name;
+            Key = grid.Key;
 
             if (grid?.Cells?.Any() == true)
             {
@@ -89,6 +92,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             get { return columns; }
             set { SetProperty(ref columns, value); }
+        }
+
+        public bool HasKey => Key.HasValue;
+
+        public KeyCode? Key
+        {
+            get { return key; }
+            set
+            {
+                SetProperty(ref key, value);
+
+                RaisePropertyChanged(nameof(HasKey));
+            }
         }
 
         public string Name
