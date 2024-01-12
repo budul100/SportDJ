@@ -214,7 +214,7 @@
 		</Cells>
 	</Grid>
 	<Options>
-		<FadeOnLowerMilliseconds>1006666666</FadeOnLowerMilliseconds>
+		<FadeOnLowerMilliseconds>100</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>

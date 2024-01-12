@@ -1,4 +1,9 @@
-﻿using ATL.AudioData;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using ATL.AudioData;
 using ATL.Playlist;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -7,11 +12,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService
 {

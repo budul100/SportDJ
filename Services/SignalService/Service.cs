@@ -1,4 +1,6 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.IO;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -8,8 +10,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.IO;
 
 namespace SportDJ.Services.SignalService
 {
@@ -146,8 +146,8 @@ namespace SportDJ.Services.SignalService
 
                 outputProvider = new FadedControlProvider(resampleProvider);
 
-                outputProvider.FadingStartedEvent += OnSignalStarted;
-                outputProvider.FadingEndedEvent += OnSignalFaded;
+                outputProvider.FadingStartedEvent += OnFadingStarted;
+                outputProvider.FadingEndedEvent += OnFadingEnded;
             }
         }
 
@@ -199,8 +199,8 @@ namespace SportDJ.Services.SignalService
                 if (isDisposing
                     && playingProvider != default)
                 {
-                    outputProvider.FadingStartedEvent -= OnSignalStarted;
-                    outputProvider.FadingEndedEvent -= OnSignalFaded;
+                    outputProvider.FadingStartedEvent -= OnFadingStarted;
+                    outputProvider.FadingEndedEvent -= OnFadingEnded;
 
                     outputProvider.Dispose();
 
@@ -220,19 +220,35 @@ namespace SportDJ.Services.SignalService
 
         #region Private Methods
 
-        private void OnSignalEnded(object sender, EventArgs e)
-        {
-            State = StateType.None;
-
-            eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
-        }
-
-        private void OnSignalFaded(object sender, EventArgs e)
+        private void OnFadingEnded(object sender, EventArgs e)
         {
             if (outputProvider?.IsSilent == true)
             {
                 playingProvider.Pause();
             }
+        }
+
+        private void OnFadingStarted(object sender, EventArgs e)
+        {
+            if (outputProvider?.IsSilent == true)
+            {
+                State = StateType.Play;
+
+                trackService.Begin(Track);
+
+                eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
+            }
+            else
+            {
+                State = StateType.Pause;
+            }
+        }
+
+        private void OnSignalEnded(object sender, EventArgs e)
+        {
+            State = StateType.None;
+
+            eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
         }
 
         private void OnSignalPaused(object sender, EventArgs e)
@@ -247,17 +263,6 @@ namespace SportDJ.Services.SignalService
             {
                 eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
             }
-        }
-
-        private void OnSignalStarted(object sender, EventArgs e)
-        {
-            trackService.Begin(Track);
-
-            State = State == StateType.Play
-                ? StateType.Pause
-                : StateType.Play;
-
-            eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
         }
 
         private void OnSignalStopped(object sender, EventArgs e)
