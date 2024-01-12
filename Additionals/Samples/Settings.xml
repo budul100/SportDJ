@@ -220,7 +220,7 @@
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
 		<KeyPauseOutput>VcNumPadEnter</KeyPauseOutput>
 		<KeyTalkVolume>VcNumPad0</KeyTalkVolume>
-		<SelectNextSeconds>20</SelectNextSeconds>
+		<SelectNextSeconds>10</SelectNextSeconds>
 		<TrimRearPercentage>15</TrimRearPercentage>
 		<TrimVolumePercentage>5</TrimVolumePercentage>
 	</Options>
