@@ -1,12 +1,15 @@
-﻿using Prism.Commands;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia.Controls;
+using Prism.Commands;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -17,6 +20,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private readonly IOutputService outputService;
         private readonly Output outputSettings;
+        private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
         private string device;
@@ -28,10 +32,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         #region Public Constructors
 
         public SettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IStorageService<Set> settingsService)
+            IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService)
             : base(regionManager)
         {
             this.settingsService = settingsService;
+            this.sessionService = sessionService;
 
             UpdateDevicesCommand = new DelegateCommand(
                 executeMethod: () => UpdateDevices());
@@ -41,8 +47,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
             outputSettings = settingsService.Contents.Outputs?
                 .SingleOrDefault(o => o.Type == OutputType.Live);
-
             Options = settingsService.Contents.Options;
+
+            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+                action: UpdateAttributes,
+                keepSubscriberReferenceAlive: true);
 
             UpdateDevices();
         }
@@ -79,6 +88,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             get { return devicesNotAvailable; }
             set { SetProperty(ref devicesNotAvailable, value); }
         }
+
+        public bool IsActive => sessionService.Contents.SettingsVisible;
 
         public Options Options { get; }
 
@@ -135,6 +146,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         #endregion Public Properties
 
         #region Private Methods
+
+        private void UpdateAttributes()
+        {
+            RaisePropertyChanged(nameof(IsActive));
+        }
 
         private void UpdateDevices()
         {

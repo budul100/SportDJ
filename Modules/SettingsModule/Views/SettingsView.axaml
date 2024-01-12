@@ -37,7 +37,7 @@
         <dt:SettingsViewModel />
     </Design.DataContext>
 
-    <DockPanel LastChildFill="True">
+    <DockPanel IsEnabled="{Binding IsActive}" LastChildFill="True">
 
         <DockPanel
             Margin="{StaticResource ContentMargin}"
@@ -68,6 +68,7 @@
                 <ComboBox
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
+                    Focusable="False"
                     IsEnabled="{Binding !DevicesNotAvailable}"
                     ItemsSource="{Binding Devices}"
                     SelectedItem="{Binding Device}" />
@@ -80,7 +81,8 @@
             AllowQuickFilter="False"
             AllowToggleView="False"
             DataContext="{Binding Options}"
-            DockPanel.Dock="Bottom" />
+            DockPanel.Dock="Bottom"
+            Focusable="False" />
 
         <Grid Margin="{StaticResource ContentMargin}" DockPanel.Dock="Top">
 
@@ -110,6 +112,7 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
+                Focusable="False"
                 Maximum="1"
                 Minimum="0"
                 Orientation="Vertical"
@@ -130,6 +133,7 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
+                Focusable="False"
                 Maximum="100"
                 Minimum="0"
                 Orientation="Vertical"
@@ -151,6 +155,7 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
+                Focusable="False"
                 Maximum="100"
                 Minimum="0"
                 Orientation="Vertical"
