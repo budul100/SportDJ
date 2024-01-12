@@ -258,8 +258,8 @@
 		<Key xsi:nil="true" />
 	</Grid>
 	<Options>
-		<FadeOnLowerMilliseconds>50</FadeOnLowerMilliseconds>
-		<FadeOnMixInMilliseconds>500</FadeOnMixInMilliseconds>
+		<FadeOnLowerMilliseconds>100</FadeOnLowerMilliseconds>
+		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
 		<KeyPauseOutput>VcEnter</KeyPauseOutput>
