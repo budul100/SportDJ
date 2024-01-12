@@ -28,6 +28,7 @@ namespace SportDJ.Services.StorageService
         private readonly IEventAggregator eventAggregator;
         private readonly SemaphoreSlim saveLock = new(1, 1);
         private readonly XmlSerializer serializer = new(typeof(T));
+
         private string filePath;
         private bool isDisposed;
 

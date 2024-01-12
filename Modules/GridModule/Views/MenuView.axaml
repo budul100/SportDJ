@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:coc="using:SportDJ.Commons.Converters"
+    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,8 +14,8 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <coc:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter" />
-        <coc:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
+        <co:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter" />
+        <co:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
     </UserControl.Resources>
 
     <MenuItem

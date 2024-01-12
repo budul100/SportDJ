@@ -17,9 +17,9 @@ namespace SportDJ.Commons.Models.Settings
 
         public float Volume { get; set; } = Constants.VolumeMax;
 
-        public double VolumePortionApps { get; set; } = Defaults.VolumePortionApps;
+        public int VolumePercentageApps { get; set; } = Defaults.VolumePercentageApps;
 
-        public double VolumePortionBackground { get; set; } = Defaults.VolumePortionBackground;
+        public int VolumePercentageBackground { get; set; } = Defaults.VolumePercentageBackground;
 
         #endregion Public Properties
     }

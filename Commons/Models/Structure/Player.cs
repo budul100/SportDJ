@@ -1,5 +1,4 @@
-﻿using SharpHook.Native;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Structure
 {
@@ -8,7 +7,8 @@ namespace SportDJ.Commons.Models.Structure
     {
         #region Public Properties
 
-        public KeyCode? Key { get; set; }
+        [XmlAttribute]
+        public string Key { get; set; }
 
         [XmlAttribute]
         public string Name { get; set; }

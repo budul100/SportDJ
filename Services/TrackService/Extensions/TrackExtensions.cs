@@ -1,11 +1,11 @@
-﻿using NAudio.Wave;
-using NAudio.WaveFormRenderer;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Models.Contents;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using NAudio.Wave;
+using NAudio.WaveFormRenderer;
+using SportDJ.Commons.Assets;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.TrackService.Extensions
 {

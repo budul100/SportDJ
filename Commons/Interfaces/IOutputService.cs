@@ -21,10 +21,6 @@ namespace SportDJ.Commons.Interfaces
 
         float Volume { get; set; }
 
-        double VolumePortionApps { get; set; }
-
-        double VolumePortionBackground { get; set; }
-
         #endregion Public Properties
 
         #region Public Methods

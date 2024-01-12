@@ -1,16 +1,21 @@
 ﻿using Prism.Ioc;
+using SharpHook;
 using SportDJ.Commons.Models.Structure;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GroupViewModel
-        : CellViewModel
+        : CellViewModel, IDisposable
     {
         #region Private Fields
 
-        private GridViewModel tab;
+        private readonly TaskPoolGlobalHook hook;
+
+        private bool isDisposed;
+        private GridViewModel selected;
 
         #endregion Private Fields
 
@@ -22,6 +27,86 @@ namespace SportDJ.Modules.GridModule.ViewModels
             Rows = 1;
             Columns = 1;
 
+            hook = containerProvider.Resolve<TaskPoolGlobalHook>();
+
+            if (hook != default)
+            {
+                hook.KeyPressed += OnKeyPressed;
+            }
+
+            InitializeTabs(
+                containerProvider: containerProvider,
+                group: group,
+                isOnCanvas: isOnCanvas);
+
+            this.RowSpan = Rows;
+            this.ColumnSpan = Columns;
+
+            RaisePropertyChanged(nameof(Rows));
+            RaisePropertyChanged(nameof(Columns));
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public int Columns { get; private set; }
+
+        public int Rows { get; private set; }
+
+        public GridViewModel Selected
+        {
+            get { return selected; }
+            set
+            {
+                if (value != default)
+                {
+                    SetProperty(ref selected, value);
+
+                    UpdateVisibility();
+                }
+            }
+        }
+
+        public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(
+                isDisposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing
+                    && hook != default)
+                {
+                    hook.KeyPressed -= OnKeyPressed;
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private void InitializeTabs(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+        {
             if (group.Grids?.Any() == true)
             {
                 foreach (var grid in group.Grids)
@@ -46,48 +131,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     }
                 }
             }
-
-            this.RowSpan = Rows;
-            this.ColumnSpan = Columns;
-
-            RaisePropertyChanged(nameof(Rows));
-            RaisePropertyChanged(nameof(Columns));
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public int Columns { get; }
-
-        public int Rows { get; }
-
-        public GridViewModel Tab
+        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            get { return tab; }
-            set
+            if (IsVisible)
             {
-                SetCellVisibility(value);
-                tab = value;
+                var selection = Tabs
+                    .FirstOrDefault(t => t.Key == e?.Data.KeyCode);
+
+                Selected = selection;
             }
         }
 
-        public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
-
-        #endregion Public Properties
-
-        #region Private Methods
-
-        private void SetCellVisibility(GridViewModel value)
+        private void UpdateVisibility()
         {
             foreach (var tab in Tabs)
             {
-                var players = tab.Cells
-                    .OfType<PlayerViewModel>().ToArray();
-
-                foreach (var player in players)
+                if (tab.Cells?.Any() == true)
                 {
-                    player.IsVisible = tab == value;
+                    foreach (var cell in tab.Cells)
+                    {
+                        cell.IsVisible = tab == Selected;
+                    }
                 }
             }
         }

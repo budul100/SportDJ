@@ -2,8 +2,7 @@
     x:Class="SportDJ.Modules.GridModule.Views.GroupView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:coc="using:SportDJ.Commons.Converters"
-    xmlns:com="using:SportDJ.Modules.GridModule.Converters"
+    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:gbac="using:GroupBox.Avalonia.Controls"
@@ -28,9 +27,9 @@
         <Thickness x:Key="InnerMargin">1</Thickness>
         <Thickness x:Key="TabMargin">20,5,20,5</Thickness>
 
-        <coc:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
-        <coc:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
-        <com:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
+        <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
+        <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
+        <co:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
     <Design.DataContext>
@@ -40,7 +39,7 @@
     <TabControl
         Margin="{DynamicResource ContentMargin}"
         ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding Tab}">
+        SelectedItem="{Binding Selected}">
 
         <TabControl.ItemTemplate>
             <DataTemplate>

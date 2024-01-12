@@ -107,56 +107,6 @@ namespace SportDJ.Services.OutputService
             }
         }
 
-        public double VolumePortionApps
-        {
-            get
-            {
-                return outputOptions.VolumePortionApps;
-            }
-            set
-            {
-                if (value < 0 || value > 1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-
-                if (value != outputOptions.VolumePortionApps)
-                {
-                    outputOptions.VolumePortionApps = value;
-
-                    if (isLowered)
-                    {
-                        Lower();
-                    }
-                }
-            }
-        }
-
-        public double VolumePortionBackground
-        {
-            get
-            {
-                return outputOptions.VolumePortionBackground;
-            }
-            set
-            {
-                if (value < 0 || value > 1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-
-                if (value != outputOptions.VolumePortionBackground)
-                {
-                    outputOptions.VolumePortionBackground = value;
-
-                    if (isLowered)
-                    {
-                        Lower();
-                    }
-                }
-            }
-        }
-
         #endregion Public Properties
 
         #region Public Methods
@@ -220,13 +170,13 @@ namespace SportDJ.Services.OutputService
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = providerOutput.Volume * (float)outputOptions.VolumePortionBackground;
+                var volumeBackground = providerOutput.Volume * outputOptions.VolumePercentageBackground / (float)Constants.PercentageMax;
 
                 providerFader.Fade(
                     volumeTarget: volumeBackground,
                     milliSeconds: fadeMilliseconds);
 
-                var volumeApps = providerOutput.Volume * (float)outputOptions.VolumePortionApps;
+                var volumeApps = providerOutput.Volume * outputOptions.VolumePercentageApps / (float)Constants.PercentageMax;
 
                 volumeService.Reduce(
                     volumeTarget: volumeApps,

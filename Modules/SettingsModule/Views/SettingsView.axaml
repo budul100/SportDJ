@@ -129,10 +129,11 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
-                Maximum="1"
+                Maximum="100"
                 Minimum="0"
                 Orientation="Vertical"
-                Value="{Binding VolumePortionBackground}" />
+                SmallChange="1"
+                Value="{Binding VolumePercentageBackground}" />
 
             <TextBlock
                 Grid.Row="0"
@@ -149,10 +150,11 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
-                Maximum="1"
+                Maximum="100"
                 Minimum="0"
                 Orientation="Vertical"
-                Value="{Binding VolumePortionApps}" />
+                SmallChange="1"
+                Value="{Binding VolumePercentageApps}" />
         </Grid>
     </DockPanel>
 </UserControl>

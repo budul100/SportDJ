@@ -56,7 +56,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.containerProvider = containerProvider;
 
             Name = player.Name;
-            Key = player.Key;
             OnForeground = player.OnForeground;
 
             savePositions = player.SavePositions;
@@ -139,8 +138,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             hook = containerProvider.Resolve<TaskPoolGlobalHook>();
 
-            if (hook != default)
+            if (hook != default
+                && !string.IsNullOrWhiteSpace(player.Key))
             {
+                Key = Enum.Parse<KeyCode>(player.Key);
                 hook.KeyPressed += OnKeyPressed;
             }
 
@@ -187,8 +188,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool IsEnding => signalService?.IsEnding == true;
 
         public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
-
-        public bool IsVisible { get; set; }
 
         public KeyCode? Key
         {
@@ -260,7 +259,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (!isDisposed)
             {
-                if (disposing)
+                if (disposing
+                    && hook != default)
                 {
                     hook.KeyPressed -= OnKeyPressed;
                 }

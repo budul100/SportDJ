@@ -24,8 +24,8 @@ namespace SportDJ.Commons.Assets
         public const int TrimRearPercentage = 10;
         public const int TrimVolumePercentage = 0;
 
-        public const double VolumePortionApps = 0.2;
-        public const double VolumePortionBackground = 0.2;
+        public const int VolumePercentageApps = 20;
+        public const int VolumePercentageBackground = 20;
 
         #endregion Public Fields
     }

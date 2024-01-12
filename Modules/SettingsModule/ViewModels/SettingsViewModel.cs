@@ -100,34 +100,34 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
-        public double VolumePortionApps
+        public int VolumePercentageApps
         {
-            get { return outputSettings.VolumePortionApps; }
+            get { return outputSettings.VolumePercentageApps; }
             set
             {
-                if (value != outputSettings.VolumePortionApps)
+                if (value != outputSettings.VolumePercentageApps)
                 {
-                    outputService.VolumePortionApps = value;
+                    outputSettings.VolumePercentageApps = value;
 
                     settingsService.Save();
 
-                    RaisePropertyChanged(nameof(VolumePortionApps));
+                    RaisePropertyChanged(nameof(VolumePercentageApps));
                 }
             }
         }
 
-        public double VolumePortionBackground
+        public int VolumePercentageBackground
         {
-            get { return outputSettings.VolumePortionBackground; }
+            get { return outputSettings.VolumePercentageBackground; }
             set
             {
-                if (value != outputService.VolumePortionBackground)
+                if (value != outputSettings.VolumePercentageBackground)
                 {
-                    outputService.VolumePortionApps = value;
+                    outputSettings.VolumePercentageBackground = value;
 
                     settingsService.Save();
 
-                    RaisePropertyChanged(nameof(VolumePortionBackground));
+                    RaisePropertyChanged(nameof(VolumePercentageBackground));
                 }
             }
         }
