@@ -1,14 +1,16 @@
-﻿using Prism.Commands;
+﻿using System;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using SharpHook;
+using SharpHook.Native;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -61,6 +63,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 executeMethod: () => outputLiveService.Raise(),
                 canExecuteMethod: () => IsActive);
 
+            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+                action: OnSettingsUpdated,
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateCommands(),
                 threadOption: ThreadOption.PublisherThread,
@@ -78,7 +84,15 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #region Public Properties
 
+        public bool HasKeyPauseOutput => options.KeyPauseOutput.HasValue;
+
+        public bool HasKeyTalkVolume => options.KeyTalkVolume.HasValue;
+
         public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
+
+        public KeyCode? KeyPauseOutput => options.KeyPauseOutput;
+
+        public KeyCode? KeyTalkVolume => options.KeyTalkVolume;
 
         public bool OthersMuted
         {
@@ -149,13 +163,13 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            if (options.KeyPauseOutput.HasValue
-                && e?.Data.KeyCode == options.KeyPauseOutput)
+            if (HasKeyPauseOutput
+                && e?.Data.KeyCode == KeyPauseOutput)
             {
                 outputLiveService.Pause();
             }
-            else if (options.KeyTalkVolume.HasValue
-                && e?.Data.KeyCode == options.KeyTalkVolume)
+            else if (HasKeyTalkVolume
+                && e?.Data.KeyCode == KeyTalkVolume)
             {
                 outputLiveService.Lower();
             }
@@ -163,11 +177,17 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
-            if (options.KeyTalkVolume.HasValue
-                && e?.Data.KeyCode == options.KeyTalkVolume)
+            if (HasKeyTalkVolume
+                && e?.Data.KeyCode == KeyTalkVolume)
             {
                 outputLiveService.Raise();
             }
+        }
+
+        private void OnSettingsUpdated()
+        {
+            RaisePropertyChanged(nameof(KeyPauseOutput));
+            RaisePropertyChanged(nameof(KeyTalkVolume));
         }
 
         private void UpdateCommands()

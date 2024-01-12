@@ -3,7 +3,6 @@
     <Color x:Key="ColorBackground">#333333</Color>
     <Color x:Key="ColorPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
-    <Color x:Key="ColorKey">DimGray</Color>
 
     <Thickness x:Key="ContentMargin">4</Thickness>
     <Thickness x:Key="ThicknessPlaying">4</Thickness>
@@ -15,4 +14,11 @@
     <x:Double x:Key="FontSizeDisplay">20</x:Double>
     <x:Double x:Key="FontSizeState">20</x:Double>
     <x:Double x:Key="FontSizeVolume">10</x:Double>
+
+    <Color x:Key="KeyBackgroundColor">DimGray</Color>
+    <Color x:Key="KeyBorderColor">LightGray</Color>
+    <Thickness x:Key="KeyBorderThickness">1</Thickness>
+    <CornerRadius x:Key="KeyCornerRadius">0</CornerRadius>
+    <Thickness x:Key="KeyPadding">15,0,15,0</Thickness>
+
 </ResourceDictionary>

@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -26,6 +27,10 @@
 
         <x:Double x:Key="IconWidth">40</x:Double>
         <x:Double x:Key="IconHeight">40</x:Double>
+
+        <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
+        <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
+        <co:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -78,10 +83,42 @@
             VerticalAlignment="Stretch"
             Focusable="False"
             IsEnabled="{Binding IsActive}">
-            <mat:MaterialIcon
-                Width="{StaticResource IconWidth}"
-                Height="{StaticResource IconHeight}"
-                Kind="Microphone" />
+
+            <Grid
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="{StaticResource ColorBackground}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasKeyTalkVolume, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                </Grid.ColumnDefinitions>
+
+                <mat:MaterialIcon
+                    Grid.Column="0"
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="Microphone" />
+
+                <Border
+                    Grid.Column="1"
+                    Padding="{StaticResource KeyPadding}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource KeyBackgroundColor}"
+                    BorderBrush="{StaticResource KeyBorderColor}"
+                    BorderThickness="{StaticResource KeyBorderThickness}"
+                    CornerRadius="{StaticResource KeyCornerRadius}"
+                    IsVisible="{Binding HasKeyTalkVolume}">
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeContent}"
+                        FontWeight="Bold"
+                        Text="{Binding KeyTalkVolume, Converter={StaticResource KeyCodeToStringConverter}}" />
+                </Border>
+            </Grid>
         </Button>
 
         <Button
@@ -93,10 +130,42 @@
             Command="{Binding PauseCommand}"
             Focusable="False"
             IsEnabled="{Binding IsActive}">
-            <mat:MaterialIcon
-                Width="{StaticResource IconWidth}"
-                Height="{StaticResource IconHeight}"
-                Kind="PauseCircle" />
+
+            <Grid
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="{StaticResource ColorBackground}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasKeyPauseOutput, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                </Grid.ColumnDefinitions>
+
+                <mat:MaterialIcon
+                    Grid.Column="0"
+                    Width="{StaticResource IconWidth}"
+                    Height="{StaticResource IconHeight}"
+                    Kind="PauseCircle" />
+
+                <Border
+                    Grid.Column="1"
+                    Padding="15,0,15,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource KeyBackgroundColor}"
+                    BorderBrush="{StaticResource KeyBorderColor}"
+                    BorderThickness="{StaticResource KeyBorderThickness}"
+                    CornerRadius="{StaticResource KeyCornerRadius}"
+                    IsVisible="{Binding HasKeyPauseOutput}">
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeContent}"
+                        FontWeight="Bold"
+                        Text="{Binding KeyPauseOutput, Converter={StaticResource KeyCodeToStringConverter}}" />
+                </Border>
+            </Grid>
         </Button>
     </Grid>
 </UserControl>

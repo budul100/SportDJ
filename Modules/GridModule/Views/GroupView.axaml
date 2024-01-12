@@ -25,7 +25,8 @@
         </ResourceDictionary>
 
         <Thickness x:Key="InnerMargin">1</Thickness>
-        <Thickness x:Key="TabMargin">20,5,20,5</Thickness>
+        <Thickness x:Key="TabMargin">30,10,30,10</Thickness>
+        <Thickness x:Key="KeyMargin">5</Thickness>
 
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
@@ -51,27 +52,27 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="5" />
-                        <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                        <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock
                         Grid.Column="0"
                         Margin="{StaticResource TabMargin}"
-                        Padding="2"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
                         FontSize="{DynamicResource FontSizeContent}"
                         Text="{Binding Name}" />
 
                     <Border
-                        Grid.Column="2"
-                        Margin="{StaticResource TabMargin}"
-                        Padding="15,0,15,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Background="{StaticResource ColorKey}"
-                        BorderBrush="LightGray"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadius}"
+                        Grid.Column="1"
+                        Margin="{StaticResource KeyMargin}"
+                        Padding="{StaticResource KeyPadding}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Stretch"
+                        Background="{StaticResource KeyBackgroundColor}"
+                        BorderBrush="{StaticResource KeyBorderColor}"
+                        BorderThickness="{StaticResource KeyBorderThickness}"
+                        CornerRadius="{StaticResource KeyCornerRadius}"
                         IsVisible="{Binding HasKey}">
 
                         <TextBlock

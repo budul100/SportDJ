@@ -121,17 +121,17 @@
 
                     <Border
                         Margin="{StaticResource KeyMargin}"
-                        Padding="15,0,15,0"
+                        Padding="{StaticResource KeyPadding}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Background="{StaticResource ColorKey}"
-                        BorderBrush="LightGray"
-                        BorderThickness="1"
-                        CornerRadius="{StaticResource CornerRadius}"
+                        Background="{StaticResource KeyBackgroundColor}"
+                        BorderBrush="{StaticResource KeyBorderColor}"
+                        BorderThickness="{StaticResource KeyBorderThickness}"
+                        CornerRadius="{StaticResource KeyCornerRadius}"
                         IsVisible="{Binding HasKey}">
                         <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
                             FontSize="{StaticResource FontSizeContent}"
                             FontWeight="Bold"
                             Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
