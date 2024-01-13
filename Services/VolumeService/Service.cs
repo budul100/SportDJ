@@ -1,14 +1,16 @@
-﻿using NAudio.CoreAudioApi;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Enums;
-using SportDJ.Commons.Interfaces;
-using SportDJ.Services.VolumeService.Extensions;
-using SportDJ.Services.VolumeService.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NAudio.CoreAudioApi;
+using Prism.Events;
+using SportDJ.Commons.Assets;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Volume;
+using SportDJ.Commons.Interfaces;
+using SportDJ.Services.VolumeService.Extensions;
+using SportDJ.Services.VolumeService.Models;
 
 namespace SportDJ.Services.VolumeService
 {
@@ -18,9 +20,10 @@ namespace SportDJ.Services.VolumeService
         #region Private Fields
 
         private readonly int baseProcessId;
-
+        private readonly IEventAggregator eventAggregator;
         private IEnumerable<AudioProcess> audioProcesses;
         private CancellationTokenSource cancellationTokenSource;
+
         private string deviceName;
         private bool isDisposed;
         private float volumeTarget;
@@ -29,8 +32,9 @@ namespace SportDJ.Services.VolumeService
 
         #region Public Constructors
 
-        public Service()
+        public Service(IEventAggregator eventAggregator)
         {
+            this.eventAggregator = eventAggregator;
             baseProcessId = Environment.ProcessId;
         }
 
@@ -48,7 +52,9 @@ namespace SportDJ.Services.VolumeService
 
         public void Activate()
         {
-            IsActive = true;
+            audioProcesses = default;
+
+            Task.Run(() => UpdateAudioProcesses());
         }
 
         public void Deactivate()
@@ -59,6 +65,8 @@ namespace SportDJ.Services.VolumeService
             }
 
             IsActive = false;
+
+            eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
 
         public void Dispose()
@@ -73,7 +81,8 @@ namespace SportDJ.Services.VolumeService
         public void Raise(float? volume = default, int? milliSeconds = default)
         {
             if (VolumeType != VolumeType.None
-                && volume > volumeTarget)
+                && volume > volumeTarget
+                && audioProcesses?.Any() == true)
             {
                 if (VolumeType == VolumeType.Reduce)
                 {
@@ -106,8 +115,6 @@ namespace SportDJ.Services.VolumeService
                 else
                 {
                     VolumeType = VolumeType.None;
-
-                    audioProcesses = default;
                 }
             }
         }
@@ -123,11 +130,6 @@ namespace SportDJ.Services.VolumeService
             if (IsActive
                 && (VolumeType == VolumeType.None || VolumeType == VolumeType.Raise || volume < volumeTarget))
             {
-                if (VolumeType == VolumeType.None || audioProcesses?.Any() == true)
-                {
-                    audioProcesses = GetAudioProcesses().ToArray();
-                }
-
                 if (audioProcesses?.Any(p => !p.IsBaseSession) == true)
                 {
                     if (VolumeType == VolumeType.Raise)
@@ -200,26 +202,35 @@ namespace SportDJ.Services.VolumeService
                     dataFlow: DataFlow.Render,
                     dwStateMask: DeviceState.Active);
 
-                if (devices.Any(d => d.FriendlyName == deviceName))
+                if (devices.Any(d => d.IsMatching(deviceName)))
                 {
-                    var sessions = devices.FirstOrDefault(d => d.FriendlyName == deviceName)?
-                        .AudioSessionManager.Sessions;
+                    var sessions = devices.Where(d => d.IsMatching(deviceName))
+                        .Select(d => d.AudioSessionManager.Sessions).ToArray();
 
-                    if (sessions?.Count > 1)
+                    foreach (var session in sessions)
                     {
-                        for (var index = Constants.IndexAudioSessionMin; index < sessions.Count; index++)
-                        {
-                            var session = sessions[index];
+                        var sessionFound = false;
 
-                            if (session.GetProcessID.ProcessExists())
+                        for (var index = Constants.IndexAudioSessionMin; index < session.Count; index++)
+                        {
+                            sessionFound = true;
+
+                            var current = session[index];
+
+                            if (current.GetProcessID.ProcessExists())
                             {
                                 var result = new AudioProcess(
-                                    session: session,
-                                    volumeGiven: session.SimpleAudioVolume.Volume,
-                                    isBaseSession: session.GetProcessID == baseProcessId);
+                                    session: current,
+                                    volumeGiven: current.SimpleAudioVolume.Volume,
+                                    isBaseSession: current.GetProcessID == baseProcessId);
 
                                 yield return result;
                             }
+                        }
+
+                        if (sessionFound)
+                        {
+                            yield break;
                         }
                     }
                 }
@@ -257,8 +268,6 @@ namespace SportDJ.Services.VolumeService
             VolumeType = volumeTarget < Constants.VolumeMax
                 ? VolumeType.Lowered
                 : VolumeType.None;
-
-            audioProcesses = default;
         }
 
         private void ReduceVolume(IEnumerable<AudioProcess> processes, float fadeStep,
@@ -310,6 +319,15 @@ namespace SportDJ.Services.VolumeService
                     processes: relevantProcesses,
                     fadeStep: 1F);
             }
+        }
+
+        private void UpdateAudioProcesses()
+        {
+            audioProcesses = GetAudioProcesses().ToArray();
+
+            IsActive = true;
+
+            eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
 
         #endregion Private Methods

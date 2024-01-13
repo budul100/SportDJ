@@ -8,6 +8,7 @@ using SharpHook.Native;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
@@ -66,6 +67,12 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
                 action: OnSettingsUpdated,
                 keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
+                action: _ => UpdateCommands(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: v => volumeService == v);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateCommands(),
@@ -192,6 +199,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void UpdateCommands()
         {
+            RaisePropertyChanged(nameof(VolumeMonitoringActive));
             RaisePropertyChanged(nameof(IsActive));
 
             PauseCommand.RaiseCanExecuteChanged();

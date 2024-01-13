@@ -1,12 +1,13 @@
-﻿using Prism.Commands;
+﻿using System;
+using System.Linq;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
-using System;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {

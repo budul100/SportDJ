@@ -1,4 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,11 +16,6 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
