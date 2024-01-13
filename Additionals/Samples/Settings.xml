@@ -124,4 +124,125 @@
 											</Cell>
 										</Cells>
 									</Grid>
-				
+									<Grid Name="Tor Herren">
+										<Cells>
+											<Cell xsi:type="Player" Column="0" Row="0" Key="VcNumPad7" Name="Tor">
+												<OnForeground>false</OnForeground>
+												<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3</Path>
+												<SavePositions>false</SavePositions>
+											</Cell>
+										</Cells>
+									</Grid>
+								</Grids>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Key="VcNumPad8" Name="Weiter">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="1" Key="VcNumPad9" Name="Ende">
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="2" Key="VcNumPad4" Name="Anheizen">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="2" Key="VcNumPad5" Name="Team">
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Team.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="2" Key="VcNumPad6" Name="Gegner">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Gegner.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="3" Key="VcNumPad1" Name="Attacke">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Angriff.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="3" Key="VcNumPad2" Name="Klatschen Kurz">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="3" Key="VcNumPad3" Name="Klatschen Lang">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Lang.m3u</Path>
+								<SavePositions>true</SavePositions>
+							</Cell>
+						</Cells>
+					</Grid>
+					<Grid Key="VcNumPadAdd" Name="Ende">
+						<Cells>
+							<Cell xsi:type="Player" Column="2" Row="0" Key="VcNumPad9" Name="Ende">
+								<OnForeground>true</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="1" Key="VcNumPad4" Name="Gewonnen">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende_Gewonnen.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="1" Key="VcNumPad5" Name="Unentschieden">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="1" Key="VcNumPad6" Name="Verloren">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende_Verloren.m3u</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="0" Row="2" Key="VcNumPad1" Name="Sonstiges">
+								<OnForeground>false</OnForeground>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="1" Row="2" Key="VcNumPad2" Name="Sonstiges">
+								<OnForeground>false</OnForeground>
+								<SavePositions>false</SavePositions>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="2" Key="VcNumPad3" Name="Abschied">
+								<OnForeground>false</OnForeground>
+								<Path>C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3</Path>
+								<SavePositions>false</SavePositions>
+							</Cell>
+						</Cells>
+					</Grid>
+				</Grids>
+			</Cell>
+		</Cells>
+	</Grid>
+	<Options>
+		<FadeOnLowerMilliseconds>200</FadeOnLowerMilliseconds>
+		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
+		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
+		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
+		<KeyPauseOutput>VcNumPadEnter</KeyPauseOutput>
+		<KeyTalkVolume>VcNumPad0</KeyTalkVolume>
+		<SelectNextSeconds>10</SelectNextSeconds>
+		<TrimRearPercentage>15</TrimRearPercentage>
+		<TrimVolumePercentage>5</TrimVolumePercentage>
+	</Options>
+	<Outputs>
+		<Output Type="Live">
+			<DeviceName>OUT 1-2 (BEHRINGER UMC 204HD 19</DeviceName>
+			<SampleRate>44100</SampleRate>
+			<Volume>1</Volume>
+			<VolumePercentageApps>19</VolumePercentageApps>
+			<VolumePercentageBackground>19</VolumePercentageBackground>
+		</Output>
+		<Output Type="PFL">
+			<DeviceName>OUT 1-2 (BEHRINGER UMC 204HD 19</DeviceName>
+			<SampleRate>44100</SampleRate>
+			<Volume>1</Volume>
+			<VolumePercentageApps>20</VolumePercentageApps>
+			<VolumePercentageBackground>20</VolumePercentageBackground>
+		</Output>
+	</Outputs>
+</Set>
