@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
@@ -47,6 +48,7 @@ namespace SportDJ.Services.StackService
 
         public bool HasUnplayeds => Entries.HasUnplayeds(Track);
 
+        public int Index { get; private set; }
         public Track Track => Entry?.Track;
 
         #endregion Public Properties
@@ -111,6 +113,8 @@ namespace SportDJ.Services.StackService
                     Reset();
                 }
 
+                position.Index = Index;
+
                 sessionService.Save();
 
                 eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
@@ -165,7 +169,7 @@ namespace SportDJ.Services.StackService
 
                 eventAggregator.GetEvent<EntriesUpdatedEvent>()?.Publish(Entries);
 
-                position.Index = index;
+                Index = index;
                 position.Path = Track.Path;
 
                 eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
