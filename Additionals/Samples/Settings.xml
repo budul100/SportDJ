@@ -231,14 +231,14 @@
 	</Options>
 	<Outputs>
 		<Output Type="Live">
-			<DeviceName>OUT 1-2 (BEHRINGER UMC 204HD 19</DeviceName>
+			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
 			<SampleRate>44100</SampleRate>
 			<Volume>1</Volume>
 			<VolumePercentageApps>19</VolumePercentageApps>
 			<VolumePercentageBackground>19</VolumePercentageBackground>
 		</Output>
 		<Output Type="PFL">
-			<DeviceName>OUT 1-2 (BEHRINGER UMC 204HD 19</DeviceName>
+			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
 			<SampleRate>44100</SampleRate>
 			<Volume>1</Volume>
 			<VolumePercentageApps>20</VolumePercentageApps>

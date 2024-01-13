@@ -10,6 +10,9 @@ namespace SportDJ.Commons.Models.Settings
 
         public string DeviceName { get; set; }
 
+        [XmlIgnore]
+        public string DeviceNameCurrent { get; set; }
+
         public int SampleRate { get; set; }
 
         [XmlAttribute]

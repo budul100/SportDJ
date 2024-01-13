@@ -1,4 +1,9 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -10,11 +15,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
@@ -193,17 +193,20 @@ namespace SportDJ.Services.OutputService
 
         public void Raise()
         {
-            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
+            if (isLowered)
+            {
+                var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-            isLowered = false;
+                isLowered = false;
 
-            providerFader.Fade(
-                volumeTarget: Constants.VolumeMax,
-                milliSeconds: fadeMilliseconds);
+                providerFader.Fade(
+                    volumeTarget: Constants.VolumeMax,
+                    milliSeconds: fadeMilliseconds);
 
-            volumeService.Raise(
-                volumeTarget: Constants.VolumeMax,
-                milliSeconds: fadeMilliseconds);
+                volumeService.Raise(
+                    volumeTarget: Constants.VolumeMax,
+                    milliSeconds: fadeMilliseconds);
+            }
         }
 
         public void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false)
@@ -239,7 +242,7 @@ namespace SportDJ.Services.OutputService
                     cancellationToken: cancellationTokenSource.Token);
 
                 volumeService.Set(
-                    deviceName: deviceName);
+                    deviceName: outputOptions.DeviceName);
             }
         }
 
@@ -401,10 +404,9 @@ namespace SportDJ.Services.OutputService
 
         private void PauseVolume()
         {
-            var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
+            var fadeMilliseconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
 
-            volumeService.Reduce(
-                volumeTarget: Constants.VolumeMin,
+            volumeService.Mute(
                 milliSeconds: fadeMilliseconds);
         }
 

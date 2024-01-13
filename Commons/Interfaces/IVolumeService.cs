@@ -20,6 +20,8 @@ namespace SportDJ.Commons.Interfaces
 
         void Deactivate();
 
+        void Mute(int? milliSeconds = default);
+
         void Raise(float? volumeTarget = default, int? milliSeconds = default);
 
         void Reduce(float? volumeTarget = default, int? milliSeconds = default);
