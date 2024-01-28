@@ -17,12 +17,11 @@ namespace SportDJ.Commons.Assets
         public const int IndexAudioDeviceMin = 0;
         public const int IndexAudioSessionMin = 0;
 
-        public const bool MessageBoxOnClosing = false;
-
         public const int MixerSourcesMax = 1024;
 
         public const double PercentageIncrement = 1;
         public const double PercentageMax = 100;
+        public const double PercentageMin = 0;
 
         public const int SecondsIsEnding = 10;
 

@@ -11,6 +11,7 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly IMixerService mixerServiceBackground;
         private readonly IMixerService mixerServiceForeground;
         private readonly IMixerService mixerServicePFL;
+        private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
@@ -36,8 +38,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private string content;
         private string counter;
         private string keyCode;
+        private ObservableCollection<MenuViewModel> menus;
         private string name;
         private bool onForeground;
+        private IOutputService outputServiceLive;
         private string remaining;
         private bool savePositions;
         private ISignalService signalService;
@@ -61,6 +65,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             mixerServicePFL = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.PFL));
 
+            settingsService = containerProvider.Resolve<IStorageService<Set>>();
             trackService = containerProvider.Resolve<ITrackService>();
 
             ExecuteCommand = new DelegateCommand(
@@ -135,6 +140,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: t => stackService?.Track == t);
+
+            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+                action: _ => UpdateContent(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => outputServiceLive == o);
+
+            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+                action: _ => UpdateContent(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => outputServiceLive == o);
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
@@ -212,7 +229,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public ObservableCollection<MenuViewModel> Menus { get; private set; }
+        public ObservableCollection<MenuViewModel> Menus => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying
+            ? menus
+            : default;
 
         public string Name
         {
@@ -424,10 +443,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateOutput()
         {
-            var outputPFL = containerProvider?.Resolve<IOutputService>(
+            outputServiceLive = containerProvider?.Resolve<IOutputService>(
+                nameof(OutputType.Live));
+
+            var outputServicePFL = containerProvider?.Resolve<IOutputService>(
                 nameof(OutputType.PFL));
 
-            HasPFL = outputPFL?.IsActive == true;
+            HasPFL = outputServicePFL?.IsActive == true;
 
             UpdateContent();
         }
@@ -443,6 +465,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 WidthPosition = signalService.Position.Value.Ticks;
                 WidthRemaining = signalService.Position.Value.Ticks;
             }
+
+            RaisePropertyChanged(nameof(Menus));
         }
 
         private void UpdateSignal()
@@ -483,7 +507,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (stackService?.Entries?.Any() == true)
             {
-                Menus = new ObservableCollection<MenuViewModel>(GetMenus().ToArray());
+                menus = new ObservableCollection<MenuViewModel>(GetMenus().ToArray());
             }
         }
 

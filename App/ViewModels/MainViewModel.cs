@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -13,12 +7,17 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -325,7 +324,7 @@ namespace SportDJ.App.ViewModels
             {
                 eventArgs.Cancel = true;
 
-                if (Constants.MessageBoxOnClosing)
+                if (settingsService.Contents.Options.EnableInterruptingDialogs)
                 {
                     dispatcherService.Post(() => CheckClosing(desktop));
                 }

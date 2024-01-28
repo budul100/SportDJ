@@ -1,14 +1,16 @@
-﻿using PropertyModels.ComponentModel;
-using SportDJ.Commons.Assets;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
     public class Options
     {
         #region Public Properties
+
+        [DisplayName("Enable interrupting dialogs")]
+        public bool EnableInterruptingDialogs { get; set; }
 
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]
@@ -41,14 +43,12 @@ namespace SportDJ.Commons.Models.Settings
         [DisplayName("Select next on play (s)")]
         public int? SelectNextOnPlaySeconds { get; set; } = Defaults.SelectNextOnPlaySeconds;
 
-        [Range(0, 100)]
-        [Trackable(min: 0, max: Constants.PercentageMax, Increment = Constants.PercentageIncrement)]
+        [Range(Constants.PercentageMin, Constants.PercentageMax)]
         [DisplayName("Trim rear (%)")]
         public int TrimRearPercentage { get; set; } = Defaults.TrimRearPercentage;
 
-        [Range(0, 100)]
-        [Trackable(min: 0, max: Constants.PercentageMax, Increment = Constants.PercentageIncrement)]
-        [DisplayName("Cue volume (%)")]
+        [Range(Constants.PercentageMin, Constants.PercentageMax)]
+        [DisplayName("Cue volume for trim (%)")]
         public int TrimVolumePercentage { get; set; } = Defaults.TrimVolumePercentage;
 
         #endregion Public Properties
