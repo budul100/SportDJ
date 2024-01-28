@@ -16,7 +16,8 @@
 
         public const int SampleRate = 44100;
 
-        public const int SelectNextSeconds = 10;
+        public const int SelectNextOnPauseSeconds = 10;
+        public const int SelectNextOnPlaySeconds = 10;
 
         public const int SettingsWidth = 200;
 

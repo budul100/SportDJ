@@ -226,7 +226,8 @@
 		<KeyCodeOutputPause>VcEnter</KeyCodeOutputPause>
 		<KeyCodeScreenChange>VcF11</KeyCodeScreenChange>
 		<KeyCodeVolumeTalk>VcSpace</KeyCodeVolumeTalk>
-		<SelectNextSeconds>10</SelectNextSeconds>
+		<SelectNextOnPauseSeconds>10</SelectNextOnPauseSeconds>
+		<SelectNextOnPlaySeconds>10</SelectNextOnPlaySeconds>
 		<TrimRearPercentage>15</TrimRearPercentage>
 		<TrimVolumePercentage>5</TrimVolumePercentage>
 	</Options>

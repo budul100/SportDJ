@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -10,6 +8,10 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService
 {
@@ -18,12 +20,13 @@ namespace SportDJ.Services.SignalService
     {
         #region Private Fields
 
+        private readonly CancellationTokenSource cancellationTokenSource;
         private readonly IEventAggregator eventAggregator;
         private readonly IStorageService<Set> settingsService;
         private readonly ITrackService trackService;
-
         private bool isDisposed;
-        private TimeSpan nextThreshold;
+
+        private TimeSpan? nextThresholdOnPlay;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
 
@@ -37,6 +40,8 @@ namespace SportDJ.Services.SignalService
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
             this.trackService = trackService;
+
+            cancellationTokenSource = new CancellationTokenSource();
         }
 
         #endregion Public Constructors
@@ -110,9 +115,6 @@ namespace SportDJ.Services.SignalService
                     sourceProvider: sourceProvider,
                     track: Track);
 
-                nextThreshold = playingProvider.Position.Add(
-                    ts: TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextSeconds));
-
                 playingProvider.SignalPausedEvent += OnSignalPaused;
                 playingProvider.SignalStoppedEvent += OnSignalStopped;
                 playingProvider.SignalEndedEvent += OnSignalEnded;
@@ -148,6 +150,12 @@ namespace SportDJ.Services.SignalService
 
                 outputProvider.FadingStartedEvent += OnFadingStarted;
                 outputProvider.FadingEndedEvent += OnFadingEnded;
+
+                if (settingsService.Contents.Options.SelectNextOnPlaySeconds.HasValue)
+                {
+                    var selectNextDuration = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPlaySeconds.Value);
+                    nextThresholdOnPlay = playingProvider.Position.Add(selectNextDuration);
+                }
             }
         }
 
@@ -196,20 +204,24 @@ namespace SportDJ.Services.SignalService
         {
             if (!isDisposed)
             {
-                if (isDisposing
-                    && playingProvider != default)
+                if (isDisposing)
                 {
-                    outputProvider.FadingStartedEvent -= OnFadingStarted;
-                    outputProvider.FadingEndedEvent -= OnFadingEnded;
+                    cancellationTokenSource?.Cancel();
 
-                    outputProvider.Dispose();
+                    if (playingProvider != default)
+                    {
+                        outputProvider.FadingStartedEvent -= OnFadingStarted;
+                        outputProvider.FadingEndedEvent -= OnFadingEnded;
 
-                    playingProvider.SignalPausedEvent -= OnSignalPaused;
-                    playingProvider.SignalStoppedEvent -= OnSignalStopped;
-                    playingProvider.SignalEndedEvent -= OnSignalEnded;
-                    playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
+                        outputProvider.Dispose();
 
-                    playingProvider.Dispose();
+                        playingProvider.SignalPausedEvent -= OnSignalPaused;
+                        playingProvider.SignalStoppedEvent -= OnSignalStopped;
+                        playingProvider.SignalEndedEvent -= OnSignalEnded;
+                        playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
+
+                        playingProvider.Dispose();
+                    }
                 }
 
                 isDisposed = true;
@@ -262,6 +274,16 @@ namespace SportDJ.Services.SignalService
             else
             {
                 eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+
+                if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
+                {
+                    var selectNextDelay = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPauseSeconds.Value);
+
+                    Task.Delay(
+                        delay: selectNextDelay,
+                        cancellationToken: cancellationTokenSource.Token)
+                        .ContinueWith(_ => SelectNext());
+                }
             }
         }
 
@@ -279,12 +301,18 @@ namespace SportDJ.Services.SignalService
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
             if (!IsOverNextThreshold
-                && Position?.Ticks > nextThreshold.Ticks)
+                && nextThresholdOnPlay.HasValue
+                && Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
             {
                 IsOverNextThreshold = true;
 
-                eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
+                SelectNext();
             }
+        }
+
+        private void SelectNext()
+        {
+            eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
         }
 
         #endregion Private Methods

@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+﻿using PropertyModels.ComponentModel;
+using SportDJ.Commons.Assets;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using PropertyModels.ComponentModel;
-using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -35,8 +35,11 @@ namespace SportDJ.Commons.Models.Settings
         [IgnoreDataMember]
         public string KeyCodeVolumeTalk { get; set; } = Defaults.KeyCodeVolumeTalk;
 
-        [DisplayName("Select next (s)")]
-        public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;
+        [DisplayName("Select next on pause (s)")]
+        public int? SelectNextOnPauseSeconds { get; set; } = Defaults.SelectNextOnPauseSeconds;
+
+        [DisplayName("Select next on play (s)")]
+        public int? SelectNextOnPlaySeconds { get; set; } = Defaults.SelectNextOnPlaySeconds;
 
         [Range(0, 100)]
         [Trackable(min: 0, max: Constants.PercentageMax, Increment = Constants.PercentageIncrement)]

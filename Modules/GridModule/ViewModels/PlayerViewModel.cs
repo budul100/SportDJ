@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -17,6 +12,11 @@ using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -106,7 +106,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: s => signalServices.Contains(s));
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
-                action: _ => SelectTrack(false),
+                action: _ => SelectTrack(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => !OnForeground
