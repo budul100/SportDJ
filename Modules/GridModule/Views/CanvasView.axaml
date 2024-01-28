@@ -12,18 +12,11 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
-    <Viewbox
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Top"
-        Stretch="Uniform"
-        StretchDirection="Both">
-
-        <ContentControl Content="{Binding Grid}">
-            <ContentControl.ContentTemplate>
-                <DataTemplate>
-                    <v:GridView />
-                </DataTemplate>
-            </ContentControl.ContentTemplate>
-        </ContentControl>
-    </Viewbox>
+    <ContentControl Content="{Binding Grid}">
+        <ContentControl.ContentTemplate>
+            <DataTemplate>
+                <v:GridView />
+            </DataTemplate>
+        </ContentControl.ContentTemplate>
+    </ContentControl>
 </UserControl>

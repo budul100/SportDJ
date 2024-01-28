@@ -89,8 +89,17 @@
         <TabControl.ContentTemplate>
             <DataTemplate>
 
-                <v:GridView />
+                <Viewbox
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Stretch="Uniform"
+                    StretchDirection="Both">
+
+                    <v:GridView />
+
+                </Viewbox>
             </DataTemplate>
+
         </TabControl.ContentTemplate>
     </TabControl>
 </UserControl>
