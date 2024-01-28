@@ -2,30 +2,27 @@
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
-using SharpHook;
-using SharpHook.Native;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Events.Volume;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
     public class ControllerViewModel
-        : RegionViewModelBase, IDisposable
+        : RegionViewModelBase
     {
         #region Private Fields
 
-        private readonly TaskPoolGlobalHook hook;
         private readonly Options options;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
 
-        private bool isDisposed;
         private bool othersMuted;
         private bool volumeMonitoringActive;
 
@@ -34,17 +31,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Set> settingsService, TaskPoolGlobalHook hook)
+            IEventAggregator eventAggregator, IStorageService<Set> settingsService)
             : base(regionManager)
         {
-            this.hook = hook;
             this.options = settingsService.Contents.Options;
-
-            if (hook != default)
-            {
-                hook.KeyPressed += OnKeyPressed;
-                hook.KeyReleased += OnKeyReleased;
-            }
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
@@ -85,21 +75,29 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
+
+            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+                action: k => OnKeyPressed(k),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
+                action: k => OnKeyReleased(k),
+                keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public bool HasKeyPauseOutput => options.KeyPauseOutput.HasValue;
+        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options.KeyPauseOutput);
 
-        public bool HasKeyTalkVolume => options.KeyTalkVolume.HasValue;
+        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options.KeyTalkVolume);
 
         public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
 
-        public KeyCode? KeyPauseOutput => options.KeyPauseOutput;
+        public string KeyPauseOutput => options.KeyPauseOutput.GetKey();
 
-        public KeyCode? KeyTalkVolume => options.KeyTalkVolume;
+        public string KeyTalkVolume => options.KeyTalkVolume.GetKey();
 
         public bool OthersMuted
         {
@@ -135,57 +133,23 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(
-                disposing: true);
-
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    hook.KeyPressed += OnKeyPressed;
-                    hook.KeyReleased += OnKeyReleased;
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        #endregion Protected Methods
-
         #region Private Methods
 
-        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
+        private void OnKeyPressed(string keyCode)
         {
-            if (HasKeyPauseOutput
-                && e?.Data.KeyCode == KeyPauseOutput)
+            if (keyCode == options.KeyPauseOutput)
             {
                 outputLiveService.Pause();
             }
-            else if (HasKeyTalkVolume
-                && e?.Data.KeyCode == KeyTalkVolume)
+            else if (keyCode == options.KeyTalkVolume)
             {
                 outputLiveService.Lower();
             }
         }
 
-        private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
+        private void OnKeyReleased(string keyCode)
         {
-            if (HasKeyTalkVolume
-                && e?.Data.KeyCode == KeyTalkVolume)
+            if (keyCode == options.KeyTalkVolume)
             {
                 outputLiveService.Raise();
             }
@@ -194,7 +158,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         private void OnSettingsUpdated()
         {
             RaisePropertyChanged(nameof(KeyPauseOutput));
+            RaisePropertyChanged(nameof(HasKeyPauseOutput));
+
             RaisePropertyChanged(nameof(KeyTalkVolume));
+            RaisePropertyChanged(nameof(HasKeyTalkVolume));
         }
 
         private void UpdateContent()

@@ -1,21 +1,19 @@
-﻿using Prism.Ioc;
-using SharpHook;
-using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
+using Prism.Events;
+using Prism.Ioc;
+using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GroupViewModel
-        : CellViewModel, IDisposable
+        : CellViewModel
     {
         #region Private Fields
 
-        private readonly TaskPoolGlobalHook hook;
         private readonly GridViewModel parent;
 
-        private bool isDisposed;
         private GridViewModel selected;
 
         #endregion Private Fields
@@ -25,27 +23,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public GroupViewModel(IContainerProvider containerProvider, Group group, GridViewModel parent, bool isOnCanvas)
             : base(group)
         {
-            Rows = 1;
-            Columns = 1;
+            this.parent = parent;
 
-            hook = containerProvider.Resolve<TaskPoolGlobalHook>();
+            var eventAggregator = containerProvider.Resolve<IEventAggregator>();
 
-            if (hook != default)
-            {
-                hook.KeyPressed += OnKeyPressed;
-            }
+            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+                action: k => SelectTab(k),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: _ => parent.IsVisible);
 
-            InitializeTabs(
+            Initialize(
                 containerProvider: containerProvider,
                 group: group,
                 isOnCanvas: isOnCanvas);
-
-            this.RowSpan = Rows;
-            this.ColumnSpan = Columns;
-
-            RaisePropertyChanged(nameof(Rows));
-            RaisePropertyChanged(nameof(Columns));
-            this.parent = parent;
         }
 
         #endregion Public Constructors
@@ -63,13 +54,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
             get { return selected; }
             set
             {
-                if (value != default)
+                if (value != default
+                    && value != selected)
                 {
                     SetProperty(ref selected, value);
 
                     foreach (var tab in Tabs)
                     {
-                        tab.IsSelected = tab == selected;
+                        tab.IsSelected = tab == value;
                     }
                 }
             }
@@ -79,41 +71,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(
-                isDisposing: true);
-
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool isDisposing)
-        {
-            if (!isDisposed)
-            {
-                if (isDisposing
-                    && hook != default)
-                {
-                    hook.KeyPressed -= OnKeyPressed;
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        #endregion Protected Methods
-
         #region Private Methods
 
-        private void InitializeTabs(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+        private void Initialize(IContainerProvider containerProvider, Group group, bool isOnCanvas)
         {
+            Rows = 1;
+            Columns = 1;
+
             if (group.Grids?.Any() == true)
             {
                 foreach (var grid in group.Grids)
@@ -138,14 +102,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     }
                 }
             }
+
+            this.RowSpan = Rows;
+            this.ColumnSpan = Columns;
+
+            RaisePropertyChanged(nameof(Rows));
+            RaisePropertyChanged(nameof(Columns));
         }
 
-        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
+        private void SelectTab(string keyCode)
         {
             if (IsVisible)
             {
                 var selection = Tabs
-                    .FirstOrDefault(t => t.Key == e?.Data.KeyCode);
+                    .FirstOrDefault(t => t.KeyCode == keyCode);
 
                 Selected = selection;
             }

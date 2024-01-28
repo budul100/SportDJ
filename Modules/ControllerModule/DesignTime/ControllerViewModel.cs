@@ -7,7 +7,7 @@
 
         public ControllerViewModel()
             : base(regionManager: default, containerProvider: default, eventAggregator: default,
-                   settingsService: default, hook: default)
+                   settingsService: default)
         { }
 
         #endregion Public Constructors

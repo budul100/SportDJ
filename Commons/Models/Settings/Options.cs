@@ -1,9 +1,8 @@
-﻿using PropertyModels.ComponentModel;
-using SharpHook.Native;
-using SportDJ.Commons.Assets;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using PropertyModels.ComponentModel;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -28,10 +27,10 @@ namespace SportDJ.Commons.Models.Settings
         public int FadeOnPauseMilliseconds { get; set; }
 
         [IgnoreDataMember]
-        public KeyCode? KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
+        public string KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
 
         [IgnoreDataMember]
-        public KeyCode? KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
+        public string KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
 
         [DisplayName("Select next (s)")]
         public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;

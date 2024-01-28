@@ -32,7 +32,6 @@
 
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
-        <co:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -118,7 +117,7 @@
                             VerticalAlignment="Stretch"
                             FontSize="{StaticResource FontSizeContent}"
                             FontWeight="Bold"
-                            Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
+                            Text="{Binding Key}" />
                     </Border>
                 </Panel>
             </Grid>

@@ -30,7 +30,6 @@
 
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
-        <co:KeyCodeToStringConverter x:Key="KeyCodeToStringConverter" />
     </UserControl.Resources>
 
     <Design.DataContext>
@@ -80,7 +79,7 @@
                             VerticalAlignment="Center"
                             FontSize="{StaticResource FontSizeContent}"
                             FontWeight="Bold"
-                            Text="{Binding Key, Converter={StaticResource KeyCodeToStringConverter}}" />
+                            Text="{Binding Key}" />
                     </Border>
                 </Grid>
             </DataTemplate>
@@ -96,10 +95,8 @@
                     StretchDirection="Both">
 
                     <v:GridView />
-
                 </Viewbox>
             </DataTemplate>
-
         </TabControl.ContentTemplate>
     </TabControl>
 </UserControl>

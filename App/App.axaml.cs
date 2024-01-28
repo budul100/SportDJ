@@ -1,16 +1,15 @@
+using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
-using SharpHook;
 using SportDJ.App.Views;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
 
 namespace SportDJ.App
 {
@@ -73,8 +72,8 @@ namespace SportDJ.App
             var messageBoxService = new MessageBoxService.Service(App.Current);
             containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
 
-            containerRegistry.RegisterSingleton<TaskPoolGlobalHook>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
+            containerRegistry.RegisterSingleton<IHookService, Services.HookService.Service>();
 
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();

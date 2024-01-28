@@ -1,5 +1,4 @@
 ﻿using Avalonia.Media.Imaging;
-using SharpHook.Native;
 using SportDJ.Commons.Assets;
 using System;
 
@@ -28,7 +27,7 @@ namespace SportDJ.Modules.GridModule.DesignTime
             Content = $"{artist} - {title}";
             Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
             Counter = $"[{3}]";
-            Key = KeyCode.VcA;
+            KeyCode = "VcA";
 
             Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
 

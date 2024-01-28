@@ -1,48 +1,45 @@
-﻿using Avalonia.Media.Imaging;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Ioc;
-using SharpHook;
-using SharpHook.Native;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Output;
-using SportDJ.Commons.Events.Signal;
-using SportDJ.Commons.Events.Stack;
-using SportDJ.Commons.Events.Track;
-using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Structure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
+using Prism.Commands;
+using Prism.Events;
+using Prism.Ioc;
+using SportDJ.Commons.Assets;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Stack;
+using SportDJ.Commons.Events.Track;
+using SportDJ.Commons.Extensions;
+using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class PlayerViewModel
-        : CellViewModel, IDisposable
+        : CellViewModel
     {
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly TaskPoolGlobalHook hook;
         private readonly IMixerService mixerServiceBackground;
         private readonly IMixerService mixerServiceForeground;
         private readonly IMixerService mixerServicePFL;
-        private readonly GridViewModel parent;
-        private readonly bool savePositions;
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
         private Bitmap bitmap;
         private string content;
         private string counter;
-        private bool isDisposed;
-        private KeyCode? key;
+        private string keyCode;
         private string name;
         private bool onForeground;
         private string remaining;
+        private bool savePositions;
         private ISignalService signalService;
         private IStackService stackService;
         private long widthPosition;
@@ -56,12 +53,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             : base(player)
         {
             this.containerProvider = containerProvider;
-            this.parent = parent;
-
-            Name = player.Name;
-            OnForeground = player.OnForeground;
-
-            savePositions = player.SavePositions;
 
             mixerServiceBackground = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
@@ -118,8 +109,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 action: _ => SelectTrack(false),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalService == s
-                    && !OnForeground);
+                filter: s => !OnForeground
+                    && signalService == s);
 
             eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
                 action: _ => UpdateTracks(),
@@ -149,19 +140,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 action: _ => UpdateOutput(),
                 keepSubscriberReferenceAlive: true);
 
-            hook = containerProvider.Resolve<TaskPoolGlobalHook>();
+            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+                action: _ => ExecuteSignal(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: k => parent.IsVisible
+                    && k == player.KeyCode);
 
-            if (hook != default
-                && !string.IsNullOrWhiteSpace(player.Key))
-            {
-                Key = Enum.Parse<KeyCode>(player.Key);
-                hook.KeyPressed += OnKeyPressed;
-            }
-
-            UpdateOutput();
-
-            UpdateStack(
-                path: player.Path);
+            Intialize(
+                player: player);
         }
 
         #endregion Public Constructors
@@ -194,7 +181,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand ExecuteCommand { get; }
 
-        public bool HasKey => Key.HasValue;
+        public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         public bool HasPFL { get; private set; }
 
@@ -208,14 +195,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
 
-        public KeyCode? Key
+        public string Key => KeyCode.GetKey();
+
+        public string KeyCode
         {
-            get { return key; }
+            get { return keyCode; }
             set
             {
-                SetProperty(ref key, value);
+                if (value != keyCode)
+                {
+                    keyCode = value;
 
-                RaisePropertyChanged(nameof(HasKey));
+                    RaisePropertyChanged(nameof(Key));
+                    RaisePropertyChanged(nameof(HasKey));
+                }
             }
         }
 
@@ -258,37 +251,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Properties
-
-        #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(
-                disposing: true);
-
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!isDisposed)
-            {
-                if (disposing
-                    && hook != default)
-                {
-                    hook.KeyPressed -= OnKeyPressed;
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        #endregion Protected Methods
 
         #region Private Methods
 
@@ -336,6 +298,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return result;
         }
 
+        private void Intialize(Player player)
+        {
+            Name = player.Name;
+            KeyCode = player.KeyCode;
+            OnForeground = player.OnForeground;
+            savePositions = player.SavePositions;
+
+            stackService = containerProvider?.Resolve<IStackService>();
+
+            Task.Run(() => stackService?.Initialize(
+                path: player.Path,
+                name: Name,
+                savePosition: savePositions));
+
+            UpdateOutput();
+        }
+
         private bool IsExecuteAvailable()
         {
             var result = stackService?.Track != default;
@@ -362,16 +341,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             ClosingContextMenuEvent?.Invoke(
                 sender: this,
                 e: default);
-        }
-
-        private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
-        {
-            if (parent.IsVisible
-                && Key.HasValue
-                && e?.Data.KeyCode == Key)
-            {
-                ExecuteSignal();
-            }
         }
 
         private void OnSignalEnded(ISignalService signalService)
@@ -490,16 +459,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 UpdateTrack();
             }
-        }
-
-        private void UpdateStack(string path)
-        {
-            stackService = containerProvider?.Resolve<IStackService>();
-
-            Task.Run(() => stackService?.Initialize(
-                path: path,
-                name: Name,
-                savePosition: savePositions));
         }
 
         private void UpdateTrack()

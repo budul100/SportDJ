@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
@@ -12,7 +11,6 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
-using SharpHook;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
@@ -32,13 +30,13 @@ namespace SportDJ.App.ViewModels
         private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
         private readonly IDispatcherService dispatcherService;
+        private readonly IHookService hookService;
         private readonly HashSet<IOutputService> liveServices = new();
         private readonly IMessageBoxService messageBoxService;
         private readonly HashSet<IOutputService> outputServices = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
-        private TaskPoolGlobalHook hook;
         private bool isDisposed;
         private string title;
 
@@ -49,15 +47,15 @@ namespace SportDJ.App.ViewModels
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IDispatcherService dispatcherService, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService, IMessageBoxService messageBoxService, TaskPoolGlobalHook hook)
+            IDispatcherService dispatcherService, IHookService hookService, IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService, IMessageBoxService messageBoxService)
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
+            this.hookService = hookService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
             this.messageBoxService = messageBoxService;
-            this.hook = hook;
 
             assemblyTitle = GetAssemblyTitle();
 
@@ -99,11 +97,6 @@ namespace SportDJ.App.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => backgroundMixer == m);
-
-            if (hook != default)
-            {
-                Task.Run(() => hook.Run());
-            }
 
             UpdateTitle();
         }
@@ -229,8 +222,7 @@ namespace SportDJ.App.ViewModels
 
                     outputServices.OnEach(s => s.Dispose());
 
-                    hook.Dispose();
-                    hook = default;
+                    hookService.Dispose();
                 }
 
                 isDisposed = true;

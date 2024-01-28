@@ -1,10 +1,9 @@
-﻿using Prism.Ioc;
-using Prism.Mvvm;
-using SharpHook.Native;
-using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
+using Prism.Ioc;
+using Prism.Mvvm;
+using SportDJ.Commons.Extensions;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -17,7 +16,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private int columns;
         private bool isSelected;
-        private KeyCode? key;
+        private string keyCode;
         private string name;
         private int rows;
 
@@ -28,14 +27,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public GridViewModel(IContainerProvider containerProvider, Grid grid, GroupViewModel parent = default)
         {
             this.parent = parent;
-            Name = grid.Name;
 
-            if (!string.IsNullOrWhiteSpace(grid.Key))
-            {
-                Key = Enum.Parse<KeyCode>(grid.Key);
-            }
-
-            InitializeGrid(
+            Initialize(
                 containerProvider: containerProvider,
                 grid: grid);
         }
@@ -52,7 +45,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref columns, value); }
         }
 
-        public bool HasKey => Key.HasValue;
+        public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         public bool IsSelected
         {
@@ -69,14 +62,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool IsVisible => IsSelected
             && parent?.IsVisible != false;
 
-        public KeyCode? Key
+        public string Key => KeyCode.GetKey();
+
+        public string KeyCode
         {
-            get { return key; }
+            get { return keyCode; }
             set
             {
-                SetProperty(ref key, value);
+                if (value != keyCode)
+                {
+                    keyCode = value;
 
-                RaisePropertyChanged(nameof(HasKey));
+                    RaisePropertyChanged(nameof(Key));
+                    RaisePropertyChanged(nameof(HasKey));
+                }
             }
         }
 
@@ -96,8 +95,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Methods
 
-        private void InitializeGrid(IContainerProvider containerProvider, Grid grid)
+        private void Initialize(IContainerProvider containerProvider, Grid grid)
         {
+            Name = grid.Name;
+            KeyCode = grid.KeyCode;
+
             if (grid?.Cells?.Any() == true)
             {
                 var rowsCount = 0;

@@ -10,7 +10,7 @@ namespace SportDJ.Commons.Models.Structure
         public List<Cell> Cells { get; set; } = new List<Cell>();
 
         [XmlAttribute]
-        public string Key { get; set; }
+        public string KeyCode { get; set; }
 
         [XmlAttribute]
         public string Name { get; set; }

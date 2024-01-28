@@ -8,7 +8,7 @@ namespace SportDJ.Commons.Models.Structure
         #region Public Properties
 
         [XmlAttribute]
-        public string Key { get; set; }
+        public string KeyCode { get; set; }
 
         [XmlAttribute]
         public string Name { get; set; }
