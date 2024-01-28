@@ -19,10 +19,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Options options;
         private readonly IOutputService outputLiveService;
+        private readonly IStorageService<Set> settingsService;
         private readonly IVolumeService volumeService;
 
+        private Options options;
         private bool othersMuted;
         private bool volumeMonitoringActive;
 
@@ -34,7 +35,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             IEventAggregator eventAggregator, IStorageService<Set> settingsService)
             : base(regionManager)
         {
-            this.options = settingsService.Contents.Options;
+            this.settingsService = settingsService;
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
@@ -55,7 +56,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 canExecuteMethod: () => IsActive);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: OnSettingsUpdated,
+                action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
@@ -83,21 +84,23 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
                 action: k => OnKeyReleased(k),
                 keepSubscriberReferenceAlive: true);
+
+            UpdateOptions();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options.KeyPauseOutput);
+        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options.KeyCodeOutputPause);
 
-        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options.KeyTalkVolume);
+        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options.KeyCodeVolumeTalk);
 
         public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
 
-        public string KeyPauseOutput => options.KeyPauseOutput.GetKey();
+        public string KeyPauseOutput => options.KeyCodeOutputPause.GetKey();
 
-        public string KeyTalkVolume => options.KeyTalkVolume.GetKey();
+        public string KeyTalkVolume => options.KeyCodeVolumeTalk.GetKey();
 
         public bool OthersMuted
         {
@@ -137,11 +140,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyPressed(string keyCode)
         {
-            if (keyCode == options.KeyPauseOutput)
+            if (keyCode == options.KeyCodeOutputPause)
             {
                 outputLiveService.Pause();
             }
-            else if (keyCode == options.KeyTalkVolume)
+            else if (keyCode == options.KeyCodeVolumeTalk)
             {
                 outputLiveService.Lower();
             }
@@ -149,19 +152,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyReleased(string keyCode)
         {
-            if (keyCode == options.KeyTalkVolume)
+            if (keyCode == options.KeyCodeVolumeTalk)
             {
                 outputLiveService.Raise();
             }
-        }
-
-        private void OnSettingsUpdated()
-        {
-            RaisePropertyChanged(nameof(KeyPauseOutput));
-            RaisePropertyChanged(nameof(HasKeyPauseOutput));
-
-            RaisePropertyChanged(nameof(KeyTalkVolume));
-            RaisePropertyChanged(nameof(HasKeyTalkVolume));
         }
 
         private void UpdateContent()
@@ -172,6 +166,17 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             PauseCommand.RaiseCanExecuteChanged();
             VolumeLowerCommand.RaiseCanExecuteChanged();
             VolumeRaiseCommand.RaiseCanExecuteChanged();
+        }
+
+        private void UpdateOptions()
+        {
+            options = settingsService.Contents.Options;
+
+            RaisePropertyChanged(nameof(KeyPauseOutput));
+            RaisePropertyChanged(nameof(HasKeyPauseOutput));
+
+            RaisePropertyChanged(nameof(KeyTalkVolume));
+            RaisePropertyChanged(nameof(HasKeyTalkVolume));
         }
 
         #endregion Private Methods

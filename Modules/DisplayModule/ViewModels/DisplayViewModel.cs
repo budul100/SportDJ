@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Prism.Events;
@@ -6,12 +7,12 @@ using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
 {
@@ -24,12 +25,14 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly IMixerService mixerService;
         private readonly IStorageService<Session> sessionService;
+        private readonly IStorageService<Set> settingsService;
 
         private Bitmap bitmap;
         private string content;
         private bool isDisposed;
         private bool isEnding;
         private string lastWindowState;
+        private Options options;
         private string remaining;
         private long widthPosition;
         private long widthRemaining;
@@ -39,17 +42,20 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         #region Public Constructors
 
         public DisplayViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Session> sessionService)
+            IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;
+            this.settingsService = settingsService;
             this.sessionService = sessionService;
 
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            clockTimer = GetClockTimer();
-            clockTimer.Start();
+            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+                action: UpdateOptions,
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => OnMixerUpdated(),
@@ -62,6 +68,15 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => mixerService == m);
+
+            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+                action: k => OnKeyPressed(k),
+                keepSubscriberReferenceAlive: true);
+
+            clockTimer = GetClockTimer();
+            clockTimer.Start();
+
+            UpdateOptions();
         }
 
         #endregion Public Constructors
@@ -212,6 +227,14 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             return result;
         }
 
+        private void OnKeyPressed(string keyCode)
+        {
+            if (keyCode == options.KeyCodeScreenChange)
+            {
+                ShowFullscreen = !ShowFullscreen;
+            }
+        }
+
         private void OnMixerStopped()
         {
             UpdateDisplay();
@@ -250,6 +273,11 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 WidthPosition = default;
                 WidthRemaining = default;
             }
+        }
+
+        private void UpdateOptions()
+        {
+            options = settingsService.Contents.Options;
         }
 
         #endregion Private Methods

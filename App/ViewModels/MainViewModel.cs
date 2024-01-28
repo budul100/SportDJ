@@ -13,6 +13,7 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
@@ -39,7 +40,6 @@ namespace SportDJ.App.ViewModels
 
         private bool isDisposed;
         private string title;
-
         private bool userWantsToQuit;
 
         #endregion Private Fields
@@ -60,6 +60,19 @@ namespace SportDJ.App.ViewModels
             assemblyTitle = GetAssemblyTitle();
 
             OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
+
+            backgroundMixer = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
+
+            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+                action: UpdateOptions,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
+                action: _ => UpdateTitle(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => backgroundMixer == m);
 
             LoadSessionService(
                 settingsService: settingsService);
@@ -85,19 +98,7 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.PFL,
                 onForeground: true);
 
-            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: UpdateAttributes,
-                keepSubscriberReferenceAlive: true);
-
-            backgroundMixer = containerProvider?.Resolve<IMixerService>(
-                name: nameof(MixerType.Background));
-
-            eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
-                action: _ => UpdateTitle(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: m => backgroundMixer == m);
-
+            UpdateOptions();
             UpdateTitle();
         }
 
@@ -336,12 +337,13 @@ namespace SportDJ.App.ViewModels
             }
         }
 
-        private void UpdateAttributes()
+        private void UpdateOptions()
         {
             RaisePropertyChanged(nameof(Height));
-            RaisePropertyChanged(nameof(SettingsWidth));
             RaisePropertyChanged(nameof(Width));
             RaisePropertyChanged(nameof(WindowState));
+
+            RaisePropertyChanged(nameof(SettingsWidth));
         }
 
         private void UpdateTitle()

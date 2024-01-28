@@ -27,10 +27,13 @@ namespace SportDJ.Commons.Models.Settings
         public int FadeOnPauseMilliseconds { get; set; }
 
         [IgnoreDataMember]
-        public string KeyPauseOutput { get; set; } = Defaults.KeyPauseOutput;
+        public string KeyCodeOutputPause { get; set; } = Defaults.KeyCodeOutputPause;
 
         [IgnoreDataMember]
-        public string KeyTalkVolume { get; set; } = Defaults.KeyCodeLowerVolume;
+        public string KeyCodeScreenChange { get; set; } = Defaults.KeyCodeScreenChange;
+
+        [IgnoreDataMember]
+        public string KeyCodeVolumeTalk { get; set; } = Defaults.KeyCodeVolumeTalk;
 
         [DisplayName("Select next (s)")]
         public int SelectNextSeconds { get; set; } = Defaults.SelectNextSeconds;

@@ -10,8 +10,9 @@
         public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
 
-        public const string KeyCodeLowerVolume = "VcSpace";
-        public const string KeyPauseOutput = "VcEnter";
+        public const string KeyCodeOutputPause = "VcEnter";
+        public const string KeyCodeScreenChange = "VcF11";
+        public const string KeyCodeVolumeTalk = "VcSpace";
 
         public const int SampleRate = 44100;
 
