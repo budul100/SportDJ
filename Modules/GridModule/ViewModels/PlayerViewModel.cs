@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -16,6 +11,11 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -78,11 +78,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 canExecuteMethod: () => IsResetAvailable());
 
             TrackBackwardCommand = new DelegateCommand(
-                executeMethod: () => UpdateStack(true),
+                executeMethod: () => SelectTrack(true),
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             TrackForwardCommand = new DelegateCommand(
-                executeMethod: () => UpdateStack(false),
+                executeMethod: () => SelectTrack(false),
                 canExecuteMethod: () => IsNextTrackAvailable());
 
             var eventAggregator = containerProvider.Resolve<IEventAggregator>();
@@ -112,7 +112,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: s => signalServices.Contains(s));
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
-                action: _ => UpdateStack(false),
+                action: _ => SelectTrack(false),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s
@@ -364,7 +364,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalServices.Remove(signalService);
             }
 
-            UpdateStack();
+            if (stackService != default
+                && stackService.Track == signalService.Track)
+            {
+                SelectTrack();
+            }
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -393,6 +397,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private void ResetStack()
         {
             stackService?.Reset();
+        }
+
+        private void SelectTrack(bool toPrevious = false)
+        {
+            if (toPrevious)
+            {
+                stackService.Previous();
+            }
+            else
+            {
+                stackService.Next();
+            }
+
+            UpdateSignal();
         }
 
         private void UpdateCommands()
@@ -446,20 +464,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 path: path,
                 name: Name,
                 savePosition: savePositions));
-        }
-
-        private void UpdateStack(bool toPrevious = false)
-        {
-            if (toPrevious)
-            {
-                stackService.Previous();
-            }
-            else
-            {
-                stackService.Next();
-            }
-
-            UpdateSignal();
         }
 
         private void UpdateTrack()
