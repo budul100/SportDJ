@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -15,6 +10,11 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
@@ -77,6 +77,8 @@ namespace SportDJ.Services.OutputService
         public string DeviceName => outputOptions?.DeviceName;
 
         public WaveFormat Format { get; private set; }
+
+        public bool IsActive => providerOutput != default;
 
         public bool IsPlaying { get; private set; }
 
@@ -157,9 +159,11 @@ namespace SportDJ.Services.OutputService
             volumeService = containerProvider.Resolve<IVolumeService>(
                 name: type.ToString());
 
+            var takeDefaultIfMissing = type == OutputType.Live;
+
             Set(
                 deviceName: outputOptions.DeviceName,
-                takeDefaultIfMissing: true);
+                takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
         public void Lower()
@@ -217,32 +221,44 @@ namespace SportDJ.Services.OutputService
             {
                 var capabilities = GetCapabilities();
 
-                var deviceNumber = GetDeviceNumber(
-                    capabilities: capabilities,
-                    deviceName: deviceName,
-                    takeDefaultIfMissing: takeDefaultIfMissing);
+                var deviceNumber = default(int?);
 
-                CloseOutput();
+                try
+                {
+                    deviceNumber = GetDeviceNumber(
+                        capabilities: capabilities,
+                        deviceName: deviceName,
+                        takeDefaultIfMissing: takeDefaultIfMissing);
+                }
+                catch (NoDeviceAvailableException)
+                { }
 
-                outputOptions.DeviceName = capabilities[deviceNumber].ProductName;
-                outputOptions.SampleRate = sampleRate;
+                if (deviceNumber.HasValue)
+                {
+                    CloseOutput();
 
-                Format = WaveFormat.CreateIeeeFloatWaveFormat(
-                    sampleRate: sampleRate,
-                    channels: capabilities[deviceNumber].Channels);
+                    outputOptions.DeviceName = capabilities[deviceNumber.Value].ProductName;
+                    outputOptions.SampleRate = sampleRate;
 
-                UpdateBackground();
-                UpdateForeground();
-                UpdateOutput(deviceNumber);
+                    Format = WaveFormat.CreateIeeeFloatWaveFormat(
+                        sampleRate: sampleRate,
+                        channels: capabilities[deviceNumber.Value].Channels);
 
-                cancellationTokenSource = new CancellationTokenSource();
+                    UpdateBackground();
+                    UpdateForeground();
+                    UpdateOutput(deviceNumber.Value);
 
-                Task.Run(
-                    action: () => providerOutput.Play(),
-                    cancellationToken: cancellationTokenSource.Token);
+                    cancellationTokenSource = new CancellationTokenSource();
 
-                volumeService.Set(
-                    deviceName: outputOptions.DeviceName);
+                    Task.Run(
+                        action: () => providerOutput.Play(),
+                        cancellationToken: cancellationTokenSource.Token);
+
+                    volumeService.Set(
+                        deviceName: outputOptions.DeviceName);
+                }
+
+                eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
             }
         }
 

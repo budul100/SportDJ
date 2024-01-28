@@ -73,14 +73,14 @@
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="40" />
+                <RowDefinition Height="{Binding HasPFLOrKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 <RowDefinition Height="5*" />
                 <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 

@@ -238,8 +238,7 @@
 			<VolumePercentageBackground>19</VolumePercentageBackground>
 		</Output>
 		<Output Type="PFL">
-			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
-			<SampleRate>44100</SampleRate>
+			<SampleRate>0</SampleRate>
 			<Volume>1</Volume>
 			<VolumePercentageApps>20</VolumePercentageApps>
 			<VolumePercentageBackground>20</VolumePercentageBackground>

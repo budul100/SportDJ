@@ -6,6 +6,7 @@ using SharpHook;
 using SharpHook.Native;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
@@ -136,6 +137,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: t => stackService?.Track == t);
 
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+                action: _ => UpdateOutput(),
+                keepSubscriberReferenceAlive: true);
+
             hook = containerProvider.Resolve<TaskPoolGlobalHook>();
 
             if (hook != default
@@ -144,6 +149,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 Key = Enum.Parse<KeyCode>(player.Key);
                 hook.KeyPressed += OnKeyPressed;
             }
+
+            UpdateOutput();
 
             UpdateStack(
                 path: player.Path);
@@ -180,6 +187,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public DelegateCommand ExecuteCommand { get; }
 
         public bool HasKey => Key.HasValue;
+
+        public bool HasPFL { get; private set; }
+
+        public bool HasPFLOrKey => HasPFL || HasKey;
 
         public bool HasStack => stackService?.Entries?.Count > 1;
 
@@ -418,6 +429,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(IsPlaying));
             RaisePropertyChanged(nameof(IsEnding));
+
+            RaisePropertyChanged(nameof(HasKey));
+            RaisePropertyChanged(nameof(HasPFL));
+            RaisePropertyChanged(nameof(HasPFLOrKey));
             RaisePropertyChanged(nameof(HasStack));
 
             ExecuteCommand.RaiseCanExecuteChanged();
@@ -425,6 +440,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             TrackBackwardCommand.RaiseCanExecuteChanged();
             TrackForwardCommand.RaiseCanExecuteChanged();
+        }
+
+        private void UpdateOutput()
+        {
+            var outputPFL = containerProvider?.Resolve<IOutputService>(
+                nameof(OutputType.PFL));
+
+            HasPFL = outputPFL?.IsActive == true;
+
+            UpdateCommands();
         }
 
         private void UpdateRemaining()
