@@ -1,6 +1,6 @@
-﻿using Avalonia.Controls;
-using System;
+﻿using System;
 using System.Globalization;
+using Avalonia.Controls;
 
 namespace SportDJ.Commons.Converters
 {
@@ -15,9 +15,13 @@ namespace SportDJ.Commons.Converters
                 ? 1d
                 : 0d;
 
+            var type = ((bool)value)
+                ? GridUnitType.Auto
+                : GridUnitType.Pixel;
+
             var result = new GridLength(
                 value: size,
-                type: GridUnitType.Auto);
+                type: type);
 
             return result;
         }
