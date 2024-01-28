@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
@@ -8,6 +6,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
+using System;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -42,12 +41,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: e => e == entry);
-
-            eventAggregator.GetEvent<EntriesUpdatedEvent>().Subscribe(
-                action: _ => UpdateEntry(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: e => e.Contains(entry));
 
             eventAggregator.GetEvent<TrackUpdatedEvent>().Subscribe(
                 action: _ => UpdateTrack(),

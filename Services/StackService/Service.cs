@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Prism.Events;
+﻿using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
-using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Services.StackService
 {
@@ -46,7 +44,8 @@ namespace SportDJ.Services.StackService
 
         public bool HasPlayeds => Entries.HasPlayeds();
 
-        public bool HasUnplayeds => Entries.HasUnplayeds(Track);
+        public bool HasUnplayeds => Entries.HasUnplayeds(
+            current: Entry);
 
         public int Index { get; private set; }
         public Track Track => Entry?.Track;
@@ -92,9 +91,11 @@ namespace SportDJ.Services.StackService
                     }
 
                     if (!Entries[index].Track.IsSilent
-                        && !Entries[index].Played)
+                        && !Entries[index].Played
+                        && Entries[index] != Entry)
                     {
                         Select(index);
+
                         break;
                     }
                 }
@@ -106,18 +107,19 @@ namespace SportDJ.Services.StackService
         {
             if (Track != default)
             {
-                Entry.Played = true;
-
-                if (Entries.AllPlayed())
+                if (Entries.AllPlayed(Entry))
                 {
                     Reset();
                 }
 
-                position.Index = Index;
-
-                sessionService.Save();
+                Entry.Played = true;
 
                 eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+
+                position.Index = Index;
+                position.Path = Track.Path;
+
+                sessionService.Save();
             }
         }
 
@@ -150,27 +152,41 @@ namespace SportDJ.Services.StackService
 
         public void Reset()
         {
-            Entries.Reset();
+            if (Entries?.Any() == true)
+            {
+                foreach (var entry in Entries)
+                {
+                    entry.Played = false;
 
-            eventAggregator.GetEvent<EntriesUpdatedEvent>()?.Publish(Entries);
+                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(entry);
+                }
+            }
+
+            eventAggregator.GetEvent<StackResetEvent>()?.Publish(this);
         }
 
         public void Select(int index)
         {
-            if (index < Entries.Count)
+            var entry = index < Entries.Count
+                ? Entries[index]
+                : default;
+
+            if (entry != default
+                && entry != Entry)
             {
                 if (Entry != default)
                 {
                     Entry.Selected = false;
+
+                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
                 }
 
-                Entry = Entries[index];
+                Entry = entry;
                 Entry.Selected = true;
 
-                eventAggregator.GetEvent<EntriesUpdatedEvent>()?.Publish(Entries);
+                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
 
                 Index = index;
-                position.Path = Track.Path;
 
                 eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
             }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SportDJ.Commons.Models.Contents;
+﻿using SportDJ.Commons.Models.Contents;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {

@@ -125,6 +125,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: s => stackService == s);
 
+            eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
+                action: _ => UpdateCommands(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: s => stackService == s);
+
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => UpdateSignal(),
                 threadOption: ThreadOption.PublisherThread,
@@ -375,8 +381,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalServices.Remove(signalService);
             }
 
-            if (stackService != default
-                && stackService.Track == signalService.Track)
+            if (this.signalService == signalService
+                && stackService?.Track == this.signalService.Track)
             {
                 SelectTrack();
             }
@@ -384,12 +390,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void OnSignalStarted(ISignalService signalService)
         {
-            if (this.signalService.Track == this.stackService?.Track)
+            if (signalService == this.signalService)
             {
-                this.stackService.Play();
-            }
+                if (signalService.Track == stackService?.Track)
+                {
+                    stackService.Play();
+                }
 
-            signalServices.Add(signalService);
+                signalServices.Add(signalService);
+            }
 
             UpdateCommands();
         }
@@ -420,8 +429,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 stackService.Next();
             }
-
-            UpdateSignal();
         }
 
         private void UpdateCommands()
@@ -515,8 +522,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 Menus = new ObservableCollection<MenuViewModel>(GetMenus().ToArray());
             }
-
-            UpdateSignal();
         }
 
         #endregion Private Methods

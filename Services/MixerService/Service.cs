@@ -255,11 +255,12 @@ namespace SportDJ.Services.MixerService
             if (fadingProviders.ContainsKey(signalService))
             {
                 var playingServices = signalServices
-                    .Where(s => s != signalService && s.IsPlaying).ToArray();
+                    .Where(s => s != signalService
+                        && s?.IsPlaying == true).ToArray();
 
                 var pausingServices = signalServices
                     .Where(s => s != signalService
-                        && s.State == StateType.Pause).ToArray();
+                        && s?.State == StateType.Pause).ToArray();
 
                 var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && playingServices.Any()
                     ? settingsService.Contents.Options.FadeOnMixInMilliseconds
