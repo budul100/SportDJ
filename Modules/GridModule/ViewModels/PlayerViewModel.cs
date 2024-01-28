@@ -30,6 +30,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly IMixerService mixerServiceBackground;
         private readonly IMixerService mixerServiceForeground;
         private readonly IMixerService mixerServicePFL;
+        private readonly GridViewModel parent;
         private readonly bool savePositions;
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
@@ -51,10 +52,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public PlayerViewModel(IContainerProvider containerProvider, Player player)
+        public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(player)
         {
             this.containerProvider = containerProvider;
+            this.parent = parent;
 
             Name = player.Name;
             OnForeground = player.OnForeground;
@@ -126,7 +128,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: s => stackService == s);
 
             eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
-                action: _ => UpdateCommands(),
+                action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => stackService == s);
@@ -364,7 +366,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            if (IsVisible
+            if (parent.IsVisible
                 && Key.HasValue
                 && e?.Data.KeyCode == Key)
             {
@@ -374,6 +376,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void OnSignalEnded(ISignalService signalService)
         {
+            if (this.signalService == signalService
+                && stackService?.Track == this.signalService.Track)
+            {
+                SelectTrack();
+            }
+
             if (signalService.State == StateType.None)
             {
                 signalService.Dispose();
@@ -381,11 +389,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalServices.Remove(signalService);
             }
 
-            if (this.signalService == signalService
-                && stackService?.Track == this.signalService.Track)
-            {
-                SelectTrack();
-            }
+            UpdateContent();
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -400,7 +404,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalServices.Add(signalService);
             }
 
-            UpdateCommands();
+            UpdateContent();
         }
 
         private void OnSignalStopped(ISignalService signalService)
@@ -411,7 +415,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 signalService.Stop();
             }
 
-            UpdateCommands();
+            UpdateContent();
         }
 
         private void ResetStack()
@@ -431,7 +435,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private void UpdateCommands()
+        private void UpdateContent()
         {
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(IsPlaying));
@@ -456,7 +460,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             HasPFL = outputPFL?.IsActive == true;
 
-            UpdateCommands();
+            UpdateContent();
         }
 
         private void UpdateRemaining()
@@ -513,7 +517,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 UpdateRemaining();
             }
 
-            UpdateCommands();
+            UpdateContent();
         }
 
         private void UpdateTracks()

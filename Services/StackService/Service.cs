@@ -48,6 +48,7 @@ namespace SportDJ.Services.StackService
             current: Entry);
 
         public int Index { get; private set; }
+
         public Track Track => Entry?.Track;
 
         #endregion Public Properties
@@ -90,16 +91,17 @@ namespace SportDJ.Services.StackService
                         index = 0;
                     }
 
-                    if (!Entries[index].Track.IsSilent
-                        && !Entries[index].Played
+                    if (Entries[index].CanBePlayed()
                         && Entries[index] != Entry)
                     {
                         Select(index);
 
-                        break;
+                        return;
                     }
                 }
                 while (position.Index != index);
+
+                Select(Index);
             }
         }
 
@@ -167,21 +169,17 @@ namespace SportDJ.Services.StackService
 
         public void Select(int index)
         {
-            var entry = index < Entries.Count
-                ? Entries[index]
-                : default;
-
-            if (entry != default
-                && entry != Entry)
+            if (index < Entries.Count)
             {
-                if (Entry != default)
+                if (Entry != default
+                    && !Entries[index].Track.IsSilent)
                 {
                     Entry.Selected = false;
 
                     eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
                 }
 
-                Entry = entry;
+                Entry = Entries[index];
                 Entry.Selected = true;
 
                 eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);

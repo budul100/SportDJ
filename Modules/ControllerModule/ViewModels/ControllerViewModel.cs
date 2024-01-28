@@ -1,5 +1,4 @@
-﻿using System;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -12,6 +11,7 @@ using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -69,19 +69,19 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
-                action: _ => UpdateCommands(),
+                action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: v => volumeService == v);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
-                action: _ => UpdateCommands(),
+                action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
-                action: _ => UpdateCommands(),
+                action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
@@ -127,7 +127,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
                 SetProperty(ref volumeMonitoringActive, value);
 
-                UpdateCommands();
+                UpdateContent();
             }
         }
 
@@ -197,7 +197,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             RaisePropertyChanged(nameof(KeyTalkVolume));
         }
 
-        private void UpdateCommands()
+        private void UpdateContent()
         {
             RaisePropertyChanged(nameof(VolumeMonitoringActive));
             RaisePropertyChanged(nameof(IsActive));

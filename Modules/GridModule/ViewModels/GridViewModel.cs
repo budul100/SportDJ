@@ -13,7 +13,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
+        private readonly GroupViewModel parent;
+
         private int columns;
+        private bool isSelected;
         private KeyCode? key;
         private string name;
         private int rows;
@@ -22,8 +25,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public GridViewModel(IContainerProvider containerProvider, Grid grid, bool isOnCanvas)
+        public GridViewModel(IContainerProvider containerProvider, Grid grid, GroupViewModel parent = default)
         {
+            this.parent = parent;
             Name = grid.Name;
 
             if (!string.IsNullOrWhiteSpace(grid.Key))
@@ -33,8 +37,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             InitializeGrid(
                 containerProvider: containerProvider,
-                grid: grid,
-                isOnCanvas: isOnCanvas);
+                grid: grid);
         }
 
         #endregion Public Constructors
@@ -50,6 +53,21 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public bool HasKey => Key.HasValue;
+
+        public bool IsSelected
+        {
+            get
+            {
+                return isSelected || parent == default;
+            }
+            set
+            {
+                isSelected = value;
+            }
+        }
+
+        public bool IsVisible => IsSelected
+            && parent?.IsVisible != false;
 
         public KeyCode? Key
         {
@@ -78,7 +96,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Methods
 
-        private void InitializeGrid(IContainerProvider containerProvider, Grid grid, bool isOnCanvas)
+        private void InitializeGrid(IContainerProvider containerProvider, Grid grid)
         {
             if (grid?.Cells?.Any() == true)
             {
@@ -93,7 +111,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                             var playerCell = new PlayerViewModel(
                                 containerProvider: containerProvider,
-                                player: player);
+                                player: player,
+                                parent: this);
 
                             Cells.Add(playerCell);
 
@@ -109,22 +128,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                         case Group group:
 
-                            var isBaseGroup = isOnCanvas;
-
-                            isOnCanvas = isOnCanvas
+                            var isOnCanvas = parent == default
                                 && grid.Cells.Count == 1;
 
                             var groupCell = new GroupViewModel(
                                 containerProvider: containerProvider,
                                 group: group,
+                                parent: this,
                                 isOnCanvas: isOnCanvas);
 
                             Cells.Add(groupCell);
-
-                            if (isBaseGroup)
-                            {
-                                groupCell.IsVisible = true;
-                            }
 
                             rowsCount = groupCell.Row + groupCell.Rows > rowsCount
                                 ? groupCell.Row + groupCell.Rows

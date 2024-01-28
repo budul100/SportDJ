@@ -12,7 +12,7 @@
         #region Public Constructors
 
         public GroupViewModel()
-            : base(default, default, false)
+            : base(default, default, default, false)
         {
             for (int index = 0; index < ElementsCount; index += 2)
             {

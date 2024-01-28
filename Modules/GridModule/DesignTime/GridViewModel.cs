@@ -12,7 +12,7 @@
         #region Public Constructors
 
         public GridViewModel()
-            : base(default, default, false)
+            : base(default, default, default)
         {
             Name = "Group";
 

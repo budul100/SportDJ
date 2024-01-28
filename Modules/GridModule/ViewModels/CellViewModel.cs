@@ -42,8 +42,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref columnSpan, value); }
         }
 
-        public bool IsVisible { get; set; }
-
         public int Row
         {
             get { return row; }

@@ -16,7 +16,7 @@ namespace SportDJ.Modules.GridModule.DesignTime
 
         public PlayerViewModel(string name, int row, int column, string title = default, string artist = default,
             TimeSpan? remaining = default)
-            : base(containerProvider: default, player: default)
+            : base(containerProvider: default, player: default, parent: default)
         {
             Name = name;
             Row = row;

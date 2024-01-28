@@ -56,8 +56,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 Grid = new GridViewModel(
                     containerProvider: containerProvider,
-                    grid: settingsService.Contents.Grid,
-                    isOnCanvas: true);
+                    grid: settingsService.Contents.Grid);
             }
         }
 

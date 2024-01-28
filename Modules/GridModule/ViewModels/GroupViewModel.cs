@@ -13,6 +13,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly TaskPoolGlobalHook hook;
+        private readonly GridViewModel parent;
 
         private bool isDisposed;
         private GridViewModel selected;
@@ -21,7 +22,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public GroupViewModel(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+        public GroupViewModel(IContainerProvider containerProvider, Group group, GridViewModel parent, bool isOnCanvas)
             : base(group)
         {
             Rows = 1;
@@ -44,6 +45,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             RaisePropertyChanged(nameof(Rows));
             RaisePropertyChanged(nameof(Columns));
+            this.parent = parent;
         }
 
         #endregion Public Constructors
@@ -51,6 +53,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Properties
 
         public int Columns { get; private set; }
+
+        public bool IsVisible => parent.IsVisible;
 
         public int Rows { get; private set; }
 
@@ -63,7 +67,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 {
                     SetProperty(ref selected, value);
 
-                    UpdateVisibility();
+                    foreach (var tab in Tabs)
+                    {
+                        tab.IsSelected = tab == selected;
+                    }
                 }
             }
         }
@@ -114,7 +121,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     var gridTab = new GridViewModel(
                         containerProvider: containerProvider,
                         grid: grid,
-                        isOnCanvas: false);
+                        parent: this);
 
                     Tabs.Add(gridTab);
                 }
@@ -141,20 +148,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     .FirstOrDefault(t => t.Key == e?.Data.KeyCode);
 
                 Selected = selection;
-            }
-        }
-
-        private void UpdateVisibility()
-        {
-            foreach (var tab in Tabs)
-            {
-                if (tab.Cells?.Any() == true)
-                {
-                    foreach (var cell in tab.Cells)
-                    {
-                        cell.IsVisible = tab == Selected;
-                    }
-                }
             }
         }
 

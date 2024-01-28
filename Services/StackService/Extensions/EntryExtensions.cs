@@ -16,6 +16,12 @@ namespace SportDJ.Services.StackService.Extensions
             return result;
         }
 
+        public static bool CanBePlayed(this Entry entry)
+        {
+            return !entry.Played
+                && !entry.Track.IsSilent;
+        }
+
         public static bool HasPlayeds(this IEnumerable<Entry> entries)
         {
             var result = entries?.Any(e => !e.Played) == true;
@@ -32,15 +38,5 @@ namespace SportDJ.Services.StackService.Extensions
         }
 
         #endregion Public Methods
-
-        #region Private Methods
-
-        private static bool CanBePlayed(this Entry entry)
-        {
-            return !entry.Played
-                && !entry.Track.IsSilent;
-        }
-
-        #endregion Private Methods
     }
 }
