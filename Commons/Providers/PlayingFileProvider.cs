@@ -231,6 +231,8 @@ namespace SportDJ.Commons.Providers
         {
             if (PlayType == PlayType.Wait)
             {
+                position = Track.Start;
+
                 end = (Track.End ?? 0) > this.sourceProvider.Length
                     ? Track.End.Value
                     : this.sourceProvider.Length;

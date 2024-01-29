@@ -46,8 +46,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private bool savePositions;
         private ISignalService signalService;
         private IStackService stackService;
-        private long widthPosition;
-        private long widthRemaining;
 
         #endregion Private Fields
 
@@ -257,17 +255,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand TrackForwardCommand { get; }
 
-        public long WidthPosition
-        {
-            get { return widthPosition; }
-            set { SetProperty(ref widthPosition, value); }
-        }
+        public long WidthPosition { get; protected set; }
 
-        public long WidthRemaining
-        {
-            get { return widthRemaining; }
-            set { SetProperty(ref widthRemaining, value); }
-        }
+        public long WidthRemaining { get; protected set; }
 
         #endregion Public Properties
 
@@ -434,6 +424,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(HasPFLOrKey));
             RaisePropertyChanged(nameof(HasStack));
 
+            RaisePropertyChanged(nameof(Menus));
+
             ExecuteCommand.RaiseCanExecuteChanged();
             ResetCommand.RaiseCanExecuteChanged();
 
@@ -465,8 +457,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 WidthPosition = signalService.Position.Value.Ticks;
                 WidthRemaining = signalService.Remaining.Value.Ticks;
             }
+            else if (signalService?.Track == stackService?.Track)
+            {
+                WidthPosition = 0;
+                WidthRemaining = stackService.Track.Length.Ticks;
+            }
 
-            RaisePropertyChanged(nameof(Menus));
+            RaisePropertyChanged(nameof(WidthPosition));
+            RaisePropertyChanged(nameof(WidthRemaining));
         }
 
         private void UpdateSignal()
@@ -489,15 +487,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (stackService.Track != default)
             {
-                Content = stackService.Track.Info;
-                Bitmap = stackService.Track.Bitmap;
-
                 var count = trackService.GetCount(stackService.Track);
                 Counter = $"[{count}]";
 
-                trackService?.Render(stackService.Track);
+                Content = stackService.Track.Info;
+                Bitmap = stackService.Track.Bitmap;
 
                 UpdateRemaining();
+
+                trackService?.Render(stackService.Track);
             }
 
             UpdateContent();

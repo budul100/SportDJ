@@ -23,18 +23,30 @@ namespace SportDJ.Commons.Converters
                     && values[1] is long widthPosition
                     && values[2] is long widthRemaining)
                 {
-                    var x = (int)((bitmap.Size.Width * widthPosition) / (double)(widthPosition + widthRemaining));
+                    widthPosition = widthPosition > 0
+                        ? widthPosition
+                        : 0;
 
-                    var width = (int)bitmap.Size.Width - x;
-                    var height = (int)bitmap.Size.Height;
+                    widthRemaining = widthRemaining > 0
+                        ? widthRemaining
+                        : 0;
 
-                    result = new PixelRect(
-                        x: x,
-                        y: 0,
-                        width: width,
-                        height: height);
+                    if (widthPosition + widthRemaining > 0)
+                    {
+                        var x = (int)(bitmap.Size.Width * widthPosition / (double)(widthPosition + widthRemaining));
+
+                        var width = (int)bitmap.Size.Width - x;
+                        var height = (int)bitmap.Size.Height;
+
+                        result = new PixelRect(
+                            x: x,
+                            y: 0,
+                            width: width,
+                            height: height);
+                    }
                 }
-                else
+
+                if (result == default)
                 {
                     result = new PixelRect(
                         size: bitmap.PixelSize);

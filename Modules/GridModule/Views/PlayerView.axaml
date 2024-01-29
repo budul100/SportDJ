@@ -68,48 +68,51 @@
                 <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                    <ColumnDefinition Width="{Binding HasPFLOrKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 
                 <Button
                     Grid.Column="0"
-                    Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False">
-                    <mat:MaterialIcon
-                        Width="{StaticResource IconWidth}"
-                        Height="{StaticResource IconHeight}"
-                        Kind="Headphones" />
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="Headphones" />
+                    </Viewbox>
                 </Button>
 
                 <Panel
-                    Grid.Column="1"
-                    Margin="{StaticResource InnerMargin}"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Background="{StaticResource ColorBackground}">
 
-                    <Border
-                        Margin="{StaticResource KeyMargin}"
-                        Padding="{StaticResource KeyPadding}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Background="{StaticResource KeyBackgroundColor}"
-                        BorderBrush="{StaticResource KeyBorderColor}"
-                        BorderThickness="{StaticResource KeyBorderThickness}"
-                        CornerRadius="{StaticResource KeyCornerRadius}"
-                        IsVisible="{Binding HasKey}">
-                        <TextBlock
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            FontSize="{StaticResource FontSizeContent}"
-                            FontWeight="Bold"
-                            Text="{Binding Key}" />
-                    </Border>
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <Border
+                            Margin="{StaticResource KeyMargin}"
+                            Padding="{StaticResource KeyPadding}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="{StaticResource KeyBackgroundColor}"
+                            BorderBrush="{StaticResource KeyBorderColor}"
+                            BorderThickness="{StaticResource KeyBorderThickness}"
+                            CornerRadius="{StaticResource KeyCornerRadius}"
+                            IsVisible="{Binding HasKey}">
+                            <TextBlock
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                FontSize="{StaticResource FontSizeContent}"
+                                FontWeight="Bold"
+                                Text="{Binding Key}" />
+                        </Border>
+                    </Viewbox>
                 </Panel>
             </Grid>
 
@@ -118,8 +121,7 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Classes.IsActive="{Binding IsActive}"
-                CornerRadius="{StaticResource PlayerCornerRadius}">
+                Classes.IsActive="{Binding IsActive}">
 
                 <Border.Styles>
                     <Style Selector="Border.IsActive">
@@ -163,43 +165,81 @@
                                 <ColumnDefinition Width="1*" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock
+                            <Viewbox
                                 Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                FontSize="{StaticResource FontSizeState}"
-                                Text="{Binding Counter}" />
+                                Stretch="Uniform"
+                                StretchDirection="DownOnly">
+                                <TextBlock
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    FontSize="{StaticResource FontSizeState}"
+                                    Text="{Binding Counter}" />
+                            </Viewbox>
 
-                            <TextBlock
+                            <Viewbox
                                 Grid.Column="1"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                FontSize="{StaticResource FontSizeContent}"
-                                FontWeight="Bold"
-                                Text="{Binding Name}" />
+                                Stretch="Uniform"
+                                StretchDirection="DownOnly">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    FontSize="{StaticResource FontSizeContent}"
+                                    FontWeight="Bold"
+                                    Text="{Binding Name}" />
+                            </Viewbox>
 
-                            <TextBlock
+                            <Viewbox
                                 Grid.Column="2"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
-                                FontSize="{StaticResource FontSizeState}"
-                                Text="{Binding Remaining}" />
+                                Stretch="Uniform"
+                                StretchDirection="DownOnly">
+                                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    FontSize="{StaticResource FontSizeState}"
+                                    Text="{Binding Remaining}" />
+                            </Viewbox>
                         </Grid>
 
-                        <TextBlock
+                        <Viewbox
                             Grid.Row="1"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeContent}"
-                            Text="{Binding Content}" />
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSizeContent}"
+                                Text="{Binding Content}" />
+                        </Viewbox>
 
-                        <Grid
-                            Grid.Row="2"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch">
+                        <Grid Grid.Row="2">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{Binding WidthPosition, Converter={StaticResource LongToGridStarConverter}}" />
+                                <ColumnDefinition Width="{Binding WidthRemaining, Converter={StaticResource LongToGridStarConverter}}" />
+                            </Grid.ColumnDefinitions>
 
                             <Image
+                                Grid.Column="0"
                                 HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                Opacity="{StaticResource DisplayOpacityRemaining}"
+                                Stretch="Fill">
+                                <Image.Source>
+                                    <CroppedBitmap Source="{Binding Bitmap}">
+                                        <CroppedBitmap.SourceRect>
+                                            <MultiBinding Converter="{StaticResource ImageToPositionRectConverter}">
+                                                <Binding Path="Bitmap" />
+                                                <Binding Path="WidthPosition" />
+                                                <Binding Path="WidthRemaining" />
+                                            </MultiBinding>
+                                        </CroppedBitmap.SourceRect>
+                                    </CroppedBitmap>
+                                </Image.Source>
+                            </Image>
+
+                            <Image
+                                Grid.Column="1"
+                                HorizontalAlignment="Right"
                                 VerticalAlignment="Stretch"
                                 Stretch="Fill">
                                 <Image.Source>
@@ -219,50 +259,56 @@
                 </Button>
             </Border>
 
-            <Grid Grid.Row="2" IsVisible="{Binding HasStack}">
+            <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Button
                     Grid.Column="0"
-                    Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackBackwardCommand}"
                     Focusable="False">
-                    <mat:MaterialIcon
-                        Width="{StaticResource IconWidth}"
-                        Height="{StaticResource IconHeight}"
-                        Kind="SkipBackward" />
-                </Button>
-
-                <Button
-                    Grid.Column="1"
-                    Margin="{StaticResource InnerMargin}"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Command="{Binding ResetCommand}"
-                    Focusable="False">
-                    <mat:MaterialIcon
-                        Width="{StaticResource IconWidth}"
-                        Height="{StaticResource IconHeight}"
-                        Kind="Restore" />
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="SkipBackward" />
+                    </Viewbox>
                 </Button>
 
                 <Button
                     Grid.Column="2"
-                    Margin="{StaticResource InnerMargin}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Command="{Binding ResetCommand}"
+                    Focusable="False">
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="Restore" />
+                    </Viewbox>
+                </Button>
+
+                <Button
+                    Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackForwardCommand}"
                     Focusable="False">
-                    <mat:MaterialIcon
-                        Width="{StaticResource IconWidth}"
-                        Height="{StaticResource IconHeight}"
-                        Kind="SkipForward" />
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="SkipForward" />
+                    </Viewbox>
                 </Button>
             </Grid>
         </Grid>

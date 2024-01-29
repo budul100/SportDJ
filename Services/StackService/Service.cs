@@ -80,7 +80,7 @@ namespace SportDJ.Services.StackService
         {
             if (Entries?.Any() == true)
             {
-                var index = position.Index;
+                var index = Index;
 
                 do
                 {
@@ -99,7 +99,7 @@ namespace SportDJ.Services.StackService
                         return;
                     }
                 }
-                while (position.Index != index);
+                while (Index != index);
 
                 Select(Index);
             }
@@ -129,7 +129,7 @@ namespace SportDJ.Services.StackService
         {
             if (Entries?.Any() == true)
             {
-                var index = position.Index;
+                var index = Index;
 
                 do
                 {
@@ -148,7 +148,9 @@ namespace SportDJ.Services.StackService
                         break;
                     }
                 }
-                while (position.Index != index);
+                while (Index != index);
+
+                Select(Index);
             }
         }
 
