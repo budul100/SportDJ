@@ -32,6 +32,9 @@
 
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
+        <co:LongToGridStarConverter x:Key="LongToGridStarConverter" />
+        <co:ImageToPositionRectConverter x:Key="ImageToPositionRectConverter" />
+        <co:ImageToRemainingRectConverter x:Key="ImageToRemainingRectConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -134,7 +137,18 @@
                     Command="{Binding ExecuteCommand}"
                     Focusable="False">
 
-                    <Grid>
+                    <Button.ContextMenu>
+                        <ContextMenu Name="ContextMenu" ItemsSource="{Binding Menus}">
+
+                            <ContextMenu.ItemTemplate>
+                                <DataTemplate>
+                                    <v:MenuView />
+                                </DataTemplate>
+                            </ContextMenu.ItemTemplate>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
@@ -179,25 +193,29 @@
                             FontSize="{StaticResource FontSizeContent}"
                             Text="{Binding Content}" />
 
-                        <Image
+                        <Grid
                             Grid.Row="2"
                             HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Source="{Binding Bitmap}"
-                            Stretch="Fill" />
+                            VerticalAlignment="Stretch">
+
+                            <Image
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                Stretch="Fill">
+                                <Image.Source>
+                                    <CroppedBitmap Source="{Binding Bitmap}">
+                                        <CroppedBitmap.SourceRect>
+                                            <MultiBinding Converter="{StaticResource ImageToRemainingRectConverter}">
+                                                <Binding Path="Bitmap" />
+                                                <Binding Path="WidthPosition" />
+                                                <Binding Path="WidthRemaining" />
+                                            </MultiBinding>
+                                        </CroppedBitmap.SourceRect>
+                                    </CroppedBitmap>
+                                </Image.Source>
+                            </Image>
+                        </Grid>
                     </Grid>
-
-                    <Button.ContextMenu>
-                        <ContextMenu Name="ContextMenu" ItemsSource="{Binding Menus}">
-
-                            <ContextMenu.ItemTemplate>
-                                <DataTemplate>
-                                    <v:MenuView />
-                                </DataTemplate>
-                            </ContextMenu.ItemTemplate>
-                        </ContextMenu>
-                    </Button.ContextMenu>
-
                 </Button>
             </Border>
 

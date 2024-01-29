@@ -463,7 +463,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (signalService?.Duration?.Ticks > 0)
             {
                 WidthPosition = signalService.Position.Value.Ticks;
-                WidthRemaining = signalService.Position.Value.Ticks;
+                WidthRemaining = signalService.Remaining.Value.Ticks;
             }
 
             RaisePropertyChanged(nameof(Menus));

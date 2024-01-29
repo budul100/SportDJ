@@ -224,9 +224,9 @@
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
 		<FadeOnPauseMilliseconds>500</FadeOnPauseMilliseconds>
-		<KeyCodeOutputPause>VcEnter</KeyCodeOutputPause>
+		<KeyCodeOutputPause>VcNumPadEnter</KeyCodeOutputPause>
 		<KeyCodeScreenChange>VcF11</KeyCodeScreenChange>
-		<KeyCodeVolumeTalk>VcSpace</KeyCodeVolumeTalk>
+		<KeyCodeVolumeTalk>VcNumPad0</KeyCodeVolumeTalk>
 		<SelectNextOnPauseSeconds>10</SelectNextOnPauseSeconds>
 		<SelectNextOnPlaySeconds>10</SelectNextOnPlaySeconds>
 		<TrimRearPercentage>15</TrimRearPercentage>

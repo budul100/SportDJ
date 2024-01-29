@@ -89,6 +89,10 @@ namespace SportDJ.Commons.Providers
                     {
                         if (!sentPause)
                         {
+                            SignalUpdatedEvent?.Invoke(
+                                sender: this,
+                                e: default);
+
                             SignalPausedEvent?.Invoke(
                                 sender: this,
                                 e: default);
@@ -163,15 +167,15 @@ namespace SportDJ.Commons.Providers
                                 PlayType = PlayType.End;
                             }
                         }
+
+                        position = PlayType != PlayType.End
+                            ? sourceProvider.Position
+                            : end;
+
+                        SignalUpdatedEvent?.Invoke(
+                            sender: this,
+                            e: default);
                     }
-
-                    position = PlayType != PlayType.End
-                        ? sourceProvider.Position
-                        : end;
-
-                    SignalUpdatedEvent?.Invoke(
-                        sender: this,
-                        e: default);
 
                     if (PlayType == PlayType.End)
                     {

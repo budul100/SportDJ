@@ -251,11 +251,11 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 && mixerService.IsPlaying)
             {
                 Content = mixerService.Track.Info;
-                Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
                 IsPlaying = mixerService.IsPlaying;
                 IsEnding = mixerService.IsEnding;
 
                 Bitmap = mixerService.Track.Bitmap;
+                Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
 
                 if (mixerService?.Duration?.Ticks > 0)
                 {
@@ -266,11 +266,11 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             else
             {
                 Content = default;
-                Remaining = default;
                 IsPlaying = false;
                 IsEnding = false;
 
                 Bitmap = default;
+                Remaining = default;
 
                 WidthPosition = default;
                 WidthRemaining = default;

@@ -1,6 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
-using System;
 
 namespace SportDJ.Modules.GridModule.DesignTime
 {
