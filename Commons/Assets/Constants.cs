@@ -17,6 +17,8 @@ namespace SportDJ.Commons.Assets
         public const int IndexAudioDeviceMin = 0;
         public const int IndexAudioSessionMin = 0;
 
+        public const int MenuGroupAdd = 10;
+        public const int MenuItemsSize = 20;
         public const int MixerSourcesMax = 1024;
 
         public const double PercentageIncrement = 1;

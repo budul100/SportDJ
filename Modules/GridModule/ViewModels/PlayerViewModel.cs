@@ -170,7 +170,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Events
 
-        public event EventHandler ClosingContextMenuEvent;
+        public event EventHandler CloseMenuEvent;
 
         #endregion Public Events
 
@@ -278,7 +278,31 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private IEnumerable<MenuViewModel> GetMenus()
+        private IEnumerable<MenuViewModel> GetMenuItems()
+        {
+            var menuItems = GetMenuTracks()
+                .OrderBy(m => m.Header).ToArray();
+
+            if (menuItems?.Length > 1)
+            {
+                var groupsSize = (menuItems.Length / ((menuItems.Length / Constants.MenuItemsSize) + 1)) + 1;
+
+                var groups = menuItems
+                    .Chunk(groupsSize).ToArray();
+
+                foreach (var group in groups)
+                {
+                    var result = new MenuViewModel(
+                        menuItems: group);
+
+                    result.CloseMenuEvent += OnMenuClosing;
+
+                    yield return result;
+                }
+            }
+        }
+
+        private IEnumerable<MenuViewModel> GetMenuTracks()
         {
             if (stackService?.Entries?.Any() == true)
             {
@@ -291,7 +315,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                         entry: stackService.Entries[index],
                         callback: () => stackService.Select(current));
 
-                    result.ClosingEvent += OnClosingContextMenu;
+                    result.CloseMenuEvent += OnMenuClosing;
 
                     yield return result;
                 }
@@ -345,9 +369,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return result;
         }
 
-        private void OnClosingContextMenu(object sender, EventArgs e)
+        private void OnMenuClosing(object sender, EventArgs e)
         {
-            ClosingContextMenuEvent?.Invoke(
+            CloseMenuEvent?.Invoke(
                 sender: this,
                 e: default);
         }
@@ -513,7 +537,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (stackService?.Entries?.Any() == true)
             {
-                menus = new ObservableCollection<MenuViewModel>(GetMenus().ToArray());
+                menus = new ObservableCollection<MenuViewModel>(GetMenuItems());
             }
         }
 

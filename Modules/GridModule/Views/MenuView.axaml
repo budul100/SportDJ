@@ -8,6 +8,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:v="using:SportDJ.Modules.GridModule.Views"
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
@@ -19,8 +20,19 @@
     </UserControl.Resources>
 
     <MenuItem
+        Name="MenuItem"
         Command="{Binding Command}"
         FontStyle="{Binding IsPlayed, Converter={StaticResource BoolToFontStyleConverter}}"
         FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}}"
-        Header="{Binding Header}" />
+        Header="{Binding Header}"
+        ItemsSource="{Binding MenuItems}"
+        StaysOpenOnClick="False">
+
+        <MenuItem.ItemTemplate>
+            <DataTemplate>
+
+                <v:MenuView />
+            </DataTemplate>
+        </MenuItem.ItemTemplate>
+    </MenuItem>
 </UserControl>

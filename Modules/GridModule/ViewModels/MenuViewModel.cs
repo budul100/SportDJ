@@ -7,6 +7,9 @@ using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -16,22 +19,28 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly Action callback;
-        private readonly Entry entry;
 
         private string header;
         private bool isPlayed;
-
         private bool isSelected;
 
         #endregion Private Fields
 
         #region Public Constructors
 
+        public MenuViewModel(IEnumerable<MenuViewModel> menuItems)
+        {
+            MenuItems = new ObservableCollection<MenuViewModel>(menuItems);
+            Command = new DelegateCommand(ExecuteCallback);
+
+            Header = GetHeader();
+        }
+
         public MenuViewModel(IContainerProvider containerProvider, Entry entry, Action callback)
         {
-            this.entry = entry;
             this.callback = callback;
 
+            Entry = entry;
             Command = new DelegateCommand(ExecuteCallback);
 
             var eventAggregator = containerProvider.Resolve<IEventAggregator>();
@@ -55,13 +64,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Events
 
-        public event EventHandler ClosingEvent;
+        public event EventHandler CloseMenuEvent;
 
         #endregion Public Events
 
         #region Public Properties
 
         public DelegateCommand Command { get; }
+
+        public Entry Entry { get; }
 
         public string Header
         {
@@ -81,6 +92,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref isSelected, value); }
         }
 
+        public ObservableCollection<MenuViewModel> MenuItems { get; }
+
         #endregion Public Properties
 
         #region Private Methods
@@ -89,22 +102,40 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             callback?.Invoke();
 
-            ClosingEvent?.Invoke(
+            CloseMenuEvent?.Invoke(
                 sender: this,
                 e: default);
         }
 
+        private string GetHeader()
+        {
+            var first = MenuItems.First().Entry.Track.Info;
+            var last = MenuItems.Last().Entry.Track.Info;
+
+            var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupAdd;
+
+            var firstHeader = first.Length > length
+                ? $"{first[..length]}..."
+                : first;
+
+            var lastHeader = last.Length > length
+                ? $"{last[..length]}..."
+                : last;
+
+            return $"Tracks {firstHeader} - {lastHeader}";
+        }
+
         private void UpdateEntry()
         {
-            IsPlayed = entry.Played;
-            IsSelected = entry.Selected;
+            IsPlayed = Entry.Played;
+            IsSelected = Entry.Selected;
         }
 
         private void UpdateTrack()
         {
-            var duration = entry.Track?.Length.ToString(Constants.FormatDuration);
+            var duration = Entry.Track?.Length.ToString(Constants.FormatDuration);
 
-            Header = $"{entry.Track.Info} ({duration}) [{entry.Track.Registers.Count}]";
+            Header = $"{Entry.Track.Info} ({duration}) [{Entry.Track.Registers.Count}]";
 
             UpdateEntry();
         }

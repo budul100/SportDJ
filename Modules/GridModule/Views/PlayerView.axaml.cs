@@ -21,14 +21,17 @@ public partial class PlayerView
 
     private void OnDataContextChanged(object sender, System.EventArgs e)
     {
-        var viewModel = (PlayerViewModel)DataContext;
+        var contextMenu = this
+            .FindControl<ContextMenu>("ContextMenu");
 
-        if (viewModel != default)
+        if (contextMenu != default)
         {
-            var contextMenu = this
-                .FindControl<ContextMenu>("ContextMenu");
+            var viewModel = DataContext as PlayerViewModel;
 
-            viewModel.ClosingContextMenuEvent += (s, e) => contextMenu?.Close();
+            if (viewModel != default)
+            {
+                viewModel.CloseMenuEvent += (s, e) => contextMenu?.Close();
+            }
         }
     }
 
