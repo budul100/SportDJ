@@ -301,7 +301,7 @@
                         <mat:MaterialIcon
                             Width="{StaticResource IconWidth}"
                             Height="{StaticResource IconHeight}"
-                            Kind="Restore" />
+                            Kind="History" />
                     </Viewbox>
                 </Button>
 

@@ -54,13 +54,19 @@
                         <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock
+                    <Viewbox
                         Grid.Column="0"
-                        Margin="{StaticResource TabMargin}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        FontSize="{DynamicResource FontSizeContent}"
-                        Text="{Binding Name}" />
+                        Stretch="Uniform"
+                        StretchDirection="DownOnly">
+
+                        <TextBlock
+                            Margin="{StaticResource TabMargin}"
+                            FontSize="{DynamicResource FontSizeContent}"
+                            Text="{Binding Name}" />
+
+                    </Viewbox>
 
                     <Viewbox
                         Grid.Column="1"
@@ -70,6 +76,7 @@
                         IsVisible="{Binding HasKey}"
                         Stretch="Uniform"
                         StretchDirection="DownOnly">
+
                         <Border
                             Padding="{StaticResource KeyPadding}"
                             Background="{StaticResource KeyBackgroundColor}"
@@ -84,6 +91,7 @@
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />
                         </Border>
+
                     </Viewbox>
                 </Grid>
             </DataTemplate>
