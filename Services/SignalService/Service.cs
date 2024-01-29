@@ -24,11 +24,12 @@ namespace SportDJ.Services.SignalService
         private readonly IEventAggregator eventAggregator;
         private readonly IStorageService<Set> settingsService;
         private readonly ITrackService trackService;
-        private bool isDisposed;
 
+        private bool isDisposed;
         private TimeSpan? nextThresholdOnPlay;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
+        private bool selectNextAlways;
 
         #endregion Private Fields
 
@@ -155,6 +156,8 @@ namespace SportDJ.Services.SignalService
                 {
                     var selectNextDuration = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPlaySeconds.Value);
                     nextThresholdOnPlay = playingProvider.Position.Add(selectNextDuration);
+
+                    selectNextAlways = selectNextDuration > Track.Length;
                 }
             }
         }
@@ -267,7 +270,7 @@ namespace SportDJ.Services.SignalService
         {
             trackService?.End(Track);
 
-            if (IsOverNextThreshold)
+            if (IsOverNextThreshold || selectNextAlways)
             {
                 Stop();
             }
