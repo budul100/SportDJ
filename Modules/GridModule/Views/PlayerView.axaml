@@ -45,30 +45,18 @@
     <Border
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
-        BorderBrush="Transparent"
         BorderThickness="{StaticResource PlayerBorderThickness}"
+        Classes.IsPlaying="{Binding IsPlaying}"
         CornerRadius="{StaticResource PlayerCornerRadius}">
 
-        <i:Interaction.Behaviors>
-            <a:DataTriggerBehavior
-                Binding="{Binding IsPlaying}"
-                ComparisonCondition="Equal"
-                Value="True">
-                <a:ChangePropertyAction
-                    PropertyName="BorderBrush"
-                    TargetObject="PlayingBorder"
-                    Value="{StaticResource ColorIsPlaying}" />
-            </a:DataTriggerBehavior>
-            <a:DataTriggerBehavior
-                Binding="{Binding IsPlaying}"
-                ComparisonCondition="Equal"
-                Value="False">
-                <a:ChangePropertyAction
-                    PropertyName="BorderBrush"
-                    TargetObject="PlayingBorder"
-                    Value="Transparent" />
-            </a:DataTriggerBehavior>
-        </i:Interaction.Behaviors>
+        <Border.Styles>
+            <Style Selector="Border.IsPlaying">
+                <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+            </Style>
+            <Style Selector="Border">
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+        </Border.Styles>
 
         <Grid>
             <Grid.RowDefinitions>
@@ -127,22 +115,17 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
+                Classes.IsActive="{Binding IsActive}"
                 CornerRadius="{StaticResource PlayerCornerRadius}">
 
-                <i:Interaction.Behaviors>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsActive}"
-                        ComparisonCondition="Equal"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsPlaying}" />
-                    </a:DataTriggerBehavior>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsActive}"
-                        ComparisonCondition="NotEqual"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
-                    </a:DataTriggerBehavior>
-                </i:Interaction.Behaviors>
+                <Border.Styles>
+                    <Style Selector="Border.IsActive">
+                        <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+                    </Style>
+                    <Style Selector="Border">
+                        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
+                    </Style>
+                </Border.Styles>
 
                 <Button
                     HorizontalAlignment="Stretch"
@@ -214,6 +197,7 @@
                             </ContextMenu.ItemTemplate>
                         </ContextMenu>
                     </Button.ContextMenu>
+
                 </Button>
             </Border>
 

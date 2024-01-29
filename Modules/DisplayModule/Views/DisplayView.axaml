@@ -23,8 +23,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 
-        <Thickness x:Key="InnerMargin">2</Thickness>
-        <CornerRadius x:Key="CornerRadius">3</CornerRadius>
+        <Thickness x:Key="InnerMargin">2,0,2,0</Thickness>
 
         <x:Double x:Key="IconWidth">30</x:Double>
         <x:Double x:Key="IconHeight">30</x:Double>
@@ -32,6 +31,7 @@
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
         <co:LongToGridStarConverter x:Key="LongToGridStarConverter" />
+        <co:ImageToRemainingRectConverter x:Key="ImageToRemainingRectConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -85,8 +85,9 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}"
-                CornerRadius="{StaticResource CornerRadius}">
+                BorderBrush="{StaticResource ColorBackground}"
+                BorderThickness="{StaticResource DisplayBorderThickness}"
+                CornerRadius="{StaticResource DisplayCornerRadius}">
 
                 <TextBlock
                     HorizontalAlignment="Center"
@@ -101,14 +102,61 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}"
-                CornerRadius="{StaticResource CornerRadius}">
+                BorderThickness="{StaticResource DisplayBorderThickness}"
+                Classes.IsEnding="{Binding IsEnding}"
+                Classes.IsPlaying="{Binding IsPlaying}"
+                CornerRadius="{StaticResource DisplayCornerRadius}">
 
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeDisplay}"
-                    Text="{Binding Content}" />
+                <Border.Styles>
+                    <Style Selector="Border.IsPlaying">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+                    </Style>
+                    <Style Selector="Border.IsEnding">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
+                    </Style>
+                    <Style Selector="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
+                    </Style>
+                </Border.Styles>
+
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+                    <Panel
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Classes.IsEnding="{Binding IsEnding}"
+                        Classes.IsPlaying="{Binding IsPlaying}">
+
+                        <Panel.Styles>
+                            <Style Selector="Panel.IsPlaying">
+                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
+                            </Style>
+                            <Style Selector="Panel.IsEnding">
+                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
+                                <Style.Animations>
+                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="50%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </Panel.Styles>
+                    </Panel>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeDisplay}"
+                        Text="{Binding Content}" />
+                </Grid>
             </Border>
 
             <Border
@@ -116,23 +164,22 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}"
-                CornerRadius="{StaticResource CornerRadius}">
+                BorderThickness="{StaticResource DisplayBorderThickness}"
+                Classes.IsEnding="{Binding IsEnding}"
+                Classes.IsPlaying="{Binding IsPlaying}"
+                CornerRadius="{StaticResource DisplayCornerRadius}">
 
-                <i:Interaction.Behaviors>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsEnding}"
-                        ComparisonCondition="Equal"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
-                    </a:DataTriggerBehavior>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsEnding}"
-                        ComparisonCondition="NotEqual"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
-                    </a:DataTriggerBehavior>
-                </i:Interaction.Behaviors>
+                <Border.Styles>
+                    <Style Selector="Border.IsPlaying">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+                    </Style>
+                    <Style Selector="Border.IsEnding">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
+                    </Style>
+                    <Style Selector="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
+                    </Style>
+                </Border.Styles>
 
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -141,38 +188,62 @@
                         <ColumnDefinition Width="{Binding WidthRemaining, Converter={StaticResource LongToGridStarConverter}}" />
                     </Grid.ColumnDefinitions>
 
-                    <Image
-                        Grid.Row="0"
-                        Grid.Column="0"
+                    <Panel
                         Grid.ColumnSpan="2"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        Classes.IsEnding="{Binding IsEnding}"
+                        Classes.IsPlaying="{Binding IsPlaying}">
+
+                        <Panel.Styles>
+                            <Style Selector="Panel.IsPlaying">
+                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
+                            </Style>
+                            <Style Selector="Panel.IsEnding">
+                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
+                                <Style.Animations>
+                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="50%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </Panel.Styles>
+                    </Panel>
+
+                    <Image
+                        Grid.ColumnSpan="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Stretch"
+                        Opacity="{StaticResource DisplayOpacityRemaining}"
                         Source="{Binding Bitmap}"
                         Stretch="Fill" />
 
-                    <Border
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        HorizontalAlignment="Stretch"
+                    <Image
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Stretch"
-                        Background="{StaticResource ColorBackground}"
-                        CornerRadius="{StaticResource CornerRadius}">
-
-                        <i:Interaction.Behaviors>
-                            <a:DataTriggerBehavior
-                                Binding="{Binding IsEnding}"
-                                ComparisonCondition="Equal"
-                                Value="True">
-                                <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
-                            </a:DataTriggerBehavior>
-                            <a:DataTriggerBehavior
-                                Binding="{Binding IsEnding}"
-                                ComparisonCondition="NotEqual"
-                                Value="True">
-                                <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
-                            </a:DataTriggerBehavior>
-                        </i:Interaction.Behaviors>
-                    </Border>
+                        Stretch="Fill">
+                        <Image.Source>
+                            <CroppedBitmap Source="{Binding Bitmap}">
+                                <CroppedBitmap.SourceRect>
+                                    <MultiBinding Converter="{StaticResource ImageToRemainingRectConverter}">
+                                        <Binding Path="Bitmap" />
+                                        <Binding Path="WidthPosition" />
+                                        <Binding Path="WidthRemaining" />
+                                    </MultiBinding>
+                                </CroppedBitmap.SourceRect>
+                            </CroppedBitmap>
+                        </Image.Source>
+                    </Image>
                 </Grid>
             </Border>
 
@@ -181,29 +252,61 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}"
-                CornerRadius="{StaticResource CornerRadius}">
+                BorderThickness="{StaticResource DisplayBorderThickness}"
+                Classes.IsEnding="{Binding IsEnding}"
+                Classes.IsPlaying="{Binding IsPlaying}"
+                CornerRadius="{StaticResource DisplayCornerRadius}">
 
-                <i:Interaction.Behaviors>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsEnding}"
-                        ComparisonCondition="Equal"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorIsEnding}" />
-                    </a:DataTriggerBehavior>
-                    <a:DataTriggerBehavior
-                        Binding="{Binding IsEnding}"
-                        ComparisonCondition="NotEqual"
-                        Value="True">
-                        <a:ChangePropertyAction PropertyName="Background" Value="{StaticResource ColorBackground}" />
-                    </a:DataTriggerBehavior>
-                </i:Interaction.Behaviors>
+                <Border.Styles>
+                    <Style Selector="Border.IsPlaying">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+                    </Style>
+                    <Style Selector="Border.IsEnding">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
+                    </Style>
+                    <Style Selector="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
+                    </Style>
+                </Border.Styles>
 
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeDisplay}"
-                    Text="{Binding Remaining}" />
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+                    <Panel
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Classes.IsEnding="{Binding IsEnding}"
+                        Classes.IsPlaying="{Binding IsPlaying}">
+
+                        <Panel.Styles>
+                            <Style Selector="Panel.IsPlaying">
+                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
+                            </Style>
+                            <Style Selector="Panel.IsEnding">
+                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
+                                <Style.Animations>
+                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="50%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </Panel.Styles>
+                    </Panel>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="{StaticResource FontSizeDisplay}"
+                        Text="{Binding Remaining}" />
+                </Grid>
             </Border>
         </Grid>
     </DockPanel>

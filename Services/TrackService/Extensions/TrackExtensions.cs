@@ -1,11 +1,11 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.WaveFormRenderer;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Models.Contents;
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace SportDJ.Services.TrackService.Extensions
 {
@@ -78,96 +78,96 @@ namespace SportDJ.Services.TrackService.Extensions
 
         public static void Trim(this Track track, float cueVolume, double trimRearPortion = 0.1)
         {
-            try
+            if (track != default
+                && File.Exists(track.Path))
             {
-                if (track != default
-                    && File.Exists(track.Path))
+                using var input = new AudioFileReader(track.Path);
+
+                lock (input)
                 {
-                    using var input = new AudioFileReader(track.Path);
+                    var start = default(long?);
+                    var end = default(long?);
 
-                    lock (input)
+                    var from = default(TimeSpan?);
+                    var to = default(TimeSpan?);
+
+                    var cue = default(long?);
+
+                    var rearCheckFrom = trimRearPortion < 1
+                        ? 1 - trimRearPortion
+                        : 0;
+
+                    var blockAlign = input.WaveFormat.BlockAlign;
+                    var buffer = new byte[blockAlign];
+                    var read = 0;
+
+                    while (input.Position < input.Length)
                     {
-                        var start = default(long?);
-                        var end = default(long?);
-
-                        var from = default(TimeSpan?);
-                        var to = default(TimeSpan?);
-
-                        var cue = default(long?);
-
-                        var rearCheckFrom = trimRearPortion < 1
-                            ? 1 - trimRearPortion
-                            : 0;
-
-                        var blockAlign = input.WaveFormat.BlockAlign;
-                        var buffer = new byte[blockAlign];
-                        var read = 0;
-
-                        while (input.Position < input.Length)
+                        try
                         {
                             read = input.Read(
                                 buffer: buffer,
                                 offset: 0,
                                 count: blockAlign);
+                        }
+                        catch
+                        { }
 
-                            if (read == 0)
+                        if (read == 0)
+                        {
+                            break;
+                        }
+
+                        for (var index = 0; index < read / 4; index++)
+                        {
+                            var volume = BitConverter.ToSingle(
+                                value: buffer,
+                                startIndex: index * 4);
+
+                            if (volume > Constants.VolumeMin)
                             {
-                                break;
-                            }
+                                end = input.Position;
+                                to = input.CurrentTime;
 
-                            for (var index = 0; index < read / 4; index++)
-                            {
-                                var volume = BitConverter.ToSingle(
-                                    value: buffer,
-                                    startIndex: index * 4);
-
-                                if (volume > Constants.VolumeMin)
+                                if (!start.HasValue)
                                 {
-                                    end = input.Position;
-                                    to = input.CurrentTime;
+                                    start = end;
+                                    from = to;
 
-                                    if (!start.HasValue)
+                                    if (input.Position < input.Length * rearCheckFrom)
                                     {
-                                        start = end;
-                                        from = to;
-
-                                        if (input.Position < input.Length * rearCheckFrom)
-                                        {
-                                            input.Position = (long)(input.Length * rearCheckFrom);
-                                            break;
-                                        }
+                                        input.Position = (long)(input.Length * rearCheckFrom);
+                                        break;
                                     }
-                                    else if (volume > cueVolume)
-                                    {
-                                        cue = input.Position;
-                                    }
+                                }
+                                else if (volume > cueVolume)
+                                {
+                                    cue = input.Position;
                                 }
                             }
                         }
-
-                        if (start.HasValue
-                            && end.HasValue
-                            && start < end)
-                        {
-                            track.Start = start.Value;
-                            track.End = end.Value;
-                            track.Cue = cue;
-
-                            track.Length = to.Value.Subtract(from.Value);
-                        }
-                        else
-                        {
-                            track.IsSilent = true;
-                        }
-
-                        track.IsChecked = true;
                     }
+
+                    if (start.HasValue
+                        && end.HasValue
+                        && start < end)
+                    {
+                        track.Start = start.Value;
+                        track.End = end.Value;
+                        track.Cue = cue;
+
+                        track.Length = to.Value.Subtract(from.Value);
+                    }
+                    else
+                    {
+                        track.IsSilent = true;
+                    }
+
+                    track.IsChecked = true;
                 }
             }
-            catch
-            { }
         }
-
-        #endregion Public Methods
     }
+
+    #endregion Public Methods
 }

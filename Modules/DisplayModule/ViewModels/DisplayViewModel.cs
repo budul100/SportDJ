@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Prism.Events;
@@ -13,6 +12,7 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
 {
@@ -31,8 +31,8 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private string content;
         private bool isDisposed;
         private bool isEnding;
+        private bool isPlaying;
         private string lastWindowState;
-        private Options options;
         private string remaining;
         private long widthPosition;
         private long widthRemaining;
@@ -53,10 +53,6 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: UpdateOptions,
-                keepSubscriberReferenceAlive: true);
-
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => OnMixerUpdated(),
                 threadOption: ThreadOption.PublisherThread,
@@ -75,8 +71,6 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             clockTimer = GetClockTimer();
             clockTimer.Start();
-
-            UpdateOptions();
         }
 
         #endregion Public Constructors
@@ -101,6 +95,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             get { return isEnding; }
             set { SetProperty(ref isEnding, value); }
+        }
+
+        public bool IsPlaying
+        {
+            get { return isPlaying; }
+            set { SetProperty(ref isPlaying, value); }
         }
 
         public string Remaining
@@ -229,7 +229,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private void OnKeyPressed(string keyCode)
         {
-            if (keyCode == options.KeyCodeScreenChange)
+            if (keyCode == settingsService.Contents.Options.KeyCodeScreenChange)
             {
                 ShowFullscreen = !ShowFullscreen;
             }
@@ -252,6 +252,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             {
                 Content = mixerService.Track.Info;
                 Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
+                IsPlaying = mixerService.IsPlaying;
                 IsEnding = mixerService.IsEnding;
 
                 Bitmap = mixerService.Track.Bitmap;
@@ -266,6 +267,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             {
                 Content = default;
                 Remaining = default;
+                IsPlaying = false;
                 IsEnding = false;
 
                 Bitmap = default;
@@ -273,11 +275,6 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 WidthPosition = default;
                 WidthRemaining = default;
             }
-        }
-
-        private void UpdateOptions()
-        {
-            options = settingsService.Contents.Options;
         }
 
         #endregion Private Methods
