@@ -11,7 +11,8 @@ namespace SportDJ.Commons.Converters
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is long units
+            if (value != default
+                && value is long units
                 && units >= 0)
             {
                 return new GridLength(
@@ -21,8 +22,8 @@ namespace SportDJ.Commons.Converters
             else
             {
                 return new GridLength(
-                    value: 0,
-                    type: GridUnitType.Star);
+                    value: 1,
+                    type: GridUnitType.Auto);
             }
         }
 

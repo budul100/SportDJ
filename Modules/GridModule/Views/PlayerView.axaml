@@ -94,20 +94,22 @@
                     VerticalAlignment="Stretch"
                     Background="{StaticResource ColorBackground}">
 
-                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                    <Viewbox
+                        Margin="{StaticResource KeyMargin}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasKey}"
+                        Stretch="Uniform"
+                        StretchDirection="Both">
                         <Border
-                            Margin="{StaticResource KeyMargin}"
                             Padding="{StaticResource KeyPadding}"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
                             Background="{StaticResource KeyBackgroundColor}"
                             BorderBrush="{StaticResource KeyBorderColor}"
                             BorderThickness="{StaticResource KeyBorderThickness}"
-                            CornerRadius="{StaticResource KeyCornerRadius}"
-                            IsVisible="{Binding HasKey}">
+                            CornerRadius="{StaticResource KeyCornerRadius}">
                             <TextBlock
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
                                 FontSize="{StaticResource FontSizeContent}"
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />

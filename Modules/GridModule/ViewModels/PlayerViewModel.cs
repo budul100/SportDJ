@@ -91,7 +91,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
-                action: _ => UpdateRemaining(),
+                action: _ => UpdateDuration(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s);
@@ -255,9 +255,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand TrackForwardCommand { get; }
 
-        public long WidthPosition { get; protected set; }
+        public long? WidthPosition { get; protected set; }
 
-        public long WidthRemaining { get; protected set; }
+        public long? WidthRemaining { get; protected set; }
 
         #endregion Public Properties
 
@@ -433,6 +433,35 @@ namespace SportDJ.Modules.GridModule.ViewModels
             TrackForwardCommand.RaiseCanExecuteChanged();
         }
 
+        private void UpdateDuration()
+        {
+            var length = signalService?.Track == stackService?.Track
+                ? signalService?.Remaining
+                : stackService?.Track?.Length;
+
+            if (length?.Ticks > 0)
+            {
+                WidthPosition = signalService?.Track == stackService?.Track
+                    && signalService?.Duration?.Ticks > 0
+                    ? signalService.Position.Value.Ticks
+                    : 0;
+
+                WidthRemaining = length.Value.Ticks;
+
+                Remaining = length.Value.ToString(Constants.FormatDuration);
+            }
+            else
+            {
+                WidthPosition = default;
+                WidthRemaining = default;
+
+                Remaining = default;
+            }
+
+            RaisePropertyChanged(nameof(WidthPosition));
+            RaisePropertyChanged(nameof(WidthRemaining));
+        }
+
         private void UpdateOutput()
         {
             outputServiceLive = containerProvider?.Resolve<IOutputService>(
@@ -444,27 +473,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             HasPFL = outputServicePFL?.IsActive == true;
 
             UpdateContent();
-        }
-
-        private void UpdateRemaining()
-        {
-            Remaining = signalService?.Track == stackService?.Track
-                ? signalService?.Remaining?.ToString(Constants.FormatDuration)
-                : stackService?.Track?.Length.ToString(Constants.FormatDuration);
-
-            if (signalService?.Duration?.Ticks > 0)
-            {
-                WidthPosition = signalService.Position.Value.Ticks;
-                WidthRemaining = signalService.Remaining.Value.Ticks;
-            }
-            else if (signalService?.Track == stackService?.Track)
-            {
-                WidthPosition = 0;
-                WidthRemaining = stackService.Track.Length.Ticks;
-            }
-
-            RaisePropertyChanged(nameof(WidthPosition));
-            RaisePropertyChanged(nameof(WidthRemaining));
         }
 
         private void UpdateSignal()
@@ -493,7 +501,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 Content = stackService.Track.Info;
                 Bitmap = stackService.Track.Bitmap;
 
-                UpdateRemaining();
+                UpdateDuration();
 
                 trackService?.Render(stackService.Track);
             }

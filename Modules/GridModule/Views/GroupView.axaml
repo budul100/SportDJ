@@ -62,25 +62,29 @@
                         FontSize="{DynamicResource FontSizeContent}"
                         Text="{Binding Name}" />
 
-                    <Border
+                    <Viewbox
                         Grid.Column="1"
                         Margin="{StaticResource KeyMargin}"
-                        Padding="{StaticResource KeyPadding}"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Stretch"
-                        Background="{StaticResource KeyBackgroundColor}"
-                        BorderBrush="{StaticResource KeyBorderColor}"
-                        BorderThickness="{StaticResource KeyBorderThickness}"
-                        CornerRadius="{StaticResource KeyCornerRadius}"
-                        IsVisible="{Binding HasKey}">
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasKey}"
+                        Stretch="Uniform"
+                        StretchDirection="DownOnly">
+                        <Border
+                            Padding="{StaticResource KeyPadding}"
+                            Background="{StaticResource KeyBackgroundColor}"
+                            BorderBrush="{StaticResource KeyBorderColor}"
+                            BorderThickness="{StaticResource KeyBorderThickness}"
+                            CornerRadius="{StaticResource KeyCornerRadius}">
 
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeContent}"
-                            FontWeight="Bold"
-                            Text="{Binding Key}" />
-                    </Border>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontSize="{StaticResource FontSizeContent}"
+                                FontWeight="Bold"
+                                Text="{Binding Key}" />
+                        </Border>
+                    </Viewbox>
                 </Grid>
             </DataTemplate>
         </TabControl.ItemTemplate>
