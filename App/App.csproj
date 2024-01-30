@@ -9,8 +9,8 @@
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<ApplicationIcon>Assets\SportDJ.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
-		<VersionMinor>1</VersionMinor>
-		<VersionBuild>1</VersionBuild>
+		<VersionMinor>2</VersionMinor>
+		<VersionBuild>0</VersionBuild>
 	</PropertyGroup>
 
 	<PropertyGroup>
