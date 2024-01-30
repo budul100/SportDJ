@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Avalonia;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
@@ -10,6 +8,8 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Linq;
 
 namespace SportDJ.App
 {
@@ -69,8 +69,8 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var messageBoxService = new MessageBoxService.Service(App.Current);
-            containerRegistry.RegisterInstance<IMessageBoxService>(messageBoxService);
+            var dialogService = new DialogService.Service(App.Current);
+            containerRegistry.RegisterInstance<IDialogService>(dialogService);
 
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IHookService, Services.HookService.Service>();

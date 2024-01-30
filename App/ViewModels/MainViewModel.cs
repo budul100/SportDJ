@@ -29,10 +29,10 @@ namespace SportDJ.App.ViewModels
         private readonly string assemblyTitle;
         private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IDispatcherService dispatcherService;
         private readonly IHookService hookService;
         private readonly HashSet<IOutputService> liveServices = new();
-        private readonly IMessageBoxService messageBoxService;
         private readonly HashSet<IOutputService> outputServices = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
@@ -47,17 +47,16 @@ namespace SportDJ.App.ViewModels
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
             IDispatcherService dispatcherService, IHookService hookService, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService, IMessageBoxService messageBoxService)
+            IStorageService<Session> sessionService, IDialogService dialogService)
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
             this.hookService = hookService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
-            this.messageBoxService = messageBoxService;
+            this.dialogService = dialogService;
 
             assemblyTitle = GetAssemblyTitle();
-
             OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
 
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
@@ -258,9 +257,9 @@ namespace SportDJ.App.ViewModels
 
         private async void CheckClosing(IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var result = await messageBoxService.GetMessageBoxResultAsync(
-                contentMessage: "Shall the application be closed?",
-                contentTitle: "Close application");
+            var result = await dialogService.GetMessageBoxResultAsync(
+                contentMessage: Constants.CloseApplicationText,
+                contentTitle: Constants.CloseApplicationTitle);
 
             if (result == ButtonResult.Yes)
             {

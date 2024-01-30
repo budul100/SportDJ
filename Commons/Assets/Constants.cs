@@ -8,6 +8,9 @@ namespace SportDJ.Commons.Assets
 
         public const string AppName = nameof(SportDJ);
 
+        public const string CloseApplicationText = "Shall the application be closed?";
+        public const string CloseApplicationTitle = "Close application";
+
         // Duration of a volume change step. Should not be greater than 100.
         public const int FadeStepInMilliSec = 30;
 
@@ -17,15 +20,22 @@ namespace SportDJ.Commons.Assets
         public const int IndexAudioDeviceMin = 0;
         public const int IndexAudioSessionMin = 0;
 
-        public const int MenuGroupAdd = 10;
-        public const int MenuItemsSize = 20;
+        public const int IsEndingSeconds = 10;
+
+        public const int MenuGroupBaseSize = 20;
+        public const int MenuGroupTextLength = 10;
+
         public const int MixerSourcesMax = 1024;
 
         public const double PercentageIncrement = 1;
         public const double PercentageMax = 100;
         public const double PercentageMin = 0;
 
-        public const int SecondsIsEnding = 10;
+        public const string ResetPlayerText = "Shall the player be reset?";
+        public const string ResetPlayerTitle = "Reset Player";
+
+        public const string SelectionFileTitle = "Select File";
+        public const string SelectionFolderTitle = "Select Folder";
 
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';

@@ -44,7 +44,7 @@
 	  <ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 	  <ProjectReference Include="..\Services\HookService\HookService.csproj" />
-	  <ProjectReference Include="..\Services\MessageBoxService\MessageBoxService.csproj" />
+	  <ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
 	  <ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
 	  <ProjectReference Include="..\Services\StackService\StackService.csproj" />

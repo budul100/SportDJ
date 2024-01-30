@@ -32,6 +32,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.callback = callback;
 
+            Command = new DelegateCommand(ExecuteCallback);
             Header = header;
         }
 
@@ -39,7 +40,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             MenuItems = new ObservableCollection<MenuViewModel>(menuItems);
             Command = new DelegateCommand(ExecuteCallback);
-
             Header = GetHeader();
         }
 
@@ -119,7 +119,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             var first = MenuItems.First().Entry.Track.Info;
             var last = MenuItems.Last().Entry.Track.Info;
 
-            var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupAdd;
+            var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupTextLength;
 
             var firstHeader = first.Length > length
                 ? $"{first[..length]}..."

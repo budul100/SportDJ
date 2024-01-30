@@ -39,11 +39,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerModule", "Modules
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService", "Services\VolumeService\VolumeService.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBoxService", "Services\MessageBoxService\MessageBoxService.csproj", "{48C41C91-3465-46EE-8632-3B506D6EF24F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DialogService", "Services\DialogService\DialogService.csproj", "{48C41C91-3465-46EE-8632-3B506D6EF24F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsModule", "Modules\SettingsModule\SettingsModule.csproj", "{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HookService", "Services\HookService\HookService.csproj", "{008B65FD-1244-4F9A-BDF9-D696A37E4F7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HookService", "Services\HookService\HookService.csproj", "{008B65FD-1244-4F9A-BDF9-D696A37E4F7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

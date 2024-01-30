@@ -53,7 +53,7 @@ namespace SportDJ.Services.SignalService
 
         public bool IsEnding => playingProvider != default
             && (playingProvider.PlayType == PlayType.Play || playingProvider.PlayType == PlayType.Stop)
-            && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.SecondsIsEnding);
+            && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingSeconds);
 
         public bool IsLoop
         {

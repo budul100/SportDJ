@@ -1,4 +1,12 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -14,11 +22,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -28,9 +31,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IDialogService dialogService;
         private readonly IMixerService mixerServiceBackground;
         private readonly IMixerService mixerServiceForeground;
         private readonly IMixerService mixerServicePFL;
+        private readonly Player player;
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
@@ -38,9 +43,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private Bitmap bitmap;
         private string content;
         private string counter;
+        private IStorageFolder inputDirectory;
         private ObservableCollection<BindableBase> menus;
         private IOutputService outputServiceLive;
-        private Player player;
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
@@ -53,6 +58,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             : base(player)
         {
             this.containerProvider = containerProvider;
+            this.player = player;
 
             mixerServiceBackground = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
@@ -63,6 +69,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             settingsService = containerProvider.Resolve<IStorageService<Set>>();
             trackService = containerProvider.Resolve<ITrackService>();
+            dialogService = containerProvider.Resolve<IDialogService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecutePlayer);
@@ -160,8 +167,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: k => parent.IsVisible
                     && k == player.KeyCode);
 
-            Intialize(
-                player: player);
+            Intialize();
         }
 
         #endregion Public Constructors
@@ -349,32 +355,47 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private IEnumerable<BindableBase> GetMenuItems()
         {
-            var openItem = new MenuViewModel(
-                header: "Select Tracks ...",
-                callback: default);
+            var selectFileItem = new MenuViewModel(
+                header: $"{Constants.SelectionFileTitle}...",
+                callback: () => SetPlayerFileAsync());
 
-            yield return openItem;
+            yield return selectFileItem;
 
-            var menuItems = GetMenuTracks()
-                .OrderBy(m => m.Header).ToArray();
+            var selectFolderItem = new MenuViewModel(
+                header: $"{Constants.SelectionFolderTitle}...",
+                callback: () => SetPlayerFolderAsync());
 
-            if (menuItems?.Length > 1)
+            yield return selectFolderItem;
+
+            if (player.Path != default)
             {
-                yield return new SeparatorViewModel();
+                var resetPlayerItem = new MenuViewModel(
+                    header: Constants.ResetPlayerTitle,
+                    callback: () => ResetPlayerAsync());
 
-                var groupsSize = (menuItems.Length / ((menuItems.Length / Constants.MenuItemsSize) + 1)) + 1;
+                yield return resetPlayerItem;
 
-                var groups = menuItems
-                    .Chunk(groupsSize).ToArray();
+                var menuItems = GetMenuTracks()
+                    .OrderBy(m => m.Header).ToArray();
 
-                foreach (var group in groups)
+                if (menuItems?.Length > 1)
                 {
-                    var result = new MenuViewModel(
-                        menuItems: group);
+                    yield return new SeparatorViewModel();
 
-                    result.CloseMenuEvent += OnMenuClosing;
+                    var groupsSize = (menuItems.Length / ((menuItems.Length / Constants.MenuGroupBaseSize) + 1)) + 1;
 
-                    yield return result;
+                    var groups = menuItems
+                        .Chunk(groupsSize).ToArray();
+
+                    foreach (var group in groups)
+                    {
+                        var result = new MenuViewModel(
+                            menuItems: group);
+
+                        result.CloseMenuEvent += OnMenuClosing;
+
+                        yield return result;
+                    }
                 }
             }
         }
@@ -408,9 +429,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return result;
         }
 
-        private void Intialize(Player player)
+        private void Intialize()
         {
-            this.player = player;
+            Counter = default;
+            Content = default;
+            Bitmap = default;
+
+            IsForeground = default;
+            IsLoop = default;
+            SavePositions = default;
 
             stackService = containerProvider?.Resolve<IStackService>();
 
@@ -478,6 +505,27 @@ namespace SportDJ.Modules.GridModule.ViewModels
             UpdateContent();
         }
 
+        private async void ResetPlayerAsync()
+        {
+            if (player.Path != default
+                && !IsActive)
+            {
+                var result = await dialogService.GetMessageBoxResultAsync(
+                    contentMessage: Constants.ResetPlayerText,
+                    contentTitle: Constants.ResetPlayerTitle,
+                    buttonDefinitions: ButtonEnum.YesNo,
+                    enterDefaultButton: ClickEnum.No);
+
+                if (result == ButtonResult.Yes)
+                {
+                    player.Path = default;
+                    settingsService.Save();
+
+                    Intialize();
+                }
+            }
+        }
+
         private void ResetStack()
         {
             stackService?.Reset();
@@ -495,11 +543,66 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private async void SetPlayerFileAsync()
+        {
+            if (inputDirectory == default)
+            {
+                var folderPath = Path.GetDirectoryName(player.Path);
+                inputDirectory = await dialogService.GetFolderAsync(folderPath);
+            }
+
+            var paths = await dialogService.OpenFilePickerAsync(
+                title: Constants.SelectionFileTitle,
+                allowMultiple: false,
+                startLocation: inputDirectory);
+
+            var path = paths.Any()
+                ? paths.First().Path.AbsolutePath
+                : default;
+
+            if (File.Exists(path))
+            {
+                player.Path = path;
+                settingsService.Save();
+
+                Intialize();
+            }
+        }
+
+        private async void SetPlayerFolderAsync()
+        {
+            if (inputDirectory == default)
+            {
+                inputDirectory = await dialogService.GetFolderAsync(player.Path);
+            }
+
+            var paths = await dialogService.OpenFolderPickerAsync(
+                title: Constants.SelectionFileTitle,
+                allowMultiple: false,
+                startLocation: inputDirectory);
+
+            var path = paths.Any()
+                ? paths.First().Path.AbsolutePath
+                : default;
+
+            if (Directory.Exists(path))
+            {
+                player.Path = path;
+                settingsService.Save();
+
+                Intialize();
+            }
+        }
+
         private void UpdateContent()
         {
             RaisePropertyChanged(nameof(IsActive));
             RaisePropertyChanged(nameof(IsPlaying));
             RaisePropertyChanged(nameof(IsEnding));
+
+            RaisePropertyChanged(nameof(IsExecuteAvailable));
+            RaisePropertyChanged(nameof(IsSelectionAvailable));
+            RaisePropertyChanged(nameof(IsResetAvailable));
 
             RaisePropertyChanged(nameof(HasKey));
             RaisePropertyChanged(nameof(HasPFL));
