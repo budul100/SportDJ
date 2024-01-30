@@ -196,7 +196,7 @@
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="3" KeyCode="VcNumPad2" Name="Klatschen Kurz">
 								<IsForeground>false</IsForeground>
-								<IsLoop>true</IsLoop>
+								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
 								<SavePositions>true</SavePositions>
 							</Cell>
