@@ -28,6 +28,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
+        public MenuViewModel(string header, Action callback)
+        {
+            this.callback = callback;
+
+            Header = header;
+        }
+
         public MenuViewModel(IEnumerable<MenuViewModel> menuItems)
         {
             MenuItems = new ObservableCollection<MenuViewModel>(menuItems);

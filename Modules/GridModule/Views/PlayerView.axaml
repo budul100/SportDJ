@@ -133,9 +133,7 @@
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />
                         </Border>
-
                     </Viewbox>
-
                 </Panel>
             </Grid>
 
@@ -165,13 +163,15 @@
                     <Button.ContextMenu>
                         <ContextMenu Name="ContextMenu" ItemsSource="{Binding Menus}">
 
-                            <ContextMenu.ItemTemplate>
-                                <DataTemplate>
+                            <ContextMenu.DataTemplates>
+                                <DataTemplate x:DataType="vm:MenuViewModel">
                                     <v:MenuView />
                                 </DataTemplate>
-                            </ContextMenu.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SeparatorViewModel">
+                                    <Separator />
+                                </DataTemplate>
+                            </ContextMenu.DataTemplates>
                         </ContextMenu>
-
                     </Button.ContextMenu>
 
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

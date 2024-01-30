@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
+using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Key;
@@ -18,6 +14,11 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -37,7 +38,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private Bitmap bitmap;
         private string content;
         private string counter;
-        private ObservableCollection<MenuViewModel> menus;
+        private ObservableCollection<BindableBase> menus;
         private IOutputService outputServiceLive;
         private Player player;
         private string remaining;
@@ -64,8 +65,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             trackService = containerProvider.Resolve<ITrackService>();
 
             ExecuteCommand = new DelegateCommand(
-                executeMethod: ExecuteSignal,
-                canExecuteMethod: () => IsExecuteAvailable);
+                executeMethod: ExecutePlayer);
 
             TrackBackwardCommand = new DelegateCommand(
                 executeMethod: () => SelectTrack(true),
@@ -114,7 +114,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     && signalService == s);
 
             eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
-                action: _ => UpdateTracks(),
+                action: _ => UpdateMenu(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => stackService == s);
@@ -154,7 +154,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: _ => ExecuteSignal(),
+                action: _ => ExecutePlayer(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: k => parent.IsVisible
@@ -168,7 +168,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Events
 
-        public event EventHandler CloseMenuEvent;
+        public event EventHandler MenuCloseEvent;
+
+        public event EventHandler MenuOpenEvent;
 
         #endregion Public Events
 
@@ -243,8 +245,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
+
         public bool IsResetAvailable => stackService?.HasPlayeds == true;
+
         public bool IsSelectionAvailable => stackService?.HasUnplayeds == true;
+
         public string Key => KeyCode.GetKey();
 
         public string KeyCode
@@ -264,7 +269,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public ObservableCollection<MenuViewModel> Menus => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying
+        public ObservableCollection<BindableBase> Menus => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying
             ? menus
             : default;
 
@@ -320,9 +325,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Methods
 
-        private void ExecuteSignal()
+        private void ExecutePlayer()
         {
-            if (signalService != default)
+            if (stackService?.Entries?.Any() == true
+                && signalService != default)
             {
                 if (signalService.State == StateType.Play)
                 {
@@ -333,15 +339,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     signalService.Start();
                 }
             }
+            else
+            {
+                MenuOpenEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
         }
 
-        private IEnumerable<MenuViewModel> GetMenuItems()
+        private IEnumerable<BindableBase> GetMenuItems()
         {
+            var openItem = new MenuViewModel(
+                header: "Select Tracks ...",
+                callback: default);
+
+            yield return openItem;
+
             var menuItems = GetMenuTracks()
                 .OrderBy(m => m.Header).ToArray();
 
             if (menuItems?.Length > 1)
             {
+                yield return new SeparatorViewModel();
+
                 var groupsSize = (menuItems.Length / ((menuItems.Length / Constants.MenuItemsSize) + 1)) + 1;
 
                 var groups = menuItems
@@ -401,11 +421,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 isLoop: player.IsLoop));
 
             UpdateOutput();
+            UpdateMenu();
         }
 
         private void OnMenuClosing(object sender, EventArgs e)
         {
-            CloseMenuEvent?.Invoke(
+            MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
         }
@@ -531,6 +552,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private void UpdateMenu()
+        {
+            menus = new ObservableCollection<BindableBase>(GetMenuItems());
+        }
+
         private void UpdateOutput()
         {
             outputServiceLive = containerProvider?.Resolve<IOutputService>(
@@ -577,14 +603,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
 
             UpdateContent();
-        }
-
-        private void UpdateTracks()
-        {
-            if (stackService?.Entries?.Any() == true)
-            {
-                menus = new ObservableCollection<MenuViewModel>(GetMenuItems());
-            }
         }
 
         #endregion Private Methods

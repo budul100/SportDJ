@@ -65,7 +65,6 @@
                             Margin="{StaticResource TabMargin}"
                             FontSize="{DynamicResource FontSizeContent}"
                             Text="{Binding Name}" />
-
                     </Viewbox>
 
                     <Viewbox
@@ -91,7 +90,6 @@
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />
                         </Border>
-
                     </Viewbox>
                 </Grid>
             </DataTemplate>
@@ -99,7 +97,6 @@
 
         <TabControl.ContentTemplate>
             <DataTemplate>
-
                 <v:GridView />
             </DataTemplate>
         </TabControl.ContentTemplate>
