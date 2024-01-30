@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -22,6 +16,12 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -50,12 +50,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private ISignalService signalService;
         private IStackService stackService;
 
+        private long widthPosition;
+
+        private long? widthRemaining;
+
         #endregion Private Fields
 
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-            : base(player)
+                               : base(player)
         {
             this.containerProvider = containerProvider;
             this.player = player;
@@ -323,9 +327,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand TrackForwardCommand { get; }
 
-        public long? WidthPosition { get; protected set; }
+        public long WidthPosition
+        {
+            get { return widthPosition; }
+            set { SetProperty(ref widthPosition, value); }
+        }
 
-        public long? WidthRemaining { get; protected set; }
+        public long? WidthRemaining
+        {
+            get { return widthRemaining; }
+            set { SetProperty(ref widthRemaining, value); }
+        }
 
         #endregion Public Properties
 
@@ -623,9 +635,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (length?.Ticks > 0)
             {
                 WidthPosition = signalService?.Track == stackService?.Track
-                    && signalService?.Duration?.Ticks > 0
+                    && signalService.Duration?.Ticks > 0
+                    && signalService.Position?.Ticks > 0
                     ? signalService.Position.Value.Ticks
-                    : 0;
+                    : 1;
 
                 WidthRemaining = length.Value.Ticks;
 
@@ -638,9 +651,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 Remaining = default;
             }
-
-            RaisePropertyChanged(nameof(WidthPosition));
-            RaisePropertyChanged(nameof(WidthRemaining));
         }
 
         private void UpdateLoop()
@@ -691,16 +701,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (stackService.Track != default)
             {
                 var count = trackService.GetCount(stackService.Track);
-                Counter = $"[{count}]";
-
+                Counter = $"({count})";
                 Content = stackService.Track.Info;
                 Bitmap = stackService.Track.Bitmap;
 
-                UpdateDuration();
-
                 trackService?.Render(stackService.Track);
             }
+            else
+            {
+                Counter = default;
+                Content = default;
+                Bitmap = default;
+            }
 
+            UpdateDuration();
             UpdateContent();
         }
 

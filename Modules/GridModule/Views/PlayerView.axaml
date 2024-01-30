@@ -243,12 +243,26 @@
 
                         <Grid Grid.Row="2">
 
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="{Binding !IsPlaying, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                                <RowDefinition Height="{Binding IsPlaying, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                            </Grid.RowDefinitions>
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="{Binding WidthPosition, Converter={StaticResource LongToGridStarConverter}}" />
                                 <ColumnDefinition Width="{Binding WidthRemaining, Converter={StaticResource LongToGridStarConverter}}" />
                             </Grid.ColumnDefinitions>
 
                             <Image
+                                Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Source="{Binding Bitmap}"
+                                Stretch="Fill" />
+
+                            <Image
+                                Grid.Row="1"
                                 Grid.Column="0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Stretch"
@@ -268,6 +282,7 @@
                             </Image>
 
                             <Image
+                                Grid.Row="1"
                                 Grid.Column="1"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Stretch"
