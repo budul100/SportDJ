@@ -52,7 +52,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" KeyCode="VcNumPad3" Name="Warten">
-								<IsForeground>false</IsForeground>
+								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
 								<SavePositions>false</SavePositions>
@@ -108,7 +108,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" KeyCode="VcNumPad3" Name="Warten">
-								<IsForeground>false</IsForeground>
+								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
 								<SavePositions>false</SavePositions>
@@ -121,13 +121,13 @@
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_TO-Normal.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="0" KeyCode="VcNumPadMultiply" Name="TO Knapp">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_TO-Knapp.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="0" Name="Sonstiges">
 								<IsForeground>false</IsForeground>
@@ -174,37 +174,37 @@
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="2" KeyCode="VcNumPad5" Name="Team">
 								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Team.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" KeyCode="VcNumPad6" Name="Gegner">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Gegner.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="3" KeyCode="VcNumPad1" Name="Attacke">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Angriff.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="3" KeyCode="VcNumPad2" Name="Klatschen Kurz">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="3" KeyCode="VcNumPad3" Name="Klatschen Lang">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Lang.m3u</Path>
-								<SavePositions>false</SavePositions>
+								<SavePositions>true</SavePositions>
 							</Cell>
 						</Cells>
 					</Grid>
