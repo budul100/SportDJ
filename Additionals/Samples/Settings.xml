@@ -165,7 +165,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" KeyCode="VcNumPad9" Name="Ende">
-								<IsForeground>false</IsForeground>
+								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
 								<SavePositions>false</SavePositions>
@@ -177,7 +177,7 @@
 								<SavePositions>false</SavePositions>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="2" KeyCode="VcNumPad5" Name="Team">
-								<IsForeground>false</IsForeground>
+								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Spiel_Team.m3u</Path>
 								<SavePositions>false</SavePositions>
@@ -211,7 +211,7 @@
 					<Grid KeyCode="VcNumPadAdd" Name="Ende">
 						<Cells>
 							<Cell xsi:type="Player" Column="2" Row="0" KeyCode="VcNumPad9" Name="Ende">
-								<IsForeground>false</IsForeground>
+								<IsForeground>true</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
 								<SavePositions>false</SavePositions>

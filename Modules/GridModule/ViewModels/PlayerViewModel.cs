@@ -435,10 +435,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             Content = default;
             Bitmap = default;
 
-            IsForeground = default;
-            IsLoop = default;
-            SavePositions = default;
-
             stackService = containerProvider?.Resolve<IStackService>();
 
             Task.Run(() => stackService?.Initialize(
