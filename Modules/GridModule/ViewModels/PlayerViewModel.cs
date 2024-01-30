@@ -1,4 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -13,11 +18,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -65,19 +65,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecuteSignal,
-                canExecuteMethod: () => IsExecuteAvailable());
-
-            ResetCommand = new DelegateCommand(
-                executeMethod: ResetStack,
-                canExecuteMethod: () => IsResetAvailable());
+                canExecuteMethod: () => IsExecuteAvailable);
 
             TrackBackwardCommand = new DelegateCommand(
                 executeMethod: () => SelectTrack(true),
-                canExecuteMethod: () => IsNextTrackAvailable());
+                canExecuteMethod: () => IsSelectionAvailable);
 
             TrackForwardCommand = new DelegateCommand(
                 executeMethod: () => SelectTrack(false),
-                canExecuteMethod: () => IsNextTrackAvailable());
+                canExecuteMethod: () => IsSelectionAvailable);
+
+            ResetCommand = new DelegateCommand(
+                executeMethod: ResetStack,
+                canExecuteMethod: () => IsResetAvailable);
 
             var eventAggregator = containerProvider.Resolve<IEventAggregator>();
 
@@ -206,6 +206,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsEnding => signalService?.IsEnding == true;
 
+        public bool IsExecuteAvailable => stackService?.Track != default;
+
         public bool IsForeground
         {
             get { return player.IsForeground; }
@@ -241,7 +243,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
-
+        public bool IsResetAvailable => stackService?.HasPlayeds == true;
+        public bool IsSelectionAvailable => stackService?.HasUnplayeds == true;
         public string Key => KeyCode.GetKey();
 
         public string KeyCode
@@ -398,27 +401,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 isLoop: player.IsLoop));
 
             UpdateOutput();
-        }
-
-        private bool IsExecuteAvailable()
-        {
-            var result = stackService?.Track != default;
-
-            return result;
-        }
-
-        private bool IsNextTrackAvailable()
-        {
-            var result = stackService?.HasUnplayeds == true;
-
-            return result;
-        }
-
-        private bool IsResetAvailable()
-        {
-            var result = stackService?.HasPlayeds == true;
-
-            return result;
         }
 
         private void OnMenuClosing(object sender, EventArgs e)

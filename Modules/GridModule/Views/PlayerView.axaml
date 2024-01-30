@@ -95,7 +95,8 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False"
-                    IsChecked="{Binding IsLoop}">
+                    IsChecked="{Binding IsLoop}"
+                    IsEnabled="{Binding IsExecuteAvailable}">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
                             Width="{StaticResource IconWidth}"
@@ -117,12 +118,14 @@
                         IsVisible="{Binding HasKey}"
                         Stretch="Uniform"
                         StretchDirection="Both">
+
                         <Border
                             Padding="{StaticResource KeyPadding}"
                             Background="{StaticResource KeyBackgroundColor}"
                             BorderBrush="{StaticResource KeyBorderColor}"
                             BorderThickness="{StaticResource KeyBorderThickness}"
-                            CornerRadius="{StaticResource KeyCornerRadius}">
+                            CornerRadius="{StaticResource KeyCornerRadius}"
+                            IsEnabled="{Binding IsExecuteAvailable}">
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -130,7 +133,9 @@
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />
                         </Border>
+
                     </Viewbox>
+
                 </Panel>
             </Grid>
 
@@ -166,6 +171,7 @@
                                 </DataTemplate>
                             </ContextMenu.ItemTemplate>
                         </ContextMenu>
+
                     </Button.ContextMenu>
 
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
