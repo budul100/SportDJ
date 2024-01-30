@@ -75,7 +75,8 @@ namespace SportDJ.Services.MixerService
 
         public TimeSpan? Duration => signalService?.Duration;
 
-        public bool IsEnding => signalService?.IsEnding == true;
+        public bool IsEnding => signalService?.IsEnding == true
+            && signalService?.IsLoop == false;
 
         public bool IsLoop => signalService?.IsLoop == true;
 

@@ -55,7 +55,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(string path, string name, bool savePosition)
+        public void Initialize(string path, string name, bool savePosition, bool isLoop)
         {
             var tracks = trackService
                 .GetTracks(path).ToList();
@@ -70,7 +70,14 @@ namespace SportDJ.Services.StackService
 
             if (savePosition)
             {
-                Next();
+                if (isLoop)
+                {
+                    Select(position.Index);
+                }
+                else
+                {
+                    Next();
+                }
             }
 
             eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);

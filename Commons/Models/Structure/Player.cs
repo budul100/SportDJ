@@ -7,13 +7,15 @@ namespace SportDJ.Commons.Models.Structure
     {
         #region Public Properties
 
+        public bool IsForeground { get; set; }
+
+        public bool IsLoop { get; set; }
+
         [XmlAttribute]
         public string KeyCode { get; set; }
 
         [XmlAttribute]
         public string Name { get; set; }
-
-        public bool OnForeground { get; set; }
 
         public string Path { get; set; }
 

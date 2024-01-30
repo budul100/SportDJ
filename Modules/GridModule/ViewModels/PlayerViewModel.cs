@@ -37,13 +37,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private Bitmap bitmap;
         private string content;
         private string counter;
-        private string keyCode;
         private ObservableCollection<MenuViewModel> menus;
-        private string name;
-        private bool onForeground;
         private IOutputService outputServiceLive;
+        private Player player;
         private string remaining;
-        private bool savePositions;
         private ISignalService signalService;
         private IStackService stackService;
 
@@ -112,7 +109,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 action: _ => SelectTrack(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => !OnForeground
+                filter: s => !IsForeground
+                    && !IsLoop
                     && signalService == s);
 
             eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
@@ -208,20 +206,56 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsEnding => signalService?.IsEnding == true;
 
+        public bool IsForeground
+        {
+            get { return player.IsForeground; }
+            set
+            {
+                if (value != player.IsForeground)
+                {
+                    player.IsForeground = value;
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(IsForeground));
+                }
+            }
+        }
+
+        public bool IsLoop
+        {
+            get { return player.IsLoop; }
+            set
+            {
+                if (value != player.IsLoop)
+                {
+                    player.IsLoop = value;
+
+                    settingsService.Save();
+
+                    UpdateLoop();
+
+                    RaisePropertyChanged(nameof(IsLoop));
+                }
+            }
+        }
+
         public virtual bool IsPlaying => signalServices?.Any(s => s.State != StateType.None) == true;
 
         public string Key => KeyCode.GetKey();
 
         public string KeyCode
         {
-            get { return keyCode; }
+            get { return player.KeyCode; }
             set
             {
-                if (value != keyCode)
+                if (value != player.KeyCode)
                 {
-                    keyCode = value;
+                    player.KeyCode = value;
 
-                    RaisePropertyChanged(nameof(Key));
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(KeyCode));
                     RaisePropertyChanged(nameof(HasKey));
                 }
             }
@@ -233,14 +267,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public string Name
         {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+            get { return player.Name; }
+            set
+            {
+                if (value != player.Name)
+                {
+                    player.Name = value;
 
-        public bool OnForeground
-        {
-            get { return onForeground; }
-            set { SetProperty(ref onForeground, value); }
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(Name));
+                }
+            }
         }
 
         public string Remaining
@@ -250,6 +288,22 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public DelegateCommand ResetCommand { get; }
+
+        public bool SavePositions
+        {
+            get { return player.SavePositions; }
+            set
+            {
+                if (value != player.SavePositions)
+                {
+                    player.SavePositions = value;
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(SavePositions));
+                }
+            }
+        }
 
         public DelegateCommand TrackBackwardCommand { get; }
 
@@ -324,7 +378,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private IMixerService GetMixerService()
         {
-            var result = OnForeground
+            var result = IsForeground
                 ? mixerServiceForeground
                 : mixerServiceBackground;
 
@@ -333,17 +387,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Intialize(Player player)
         {
-            Name = player.Name;
-            KeyCode = player.KeyCode;
-            OnForeground = player.OnForeground;
-            savePositions = player.SavePositions;
+            this.player = player;
 
             stackService = containerProvider?.Resolve<IStackService>();
 
             Task.Run(() => stackService?.Initialize(
                 path: player.Path,
-                name: Name,
-                savePosition: savePositions));
+                name: player.Name,
+                savePosition: player.SavePositions,
+                isLoop: player.IsLoop));
 
             UpdateOutput();
         }
@@ -378,17 +430,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void OnSignalEnded(ISignalService signalService)
         {
-            if (this.signalService == signalService
-                && stackService?.Track == this.signalService.Track)
+            if (!IsLoop)
             {
-                SelectTrack();
-            }
+                if (this.signalService == signalService
+                    && signalService.Track == stackService?.Track)
+                {
+                    SelectTrack();
+                }
 
-            if (signalService.State == StateType.None)
-            {
-                signalService.Dispose();
+                if (signalService.State == StateType.None)
+                {
+                    signalService.Dispose();
 
-                signalServices.Remove(signalService);
+                    signalServices.Remove(signalService);
+                }
             }
 
             UpdateContent();
@@ -412,7 +467,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private void OnSignalStopped(ISignalService signalService)
         {
             if ((signalService == this.signalService)
-                && (signalService.State == StateType.None || OnForeground || signalService.IsOverNextThreshold))
+                && (signalService.State == StateType.None || IsForeground || signalService.IsOverNextThreshold))
             {
                 signalService.Stop();
             }
@@ -486,6 +541,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(WidthRemaining));
         }
 
+        private void UpdateLoop()
+        {
+            if (signalService != default)
+            {
+                signalService.IsLoop = player.IsLoop;
+            }
+        }
+
         private void UpdateOutput()
         {
             outputServiceLive = containerProvider?.Resolve<IOutputService>(
@@ -512,6 +575,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 this.signalService = mixerService?.Add(stackService.Track);
 
                 UpdateTrack();
+                UpdateLoop();
             }
         }
 

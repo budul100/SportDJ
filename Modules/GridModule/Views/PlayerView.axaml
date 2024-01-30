@@ -64,18 +64,20 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="{Binding HasPFLOrKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                <RowDefinition Height="5*" />
+                <RowDefinition Height="4*" />
                 <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="{Binding HasPFLOrKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 
-                <Button
+                <ToggleButton
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
@@ -86,10 +88,24 @@
                             Height="{StaticResource IconHeight}"
                             Kind="Headphones" />
                     </Viewbox>
-                </Button>
+                </ToggleButton>
+
+                <ToggleButton
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Focusable="False"
+                    IsChecked="{Binding IsLoop}">
+                    <Viewbox Stretch="Uniform" StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource IconWidth}"
+                            Height="{StaticResource IconHeight}"
+                            Kind="Repeat" />
+                    </Viewbox>
+                </ToggleButton>
 
                 <Panel
-                    Grid.Column="2"
+                    Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Background="{StaticResource ColorBackground}">

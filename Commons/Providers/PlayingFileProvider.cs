@@ -67,7 +67,14 @@ namespace SportDJ.Commons.Providers
 
         public void End()
         {
-            PlayType = PlayType.End;
+            if (IsLoop)
+            {
+                Pause();
+            }
+            else
+            {
+                PlayType = PlayType.End;
+            }
         }
 
         public void Pause()
