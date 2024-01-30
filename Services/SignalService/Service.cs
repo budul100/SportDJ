@@ -49,7 +49,9 @@ namespace SportDJ.Services.SignalService
 
         #region Public Properties
 
-        public TimeSpan? Duration => playingProvider?.Duration;
+        public TimeSpan? Duration => !(playingProvider?.Duration < TimeSpan.Zero)
+            ? playingProvider?.Duration
+            : TimeSpan.Zero;
 
         public bool IsEnding => playingProvider != default
             && (playingProvider.PlayType == PlayType.Play || playingProvider.PlayType == PlayType.Stop)
@@ -78,9 +80,13 @@ namespace SportDJ.Services.SignalService
 
         public ISampleProvider Output => outputProvider;
 
-        public TimeSpan? Position => playingProvider?.Position;
+        public TimeSpan? Position => !(playingProvider?.Position < TimeSpan.Zero)
+            ? playingProvider?.Position
+            : TimeSpan.Zero;
 
-        public TimeSpan? Remaining => playingProvider?.Remaining;
+        public TimeSpan? Remaining => !(playingProvider?.Remaining < TimeSpan.Zero)
+            ? playingProvider?.Remaining
+            : TimeSpan.Zero;
 
         public StateType State { get; private set; }
 

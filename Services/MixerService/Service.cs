@@ -24,6 +24,7 @@ namespace SportDJ.Services.MixerService
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
         private readonly Dictionary<ISignalService, FadedControlProvider> fadingProviders = new();
+        private readonly object lockMixer = new();
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = new();
 
@@ -126,7 +127,7 @@ namespace SportDJ.Services.MixerService
 
                 if (result.Output != default)
                 {
-                    lock (mixingProvider)
+                    lock (lockMixer)
                     {
                         signalServices.Add(result);
 

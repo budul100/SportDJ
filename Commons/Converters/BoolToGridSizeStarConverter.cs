@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using System;
 using System.Globalization;
-using Avalonia.Controls;
 
 namespace SportDJ.Commons.Converters
 {

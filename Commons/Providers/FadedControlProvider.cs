@@ -10,6 +10,7 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
+        private readonly object lockProvider = new object();
         private readonly ISampleProvider sourceProvider;
 
         private long fadeSampleCount;
@@ -83,7 +84,7 @@ namespace SportDJ.Commons.Providers
             }
             else
             {
-                lock (sourceProvider)
+                lock (lockProvider)
                 {
                     if (FadeType == FadeType.Raise)
                     {
@@ -108,7 +109,7 @@ namespace SportDJ.Commons.Providers
                 offset: offset,
                 count: count);
 
-            lock (sourceProvider)
+            lock (lockProvider)
             {
                 AdjustBuffer(
                     buffer: buffer,

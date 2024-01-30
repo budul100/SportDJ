@@ -11,6 +11,7 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
+        private readonly object lockProvider = new object();
         private readonly AudioFileReader sourceProvider;
 
         private long end;
@@ -90,7 +91,7 @@ namespace SportDJ.Commons.Providers
 
             try
             {
-                lock (sourceProvider)
+                lock (lockProvider)
                 {
                     if (PlayType == PlayType.Pause)
                     {

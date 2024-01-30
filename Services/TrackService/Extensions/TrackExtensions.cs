@@ -17,6 +17,9 @@ namespace SportDJ.Services.TrackService.Extensions
             x: 96,
             y: 96);
 
+        private static readonly object lockTrim = new object();
+        private static readonly object lockRender = new object();
+
         #endregion Private Fields
 
         #region Public Methods
@@ -33,15 +36,20 @@ namespace SportDJ.Services.TrackService.Extensions
                     BottomPeakPen = new Pen(Constants.ColorPeakBottom)
                 };
 
-                using var input = new AudioFileReader(track.Path);
+                var image = default(Image);
 
-                var renderer = new WaveFormRenderer();
-                var peakProvider = new MaxPeakProvider();
+                lock (lockRender)
+                {
+                    using var input = new AudioFileReader(track.Path);
 
-                var image = renderer.Render(
-                    waveStream: input,
-                    peakProvider: peakProvider,
-                    settings: settings);
+                    var renderer = new WaveFormRenderer();
+                    var peakProvider = new MaxPeakProvider();
+
+                    image = renderer.Render(
+                        waveStream: input,
+                        peakProvider: peakProvider,
+                        settings: settings);
+                }
 
                 if (image != default)
                 {
@@ -81,21 +89,21 @@ namespace SportDJ.Services.TrackService.Extensions
             if (track != default
                 && File.Exists(track.Path))
             {
-                using var input = new AudioFileReader(track.Path);
+                var start = default(long?);
+                var end = default(long?);
 
-                lock (input)
+                var from = default(TimeSpan?);
+                var to = default(TimeSpan?);
+
+                var cue = default(long?);
+
+                var rearCheckFrom = trimRearPortion < 1
+                    ? 1 - trimRearPortion
+                    : 0;
+
+                lock (lockTrim)
                 {
-                    var start = default(long?);
-                    var end = default(long?);
-
-                    var from = default(TimeSpan?);
-                    var to = default(TimeSpan?);
-
-                    var cue = default(long?);
-
-                    var rearCheckFrom = trimRearPortion < 1
-                        ? 1 - trimRearPortion
-                        : 0;
+                    using var input = new AudioFileReader(track.Path);
 
                     var blockAlign = input.WaveFormat.BlockAlign;
                     var buffer = new byte[blockAlign];
@@ -147,24 +155,24 @@ namespace SportDJ.Services.TrackService.Extensions
                             }
                         }
                     }
-
-                    if (start.HasValue
-                        && end.HasValue
-                        && start < end)
-                    {
-                        track.Start = start.Value;
-                        track.End = end.Value;
-                        track.Cue = cue;
-
-                        track.Length = to.Value.Subtract(from.Value);
-                    }
-                    else
-                    {
-                        track.IsSilent = true;
-                    }
-
-                    track.IsChecked = true;
                 }
+
+                if (start.HasValue
+                    && end.HasValue
+                    && start < end)
+                {
+                    track.Start = start.Value;
+                    track.End = end.Value;
+                    track.Cue = cue;
+
+                    track.Length = to.Value.Subtract(from.Value);
+                }
+                else
+                {
+                    track.IsSilent = true;
+                }
+
+                track.IsChecked = true;
             }
         }
     }

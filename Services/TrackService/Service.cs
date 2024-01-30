@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using ATL.AudioData;
+﻿using ATL.AudioData;
 using ATL.Playlist;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -12,6 +7,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService
 {
@@ -24,6 +24,7 @@ namespace SportDJ.Services.TrackService
         private readonly IEventAggregator eventAggregator;
         private readonly IEnumerable<ATL.Format> formatsAudio;
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
+        private readonly object lockTracks = new object();
         private readonly PlaylistIOFactory playlistIOFactory;
         private readonly IStorageService<Set> settingsService;
         private readonly Dictionary<string, Track> tracks = new Dictionary<string, Track>();
@@ -144,7 +145,7 @@ namespace SportDJ.Services.TrackService
                         info: info,
                         length: length);
 
-                    lock (tracks)
+                    lock (lockTracks)
                     {
                         tracks.Add(
                             key: file,

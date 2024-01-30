@@ -8,7 +8,6 @@ namespace SportDJ.Commons.Converters
     public class DoubleToGridPixelConverter
         : IValueConverter
     {
-
         #region Public Methods
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -41,6 +40,5 @@ namespace SportDJ.Commons.Converters
         }
 
         #endregion Public Methods
-
     }
 }
