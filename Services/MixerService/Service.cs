@@ -115,7 +115,7 @@ namespace SportDJ.Services.MixerService
 
         #region Public Methods
 
-        public ISignalService Add(Track track)
+        public ISignalService Add(Track track, bool isLoop)
         {
             var result = default(ISignalService);
 
@@ -129,6 +129,8 @@ namespace SportDJ.Services.MixerService
 
                 if (result.Output != default)
                 {
+                    result.IsLoop = isLoop;
+
                     lock (lockMixer)
                     {
                         signalServices.Add(result);
@@ -248,7 +250,7 @@ namespace SportDJ.Services.MixerService
             EndMixer();
 
             signalServices
-                .Where(s => s == signalService || s.IsOverNextThreshold)
+                .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold))
                 .OnEach(s => RemoveSignal(s));
         }
 

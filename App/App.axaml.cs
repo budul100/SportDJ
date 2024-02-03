@@ -94,6 +94,7 @@ namespace SportDJ.App
                 from: typeof(IMixerService),
                 to: typeof(Services.MixerService.Service));
 
+            containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
 

@@ -36,7 +36,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        ISignalService Add(Track track);
+        ISignalService Add(Track track, bool isLoop);
 
         void Initialize(MixerType type, WaveFormat waveFormat, bool playsMultipleSignals);
 

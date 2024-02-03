@@ -19,7 +19,7 @@ namespace SportDJ.Commons.Models.Structure
 
         public string Path { get; set; }
 
-        public bool SavePositions { get; set; }
+        public bool SavePosition { get; set; }
 
         #endregion Public Properties
     }

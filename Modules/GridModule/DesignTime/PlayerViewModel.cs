@@ -1,6 +1,4 @@
-﻿using Avalonia.Media.Imaging;
-using SportDJ.Commons.Assets;
-using System;
+﻿using System;
 
 namespace SportDJ.Modules.GridModule.DesignTime
 {
@@ -24,14 +22,14 @@ namespace SportDJ.Modules.GridModule.DesignTime
             artist ??= "Artist";
             title ??= "Title";
 
-            Content = $"{artist} - {title}";
-            Counter = $"[{3}]";
-            KeyCode = "VcA";
+            //Content = $"{artist} - {title}";
+            //Counter = $"[{3}]";
+            //KeyCode = "VcA";
 
-            Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
+            //Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
 
-            Progress = 0.2;
-            Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
+            //Progress = 0.2;
+            //Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
         }
 
         #endregion Public Constructors

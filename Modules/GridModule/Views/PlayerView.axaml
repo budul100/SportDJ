@@ -47,11 +47,11 @@
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
         BorderThickness="{StaticResource PlayerBorderThickness}"
-        Classes.IsPlaying="{Binding IsPlaying}"
+        Classes.IsActive="{Binding IsActive}"
         CornerRadius="{StaticResource PlayerCornerRadius}">
 
         <Border.Styles>
-            <Style Selector="Border.IsPlaying">
+            <Style Selector="Border.IsActive">
                 <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
             </Style>
             <Style Selector="Border">
@@ -94,7 +94,7 @@
                     VerticalAlignment="Stretch"
                     Focusable="False"
                     IsChecked="{Binding IsLoop}"
-                    IsEnabled="{Binding IsExecuteAvailable}">
+                    IsEnabled="{Binding IsAvailableExecute}">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
                             Width="{StaticResource IconWidth}"
@@ -123,7 +123,8 @@
                             BorderBrush="{StaticResource KeyBorderColor}"
                             BorderThickness="{StaticResource KeyBorderThickness}"
                             CornerRadius="{StaticResource KeyCornerRadius}"
-                            IsEnabled="{Binding IsExecuteAvailable}">
+                            IsEnabled="{Binding IsAvailableExecute}">
+
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
@@ -140,10 +141,10 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Classes.IsActive="{Binding IsActive}">
+                Classes.IsPlaying="{Binding IsPlaying}">
 
                 <Border.Styles>
-                    <Style Selector="Border.IsActive">
+                    <Style Selector="Border.IsPlaying">
                         <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
                     </Style>
                     <Style Selector="Border">

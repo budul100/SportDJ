@@ -29,7 +29,6 @@ namespace SportDJ.Services.SignalService
         private TimeSpan? nextThresholdOnPlay;
         private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
-        private bool selectNextAlways;
 
         #endregion Private Fields
 
@@ -166,8 +165,6 @@ namespace SportDJ.Services.SignalService
                 {
                     var selectNextDuration = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPlaySeconds.Value);
                     nextThresholdOnPlay = playingProvider.Position.Add(selectNextDuration);
-
-                    selectNextAlways = selectNextDuration > Track.Length;
                 }
             }
         }
@@ -269,6 +266,11 @@ namespace SportDJ.Services.SignalService
             }
         }
 
+        private void OnSelectNext()
+        {
+            eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
+        }
+
         private void OnSignalEnded(object sender, EventArgs e)
         {
             State = StateType.None;
@@ -280,7 +282,7 @@ namespace SportDJ.Services.SignalService
         {
             trackService?.End(Track);
 
-            if (IsOverNextThreshold || selectNextAlways)
+            if (IsOverNextThreshold)
             {
                 Stop();
             }
@@ -295,7 +297,7 @@ namespace SportDJ.Services.SignalService
                     Task.Delay(
                         delay: selectNextDelay,
                         cancellationToken: cancellationTokenSource.Token)
-                        .ContinueWith(_ => SelectNext());
+                        .ContinueWith(_ => OnSelectNext());
                 }
             }
         }
@@ -314,18 +316,15 @@ namespace SportDJ.Services.SignalService
             eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
             if (!IsOverNextThreshold
-                && nextThresholdOnPlay.HasValue
-                && Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                && nextThresholdOnPlay.HasValue)
             {
-                IsOverNextThreshold = true;
+                IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
 
-                SelectNext();
+                if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                {
+                    OnSelectNext();
+                }
             }
-        }
-
-        private void SelectNext()
-        {
-            eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
         }
 
         #endregion Private Methods
