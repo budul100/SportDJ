@@ -25,14 +25,13 @@ namespace SportDJ.Modules.GridModule.DesignTime
             title ??= "Title";
 
             Content = $"{artist} - {title}";
-            Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
             Counter = $"[{3}]";
             KeyCode = "VcA";
 
             Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
 
-            WidthPosition = 20;
-            WidthRemaining = 80;
+            Progress = 0.2;
+            Remaining = remaining?.ToString(Constants.FormatDuration) ?? "00:05.3";
         }
 
         #endregion Public Constructors

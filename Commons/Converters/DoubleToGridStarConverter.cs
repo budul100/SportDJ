@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace SportDJ.Commons.Converters
 {
-    public class LongToGridStarConverter
+    public class DoubleToGridStarConverter
         : OneWayValueConverter
     {
         #region Public Methods
@@ -12,7 +12,7 @@ namespace SportDJ.Commons.Converters
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value != default
-                && value is long units
+                && value is double units
                 && units >= 0)
             {
                 return new GridLength(

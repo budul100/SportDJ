@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System;
+using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
-using System;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -25,6 +25,8 @@ namespace SportDJ.Commons.Interfaces
         ISampleProvider Output { get; }
 
         TimeSpan? Position { get; }
+
+        double? Progress { get; }
 
         TimeSpan? Remaining { get; }
 

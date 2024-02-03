@@ -20,20 +20,20 @@ namespace SportDJ.Commons.Converters
                 && values[0] is Bitmap bitmap)
             {
                 if (values?.Count >= 3
-                    && values[1] is long widthPosition
-                    && values[2] is long widthRemaining)
+                    && values[1] is double played
+                    && values[2] is double remaining)
                 {
-                    widthPosition = widthPosition > 0
-                        ? widthPosition
+                    played = played > 0
+                        ? played
                         : 0;
 
-                    widthRemaining = widthRemaining > 0
-                        ? widthRemaining
+                    remaining = remaining > 0
+                        ? remaining
                         : 0;
 
-                    if (widthPosition + widthRemaining > 0)
+                    if (played + remaining > 0)
                     {
-                        var x = (int)(bitmap.Size.Width * widthPosition / (double)(widthPosition + widthRemaining));
+                        var x = (int)(bitmap.Size.Width * played / (played + remaining));
 
                         var width = (int)bitmap.Size.Width - x;
                         var height = (int)bitmap.Size.Height;

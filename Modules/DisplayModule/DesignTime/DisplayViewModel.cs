@@ -16,8 +16,8 @@ namespace SportDJ.Modules.DisplayModule.DesignTime
             IsEnding = true;
 
             Bitmap = new Bitmap(@"C:\Users\mgr\Entwicklung\SportDJ\Additionals\Samples\Sample1.png");
-            WidthPosition = 20;
-            WidthRemaining = 80;
+
+            Progress = 0.2;
         }
 
         #endregion Public Constructors

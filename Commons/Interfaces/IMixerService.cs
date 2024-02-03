@@ -22,6 +22,8 @@ namespace SportDJ.Commons.Interfaces
 
         TimeSpan? Position { get; }
 
+        double? Progress { get; }
+
         TimeSpan? Remaining { get; }
 
         Track Track { get; }

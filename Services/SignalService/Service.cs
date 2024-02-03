@@ -84,6 +84,10 @@ namespace SportDJ.Services.SignalService
             ? playingProvider?.Position
             : TimeSpan.Zero;
 
+        public double? Progress => Duration?.Ticks > 0
+            ? (Position?.Ticks ?? 0) / (double)Duration.Value.Ticks
+            : default;
+
         public TimeSpan? Remaining => !(playingProvider?.Remaining < TimeSpan.Zero)
             ? playingProvider?.Remaining
             : TimeSpan.Zero;

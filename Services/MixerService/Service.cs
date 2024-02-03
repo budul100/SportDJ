@@ -87,6 +87,8 @@ namespace SportDJ.Services.MixerService
 
         public TimeSpan? Position => signalService?.Position;
 
+        public double? Progress => signalService?.Progress;
+
         public TimeSpan? Remaining => signalService?.Remaining;
 
         public Track Track => signalService?.Track;

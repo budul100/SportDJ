@@ -33,9 +33,8 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private bool isEnding;
         private bool isPlaying;
         private string lastWindowState;
+        private double? progress;
         private string remaining;
-        private long widthPosition;
-        private long widthRemaining;
 
         #endregion Private Fields
 
@@ -103,6 +102,12 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             set { SetProperty(ref isPlaying, value); }
         }
 
+        public double? Progress
+        {
+            get { return progress; }
+            set { SetProperty(ref progress, value); }
+        }
+
         public string Remaining
         {
             get { return remaining; }
@@ -161,18 +166,6 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                     eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
                 }
             }
-        }
-
-        public long WidthPosition
-        {
-            get { return widthPosition; }
-            set { SetProperty(ref widthPosition, value); }
-        }
-
-        public long WidthRemaining
-        {
-            get { return widthRemaining; }
-            set { SetProperty(ref widthRemaining, value); }
         }
 
         #endregion Public Properties
@@ -256,12 +249,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
                 Bitmap = mixerService.Track.Bitmap;
                 Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
-
-                if (mixerService?.Duration?.Ticks > 0)
-                {
-                    WidthPosition = mixerService.Position.Value.Ticks;
-                    WidthRemaining = mixerService.Remaining.Value.Ticks;
-                }
+                Progress = mixerService.Progress;
             }
             else
             {
@@ -270,10 +258,8 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 IsEnding = false;
 
                 Bitmap = default;
+                Progress = default;
                 Remaining = default;
-
-                WidthPosition = default;
-                WidthRemaining = default;
             }
         }
 

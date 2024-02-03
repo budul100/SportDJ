@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:co="using:SportDJ.Commons.Converters"
+    xmlns:ct="using:SportDJ.Commons.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -32,9 +33,6 @@
 
         <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
         <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
-        <co:LongToGridStarConverter x:Key="LongToGridStarConverter" />
-        <co:ImageToPositionRectConverter x:Key="ImageToPositionRectConverter" />
-        <co:ImageToRemainingRectConverter x:Key="ImageToRemainingRectConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -241,65 +239,10 @@
                                 Text="{Binding Content}" />
                         </Viewbox>
 
-                        <Grid Grid.Row="2">
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="{Binding !IsPlaying, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                                <RowDefinition Height="{Binding IsPlaying, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                            </Grid.RowDefinitions>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="{Binding WidthPosition, Converter={StaticResource LongToGridStarConverter}}" />
-                                <ColumnDefinition Width="{Binding WidthRemaining, Converter={StaticResource LongToGridStarConverter}}" />
-                            </Grid.ColumnDefinitions>
-
-                            <Image
-                                Grid.Row="0"
-                                Grid.ColumnSpan="2"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Source="{Binding Bitmap}"
-                                Stretch="Fill" />
-
-                            <Image
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Stretch"
-                                Opacity="{StaticResource DisplayOpacityRemaining}"
-                                Stretch="Fill">
-                                <Image.Source>
-                                    <CroppedBitmap Source="{Binding Bitmap}">
-                                        <CroppedBitmap.SourceRect>
-                                            <MultiBinding Converter="{StaticResource ImageToPositionRectConverter}">
-                                                <Binding Path="Bitmap" />
-                                                <Binding Path="WidthPosition" />
-                                                <Binding Path="WidthRemaining" />
-                                            </MultiBinding>
-                                        </CroppedBitmap.SourceRect>
-                                    </CroppedBitmap>
-                                </Image.Source>
-                            </Image>
-
-                            <Image
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Stretch"
-                                Stretch="Fill">
-                                <Image.Source>
-                                    <CroppedBitmap Source="{Binding Bitmap}">
-                                        <CroppedBitmap.SourceRect>
-                                            <MultiBinding Converter="{StaticResource ImageToRemainingRectConverter}">
-                                                <Binding Path="Bitmap" />
-                                                <Binding Path="WidthPosition" />
-                                                <Binding Path="WidthRemaining" />
-                                            </MultiBinding>
-                                        </CroppedBitmap.SourceRect>
-                                    </CroppedBitmap>
-                                </Image.Source>
-                            </Image>
-                        </Grid>
+                        <ct:TrackRenderer
+                            Grid.Row="2"
+                            Bitmap="{Binding Bitmap}"
+                            Progress="{Binding Progress}" />
                     </Grid>
                 </Button>
             </Border>

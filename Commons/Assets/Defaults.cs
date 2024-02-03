@@ -14,6 +14,8 @@
         public const string KeyCodeScreenChange = "VcF11";
         public const string KeyCodeVolumeTalk = "VcSpace";
 
+        public const double OpacityPlayed = 0.5;
+
         public const int SampleRate = 44100;
 
         public const int SelectNextOnPauseSeconds = 10;

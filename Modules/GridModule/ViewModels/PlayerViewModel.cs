@@ -46,20 +46,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private IStorageFolder inputDirectory;
         private ObservableCollection<BindableBase> menus;
         private IOutputService outputServiceLive;
+        private double? progress;
         private string remaining;
         private ISignalService signalService;
         private IStackService stackService;
-
-        private long widthPosition;
-
-        private long? widthRemaining;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-                               : base(player)
+            : base(player)
         {
             this.containerProvider = containerProvider;
             this.player = player;
@@ -299,6 +296,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        public double? Progress
+        {
+            get { return progress; }
+            set { SetProperty(ref progress, value); }
+        }
+
         public string Remaining
         {
             get { return remaining; }
@@ -326,18 +329,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public DelegateCommand TrackBackwardCommand { get; }
 
         public DelegateCommand TrackForwardCommand { get; }
-
-        public long WidthPosition
-        {
-            get { return widthPosition; }
-            set { SetProperty(ref widthPosition, value); }
-        }
-
-        public long? WidthRemaining
-        {
-            get { return widthRemaining; }
-            set { SetProperty(ref widthRemaining, value); }
-        }
 
         #endregion Public Properties
 
@@ -634,22 +625,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             if (length?.Ticks > 0)
             {
-                WidthPosition = signalService?.Track == stackService?.Track
-                    && signalService.Duration?.Ticks > 0
-                    && signalService.Position?.Ticks > 0
-                    ? signalService.Position.Value.Ticks
-                    : 1;
-
-                WidthRemaining = length.Value.Ticks;
-
                 Remaining = length.Value.ToString(Constants.FormatDuration);
+                Progress = signalService?.Track == stackService?.Track
+                    ? signalService.Progress
+                    : default;
             }
             else
             {
-                WidthPosition = default;
-                WidthRemaining = default;
-
                 Remaining = default;
+                Progress = default;
             }
         }
 

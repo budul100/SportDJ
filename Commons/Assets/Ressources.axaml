@@ -22,7 +22,6 @@
 
     <Thickness x:Key="DisplayBorderThickness">2</Thickness>
     <CornerRadius x:Key="DisplayCornerRadius">4</CornerRadius>
-    <x:Double x:Key="DisplayOpacityRemaining">0.5</x:Double>
     <x:Double x:Key="DisplayOpacityPlaying">0.3</x:Double>
     <x:Double x:Key="DisplayOpacityEndingFrom">0.2</x:Double>
     <x:Double x:Key="DisplayOpacityEndingTo">0.5</x:Double>
