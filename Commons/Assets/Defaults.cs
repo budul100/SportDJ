@@ -10,11 +10,13 @@
         public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
 
+        public const double FlashingDurationMilliSecs = 500;
+        public const double FlashingOpacityMax = 0.5;
+        public const double FlashingOpacityMin = 0.2;
+
         public const string KeyCodeOutputPause = "VcEnter";
         public const string KeyCodeScreenChange = "VcF11";
         public const string KeyCodeVolumeTalk = "VcSpace";
-
-        public const double OpacityPlayed = 0.5;
 
         public const int SampleRate = 44100;
 
@@ -22,6 +24,8 @@
         public const int SelectNextOnPlaySeconds = 10;
 
         public const int SettingsWidth = 200;
+
+        public const double TrackOpacityPlayed = 0.5;
 
         public const int TrimRearPercentage = 10;
         public const int TrimVolumePercentage = 0;

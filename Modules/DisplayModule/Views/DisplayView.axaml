@@ -119,32 +119,16 @@
                     <Panel
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Classes.IsEnding="{Binding IsEnding}"
-                        Classes.IsPlaying="{Binding IsPlaying}">
+                        Background="{StaticResource ColorIsPlaying}"
+                        IsVisible="{Binding IsPlaying}"
+                        Opacity="{StaticResource DisplayOpacityPlaying}" />
 
-                        <Panel.Styles>
-                            <Style Selector="Panel.IsPlaying">
-                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
-                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
-                            </Style>
-                            <Style Selector="Panel.IsEnding">
-                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
-                                <Style.Animations>
-                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
-                                        <KeyFrame Cue="0%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="50%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="100%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                    </Animation>
-                                </Style.Animations>
-                            </Style>
-                        </Panel.Styles>
-                    </Panel>
+                    <ct:FlashingPanel
+                        DurationMilliSecs="{StaticResource DisplayFlashingDurationMilliSecs}"
+                        IsActive="{Binding IsEnding}"
+                        OpacityMax="{StaticResource DisplayOpacityEndingMax}"
+                        OpacityMin="{StaticResource DisplayOpacityEndingMin}"
+                        Color="{StaticResource ColorIsEnding}" />
 
                     <TextBlock
                         HorizontalAlignment="Center"
@@ -181,36 +165,20 @@
                     <Panel
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Classes.IsEnding="{Binding IsEnding}"
-                        Classes.IsPlaying="{Binding IsPlaying}">
+                        Background="{StaticResource ColorIsPlaying}"
+                        IsVisible="{Binding IsPlaying}"
+                        Opacity="{StaticResource DisplayOpacityPlaying}" />
 
-                        <Panel.Styles>
-                            <Style Selector="Panel.IsPlaying">
-                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
-                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
-                            </Style>
-                            <Style Selector="Panel.IsEnding">
-                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
-                                <Style.Animations>
-                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
-                                        <KeyFrame Cue="0%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="50%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="100%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                    </Animation>
-                                </Style.Animations>
-                            </Style>
-                        </Panel.Styles>
-                    </Panel>
+                    <ct:FlashingPanel
+                        DurationMilliSecs="{StaticResource DisplayFlashingDurationMilliSecs}"
+                        IsActive="{Binding IsEnding}"
+                        OpacityMax="{StaticResource DisplayOpacityEndingMax}"
+                        OpacityMin="{StaticResource DisplayOpacityEndingMin}"
+                        Color="{StaticResource ColorIsEnding}" />
 
                     <ct:TrackRenderer
-                        Grid.Row="2"
                         Bitmap="{Binding Bitmap}"
+                        OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                         Progress="{Binding Progress}" />
                 </Grid>
             </Border>
@@ -242,32 +210,16 @@
                     <Panel
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Classes.IsEnding="{Binding IsEnding}"
-                        Classes.IsPlaying="{Binding IsPlaying}">
+                        Background="{StaticResource ColorIsPlaying}"
+                        IsVisible="{Binding IsPlaying}"
+                        Opacity="{StaticResource DisplayOpacityPlaying}" />
 
-                        <Panel.Styles>
-                            <Style Selector="Panel.IsPlaying">
-                                <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
-                                <Setter Property="Opacity" Value="{StaticResource DisplayOpacityPlaying}" />
-                            </Style>
-                            <Style Selector="Panel.IsEnding">
-                                <Setter Property="Background" Value="{StaticResource ColorIsEnding}" />
-                                <Style.Animations>
-                                    <Animation IterationCount="INFINITE" Duration="{StaticResource DisplayDurationEnding}">
-                                        <KeyFrame Cue="0%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="50%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingTo}" />
-                                        </KeyFrame>
-                                        <KeyFrame Cue="100%">
-                                            <Setter Property="Opacity" Value="{StaticResource DisplayOpacityEndingFrom}" />
-                                        </KeyFrame>
-                                    </Animation>
-                                </Style.Animations>
-                            </Style>
-                        </Panel.Styles>
-                    </Panel>
+                    <ct:FlashingPanel
+                        DurationMilliSecs="{StaticResource DisplayFlashingDurationMilliSecs}"
+                        IsActive="{Binding IsEnding}"
+                        OpacityMax="{StaticResource DisplayOpacityEndingMax}"
+                        OpacityMin="{StaticResource DisplayOpacityEndingMin}"
+                        Color="{StaticResource ColorIsEnding}" />
 
                     <TextBlock
                         HorizontalAlignment="Center"

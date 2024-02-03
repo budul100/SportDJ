@@ -12,4 +12,10 @@
 		<PackageReference Include="Prism.Avalonia" Version="8.1.97.11000" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Controls\FlashingPanel.axaml.cs">
+	    <DependentUpon>FlashingPanel.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
 </Project>

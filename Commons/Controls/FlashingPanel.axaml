@@ -1,0 +1,35 @@
+<UserControl
+    x:Class="SportDJ.Commons.Controls.FlashingPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <Panel
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Classes.IsActive="{Binding $parent[UserControl].IsActive}">
+
+        <Panel.Styles>
+            <Style Selector="Panel.IsActive">
+                <Setter Property="Background" Value="{Binding $parent[UserControl].Color}" />
+                <Style.Animations>
+                    <Animation IterationCount="INFINITE" Duration="{Binding $parent[UserControl].Duration}">
+                        <KeyFrame Cue="0%">
+                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMin}" />
+                        </KeyFrame>
+                        <KeyFrame Cue="50%">
+                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMax}" />
+                        </KeyFrame>
+                        <KeyFrame Cue="100%">
+                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMin}" />
+                        </KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>
+        </Panel.Styles>
+    </Panel>
+</UserControl>

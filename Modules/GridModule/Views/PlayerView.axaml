@@ -242,6 +242,7 @@
                         <ct:TrackRenderer
                             Grid.Row="2"
                             Bitmap="{Binding Bitmap}"
+                            OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                             Progress="{Binding Progress}" />
                     </Grid>
                 </Button>

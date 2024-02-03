@@ -30,8 +30,8 @@ public partial class PlayerView
 
             if (viewModel != default)
             {
-                viewModel.MenuCloseEvent += (s, e) => contextMenu.Close();
-                viewModel.MenuOpenEvent += (s, e) => contextMenu.Open();
+                viewModel.MenuCloseEvent += (s, e) => { if (contextMenu.ItemCount > 0) contextMenu.Close(); };
+                viewModel.MenuOpenEvent += (s, e) => { if (contextMenu.ItemCount > 0) contextMenu.Open(); };
             }
         }
     }

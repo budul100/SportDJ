@@ -19,7 +19,7 @@ namespace SportDJ.Commons.Controls
 
         public static readonly StyledProperty<double> OpacityPlayedProperty = AvaloniaProperty.Register<TrackRenderer, double>(
             name: nameof(Opacity),
-            defaultValue: Defaults.OpacityPlayed);
+            defaultValue: Defaults.TrackOpacityPlayed);
 
         public static readonly DirectProperty<TrackRenderer, double> PlayedProperty = AvaloniaProperty.RegisterDirect<TrackRenderer, double>(
             name: "Played",
