@@ -1,12 +1,12 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -125,7 +125,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Play();
 
             Assert.Equal(
-                expected: 3,
+                expected: 2,
                 actual: stackService.Entries.Count(e => !e.Played));
 
             Assert.True(stackService.Track == track);

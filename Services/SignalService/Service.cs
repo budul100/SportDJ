@@ -1,4 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -8,10 +12,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService
 {
@@ -266,11 +266,6 @@ namespace SportDJ.Services.SignalService
             }
         }
 
-        private void OnSelectNext()
-        {
-            eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
-        }
-
         private void OnSignalEnded(object sender, EventArgs e)
         {
             State = StateType.None;
@@ -297,7 +292,7 @@ namespace SportDJ.Services.SignalService
                     Task.Delay(
                         delay: selectNextDelay,
                         cancellationToken: cancellationTokenSource.Token)
-                        .ContinueWith(_ => OnSelectNext());
+                        .ContinueWith(_ => SelectNext());
                 }
             }
         }
@@ -322,9 +317,14 @@ namespace SportDJ.Services.SignalService
 
                 if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
                 {
-                    OnSelectNext();
+                    SelectNext();
                 }
             }
+        }
+
+        private void SelectNext()
+        {
+            eventAggregator.GetEvent<SignalNextEvent>().Publish(this);
         }
 
         #endregion Private Methods
