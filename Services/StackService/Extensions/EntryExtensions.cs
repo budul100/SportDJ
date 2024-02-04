@@ -18,13 +18,13 @@ namespace SportDJ.Services.StackService.Extensions
 
         public static bool CanBePlayed(this Entry entry)
         {
-            return !entry.Played
+            return !entry.IsPlayed
                 && !entry.Track.IsSilent;
         }
 
         public static bool HasPlayeds(this IEnumerable<Entry> entries)
         {
-            var result = entries?.Any(e => !e.Played) == true;
+            var result = entries?.Any(e => !e.IsPlayed) == true;
 
             return result;
         }

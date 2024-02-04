@@ -1,6 +1,5 @@
 ﻿using Prism.Commands;
 using Prism.Events;
-using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
@@ -36,24 +35,26 @@ namespace SportDJ.Modules.GridModule.ViewModels
             Header = header;
         }
 
-        public MenuViewModel(IEnumerable<MenuViewModel> menuItems)
+        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<MenuViewModel> menuItems)
         {
+            eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
+                action: _ => UpdateItems(),
+                keepSubscriberReferenceAlive: true);
+
             MenuItems = new ObservableCollection<MenuViewModel>(menuItems);
+
             Command = new DelegateCommand(ExecuteCallback);
             Header = GetHeader();
+
+            UpdateItems();
         }
 
-        public MenuViewModel(IContainerProvider containerProvider, Entry entry, Action callback)
+        public MenuViewModel(IEventAggregator eventAggregator, Entry entry, Action callback)
         {
             this.callback = callback;
 
-            Entry = entry;
-            Command = new DelegateCommand(ExecuteCallback);
-
-            var eventAggregator = containerProvider.Resolve<IEventAggregator>();
-
             eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
-                action: _ => UpdateEntry(),
+                action: _ => UpdateItem(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: e => e == entry);
@@ -64,6 +65,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: t => t == entry.Track);
 
+            Entry = entry;
+            Command = new DelegateCommand(ExecuteCallback);
+
             UpdateTrack();
         }
 
@@ -71,7 +75,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Events
 
-        public event EventHandler CloseMenuEvent;
+        public event EventHandler MenuCloseEvent;
 
         #endregion Public Events
 
@@ -101,6 +105,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public ObservableCollection<MenuViewModel> MenuItems { get; }
 
+        public MenuViewModel Selected { get; private set; }
+
         #endregion Public Properties
 
         #region Private Methods
@@ -109,7 +115,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             callback?.Invoke();
 
-            CloseMenuEvent?.Invoke(
+            MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
         }
@@ -132,10 +138,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return $"Tracks {firstHeader} - {lastHeader}";
         }
 
-        private void UpdateEntry()
+        private void UpdateItem()
         {
-            IsPlayed = Entry.Played;
-            IsSelected = Entry.Selected;
+            IsPlayed = Entry.IsPlayed;
+            IsSelected = Entry.IsSelected;
+        }
+
+        private void UpdateItems()
+        {
+            Selected = MenuItems?.FirstOrDefault(m => m.Entry?.IsSelected == true);
+
+            IsSelected = Selected != default;
         }
 
         private void UpdateTrack()
@@ -144,7 +157,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             Header = $"{Entry.Track.Info} ({duration}) [{Entry.Track.Registers.Count}]";
 
-            UpdateEntry();
+            UpdateItem();
         }
 
         #endregion Private Methods

@@ -30,11 +30,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
+        private readonly IEventAggregator eventAggregator;
         private readonly Player player;
         private readonly IStorageService<Set> settingsService;
-
         private IStorageFolder inputDirectory;
-        private ObservableCollection<BindableBase> menus;
         private IOutputService outputServiceLive;
         private IPlayerService playerService;
 
@@ -66,7 +65,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: ResetStack,
                 canExecuteMethod: () => IsAvailableReset);
 
-            var eventAggregator = containerProvider.Resolve<IEventAggregator>();
+            eventAggregator = containerProvider.Resolve<IEventAggregator>();
 
             eventAggregator?.GetEvent<PlayerDefinedEvent>().Subscribe(
                 action: _ => UpdateContent(),
@@ -152,6 +151,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsAvailableExecute => playerService?.IsAvailable == true;
 
+        public bool IsAvailableMenu => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying;
+
         public bool IsAvailableReset => playerService?.HasPlayeds == true;
 
         public bool IsAvailableSelection => playerService?.HasUnplayeds == true;
@@ -223,9 +224,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public ObservableCollection<BindableBase> Menus => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying
-            ? menus
-            : default;
+        public ObservableCollection<BindableBase> Menus { get; private set; }
 
         public string Name
         {
@@ -324,9 +323,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     foreach (var group in groups)
                     {
                         var result = new MenuViewModel(
+                            eventAggregator: eventAggregator,
                             menuItems: group);
 
-                        result.CloseMenuEvent += OnMenuClosing;
+                        result.MenuCloseEvent += OnMenuClosing;
 
                         yield return result;
                     }
@@ -343,11 +343,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     var current = index;
 
                     var result = new MenuViewModel(
-                        containerProvider: containerProvider,
+                        eventAggregator: eventAggregator,
                         entry: playerService?.StackService.Entries[index],
                         callback: () => playerService?.StackService.Select(current));
 
-                    result.CloseMenuEvent += OnMenuClosing;
+                    result.MenuCloseEvent += OnMenuClosing;
 
                     yield return result;
                 }
@@ -470,6 +470,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(IsAvailableExecute));
             RaisePropertyChanged(nameof(IsAvailableSelection));
             RaisePropertyChanged(nameof(IsAvailableReset));
+            RaisePropertyChanged(nameof(IsAvailableMenu));
 
             RaisePropertyChanged(nameof(HasKey));
             RaisePropertyChanged(nameof(HasPFL));
@@ -493,7 +494,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateMenu()
         {
-            menus = new ObservableCollection<BindableBase>(GetMenuItems());
+            var menus = GetMenuItems();
+            Menus = new ObservableCollection<BindableBase>(menus);
         }
 
         private void UpdateOutput()

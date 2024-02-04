@@ -160,7 +160,10 @@
                     Focusable="False">
 
                     <Button.ContextMenu>
-                        <ContextMenu Name="ContextMenu" ItemsSource="{Binding Menus}">
+                        <ContextMenu
+                            Name="ContextMenu"
+                            IsVisible="{Binding IsAvailableMenu}"
+                            ItemsSource="{Binding Menus}">
 
                             <ContextMenu.DataTemplates>
                                 <DataTemplate x:DataType="vm:MenuViewModel">

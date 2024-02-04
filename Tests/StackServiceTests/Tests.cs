@@ -92,13 +92,13 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 3,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             stackService.Play();
 
             Assert.Equal(
                 expected: 2,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
 
@@ -112,7 +112,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 1,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
 
@@ -126,7 +126,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 2,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
         }
@@ -176,13 +176,13 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 3,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             stackService.Play();
 
             Assert.Equal(
                 expected: 2,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
 
@@ -196,7 +196,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 1,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
 
@@ -204,7 +204,7 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.Equal(
                 expected: 3,
-                actual: stackService.Entries.Count(e => !e.Played));
+                actual: stackService.Entries.Count(e => !e.IsPlayed));
 
             Assert.True(stackService.Track == track);
         }

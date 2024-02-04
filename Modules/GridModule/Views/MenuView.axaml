@@ -21,11 +21,13 @@
 
     <MenuItem
         Name="MenuItem"
+        AutoScrollToSelectedItem="True"
         Command="{Binding Command}"
         FontStyle="{Binding IsPlayed, Converter={StaticResource BoolToFontStyleConverter}}"
         FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}}"
         Header="{Binding Header}"
         ItemsSource="{Binding MenuItems}"
+        SelectedItem="{Binding Selected}"
         StaysOpenOnClick="False">
 
         <MenuItem.ItemTemplate>

@@ -13,9 +13,9 @@
 
         #region Public Properties
 
-        public bool Played { get; set; }
+        public bool IsPlayed { get; set; }
 
-        public bool Selected { get; set; }
+        public bool IsSelected { get; set; }
 
         public Track Track { get; }
 

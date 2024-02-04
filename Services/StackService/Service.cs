@@ -121,7 +121,7 @@ namespace SportDJ.Services.StackService
                     Reset();
                 }
 
-                Entry.Played = true;
+                Entry.IsPlayed = true;
 
                 eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
 
@@ -148,7 +148,7 @@ namespace SportDJ.Services.StackService
                     index--;
 
                     if (!Entries[index].Track.IsSilent
-                        && !Entries[index].Played)
+                        && !Entries[index].IsPlayed)
                     {
                         Select(index);
 
@@ -167,7 +167,7 @@ namespace SportDJ.Services.StackService
             {
                 foreach (var entry in Entries)
                 {
-                    entry.Played = false;
+                    entry.IsPlayed = false;
 
                     eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(entry);
                 }
@@ -183,13 +183,13 @@ namespace SportDJ.Services.StackService
                 if (Entry != default
                     && !Entries[index].Track.IsSilent)
                 {
-                    Entry.Selected = false;
+                    Entry.IsSelected = false;
 
                     eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
                 }
 
                 Entry = Entries[index];
-                Entry.Selected = true;
+                Entry.IsSelected = true;
 
                 eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
 
