@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,24 +14,33 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <co:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter" />
-        <co:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <MenuItem
         Name="MenuItem"
         AutoScrollToSelectedItem="True"
+        Classes.IsChecked="{Binding IsChecked}"
         Command="{Binding Command}"
-        FontStyle="{Binding IsPlayed, Converter={StaticResource BoolToFontStyleConverter}}"
-        FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}}"
+        FontStyle="{Binding IsPlayed, Converter={StaticResource BoolToFontStyleConverter}, ConverterParameter={StaticResource MenuFontStylePlayed}}"
+        FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}, ConverterParameter={StaticResource MenuFontWeightSelected}}"
         Header="{Binding Header}"
         ItemsSource="{Binding MenuItems}"
         SelectedItem="{Binding Selected}"
         StaysOpenOnClick="False">
 
+        <MenuItem.Styles>
+            <Style Selector="MenuItem.IsChecked">
+                <Setter Property="Background" Value="{StaticResource ColorIsChecked}" />
+            </Style>
+        </MenuItem.Styles>
+
         <MenuItem.ItemTemplate>
             <DataTemplate>
-
                 <v:MenuView />
             </DataTemplate>
         </MenuItem.ItemTemplate>

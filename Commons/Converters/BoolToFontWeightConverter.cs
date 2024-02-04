@@ -11,9 +11,14 @@ namespace SportDJ.Commons.Converters
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var result = value is bool boolean && boolean
-                ? FontWeight.Bold
-                : FontWeight.Regular;
+            var result = FontWeight.Regular;
+
+            if (value is bool boolean
+                && boolean
+                && parameter is FontWeight weight)
+            {
+                result = weight;
+            }
 
             return result;
         }

@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:ct="using:SportDJ.Commons.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
@@ -26,13 +25,6 @@
         </ResourceDictionary>
 
         <Thickness x:Key="InnerMargin">1</Thickness>
-        <Thickness x:Key="KeyMargin">5</Thickness>
-
-        <x:Double x:Key="IconWidth">30</x:Double>
-        <x:Double x:Key="IconHeight">30</x:Double>
-
-        <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
-        <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -82,8 +74,8 @@
                     Focusable="False">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
                             Kind="Headphones" />
                     </Viewbox>
                 </ToggleButton>
@@ -97,8 +89,8 @@
                     IsEnabled="{Binding IsAvailableExecute}">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
                             Kind="Repeat" />
                     </Viewbox>
                 </ToggleButton>
@@ -270,8 +262,8 @@
                     Focusable="False">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
                             Kind="SkipBackward" />
                     </Viewbox>
                 </Button>
@@ -284,8 +276,8 @@
                     Focusable="False">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
                             Kind="History" />
                     </Viewbox>
                 </Button>
@@ -298,8 +290,8 @@
                     Focusable="False">
                     <Viewbox Stretch="Uniform" StretchDirection="Both">
                         <mat:MaterialIcon
-                            Width="{StaticResource IconWidth}"
-                            Height="{StaticResource IconHeight}"
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
                             Kind="SkipForward" />
                     </Viewbox>
                 </Button>

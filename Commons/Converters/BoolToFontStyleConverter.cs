@@ -11,9 +11,14 @@ namespace SportDJ.Commons.Converters
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var result = value is bool boolean && boolean
-                ? FontStyle.Italic
-                : FontStyle.Normal;
+            var result = FontStyle.Normal;
+
+            if (value is bool boolean
+                && boolean
+                && parameter is FontStyle style)
+            {
+                result = style;
+            }
 
             return result;
         }

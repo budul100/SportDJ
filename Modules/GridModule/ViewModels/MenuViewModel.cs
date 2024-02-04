@@ -20,6 +20,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly Action callback;
 
         private string header;
+        private bool isChecked;
         private bool isPlayed;
         private bool isSelected;
 
@@ -33,6 +34,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             Command = new DelegateCommand(ExecuteCallback);
             Header = header;
+
+            IsChecked = true;
         }
 
         public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<MenuViewModel> menuItems)
@@ -89,6 +92,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             get { return header; }
             set { SetProperty(ref header, value); }
+        }
+
+        public bool IsChecked
+        {
+            get { return isChecked; }
+            set { SetProperty(ref isChecked, value); }
         }
 
         public bool IsPlayed

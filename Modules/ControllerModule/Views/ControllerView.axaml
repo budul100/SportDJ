@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:co="using:SportDJ.Commons.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -16,7 +15,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
@@ -24,12 +22,6 @@
         </ResourceDictionary>
 
         <Thickness x:Key="InnerMargin">1</Thickness>
-
-        <x:Double x:Key="IconWidth">40</x:Double>
-        <x:Double x:Key="IconHeight">40</x:Double>
-
-        <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
-        <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -68,8 +60,8 @@
             Focusable="False"
             IsChecked="{Binding VolumeMonitoringActive}">
             <mat:MaterialIcon
-                Width="{StaticResource IconWidth}"
-                Height="{StaticResource IconHeight}"
+                Width="{StaticResource ControllerIconSize}"
+                Height="{StaticResource ControllerIconSize}"
                 Kind="VolumeMute" />
         </ToggleButton>
 
@@ -95,8 +87,8 @@
 
                 <mat:MaterialIcon
                     Grid.Column="0"
-                    Width="{StaticResource IconWidth}"
-                    Height="{StaticResource IconHeight}"
+                    Width="{StaticResource ControllerIconSize}"
+                    Height="{StaticResource ControllerIconSize}"
                     Kind="Microphone" />
 
                 <Border
@@ -142,8 +134,8 @@
 
                 <mat:MaterialIcon
                     Grid.Column="0"
-                    Width="{StaticResource IconWidth}"
-                    Height="{StaticResource IconHeight}"
+                    Width="{StaticResource ControllerIconSize}"
+                    Height="{StaticResource ControllerIconSize}"
                     Kind="PauseCircle" />
 
                 <Border
