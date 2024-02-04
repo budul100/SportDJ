@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Material.Icons;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
@@ -290,13 +291,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var selectFileItem = new MenuViewModel(
                 header: $"{Constants.SelectionFileTitle}...",
-                callback: () => SetPlayerFileAsync());
+                callback: () => SetPlayerFileAsync(),
+                icon: MaterialIconKind.FileMultipleOutline);
 
             yield return selectFileItem;
 
             var selectFolderItem = new MenuViewModel(
                 header: $"{Constants.SelectionFolderTitle}...",
-                callback: () => SetPlayerFolderAsync());
+                callback: () => SetPlayerFolderAsync(),
+                icon: MaterialIconKind.FolderMultipleOutline);
 
             yield return selectFolderItem;
 
@@ -304,7 +307,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 var clearPlayerItem = new MenuViewModel(
                     header: Constants.PlayerClearTitle,
-                    callback: () => SetPlayerClearAsync());
+                    callback: () => SetPlayerClearAsync(),
+                    icon: MaterialIconKind.CloseCircleOutline);
 
                 yield return clearPlayerItem;
 
@@ -313,7 +317,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 var isForegroundItem = new MenuViewModel(
                     header: Constants.PlayerOnForegroundText,
                     callback: () => IsForeground = !IsForeground,
-                    isCheckedGetter: () => IsForeground);
+                    isCheckedGetter: () => IsForeground,
+                    icon: MaterialIconKind.ChevronUpBox);
 
                 yield return isForegroundItem;
 

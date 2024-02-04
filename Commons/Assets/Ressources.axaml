@@ -29,6 +29,7 @@
 
     <FontStyle x:Key="MenuFontStylePlayed">Italic</FontStyle>
     <FontWeight x:Key="MenuFontWeightSelected">Bold</FontWeight>
+    <x:Double x:Key="MenuIconSize">30</x:Double>
 
     <Thickness x:Key="GroupTabMargin">30,10,30,10</Thickness>
 

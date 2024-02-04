@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using Material.Icons;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -29,12 +30,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(string header, Action callback, Func<bool> isCheckedGetter = default)
+        public MenuViewModel(string header, Action callback, Func<bool> isCheckedGetter = default,
+            MaterialIconKind? icon = default)
         {
             this.callback = callback;
             this.isCheckedGetter = isCheckedGetter;
 
             Command = new DelegateCommand(ExecuteCallback);
+            Icon = icon;
             Header = header;
 
             UpdateIsChecked();
@@ -90,11 +93,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public Entry Entry { get; }
 
+        public bool HasIcon => Icon != default;
+
         public string Header
         {
             get { return header; }
             set { SetProperty(ref header, value); }
         }
+
+        public MaterialIconKind? Icon { get; }
 
         public bool IsChecked
         {
