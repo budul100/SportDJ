@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
-using System;
+﻿using System;
+using NAudio.Wave;
 
-namespace SportDJ.Commons.Extensions
+namespace SportDJ.Commons.Providers.Extensions
 {
     internal static class ProviderExtensions
     {
@@ -25,19 +25,17 @@ namespace SportDJ.Commons.Extensions
             return result;
         }
 
-        public static TimeSpan ToDuration(this long seconds, int averageBytesPerSecond)
+        public static long ToBytes(this TimeSpan duration, int averageBytesPerSecond)
         {
-            var value = (double)seconds * 1000 / averageBytesPerSecond;
-            var result = TimeSpan.FromMilliseconds(value);
+            var result = duration.Seconds * averageBytesPerSecond;
 
             return result;
         }
 
-        public static long ToSeconds(this TimeSpan? time, int averageBytesPerSecond)
+        public static TimeSpan ToDuration(this long bytes, int averageBytesPerSecond)
         {
-            var result = time.HasValue
-                ? (long)(time.Value.TotalMilliseconds * averageBytesPerSecond / 1000)
-                : default;
+            var seconds = (double)bytes / averageBytesPerSecond;
+            var result = TimeSpan.FromSeconds(seconds);
 
             return result;
         }

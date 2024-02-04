@@ -165,7 +165,7 @@ namespace SportDJ.Services.TrackService.Extensions
                     track.End = end.Value;
                     track.Cue = cue;
 
-                    track.Length = to.Value.Subtract(from.Value);
+                    track.Duration = to.Value.Subtract(from.Value);
                 }
                 else
                 {

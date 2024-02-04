@@ -8,13 +8,13 @@ namespace SportDJ.Commons.Models.Contents
     {
         #region Public Constructors
 
-        public Track(string path, string title, string artist, string info, TimeSpan length)
+        public Track(string path, string title, string artist, string info, TimeSpan duration)
         {
-            Artist = artist;
-            Info = info;
-            Length = length;
             Path = path;
             Title = title;
+            Artist = artist;
+            Info = info;
+            Duration = duration;
         }
 
         #endregion Public Constructors
@@ -27,6 +27,8 @@ namespace SportDJ.Commons.Models.Contents
 
         public long? Cue { get; set; }
 
+        public TimeSpan Duration { get; set; }
+
         public long? End { get; set; }
 
         public string Info { get; }
@@ -34,8 +36,6 @@ namespace SportDJ.Commons.Models.Contents
         public bool IsChecked { get; set; }
 
         public bool IsSilent { get; set; }
-
-        public TimeSpan Length { get; set; }
 
         public string Path { get; }
 

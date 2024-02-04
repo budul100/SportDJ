@@ -140,7 +140,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateTrack()
         {
-            var duration = Entry.Track?.Length.ToString(Constants.FormatDuration);
+            var duration = Entry.Track?.Duration.ToString(Constants.FormatDuration);
 
             Header = $"{Entry.Track.Info} ({duration}) [{Entry.Track.Registers.Count}]";
 

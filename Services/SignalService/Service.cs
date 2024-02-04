@@ -8,6 +8,7 @@ using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -52,8 +53,7 @@ namespace SportDJ.Services.SignalService
             ? playingProvider?.Duration
             : TimeSpan.Zero;
 
-        public bool IsEnding => playingProvider != default
-            && (playingProvider.PlayType == PlayType.Play || playingProvider.PlayType == PlayType.Stop)
+        public bool IsEnding => playingProvider?.PlayType.IsRunning() == true
             && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingSeconds);
 
         public bool IsLoop
@@ -73,7 +73,7 @@ namespace SportDJ.Services.SignalService
 
         public bool IsOverNextThreshold { get; private set; }
 
-        public bool IsPlaying => playingProvider?.PlayType == PlayType.Play;
+        public bool IsPlaying => playingProvider?.PlayType == PlayType.Playing;
 
         public bool IsSilent => outputProvider?.IsSilent != false;
 
@@ -121,12 +121,17 @@ namespace SportDJ.Services.SignalService
 
                 var sourceProvider = new AudioFileReader(Track.Path);
 
+                var fadeOut = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0
+                    ? TimeSpan.FromMilliseconds(settingsService.Contents.Options.FadeOnMixOutMilliseconds)
+                    : TimeSpan.Zero;
+
                 playingProvider = new PlayingFileProvider(
                     sourceProvider: sourceProvider,
-                    track: Track);
+                    track: Track,
+                    fadeOut: fadeOut);
 
+                playingProvider.CueExceededEvent += OnCueExceeded;
                 playingProvider.SignalPausedEvent += OnSignalPaused;
-                playingProvider.SignalStoppedEvent += OnSignalStopped;
                 playingProvider.SignalEndedEvent += OnSignalEnded;
                 playingProvider.SignalUpdatedEvent += OnSignalUpdated;
 
@@ -225,8 +230,8 @@ namespace SportDJ.Services.SignalService
 
                         outputProvider.Dispose();
 
+                        playingProvider.CueExceededEvent -= OnCueExceeded;
                         playingProvider.SignalPausedEvent -= OnSignalPaused;
-                        playingProvider.SignalStoppedEvent -= OnSignalStopped;
                         playingProvider.SignalEndedEvent -= OnSignalEnded;
                         playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
 
@@ -241,6 +246,15 @@ namespace SportDJ.Services.SignalService
         #endregion Protected Methods
 
         #region Private Methods
+
+        private void OnCueExceeded(object sender, EventArgs e)
+        {
+            trackService?.End(Track);
+
+            State = StateType.Stop;
+
+            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+        }
 
         private void OnFadingEnded(object sender, EventArgs e)
         {
@@ -295,15 +309,6 @@ namespace SportDJ.Services.SignalService
                         .ContinueWith(_ => SelectNext());
                 }
             }
-        }
-
-        private void OnSignalStopped(object sender, EventArgs e)
-        {
-            trackService?.End(Track);
-
-            State = StateType.Stop;
-
-            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
         }
 
         private void OnSignalUpdated(object sender, EventArgs e)

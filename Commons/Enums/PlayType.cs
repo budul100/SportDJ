@@ -2,14 +2,14 @@
 {
     public enum PlayType
     {
-        Wait,
+        Waiting,
 
-        Play,
+        Playing,
 
-        Pause,
+        Pausing,
 
-        Stop,
+        Stopping,
 
-        End,
+        Ended,
     }
 }

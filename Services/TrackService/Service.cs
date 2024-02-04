@@ -136,14 +136,14 @@ namespace SportDJ.Services.TrackService
                 if (atlTrack != default)
                 {
                     var info = atlTrack.GetInfo();
-                    var length = TimeSpan.FromSeconds(atlTrack.Duration);
+                    var duration = TimeSpan.FromSeconds(atlTrack.Duration);
 
                     var result = new Track(
                         path: file,
                         title: atlTrack.Title,
                         artist: atlTrack.Artist,
                         info: info,
-                        length: length);
+                        duration: duration);
 
                     lock (lockTracks)
                     {

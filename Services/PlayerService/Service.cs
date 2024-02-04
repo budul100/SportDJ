@@ -242,7 +242,7 @@ namespace SportDJ.Services.PlayerService
         {
             var remaining = signalService?.Track == StackService.Track
                 ? signalService?.Remaining
-                : StackService?.Track?.Length;
+                : StackService?.Track?.Duration;
 
             if (remaining?.Ticks > 0)
             {
