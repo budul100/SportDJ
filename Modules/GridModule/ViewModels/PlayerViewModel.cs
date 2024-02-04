@@ -1,4 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -15,11 +20,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -302,11 +302,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             if (player.Path != default)
             {
-                var resetPlayerItem = new MenuViewModel(
-                    header: Constants.ResetPlayerTitle,
-                    callback: () => ResetPlayerAsync());
+                var clearPlayerItem = new MenuViewModel(
+                    header: Constants.ClearPlayerTitle,
+                    callback: () => SetPlayerClearAsync());
 
-                yield return resetPlayerItem;
+                yield return clearPlayerItem;
 
                 var menuItems = GetMenuTracks()
                     .OrderBy(m => m.Header).ToArray();
@@ -380,14 +380,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 e: default);
         }
 
-        private async void ResetPlayerAsync()
+        private void ResetStack()
+        {
+            playerService?.Reset();
+        }
+
+        private async void SetPlayerClearAsync()
         {
             if (player.Path != default
                 && !IsActive)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.ResetPlayerText,
-                    contentTitle: Constants.ResetPlayerTitle,
+                    contentMessage: Constants.ClearPlayerText,
+                    contentTitle: Constants.ClearPlayerTitle,
                     buttonDefinitions: ButtonEnum.YesNo,
                     enterDefaultButton: ClickEnum.No);
 
@@ -399,11 +404,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     Intialize();
                 }
             }
-        }
-
-        private void ResetStack()
-        {
-            playerService?.Reset();
         }
 
         private async void SetPlayerFileAsync()

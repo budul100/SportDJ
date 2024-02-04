@@ -31,8 +31,8 @@ namespace SportDJ.Commons.Assets
         public const double PercentageMax = 100;
         public const double PercentageMin = 0;
 
-        public const string ResetPlayerText = "Shall the player be reset?";
-        public const string ResetPlayerTitle = "Reset Player";
+        public const string ClearPlayerText = "Shall the player be cleared?";
+        public const string ClearPlayerTitle = "Clear Player";
 
         public const string SelectionFileTitle = "Select File";
         public const string SelectionFolderTitle = "Select Folder";
