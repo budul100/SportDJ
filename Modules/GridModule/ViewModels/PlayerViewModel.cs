@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -20,6 +15,11 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -303,10 +303,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (player.Path != default)
             {
                 var clearPlayerItem = new MenuViewModel(
-                    header: Constants.ClearPlayerTitle,
+                    header: Constants.PlayerClearTitle,
                     callback: () => SetPlayerClearAsync());
 
                 yield return clearPlayerItem;
+
+                yield return new SeparatorViewModel();
+
+                var isForegroundItem = new MenuViewModel(
+                    header: Constants.PlayerOnForegroundText,
+                    callback: () => IsForeground = !IsForeground,
+                    isCheckedGetter: () => IsForeground);
+
+                yield return isForegroundItem;
 
                 var menuItems = GetMenuTracks()
                     .OrderBy(m => m.Header).ToArray();
@@ -391,8 +400,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 && !IsActive)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.ClearPlayerText,
-                    contentTitle: Constants.ClearPlayerTitle,
+                    contentMessage: Constants.PlayerClearText,
+                    contentTitle: Constants.PlayerClearTitle,
                     buttonDefinitions: ButtonEnum.YesNo,
                     enterDefaultButton: ClickEnum.No);
 

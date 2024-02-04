@@ -18,6 +18,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly Action callback;
+        private readonly Func<bool> isCheckedGetter;
 
         private string header;
         private bool isChecked;
@@ -28,14 +29,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(string header, Action callback)
+        public MenuViewModel(string header, Action callback, Func<bool> isCheckedGetter = default)
         {
             this.callback = callback;
+            this.isCheckedGetter = isCheckedGetter;
 
             Command = new DelegateCommand(ExecuteCallback);
             Header = header;
 
-            IsChecked = true;
+            UpdateIsChecked();
         }
 
         public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<MenuViewModel> menuItems)
@@ -124,6 +126,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             callback?.Invoke();
 
+            UpdateIsChecked();
+
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
@@ -145,6 +149,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 : last;
 
             return $"Tracks {firstHeader} - {lastHeader}";
+        }
+
+        private void UpdateIsChecked()
+        {
+            if (isCheckedGetter != default)
+            {
+                IsChecked = isCheckedGetter.Invoke();
+            }
         }
 
         private void UpdateItem()

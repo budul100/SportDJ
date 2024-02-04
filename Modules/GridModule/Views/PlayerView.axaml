@@ -133,9 +133,13 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
+                Classes.IsForeground="{Binding IsForeground}"
                 Classes.IsPlaying="{Binding IsPlaying}">
 
                 <Border.Styles>
+                    <Style Selector="Border.IsForeground">
+                        <Setter Property="Background" Value="{StaticResource ColorIsForeground}" />
+                    </Style>
                     <Style Selector="Border.IsPlaying">
                         <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
                     </Style>
