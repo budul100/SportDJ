@@ -1,8 +1,8 @@
-﻿using NAudio.Utils;
+﻿using System;
+using System.Collections.Generic;
+using NAudio.Utils;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
-using System;
-using System.Collections.Generic;
 
 namespace SportDJ.Commons.Providers
 {
@@ -11,7 +11,8 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
-        private readonly object lockProvider = new object();
+        private readonly object lockProviders = new object();
+        private readonly object lockReader = new object();
         private readonly List<ISampleProvider> sourceProviders = new List<ISampleProvider>();
 
         private float[] sourceBuffer;
@@ -38,7 +39,7 @@ namespace SportDJ.Commons.Providers
                     paramName: nameof(sourceProvider));
             }
 
-            lock (lockProvider)
+            lock (lockProviders)
             {
                 if (sourceProviders.Count >= Constants.MixerSourcesMax)
                 {
@@ -58,7 +59,7 @@ namespace SportDJ.Commons.Providers
                 buffer: sourceBuffer,
                 samplesRequired: count);
 
-            lock (lockProvider)
+            lock (lockReader)
             {
                 var index = sourceProviders.Count - 1;
 
@@ -112,7 +113,7 @@ namespace SportDJ.Commons.Providers
         {
             if (sourceProviders.Contains(source))
             {
-                lock (lockProvider)
+                lock (lockProviders)
                 {
                     sourceProviders.Remove(source);
                 }
@@ -121,7 +122,7 @@ namespace SportDJ.Commons.Providers
 
         public void RemoveAll()
         {
-            lock (lockProvider)
+            lock (lockProviders)
             {
                 sourceProviders.Clear();
             }

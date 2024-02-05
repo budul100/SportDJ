@@ -146,7 +146,8 @@ namespace SportDJ.Commons.Providers
                                     offset: offset + read,
                                     count: required);
 
-                                if (readThisTime < required || sourceProvider.Position >= end)
+                                if (readThisTime < required || sourceProvider.Position >= end
+                                    || (cue.HasValue && sourceProvider.Position >= cue))
                                 {
                                     sourceProvider.Position = Track.Start;
                                 }

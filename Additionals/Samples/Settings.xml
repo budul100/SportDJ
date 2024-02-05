@@ -257,7 +257,7 @@
 		</Cells>
 	</Grid>
 	<Options>
-		<EnableInterruptingDialogs>true</EnableInterruptingDialogs>
+		<DisableInterruptingDialogs>false</DisableInterruptingDialogs>
 		<FadeOnLowerMilliseconds>200</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
