@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
 using Material.Icons;
-using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -15,7 +12,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
-using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
@@ -27,10 +23,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Player player;
-
-        private IStorageFolder inputDirectory;
-        private IPlayerService playerService;
+        private readonly IPlayerService playerService;
 
         #endregion Private Fields
 
@@ -39,7 +32,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(containerProvider: containerProvider, cell: player)
         {
-            this.player = player;
+            playerService = containerProvider?.Resolve<IPlayerService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecutePlayer);
@@ -56,29 +49,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Reset(),
                 canExecuteMethod: () => IsAvailableReset);
 
-            eventAggregator?.GetEvent<PlayerDefinedEvent>().Subscribe(
-                action: _ => UpdateContent(),
+            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
+                action: _ => base.Initialize(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
             eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
+                action: _ => UpdateContent(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerService == p);
+
+            eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
-            eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
+            eventAggregator?.GetEvent<PlayerDefinedEvent>().Subscribe(
                 action: _ => UpdateMenu(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => playerService?.StackService == s);
-
-            eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
-                action: _ => UpdateContent(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: s => playerService?.StackService == s);
+                filter: p => playerService == p);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateContent(),
@@ -99,7 +92,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: k => parent.IsVisible
                     && k == player.KeyCode);
 
-            Intialize();
+            playerService.Initialize(
+                player: player);
         }
 
         #endregion Public Constructors
@@ -144,21 +138,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsForeground
         {
-            get { return player.IsForeground; }
+            get { return playerService?.IsForeground == true; }
             set
             {
-                if (value != player.IsForeground)
+                if (playerService != default
+                    && value != playerService.IsForeground)
                 {
-                    player.IsForeground = value;
-
-                    settingsService.Save();
-
-                    if (playerService != default)
-                    {
-                        playerService.MixerType = player.IsForeground
-                            ? MixerType.Foreground
-                            : MixerType.Background;
-                    }
+                    playerService.IsForeground = value;
 
                     RaisePropertyChanged(nameof(IsForeground));
                 }
@@ -167,19 +153,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsLoop
         {
-            get { return player.IsLoop; }
+            get { return playerService?.IsLoop == true; }
             set
             {
-                if (value != player.IsLoop)
+                if (playerService != default
+                    && value != playerService.IsLoop)
                 {
-                    player.IsLoop = value;
-
-                    settingsService.Save();
-
-                    if (playerService != default)
-                    {
-                        playerService.IsLoop = player.IsLoop;
-                    }
+                    playerService.IsLoop = value;
 
                     RaisePropertyChanged(nameof(IsLoop));
                 }
@@ -192,14 +172,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public string KeyCode
         {
-            get { return player.KeyCode; }
+            get { return playerService?.KeyCode; }
             set
             {
-                if (value != player.KeyCode)
+                if (playerService != default
+                    && value != playerService.KeyCode)
                 {
-                    player.KeyCode = value;
-
-                    settingsService.Save();
+                    playerService.KeyCode = value;
 
                     RaisePropertyChanged(nameof(KeyCode));
                     RaisePropertyChanged(nameof(HasKey));
@@ -209,14 +188,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public string Name
         {
-            get { return player.Name; }
+            get { return playerService.Name; }
             set
             {
-                if (value != player.Name)
+                if (playerService != default
+                    && value != playerService.Name)
                 {
-                    player.Name = value;
-
-                    settingsService.Save();
+                    playerService.Name = value;
 
                     RaisePropertyChanged(nameof(Name));
                 }
@@ -231,14 +209,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool SavePosition
         {
-            get { return player.SavePosition; }
+            get { return playerService.SavePosition; }
             set
             {
-                if (value != player.SavePosition)
+                if (playerService != default
+                    && value != playerService.SavePosition)
                 {
-                    player.SavePosition = value;
-
-                    settingsService.Save();
+                    playerService.SavePosition = value;
 
                     RaisePropertyChanged(nameof(SavePosition));
                 }
@@ -282,23 +259,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             var selectFileItem = new MenuViewModel(
                 header: $"{Constants.SelectionFileHeader}...",
-                callback: () => SetPlayerFileAsync(),
+                callback: () => playerService?.SetFileAsync(),
                 icon: MaterialIconKind.FileMultipleOutline);
 
             yield return selectFileItem;
 
             var selectFolderItem = new MenuViewModel(
                 header: $"{Constants.SelectionFolderHeader}...",
-                callback: () => SetPlayerFolderAsync(),
+                callback: () => playerService?.SetFolderAsync(),
                 icon: MaterialIconKind.FolderMultipleOutline);
 
             yield return selectFolderItem;
 
-            if (player.Path != default)
+            if (playerService?.HasPaths == true)
             {
                 var clearPlayerItem = new MenuViewModel(
                     header: Constants.PlayerClearHeader,
-                    callback: () => SetPlayerClearAsync(),
+                    callback: () => playerService.ClearAsync(),
                     icon: MaterialIconKind.CloseCircleOutline);
 
                 yield return clearPlayerItem;
@@ -339,24 +316,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        protected override void Intialize()
-        {
-            playerService = containerProvider?.Resolve<IPlayerService>();
-
-            var mixerType = IsForeground
-                ? MixerType.Foreground
-                : MixerType.Background;
-
-            playerService.Initialize(
-                path: player.Path,
-                name: player.Name,
-                savePosition: player.SavePosition,
-                isLoop: player.IsLoop,
-                mixerType: mixerType);
-
-            base.Intialize();
-        }
-
         protected override void UpdateOutput()
         {
             base.UpdateOutput();
@@ -389,16 +348,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private IEnumerable<MenuViewModel> GetMenuTracks()
         {
-            if (playerService?.StackService?.Entries?.Any() == true)
+            if (playerService?.Entries?.Any() == true)
             {
-                for (var index = 0; index < playerService.StackService.Entries.Count; index++)
+                foreach (var entry in playerService.Entries)
                 {
-                    var current = index;
-
                     var result = new MenuViewModel(
                         eventAggregator: eventAggregator,
-                        entry: playerService?.StackService.Entries[index],
-                        callback: () => playerService?.StackService.Select(current));
+                        entry: entry);
 
                     result.MenuCloseEvent += OnMenuClosing;
 
@@ -412,78 +368,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
-        }
-
-        private async void SetPlayerClearAsync()
-        {
-            if (player.Path != default
-                && !IsActive)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.PlayerClearMessage,
-                    contentTitle: Constants.PlayerClearHeader,
-                    buttonDefinitions: ButtonEnum.YesNo,
-                    enterDefaultButton: ClickEnum.No);
-
-                if (result == ButtonResult.Yes)
-                {
-                    player.Path = default;
-                    settingsService.Save();
-
-                    Intialize();
-                }
-            }
-        }
-
-        private async void SetPlayerFileAsync()
-        {
-            if (inputDirectory == default)
-            {
-                var folderPath = Path.GetDirectoryName(player.Path);
-                inputDirectory = await dialogService.GetFolderAsync(folderPath);
-            }
-
-            var paths = await dialogService.OpenFilePickerAsync(
-                title: Constants.SelectionFileHeader,
-                allowMultiple: false,
-                startLocation: inputDirectory);
-
-            var path = paths.Any()
-                ? paths.First().Path.AbsolutePath
-                : default;
-
-            if (File.Exists(path))
-            {
-                player.Path = path;
-                settingsService.Save();
-
-                Intialize();
-            }
-        }
-
-        private async void SetPlayerFolderAsync()
-        {
-            if (inputDirectory == default)
-            {
-                inputDirectory = await dialogService.GetFolderAsync(player.Path);
-            }
-
-            var paths = await dialogService.OpenFolderPickerAsync(
-                title: Constants.SelectionFileHeader,
-                allowMultiple: false,
-                startLocation: inputDirectory);
-
-            var path = paths.Any()
-                ? paths.First().Path.AbsolutePath
-                : default;
-
-            if (Directory.Exists(path))
-            {
-                player.Path = path;
-                settingsService.Save();
-
-                Intialize();
-            }
         }
 
         private void UpdateContent()

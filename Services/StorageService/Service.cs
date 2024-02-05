@@ -1,12 +1,12 @@
-﻿using Prism.Events;
-using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Prism.Events;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.StorageService
 {
@@ -153,7 +153,7 @@ namespace SportDJ.Services.StorageService
             { }
         }
 
-        private async void SaveSettingsAsync()
+        private async Task SaveSettingsAsync()
         {
             await saveLock.WaitAsync();
 

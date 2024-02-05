@@ -1,4 +1,5 @@
-﻿using SportDJ.Commons.Enums;
+﻿using System.Threading.Tasks;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Commons.Interfaces
@@ -18,9 +19,9 @@ namespace SportDJ.Commons.Interfaces
 
         void Move(Cell cell, OrientationType orientation);
 
-        void RemoveAsync(Cell cell);
+        Task RemoveAsync(Cell cell);
 
-        void SwapAsync<T>(T cell)
+        Task SwapAsync<T>(T cell)
             where T : Cell;
 
         #endregion Public Methods

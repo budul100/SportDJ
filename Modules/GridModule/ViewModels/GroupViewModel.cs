@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Models.Structure;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -135,7 +135,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(Rows));
             RaisePropertyChanged(nameof(Columns));
 
-            base.Intialize();
+            base.Initialize();
         }
 
         private void SelectTab(string keyCode)

@@ -94,9 +94,9 @@ namespace SportDJ.Services.TrackService
             return result;
         }
 
-        public IEnumerable<Track> GetTracks(string path)
+        public IEnumerable<Track> GetTracks(IEnumerable<string> paths)
         {
-            var files = GetFiles(path)
+            var files = GetFiles(paths)
                 .Select(p => Path.GetFullPath(p)).ToArray();
 
             if (files?.Any() == true)
@@ -157,43 +157,43 @@ namespace SportDJ.Services.TrackService
             }
         }
 
-        private IEnumerable<string> GetFiles(string path)
+        private IEnumerable<string> GetFiles(IEnumerable<string> paths)
         {
-            if (!string.IsNullOrWhiteSpace(path))
+            if (paths?.Any() == true)
             {
-                if (File.Exists(path)
-                    && formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(path))))
-                {
-                    yield return path;
-                }
+                var relevants = paths?
+                    .Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
 
-                var relevants = default(IEnumerable<string>);
-
-                if (File.Exists(path)
-                    && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(path))))
+                foreach (var relevant in relevants)
                 {
-                    relevants = playlistIOFactory.GetPlaylistIO(path).FilePaths;
-                }
-                else if (Directory.Exists(path))
-                {
-                    relevants = Directory.GetFiles(
-                        path: path,
-                        searchPattern: "*.*",
-                        searchOption: SearchOption.TopDirectoryOnly)
-                        .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
-                            || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
-                }
-
-                if (relevants?.Any() == true)
-                {
-                    foreach (var relevant in relevants)
+                    if (File.Exists(relevant)
+                        && formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
                     {
-                        var files = GetFiles(relevant).ToArray();
+                        yield return relevant;
+                    }
 
-                        foreach (var file in files)
-                        {
-                            yield return relevant;
-                        }
+                    var filePaths = default(IEnumerable<string>);
+
+                    if (File.Exists(relevant)
+                        && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
+                    {
+                        filePaths = playlistIOFactory.GetPlaylistIO(relevant).FilePaths;
+                    }
+                    else if (Directory.Exists(relevant))
+                    {
+                        filePaths = Directory.GetFiles(
+                            path: relevant,
+                            searchPattern: "*.*",
+                            searchOption: SearchOption.TopDirectoryOnly)
+                            .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
+                                || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
+                    }
+
+                    var files = GetFiles(filePaths).ToArray();
+
+                    foreach (var file in files)
+                    {
+                        yield return file;
                     }
                 }
             }

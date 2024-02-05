@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -82,7 +83,7 @@ namespace SportDJ.Services.GridService
             UpdateGrid();
         }
 
-        public async void RemoveAsync(Cell cell)
+        public async Task RemoveAsync(Cell cell)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Constants.GridRemoveMessage,
@@ -96,7 +97,7 @@ namespace SportDJ.Services.GridService
             }
         }
 
-        public async void SwapAsync<T>(T cell)
+        public async Task SwapAsync<T>(T cell)
             where T : Cell
         {
             if (cell is Player player)

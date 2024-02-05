@@ -22,7 +22,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         protected readonly IDialogService dialogService;
         protected readonly IEventAggregator eventAggregator;
         protected readonly IGridService gridService;
-        protected readonly IStorageService<Set> settingsService;
 
         protected bool isDisposed;
         protected IOutputService outputServiceLive;
@@ -32,6 +31,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly Cell cell;
+        private readonly IStorageService<Set> settingsService;
 
         private int columnSpan;
         private int rowSpan;
@@ -154,7 +154,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected abstract IEnumerable<BindableBase> GetMenuItems();
 
-        protected virtual void Intialize()
+        protected virtual void Initialize()
         {
             UpdateOutput();
             UpdateMenu();

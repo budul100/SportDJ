@@ -2,20 +2,27 @@
 	<Grid>
 		<Cells>
 			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
-				<IsForeground>false</IsForeground>
+				<IsForeground>true</IsForeground>
 				<IsLoop>false</IsLoop>
+				<Paths>
+					<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen</Path>
+				</Paths>
 				<SavePosition>false</SavePosition>
 			</Cell>
 			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
-				<IsForeground>false</IsForeground>
+				<IsForeground>true</IsForeground>
 				<IsLoop>false</IsLoop>
-				<Path>C:/Users/mgr/SportDJ/Spiel_Team.m3u</Path>
+				<Paths>
+					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Organ - Attacke.mp3</Path>
+					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Orgel - Angriff lang.mp3</Path>
+					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Orgel - Angriff.mp3</Path>
+				</Paths>
 				<SavePosition>false</SavePosition>
 			</Cell>
 		</Cells>
 	</Grid>
 	<Options>
-		<EnableInterruptingDialogs>true</EnableInterruptingDialogs>
+		<DisableInterruptingDialogs>false</DisableInterruptingDialogs>
 		<FadeOnLowerMilliseconds>200</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>

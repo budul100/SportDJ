@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Structure
 {
@@ -20,7 +21,8 @@ namespace SportDJ.Commons.Models.Structure
         [XmlAttribute]
         public string Name { get; set; }
 
-        public string Path { get; set; }
+        [XmlArrayItem(ElementName = "Path")]
+        public List<string> Paths { get; set; } = new List<string>();
 
         [XmlIgnore]
         public override int Rows => 1;

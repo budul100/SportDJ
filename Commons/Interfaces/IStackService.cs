@@ -1,5 +1,6 @@
-﻿using SportDJ.Commons.Models.Contents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -23,7 +24,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Initialize(string path, string name, bool savePosition, bool isLoop);
+        void Initialize(IEnumerable<string> paths, string name, bool savePosition, bool isLoop);
 
         void Next();
 
@@ -32,8 +33,6 @@ namespace SportDJ.Commons.Interfaces
         void Previous();
 
         void Reset();
-
-        void Select(int index);
 
         void Shuffle();
 

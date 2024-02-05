@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -11,6 +12,7 @@ using Avalonia.Platform.Storage;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Interfaces;
 
@@ -43,17 +45,36 @@ namespace SportDJ.DialogService
 
         #region Public Methods
 
-        public async Task<IStorageFolder> GetFolderAsync(string basePath = default)
+        public async Task<IStorageFolder> GetFolderAsync(IEnumerable<string> paths = default,
+            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
         {
             var result = default(IStorageFolder);
 
-            var folderPath = Path.GetDirectoryName(basePath);
+            var relevant = default(string);
 
-            if (Directory.Exists(folderPath))
+            if (paths?.Any() == true)
+            {
+                relevant = paths?.FirstOrDefault(p => Directory.Exists(p));
+
+                if (string.IsNullOrEmpty(relevant))
+                {
+                    relevant = paths?
+                        .Select(p => Path.GetDirectoryName(p))
+                        .FirstOrDefault(p => Directory.Exists(p));
+                }
+            }
+
+            if (string.IsNullOrEmpty(relevant)
+                && alternative != default)
+            {
+                relevant = Environment.GetFolderPath(alternative.Value);
+            }
+
+            if (Directory.Exists(relevant))
             {
                 var topLevel = GetTopLevel();
 
-                result = await topLevel?.StorageProvider.TryGetFolderFromPathAsync(folderPath);
+                result = await topLevel?.StorageProvider.TryGetFolderFromPathAsync(relevant);
             }
 
             return result;

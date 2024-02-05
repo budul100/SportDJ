@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,7 +11,8 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Methods
 
-        Task<IStorageFolder> GetFolderAsync(string basePath = default);
+        Task<IStorageFolder> GetFolderAsync(IEnumerable<string> paths = default,
+            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile);
 
         Task<ButtonResult> GetMessageBoxResultAsync(string contentMessage, string contentTitle,
             ButtonEnum buttonDefinitions = ButtonEnum.YesNo, ClickEnum enterDefaultButton = ClickEnum.Yes,

@@ -1,13 +1,13 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Services.StackService
 {
@@ -55,12 +55,12 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(string path, string name, bool savePosition, bool isLoop)
+        public void Initialize(IEnumerable<string> paths, string name, bool savePosition, bool isLoop)
         {
             var tracks = trackService
-                .GetTracks(path).ToList();
+                .GetTracks(paths).ToArray();
 
-            Entries = tracks.GetEntries().ToList();
+            Entries = GetEntries(tracks).ToList();
 
             position = GetPosition(
                 playerName: name,
@@ -72,7 +72,7 @@ namespace SportDJ.Services.StackService
             {
                 if (isLoop)
                 {
-                    Select(position.Index);
+                    SelectEntry(position.Index);
                 }
                 else
                 {
@@ -101,14 +101,14 @@ namespace SportDJ.Services.StackService
                     if (Entries[index].CanBePlayed()
                         && Entries[index] != Entry)
                     {
-                        Select(index);
+                        SelectEntry(index);
 
                         return;
                     }
                 }
                 while (Index != index);
 
-                Select(Index);
+                SelectEntry(Index);
             }
         }
 
@@ -150,14 +150,14 @@ namespace SportDJ.Services.StackService
                     if (!Entries[index].Track.IsSilent
                         && !Entries[index].IsPlayed)
                     {
-                        Select(index);
+                        SelectEntry(index);
 
                         break;
                     }
                 }
                 while (Index != index);
 
-                Select(Index);
+                SelectEntry(Index);
             }
         }
 
@@ -174,29 +174,6 @@ namespace SportDJ.Services.StackService
             }
 
             eventAggregator.GetEvent<StackResetEvent>()?.Publish(this);
-        }
-
-        public void Select(int index)
-        {
-            if (index < Entries.Count)
-            {
-                if (Entry != default
-                    && !Entries[index].Track.IsSilent)
-                {
-                    Entry.IsSelected = false;
-
-                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
-                }
-
-                Entry = Entries[index];
-                Entry.IsSelected = true;
-
-                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
-
-                Index = index;
-
-                eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
-            }
         }
 
         public void Shuffle()
@@ -221,6 +198,21 @@ namespace SportDJ.Services.StackService
         #endregion Public Methods
 
         #region Private Methods
+
+        private IEnumerable<Entry> GetEntries(IEnumerable<Track> tracks)
+        {
+            if (tracks?.Any() == true)
+            {
+                foreach (var track in tracks)
+                {
+                    var result = new Entry(
+                        track: track,
+                        selector: e => SelectEntry(e));
+
+                    yield return result;
+                }
+            }
+        }
 
         private Position GetPosition(string playerName, bool savePosition)
         {
@@ -247,18 +239,48 @@ namespace SportDJ.Services.StackService
             }
         }
 
+        private void SelectEntry(Entry entry)
+        {
+            var index = Entries.IndexOf(entry);
+
+            SelectEntry(index);
+        }
+
+        private void SelectEntry(int index)
+        {
+            if (index < Entries.Count)
+            {
+                if (Entry != default
+                    && !Entries[index].Track.IsSilent)
+                {
+                    Entry.IsSelected = false;
+
+                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+                }
+
+                Entry = Entries[index];
+                Entry.IsSelected = true;
+
+                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+
+                Index = index;
+
+                eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
+            }
+        }
+
         private void SetTrack()
         {
             if (Entries?.Any(e => e.Track.Path == position.Path) != true
                 || position.Index >= Entries.Count)
             {
-                Select(0);
+                SelectEntry(0);
             }
             else if (Entries[position.Index].Track != Track)
             {
                 var index = Entries.IndexOf(Entries.First(e => e.Track.Path == position.Path));
 
-                Select(index);
+                SelectEntry(index);
             }
         }
 

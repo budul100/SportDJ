@@ -1,6 +1,8 @@
-﻿using SportDJ.Commons.Enums;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using SportDJ.Commons.Models.Contents;
-using System;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -10,6 +12,10 @@ namespace SportDJ.Commons.Interfaces
         #region Public Properties
 
         int Counter { get; }
+
+        IEnumerable<Entry> Entries { get; }
+
+        bool HasPaths { get; }
 
         bool HasPlayeds { get; }
 
@@ -23,17 +29,21 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsEnding { get; }
 
+        bool IsForeground { get; set; }
+
         bool IsLoop { get; set; }
 
         bool IsPlaying { get; }
 
-        MixerType MixerType { get; set; }
+        string KeyCode { get; set; }
+
+        string Name { get; set; }
 
         double? Progress { get; }
 
         TimeSpan? Remaining { get; }
 
-        IStackService StackService { get; }
+        bool SavePosition { get; set; }
 
         Track Track { get; }
 
@@ -41,15 +51,21 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
+        Task ClearAsync();
+
         void Execute();
 
-        void Initialize(string path, string name, bool savePosition, bool isLoop, MixerType mixerType);
+        void Initialize(Player player);
 
         void Next();
 
         void Previous();
 
         void Reset();
+
+        Task SetFileAsync();
+
+        Task SetFolderAsync();
 
         #endregion Public Methods
     }

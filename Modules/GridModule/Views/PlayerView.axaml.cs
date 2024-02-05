@@ -17,9 +17,25 @@ public partial class PlayerView
 
     #endregion Public Constructors
 
+    #region Protected Methods
+
+    protected override void OnDataContextBeginUpdate()
+    {
+        base.OnDataContextBeginUpdate();
+
+        UpdateContextMenu();
+    }
+
+    #endregion Protected Methods
+
     #region Private Methods
 
     private void OnDataContextChanged(object sender, System.EventArgs e)
+    {
+        UpdateContextMenu();
+    }
+
+    private void UpdateContextMenu()
     {
         var contextMenu = this
             .FindControl<ContextMenu>("ContextMenu");
@@ -30,8 +46,8 @@ public partial class PlayerView
 
             if (viewModel != default)
             {
-                viewModel.MenuCloseEvent += (s, e) => { if (contextMenu.ItemCount > 0) contextMenu.Close(); };
-                viewModel.MenuOpenEvent += (s, e) => { if (contextMenu.ItemCount > 0) contextMenu.Open(); };
+                viewModel.MenuOpenEvent += (s, e) => contextMenu.Open();
+                viewModel.MenuCloseEvent += (s, e) => contextMenu.Close();
             }
         }
     }
