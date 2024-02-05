@@ -1,20 +1,22 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Prism.Ioc;
+﻿using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GridViewModel
-        : BindableBase
+        : BindableBase, IDisposable
     {
         #region Private Fields
 
         private readonly GroupViewModel parent;
 
         private int columns;
+        private bool isDisposed;
         private bool isSelected;
         private string keyCode;
         private string name;
@@ -92,6 +94,39 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(
+                isDisposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    foreach (var cell in Cells)
+                    {
+                        cell.Dispose();
+                    }
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
 
         #region Private Methods
 

@@ -30,7 +30,9 @@ namespace SportDJ.Services.HookService
             hook.KeyPressed += OnKeyPressed;
             hook.KeyReleased += OnKeyReleased;
 
+#if (!DEBUG)
             Task.Run(() => hook.Run());
+#endif
         }
 
         #endregion Public Constructors

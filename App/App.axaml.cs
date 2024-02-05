@@ -77,6 +77,7 @@ namespace SportDJ.App
 
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
+            containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
 
             RegisterTypes<OutputType>(

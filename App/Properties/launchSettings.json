@@ -1,8 +1,12 @@
 {
   "profiles": {
-    "App": {
+    "App (with full settings)": {
       "commandName": "Project",
       "commandLineArgs": "\"..\\..\\..\\..\\Additionals\\Samples\\Settings.xml\""
+    },
+    "App (with empty settings)": {
+      "commandName": "Project",
+      "commandLineArgs": "\"..\\..\\..\\..\\Additionals\\Samples\\Empty.xml\""
     }
   }
 }

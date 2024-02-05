@@ -14,22 +14,22 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
-        private readonly IStorageService<Set> settingsService;
+        private readonly IGridService gridService;
 
-        private GridViewModel element;
+        private GridViewModel grid;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public CanvasViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+            IEventAggregator eventAggregator, IGridService gridService)
             : base(regionManager)
         {
             this.containerProvider = containerProvider;
-            this.settingsService = settingsService;
+            this.gridService = gridService;
 
-            eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
+            eventAggregator.GetEvent<GridUpdatedEvent>().Subscribe(
                 action: Initialize,
                 keepSubscriberReferenceAlive: true);
 
@@ -42,8 +42,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public GridViewModel Grid
         {
-            get { return element; }
-            set { SetProperty(ref element, value); }
+            get { return grid; }
+            set { SetProperty(ref grid, value); }
         }
 
         #endregion Public Properties
@@ -52,12 +52,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Initialize()
         {
-            if (containerProvider != default)
-            {
-                Grid = new GridViewModel(
-                    containerProvider: containerProvider,
-                    grid: settingsService.Contents.Grid);
-            }
+            Grid?.Dispose();
+
+            Grid = new GridViewModel(
+                containerProvider: containerProvider,
+                grid: gridService.Grid);
         }
 
         #endregion Private Methods

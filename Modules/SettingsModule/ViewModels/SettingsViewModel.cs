@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -7,8 +9,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -46,10 +46,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
             outputSettings = settingsService.Contents.Outputs?
                 .SingleOrDefault(o => o.Type == OutputType.Live);
+
             Options = settingsService.Contents.Options;
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: UpdateAttributes,
+                action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
 
             UpdateDevices();
@@ -146,11 +147,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Private Methods
 
-        private void UpdateAttributes()
-        {
-            RaisePropertyChanged(nameof(IsActive));
-        }
-
         private void UpdateDevices()
         {
             Device = outputService.DeviceName;
@@ -161,6 +157,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 .Select(d => d.Value));
 
             isUpdate = false;
+        }
+
+        private void UpdateOptions()
+        {
+            RaisePropertyChanged(nameof(IsActive));
         }
 
         #endregion Private Methods

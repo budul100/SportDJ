@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Prism.Events;
 using Prism.Ioc;
+using Prism.Mvvm;
 using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Models.Structure;
 
@@ -21,7 +23,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Constructors
 
         public GroupViewModel(IContainerProvider containerProvider, Group group, GridViewModel parent, bool isOnCanvas)
-            : base(group)
+            : base(containerProvider: containerProvider, cell: group)
         {
             this.parent = parent;
 
@@ -71,6 +73,30 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
+        #region Protected Methods
+
+        protected override void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    foreach (var tab in Tabs)
+                    {
+                        tab.Dispose();
+                    }
+
+                    Tabs.Clear();
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        protected override IEnumerable<BindableBase> GetMenuItems() => this.GetMenuCells().ToArray();
+
+        #endregion Protected Methods
+
         #region Private Methods
 
         private void Initialize(IContainerProvider containerProvider, Group group, bool isOnCanvas)
@@ -108,6 +134,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             RaisePropertyChanged(nameof(Rows));
             RaisePropertyChanged(nameof(Columns));
+
+            base.Intialize();
         }
 
         private void SelectTab(string keyCode)

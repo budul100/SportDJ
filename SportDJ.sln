@@ -45,7 +45,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SettingsModule", "Modules\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HookService", "Services\HookService\HookService.csproj", "{008B65FD-1244-4F9A-BDF9-D696A37E4F7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService", "Services\PlayerService\PlayerService.csproj", "{087DACE7-62EE-463E-8809-445076522EE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService", "Services\PlayerService\PlayerService.csproj", "{087DACE7-62EE-463E-8809-445076522EE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridService", "Services\GridService\GridService.csproj", "{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,10 @@ Global
 		{087DACE7-62EE-463E-8809-445076522EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{087DACE7-62EE-463E-8809-445076522EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{087DACE7-62EE-463E-8809-445076522EE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,6 +157,7 @@ Global
 		{4E52BA36-2D11-4734-BEB6-F239ECF4AD2D} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 		{008B65FD-1244-4F9A-BDF9-D696A37E4F7B} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{087DACE7-62EE-463E-8809-445076522EE6} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

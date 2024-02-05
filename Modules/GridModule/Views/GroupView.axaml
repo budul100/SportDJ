@@ -34,6 +34,23 @@
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Selected}">
 
+        <TabControl.ContextMenu>
+            <ContextMenu
+                Name="ContextMenu"
+                IsVisible="{Binding IsAvailableMenu}"
+                ItemsSource="{Binding Menus}">
+
+                <ContextMenu.DataTemplates>
+                    <DataTemplate x:DataType="vm:MenuViewModel">
+                        <v:MenuView />
+                    </DataTemplate>
+                    <DataTemplate x:DataType="vm:SeparatorViewModel">
+                        <Separator />
+                    </DataTemplate>
+                </ContextMenu.DataTemplates>
+            </ContextMenu>
+        </TabControl.ContextMenu>
+
         <TabControl.ItemTemplate>
             <DataTemplate>
 

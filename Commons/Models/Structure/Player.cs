@@ -7,6 +7,9 @@ namespace SportDJ.Commons.Models.Structure
     {
         #region Public Properties
 
+        [XmlIgnore]
+        public override int Columns => 1;
+
         public bool IsForeground { get; set; }
 
         public bool IsLoop { get; set; }
@@ -18,6 +21,9 @@ namespace SportDJ.Commons.Models.Structure
         public string Name { get; set; }
 
         public string Path { get; set; }
+
+        [XmlIgnore]
+        public override int Rows => 1;
 
         public bool SavePosition { get; set; }
 

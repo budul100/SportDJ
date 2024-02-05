@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Material.Icons;
 using MsBox.Avalonia.Enums;
@@ -14,13 +18,7 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -29,13 +27,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IContainerProvider containerProvider;
-        private readonly IDialogService dialogService;
-        private readonly IEventAggregator eventAggregator;
         private readonly Player player;
-        private readonly IStorageService<Set> settingsService;
+
         private IStorageFolder inputDirectory;
-        private IOutputService outputServiceLive;
         private IPlayerService playerService;
 
         #endregion Private Fields
@@ -43,13 +37,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-            : base(player)
+            : base(containerProvider: containerProvider, cell: player)
         {
-            this.containerProvider = containerProvider;
             this.player = player;
-
-            settingsService = containerProvider.Resolve<IStorageService<Set>>();
-            dialogService = containerProvider.Resolve<IDialogService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecutePlayer);
@@ -63,10 +53,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 canExecuteMethod: () => IsAvailableSelection);
 
             ResetCommand = new DelegateCommand(
-                executeMethod: ResetStack,
+                executeMethod: () => playerService?.Reset(),
                 canExecuteMethod: () => IsAvailableReset);
-
-            eventAggregator = containerProvider.Resolve<IEventAggregator>();
 
             eventAggregator?.GetEvent<PlayerDefinedEvent>().Subscribe(
                 action: _ => UpdateContent(),
@@ -91,10 +79,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => playerService?.StackService == s);
-
-            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
-                action: _ => UpdateOutput(),
-                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateContent(),
@@ -134,7 +118,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public string Content => playerService?.Track?.Info;
 
-        public string Counter => playerService != default
+        public string Counter => playerService?.Track != default
             ? $"({playerService.Counter})"
             : default;
 
@@ -151,8 +135,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public virtual bool IsActive => playerService?.IsActive == true;
 
         public bool IsAvailableExecute => playerService?.IsAvailable == true;
-
-        public bool IsAvailableMenu => settingsService.Contents.Options.EnableInterruptingDialogs || !outputServiceLive.IsPlaying;
 
         public bool IsAvailableReset => playerService?.HasPlayeds == true;
 
@@ -225,8 +207,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public ObservableCollection<BindableBase> Menus { get; private set; }
-
         public string Name
         {
             get { return player.Name; }
@@ -271,33 +251,44 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
-        #region Private Methods
+        #region Protected Methods
 
-        private void ExecutePlayer()
+        protected override void Dispose(bool isDisposing)
         {
-            if (playerService?.IsAvailable == true)
+            if (!isDisposed)
             {
-                playerService.Execute();
-            }
-            else
-            {
-                MenuOpenEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                if (isDisposing)
+                {
+                    playerService?.Dispose();
+                }
+
+                isDisposed = true;
             }
         }
 
-        private IEnumerable<BindableBase> GetMenuItems()
+        protected override IEnumerable<BindableBase> GetMenuItems()
         {
+            var menuCells = GetMenuCells().ToArray();
+
+            var editCellsItem = new MenuViewModel(
+                header: $"{Constants.GridEditHeader}...",
+                menuItems: menuCells);
+
+            editCellsItem.MenuCloseEvent += OnMenuClosing;
+
+            yield return editCellsItem;
+
+            yield return new SeparatorViewModel();
+
             var selectFileItem = new MenuViewModel(
-                header: $"{Constants.SelectionFileTitle}...",
+                header: $"{Constants.SelectionFileHeader}...",
                 callback: () => SetPlayerFileAsync(),
                 icon: MaterialIconKind.FileMultipleOutline);
 
             yield return selectFileItem;
 
             var selectFolderItem = new MenuViewModel(
-                header: $"{Constants.SelectionFolderTitle}...",
+                header: $"{Constants.SelectionFolderHeader}...",
                 callback: () => SetPlayerFolderAsync(),
                 icon: MaterialIconKind.FolderMultipleOutline);
 
@@ -306,7 +297,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (player.Path != default)
             {
                 var clearPlayerItem = new MenuViewModel(
-                    header: Constants.PlayerClearTitle,
+                    header: Constants.PlayerClearHeader,
                     callback: () => SetPlayerClearAsync(),
                     icon: MaterialIconKind.CloseCircleOutline);
 
@@ -315,7 +306,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 yield return new SeparatorViewModel();
 
                 var isForegroundItem = new MenuViewModel(
-                    header: Constants.PlayerOnForegroundText,
+                    header: Constants.PlayerOnForegroundHeader,
                     callback: () => IsForeground = !IsForeground,
                     isCheckedGetter: () => IsForeground,
                     icon: MaterialIconKind.ChevronUpBox);
@@ -348,6 +339,54 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        protected override void Intialize()
+        {
+            playerService = containerProvider?.Resolve<IPlayerService>();
+
+            var mixerType = IsForeground
+                ? MixerType.Foreground
+                : MixerType.Background;
+
+            playerService.Initialize(
+                path: player.Path,
+                name: player.Name,
+                savePosition: player.SavePosition,
+                isLoop: player.IsLoop,
+                mixerType: mixerType);
+
+            base.Intialize();
+        }
+
+        protected override void UpdateOutput()
+        {
+            base.UpdateOutput();
+
+            var outputServicePFL = containerProvider?.Resolve<IOutputService>(
+                nameof(OutputType.PFL));
+
+            HasPFL = outputServicePFL?.IsActive == true;
+
+            UpdateContent();
+        }
+
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private void ExecutePlayer()
+        {
+            if (playerService?.IsAvailable == true)
+            {
+                playerService.Execute();
+            }
+            else
+            {
+                MenuOpenEvent?.Invoke(
+                    sender: this,
+                    e: default);
+            }
+        }
+
         private IEnumerable<MenuViewModel> GetMenuTracks()
         {
             if (playerService?.StackService?.Entries?.Any() == true)
@@ -368,35 +407,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private void Intialize()
-        {
-            playerService = containerProvider?.Resolve<IPlayerService>();
-
-            var mixerType = IsForeground
-                ? MixerType.Foreground
-                : MixerType.Background;
-
-            playerService.Initialize(
-                path: player.Path,
-                name: player.Name,
-                savePosition: player.SavePosition,
-                isLoop: player.IsLoop,
-                mixerType: mixerType);
-
-            UpdateOutput();
-            UpdateMenu();
-        }
-
         private void OnMenuClosing(object sender, EventArgs e)
         {
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
-        }
-
-        private void ResetStack()
-        {
-            playerService?.Reset();
         }
 
         private async void SetPlayerClearAsync()
@@ -405,8 +420,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 && !IsActive)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.PlayerClearText,
-                    contentTitle: Constants.PlayerClearTitle,
+                    contentMessage: Constants.PlayerClearMessage,
+                    contentTitle: Constants.PlayerClearHeader,
                     buttonDefinitions: ButtonEnum.YesNo,
                     enterDefaultButton: ClickEnum.No);
 
@@ -429,7 +444,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
 
             var paths = await dialogService.OpenFilePickerAsync(
-                title: Constants.SelectionFileTitle,
+                title: Constants.SelectionFileHeader,
                 allowMultiple: false,
                 startLocation: inputDirectory);
 
@@ -454,7 +469,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
 
             var paths = await dialogService.OpenFolderPickerAsync(
-                title: Constants.SelectionFileTitle,
+                title: Constants.SelectionFileHeader,
                 allowMultiple: false,
                 startLocation: inputDirectory);
 
@@ -504,25 +519,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             RaisePropertyChanged(nameof(Progress));
             RaisePropertyChanged(nameof(Remaining));
-        }
-
-        private void UpdateMenu()
-        {
-            var menus = GetMenuItems();
-            Menus = new ObservableCollection<BindableBase>(menus);
-        }
-
-        private void UpdateOutput()
-        {
-            outputServiceLive = containerProvider?.Resolve<IOutputService>(
-                nameof(OutputType.Live));
-
-            var outputServicePFL = containerProvider?.Resolve<IOutputService>(
-                nameof(OutputType.PFL));
-
-            HasPFL = outputServicePFL?.IsActive == true;
-
-            UpdateContent();
         }
 
         #endregion Private Methods

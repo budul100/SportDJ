@@ -258,8 +258,8 @@ namespace SportDJ.App.ViewModels
         private async void CheckClosing(IClassicDesktopStyleApplicationLifetime desktop)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Constants.CloseApplicationText,
-                contentTitle: Constants.CloseApplicationTitle);
+                contentMessage: Constants.CloseApplicationMessage,
+                contentTitle: Constants.CloseApplicationHeader);
 
             if (result == ButtonResult.Yes)
             {
@@ -323,7 +323,7 @@ namespace SportDJ.App.ViewModels
             {
                 eventArgs.Cancel = true;
 
-                if (settingsService.Contents.Options.EnableInterruptingDialogs)
+                if (!settingsService.Contents.Options.DisableInterruptingDialogs)
                 {
                     dispatcherService.Post(() => CheckClosing(desktop));
                 }

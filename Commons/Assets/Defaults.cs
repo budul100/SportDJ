@@ -7,6 +7,11 @@
         public const int AppHeightDefault = 800;
         public const int AppWidthDefault = 1200;
 
+        public const int FadeOnLowerMilliseconds = 200;
+        public const int FadeOnMixInMilliseconds = 100;
+        public const int FadeOnMixOutMilliseconds = 500;
+        public const int FadeOnPauseMilliseconds = 500;
+
         public const string FileNameSession = "Session.xml";
         public const string FileNameSettings = "Settings.xml";
 

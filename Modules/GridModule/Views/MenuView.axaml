@@ -9,6 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
+    xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
@@ -52,10 +53,13 @@
                 Kind="{Binding Icon}" />
         </MenuItem.Icon>
 
-        <MenuItem.ItemTemplate>
-            <DataTemplate>
+        <MenuItem.DataTemplates>
+            <DataTemplate x:DataType="vm:MenuViewModel">
                 <v:MenuView />
             </DataTemplate>
-        </MenuItem.ItemTemplate>
+            <DataTemplate x:DataType="vm:SeparatorViewModel">
+                <Separator />
+            </DataTemplate>
+        </MenuItem.DataTemplates>
     </MenuItem>
 </UserControl>

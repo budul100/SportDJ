@@ -37,20 +37,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.isCheckedGetter = isCheckedGetter;
 
             Command = new DelegateCommand(ExecuteCallback);
-            Icon = icon;
             Header = header;
+            Icon = icon;
 
             UpdateIsChecked();
         }
 
-        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<MenuViewModel> menuItems)
+        public MenuViewModel(string header, IEnumerable<BindableBase> menuItems, MaterialIconKind? icon = default)
+        {
+            MenuItems = new ObservableCollection<BindableBase>(menuItems);
+            Command = new DelegateCommand(ExecuteCallback);
+            Header = header;
+            Icon = icon;
+
+            UpdateItems();
+        }
+
+        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems)
         {
             eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
                 action: _ => UpdateItems(),
                 keepSubscriberReferenceAlive: true);
 
-            MenuItems = new ObservableCollection<MenuViewModel>(menuItems);
-
+            MenuItems = new ObservableCollection<BindableBase>(menuItems);
             Command = new DelegateCommand(ExecuteCallback);
             Header = GetHeader();
 
@@ -121,7 +130,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref isSelected, value); }
         }
 
-        public ObservableCollection<MenuViewModel> MenuItems { get; }
+        public ObservableCollection<BindableBase> MenuItems { get; }
 
         public MenuViewModel Selected { get; private set; }
 
@@ -131,31 +140,41 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void ExecuteCallback()
         {
-            callback?.Invoke();
-
-            UpdateIsChecked();
-
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
+
+            callback?.Invoke();
+
+            UpdateIsChecked();
         }
 
         private string GetHeader()
         {
-            var first = MenuItems.First().Entry.Track.Info;
-            var last = MenuItems.Last().Entry.Track.Info;
+            var result = default(string);
 
-            var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupTextLength;
+            var relevants = MenuItems
+                .OfType<MenuViewModel>().ToArray();
 
-            var firstHeader = first.Length > length
-                ? $"{first[..length]}..."
-                : first;
+            if (relevants?.Any() == true)
+            {
+                var first = relevants.First().Entry.Track.Info;
+                var last = relevants.Last().Entry.Track.Info;
 
-            var lastHeader = last.Length > length
-                ? $"{last[..length]}..."
-                : last;
+                var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupTextLength;
 
-            return $"Tracks {firstHeader} - {lastHeader}";
+                var firstHeader = first.Length > length
+                    ? $"{first[..length]}..."
+                    : first;
+
+                var lastHeader = last.Length > length
+                    ? $"{last[..length]}..."
+                    : last;
+
+                result = $"Tracks {firstHeader} - {lastHeader}";
+            }
+
+            return result;
         }
 
         private void UpdateIsChecked()
@@ -174,7 +193,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateItems()
         {
-            Selected = MenuItems?.FirstOrDefault(m => m.Entry?.IsSelected == true);
+            Selected = MenuItems?.OfType<MenuViewModel>()
+                .FirstOrDefault(m => m.Entry?.IsSelected == true);
 
             IsSelected = Selected != default;
         }

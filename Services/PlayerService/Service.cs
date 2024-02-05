@@ -24,6 +24,7 @@ namespace SportDJ.Services.PlayerService
         private readonly HashSet<ISignalService> signalServices = new();
         private readonly ITrackService trackService;
 
+        private bool isDisposed;
         private bool isLoop;
         private ISignalService signalService;
 
@@ -137,6 +138,15 @@ namespace SportDJ.Services.PlayerService
 
         #region Public Methods
 
+        public void Dispose()
+        {
+            Dispose(
+                isDisposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
+        }
+
         public void Execute()
         {
             if (IsAvailable)
@@ -181,6 +191,23 @@ namespace SportDJ.Services.PlayerService
         }
 
         #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    signalService?.Dispose();
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        #endregion Protected Methods
 
         #region Private Methods
 

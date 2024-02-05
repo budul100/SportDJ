@@ -38,11 +38,6 @@ public partial class MenuView
 
     #region Private Methods
 
-    private void OnClick(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        var contextMenu = this.FindAncestorOfType<ContextMenu>();
-    }
-
     private void OnSubmenuOpened(object sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         var groupItems = this.FindAncestorOfType<ContextMenu>()

@@ -16,8 +16,6 @@ namespace SportDJ.Modules.GridModule.DesignTime
             : base(containerProvider: default, player: default, parent: default)
         {
             Name = name;
-            Row = row;
-            Column = column;
 
             artist ??= "Artist";
             title ??= "Title";

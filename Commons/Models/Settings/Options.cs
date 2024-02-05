@@ -9,24 +9,24 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        [DisplayName("Enable interrupting dialogs")]
-        public bool EnableInterruptingDialogs { get; set; }
+        [DisplayName("Disable interrupting dialogs")]
+        public bool DisableInterruptingDialogs { get; set; }
 
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]
-        public int FadeOnLowerMilliseconds { get; set; }
+        public int FadeOnLowerMilliseconds { get; set; } = Defaults.FadeOnLowerMilliseconds;
 
         [Category("Fade durations")]
         [DisplayName("Fade mix-in (ms)")]
-        public int FadeOnMixInMilliseconds { get; set; }
+        public int FadeOnMixInMilliseconds { get; set; } = Defaults.FadeOnMixInMilliseconds;
 
         [Category("Fade durations")]
         [DisplayName("Fade mix-out (ms)")]
-        public int FadeOnMixOutMilliseconds { get; set; }
+        public int FadeOnMixOutMilliseconds { get; set; } = Defaults.FadeOnMixOutMilliseconds;
 
         [Category("Fade durations")]
         [DisplayName("Fade pause (ms)")]
-        public int FadeOnPauseMilliseconds { get; set; }
+        public int FadeOnPauseMilliseconds { get; set; } = Defaults.FadeOnPauseMilliseconds;
 
         [IgnoreDataMember]
         public string KeyCodeOutputPause { get; set; } = Defaults.KeyCodeOutputPause;
