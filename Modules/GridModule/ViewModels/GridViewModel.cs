@@ -20,6 +20,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private bool isSelected;
         private string keyCode;
         private string name;
+
         private int rows;
 
         #endregion Private Fields
@@ -39,7 +40,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<CellViewModel> Cells { get; } = new ObservableCollection<CellViewModel>();
+        public ObservableCollection<CellViewModel> Cells { get; private set; }
 
         public int Columns
         {
@@ -116,10 +117,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 if (isDisposing)
                 {
-                    foreach (var cell in Cells)
+                    if (Cells?.Any() == true)
                     {
-                        cell.Dispose();
+                        foreach (var cell in Cells)
+                        {
+                            cell.Dispose();
+                        }
+
+                        Cells = default;
                     }
+
+                    Columns = default;
+                    Rows = default;
                 }
 
                 isDisposed = true;
@@ -132,6 +141,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Initialize(IContainerProvider containerProvider, Grid grid)
         {
+            Cells = new ObservableCollection<CellViewModel>();
+
             Name = grid.Name;
             KeyCode = grid.KeyCode;
 

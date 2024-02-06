@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -10,6 +7,9 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -23,18 +23,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
         protected readonly IEventAggregator eventAggregator;
         protected readonly IGridService gridService;
 
-        protected bool isDisposed;
         protected IOutputService outputServiceLive;
 
         #endregion Protected Fields
 
         #region Private Fields
 
-        private readonly Cell cell;
         private readonly IStorageService<Set> settingsService;
 
-        private int columnSpan;
-        private int rowSpan;
+        private Cell cell;
+        private bool isDisposed;
 
         #endregion Private Fields
 
@@ -53,9 +51,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
                 keepSubscriberReferenceAlive: true);
-
-            RowSpan = 1;
-            ColumnSpan = 1;
         }
 
         #endregion Protected Constructors
@@ -70,23 +65,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public int Column => cell.Column;
 
-        public int ColumnSpan
-        {
-            get { return columnSpan; }
-            set { SetProperty(ref columnSpan, value); }
-        }
+        public int ColumnSpan { get; protected set; } = 1;
 
-        public bool IsAvailableMenu => !settingsService.Contents.Options.DisableInterruptingDialogs || !outputServiceLive.IsPlaying;
+        public bool IsAvailableMenu => !outputServiceLive.IsPlaying
+            || !settingsService.Contents.Options.DisableInterruptingDialogs;
 
         public ObservableCollection<BindableBase> Menus { get; private set; }
 
         public int Row => cell.Row;
 
-        public int RowSpan
-        {
-            get { return rowSpan; }
-            set { SetProperty(ref rowSpan, value); }
-        }
+        public int RowSpan { get; protected set; } = 1;
 
         #endregion Public Properties
 
@@ -105,7 +93,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Protected Methods
 
-        protected abstract void Dispose(bool isDisposing);
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    cell = default;
+                }
+
+                isDisposed = true;
+            }
+        }
 
         protected IEnumerable<BindableBase> GetMenuCells()
         {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -15,6 +12,9 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -25,12 +25,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IPlayerService playerService;
 
+        private bool isDisposed;
+
+        private bool isRenaming;
+
         #endregion Private Fields
 
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-            : base(containerProvider: containerProvider, cell: player)
+                   : base(containerProvider: containerProvider, cell: player)
         {
             playerService = containerProvider?.Resolve<IPlayerService>();
 
@@ -166,7 +170,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
-        public bool IsRenaming { get; private set; }
+        public bool IsRenaming
+        {
+            get { return isRenaming; }
+            set { SetProperty(ref isRenaming, value); }
+        }
 
         public string Key => KeyCode.GetKey();
 
@@ -243,6 +251,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 isDisposed = true;
             }
+
+            base.Dispose(
+                isDisposing: isDisposing);
         }
 
         protected override IEnumerable<BindableBase> GetMenuItems()
@@ -258,6 +269,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
             yield return editCellsItem;
 
             yield return new SeparatorViewModel();
+
+            var renameItem = new MenuViewModel(
+                header: Texts.PlayerRenameHeader,
+                callback: () => RenamePlayer(),
+                icon: MaterialIconKind.FormTextbox);
+
+            renameItem.MenuCloseEvent += OnMenuClosing;
+
+            yield return renameItem;
 
             var selectFileItem = new MenuViewModel(
                 header: $"{Texts.PlayerSelectionFileHeader}...",
@@ -301,15 +321,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
 
                 yield return new SeparatorViewModel();
-
-                var renameItem = new MenuViewModel(
-                    header: Texts.PlayerRenameHeader,
-                    callback: () => RenamePlayer(),
-                    icon: MaterialIconKind.FormTextbox);
-
-                renameItem.MenuCloseEvent += OnMenuClosing;
-
-                yield return renameItem;
 
                 var isForegroundItem = new MenuViewModel(
                     header: Texts.PlayerOnForegroundHeader,
@@ -375,7 +386,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void ExecutePlayer()
         {
-            if (!IsRenaming)
+            if (IsRenaming)
+            {
+                IsRenaming = false;
+            }
+            else
             {
                 if (playerService?.IsAvailable == true)
                 {
@@ -412,8 +427,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (playerService?.IsActive != true)
             {
                 IsRenaming = true;
-
-                RaisePropertyChanged(nameof(IsRenaming));
             }
         }
 

@@ -16,6 +16,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly GridViewModel parent;
 
+        private bool isDisposed;
         private GridViewModel selected;
 
         #endregion Private Fields
@@ -91,6 +92,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 isDisposed = true;
             }
+
+            base.Dispose(
+                isDisposing: isDisposing);
         }
 
         protected override IEnumerable<BindableBase> GetMenuItems() => this.GetMenuCells().ToArray();
@@ -129,11 +133,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
             }
 
+            RaisePropertyChanged(nameof(Rows));
+            RaisePropertyChanged(nameof(Columns));
+
             this.RowSpan = Rows;
             this.ColumnSpan = Columns;
 
-            RaisePropertyChanged(nameof(Rows));
-            RaisePropertyChanged(nameof(Columns));
+            RaisePropertyChanged(nameof(RowSpan));
+            RaisePropertyChanged(nameof(ColumnSpan));
 
             base.Initialize();
         }

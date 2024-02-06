@@ -1,25 +1,13 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid>
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" Name="012345678901234567890123456789">
+			<Cell xsi:type="Player" Column="0" Row="0" Name="yxc">
 				<IsForeground>false</IsForeground>
 				<IsLoop>false</IsLoop>
-				<Paths>
-					<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen</Path>
-				</Paths>
-				<SavePosition>true</SavePosition>
-			</Cell>
-			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
-				<IsForeground>true</IsForeground>
-				<IsLoop>false</IsLoop>
-				<Paths>
-					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Organ - Attacke.mp3</Path>
-					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Orgel - Angriff lang.mp3</Path>
-					<Path>C:\Users\mgr\SportDJ\Spiel_Angriff\Orgel - Angriff.mp3</Path>
-				</Paths>
+				<Paths />
 				<SavePosition>false</SavePosition>
 			</Cell>
-			<Cell xsi:type="Player" Column="1" Row="1" Name="Player 1">
+			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 24">
 				<IsForeground>false</IsForeground>
 				<IsLoop>false</IsLoop>
 				<Paths />
