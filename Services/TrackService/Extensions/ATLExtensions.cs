@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace SportDJ.Services.TrackService.Extensions
 {
@@ -30,7 +31,14 @@ namespace SportDJ.Services.TrackService.Extensions
                 content.Append(atlTrack.Title);
             }
 
-            return content.ToString();
+            var result = content.ToString();
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = Path.GetFileNameWithoutExtension(atlTrack.Path);
+            }
+
+            return result;
         }
 
         #endregion Public Methods
