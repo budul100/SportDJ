@@ -1,4 +1,9 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -12,11 +17,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -33,11 +33,11 @@ namespace SportDJ.Services.PlayerService
         private readonly IStackService stackService;
         private readonly ITrackService trackService;
 
-        private IStorageFolder inputDirectory;
         private bool isDisposed;
         private MixerType mixerType;
         private Player player;
         private ISignalService signalService;
+        private IStorageFolder startLocation;
 
         #endregion Private Fields
 
@@ -300,12 +300,12 @@ namespace SportDJ.Services.PlayerService
 
         public async Task SetFileAsync()
         {
-            inputDirectory ??= await dialogService.GetFolderAsync(player.Paths);
+            startLocation ??= await dialogService.GetFolderAsync(player.Paths);
 
             var results = await dialogService.OpenFilePickerAsync(
                 title: Texts.PlayerSelectionFileHeader,
                 allowMultiple: true,
-                startLocation: inputDirectory);
+                startLocation: startLocation);
 
             if (results?.Any() == true)
             {
@@ -321,12 +321,12 @@ namespace SportDJ.Services.PlayerService
 
         public async Task SetFolderAsync()
         {
-            inputDirectory ??= await dialogService.GetFolderAsync(player.Paths);
+            startLocation ??= await dialogService.GetFolderAsync(player.Paths);
 
             var results = await dialogService.OpenFolderPickerAsync(
                 title: Texts.PlayerSelectionFolderHeader,
                 allowMultiple: true,
-                startLocation: inputDirectory);
+                startLocation: startLocation);
 
             if (results?.Any() == true)
             {
