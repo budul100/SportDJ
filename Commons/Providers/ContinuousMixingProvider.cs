@@ -11,8 +11,7 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
-        private readonly object lockProviders = new object();
-        private readonly object lockReader = new object();
+        private readonly object lockProvider = new object();
         private readonly List<ISampleProvider> sourceProviders = new List<ISampleProvider>();
 
         private float[] sourceBuffer;
@@ -39,14 +38,14 @@ namespace SportDJ.Commons.Providers
                     paramName: nameof(sourceProvider));
             }
 
-            lock (lockProviders)
+            if (sourceProviders.Count >= Constants.MixerSourcesMax)
             {
-                if (sourceProviders.Count >= Constants.MixerSourcesMax)
-                {
-                    throw new InvalidOperationException(
-                        $"There cannot be more than {Constants.MixerSourcesMax} mixer inputs.");
-                }
+                throw new InvalidOperationException(
+                    $"There cannot be more than {Constants.MixerSourcesMax} mixer inputs.");
+            }
 
+            lock (lockProvider)
+            {
                 sourceProviders.Add(sourceProvider);
             }
         }
@@ -59,7 +58,7 @@ namespace SportDJ.Commons.Providers
                 buffer: sourceBuffer,
                 samplesRequired: count);
 
-            lock (lockReader)
+            lock (lockProvider)
             {
                 var index = sourceProviders.Count - 1;
 
@@ -113,7 +112,7 @@ namespace SportDJ.Commons.Providers
         {
             if (sourceProviders.Contains(source))
             {
-                lock (lockProviders)
+                lock (lockProvider)
                 {
                     sourceProviders.Remove(source);
                 }
@@ -122,7 +121,7 @@ namespace SportDJ.Commons.Providers
 
         public void RemoveAll()
         {
-            lock (lockProviders)
+            lock (lockProvider)
             {
                 sourceProviders.Clear();
             }
