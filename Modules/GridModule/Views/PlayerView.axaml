@@ -206,11 +206,13 @@
                                 VerticalAlignment="Top"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
-                                <TextBlock
+                                <ct:EditableText
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     FontSize="{StaticResource FontSizeContent}"
                                     FontWeight="Bold"
+                                    IsActive="{Binding IsRenaming}"
+                                    MaxLength="{Binding MaxLengthName}"
                                     Text="{Binding Name}" />
                             </Viewbox>
 

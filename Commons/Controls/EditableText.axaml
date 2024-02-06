@@ -1,0 +1,40 @@
+<UserControl
+    x:Class="SportDJ.Commons.Controls.EditableText"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+
+    <Grid>
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            FontSize="{Binding $parent[UserControl].FontSize}"
+            FontWeight="Bold"
+            IsVisible="{Binding !$parent[UserControl].IsActive}"
+            Text="{Binding $parent[UserControl].Text}" />
+
+        <TextBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            AcceptsReturn="False"
+            AcceptsTab="False"
+            Focusable="True"
+            FontSize="{Binding $parent[UserControl].FontSize}"
+            FontWeight="Bold"
+            GotFocus="OnGotFocus"
+            IsUndoEnabled="True"
+            IsVisible="{Binding $parent[UserControl].IsActive}"
+            KeyDown="OnKeyDown"
+            LostFocus="OnLostFocus"
+            MaxLength="{Binding $parent[UserControl].MaxLength}"
+            MaxLines="1"
+            Text="{Binding $parent[UserControl].Text}"
+            TextAlignment="Justify"
+            TextWrapping="NoWrap" />
+    </Grid>
+</UserControl>

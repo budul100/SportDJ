@@ -22,6 +22,8 @@ namespace SportDJ.Commons.Assets
 
         public const int MixerSourcesMax = 1024;
 
+        public const int NameMaxLength = 30;
+
         public const double PercentageIncrement = 1;
         public const double PercentageMax = 100;
         public const double PercentageMin = 0;

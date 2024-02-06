@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -17,6 +12,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -35,6 +35,7 @@ namespace SportDJ.Services.PlayerService
 
         private bool isDisposed;
         private MixerType mixerType;
+        private string name;
         private Player player;
         private ISignalService signalService;
         private IStorageFolder startLocation;
@@ -192,14 +193,16 @@ namespace SportDJ.Services.PlayerService
 
         public string Name
         {
-            get => player?.Name;
+            get => name ?? player.Name;
 
             set
             {
                 if (player != default
                     && player.Name != value)
                 {
-                    player.Name = value;
+                    name = value;
+
+                    player.Name = name.Trim();
 
                     settingsService.Save();
                 }

@@ -22,9 +22,10 @@
         public const string PlayerClearHeader = "Clear player";
         public const string PlayerClearMessage = "Shall the player be cleared?";
         public const string PlayerOnForegroundHeader = "On foreground";
+        public const string PlayerRenameHeader = "Rename player";
         public const string PlayerSavePosition = "Save position";
-        public const string PlayerSelectionFileHeader = "Select File";
-        public const string PlayerSelectionFolderHeader = "Select Folder";
+        public const string PlayerSelectionFileHeader = "Select file";
+        public const string PlayerSelectionFolderHeader = "Select folder";
         public const string PlayerShuffleHeader = "Shuffle tracks";
         public const string PlayerShuffleMessage = "Shall the player tracks be shuffled?";
 

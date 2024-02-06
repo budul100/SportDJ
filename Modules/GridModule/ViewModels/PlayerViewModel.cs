@@ -168,6 +168,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
+        public bool IsRenaming { get; private set; }
+
         public string Key => KeyCode.GetKey();
 
         public string KeyCode
@@ -185,6 +187,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
             }
         }
+
+        public int MaxLengthName => Constants.NameMaxLength;
 
         public string Name
         {
@@ -273,24 +277,31 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             if (playerService?.HasPaths == true)
             {
-                var clearPlayerItem = new MenuViewModel(
+                var clearItem = new MenuViewModel(
                     header: Texts.PlayerClearHeader,
                     callback: () => playerService.ClearAsync(),
                     icon: MaterialIconKind.CloseCircleOutline);
 
-                yield return clearPlayerItem;
+                yield return clearItem;
 
                 if (playerService.HasStack)
                 {
-                    var shufflePlayerItem = new MenuViewModel(
+                    var shuffleItem = new MenuViewModel(
                         header: Texts.PlayerShuffleHeader,
                         callback: () => playerService.ShuffleAsync(),
                         icon: MaterialIconKind.ShuffleVariant);
 
-                    yield return shufflePlayerItem;
+                    yield return shuffleItem;
                 }
 
                 yield return new SeparatorViewModel();
+
+                var renameItem = new MenuViewModel(
+                    header: Texts.PlayerRenameHeader,
+                    callback: () => RenamePlayer(),
+                    icon: MaterialIconKind.FormTextbox);
+
+                yield return renameItem;
 
                 var isForegroundItem = new MenuViewModel(
                     header: Texts.PlayerOnForegroundHeader,
@@ -352,15 +363,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void ExecutePlayer()
         {
-            if (playerService?.IsAvailable == true)
+            if (!IsRenaming)
             {
-                playerService.Execute();
-            }
-            else
-            {
-                MenuOpenEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                if (playerService?.IsAvailable == true)
+                {
+                    playerService.Execute();
+                }
+                else
+                {
+                    MenuOpenEvent?.Invoke(
+                        sender: this,
+                        e: default);
+                }
             }
         }
 
@@ -386,6 +400,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
+        }
+
+        private void RenamePlayer()
+        {
+            if (playerService?.IsActive != true)
+            {
+                IsRenaming = true;
+
+                RaisePropertyChanged(nameof(IsRenaming));
+            }
         }
 
         private void UpdateContent()

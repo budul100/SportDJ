@@ -1,7 +1,7 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid>
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
+			<Cell xsi:type="Player" Column="0" Row="0" Name="012345678901234567890123456789">
 				<IsForeground>false</IsForeground>
 				<IsLoop>false</IsLoop>
 				<Paths>
