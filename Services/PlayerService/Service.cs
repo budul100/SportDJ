@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -17,6 +12,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -52,7 +52,6 @@ namespace SportDJ.Services.PlayerService
             this.trackService = trackService;
             this.dialogService = dialogService;
             this.settingsService = settingsService;
-
             this.stackService = stackService;
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
@@ -136,37 +135,30 @@ namespace SportDJ.Services.PlayerService
 
         public bool IsForeground
         {
-            get => HasPaths && player.IsForeground;
+            get => player?.IsForeground == true;
 
             set
             {
-                if (HasPaths
+                if (player != default
                     && player.IsForeground != value
                     && mixerType != MixerType.PFL)
                 {
                     player.IsForeground = value;
 
-                    mixerType = player.IsForeground
-                        ? MixerType.Foreground
-                        : MixerType.Background;
-
                     settingsService.Save();
 
-                    if (!IsActive)
-                    {
-                        UpdateSignal();
-                    }
+                    UpdateSignal();
                 }
             }
         }
 
         public bool IsLoop
         {
-            get => HasPaths && player.IsLoop;
+            get => player?.IsLoop == true;
 
             set
             {
-                if (HasPaths
+                if (player != default
                     && player.IsLoop != value)
                 {
                     player.IsLoop = value;
@@ -220,11 +212,11 @@ namespace SportDJ.Services.PlayerService
 
         public bool SavePosition
         {
-            get => HasPaths && player.SavePosition;
+            get => player?.SavePosition == true;
 
             set
             {
-                if (HasPaths
+                if (player != default
                     && player.SavePosition != value)
                 {
                     player.SavePosition = value;
@@ -242,12 +234,11 @@ namespace SportDJ.Services.PlayerService
 
         public async Task ClearAsync()
         {
-            if (HasPaths
-                && !IsActive)
+            if (HasPaths)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.PlayerClearMessage,
-                    contentTitle: Constants.PlayerClearHeader,
+                    contentMessage: Texts.PlayerClearMessage,
+                    contentTitle: Texts.PlayerClearHeader,
                     buttonDefinitions: ButtonEnum.YesNo,
                     enterDefaultButton: ClickEnum.No);
 
@@ -312,7 +303,7 @@ namespace SportDJ.Services.PlayerService
             inputDirectory ??= await dialogService.GetFolderAsync(player.Paths);
 
             var results = await dialogService.OpenFilePickerAsync(
-                title: Constants.SelectionFileHeader,
+                title: Texts.PlayerSelectionFileHeader,
                 allowMultiple: true,
                 startLocation: inputDirectory);
 
@@ -333,7 +324,7 @@ namespace SportDJ.Services.PlayerService
             inputDirectory ??= await dialogService.GetFolderAsync(player.Paths);
 
             var results = await dialogService.OpenFolderPickerAsync(
-                title: Constants.SelectionFolderHeader,
+                title: Texts.PlayerSelectionFolderHeader,
                 allowMultiple: true,
                 startLocation: inputDirectory);
 
@@ -346,6 +337,23 @@ namespace SportDJ.Services.PlayerService
                 settingsService.Save();
 
                 Initialize();
+            }
+        }
+
+        public async Task ShuffleAsync()
+        {
+            if (HasStack)
+            {
+                var result = await dialogService.GetMessageBoxResultAsync(
+                    contentMessage: Texts.PlayerShuffleMessage,
+                    contentTitle: Texts.PlayerShuffleHeader,
+                    buttonDefinitions: ButtonEnum.YesNo,
+                    enterDefaultButton: ClickEnum.No);
+
+                if (result == ButtonResult.Yes)
+                {
+                    stackService.Shuffle();
+                }
             }
         }
 
@@ -376,9 +384,9 @@ namespace SportDJ.Services.PlayerService
 
             Task.Run(() => stackService.Initialize(
                 paths: player.Paths,
-                name: player.Name,
-                savePosition: player.SavePosition,
-                isLoop: player.IsLoop));
+                name: Name,
+                savePosition: SavePosition,
+                isLoop: IsLoop));
 
             eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this);
         }
@@ -467,6 +475,10 @@ namespace SportDJ.Services.PlayerService
                 {
                     signalService?.Stop();
                 }
+
+                mixerType = player.IsForeground
+                    ? MixerType.Foreground
+                    : MixerType.Background;
 
                 var mixerService = containerProvider?.Resolve<IMixerService>(
                     name: mixerType.ToString());

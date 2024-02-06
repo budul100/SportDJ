@@ -67,6 +67,8 @@ namespace SportDJ.Commons.Interfaces
 
         Task SetFolderAsync();
 
+        Task ShuffleAsync();
+
         #endregion Public Methods
     }
 }

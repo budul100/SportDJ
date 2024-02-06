@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
@@ -15,6 +10,11 @@ using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.DialogService
 {
@@ -170,7 +170,7 @@ namespace SportDJ.DialogService
         {
             var result = default(WindowIcon);
 
-            var uri = new Uri($"avares://{Constants.AppName}/Assets/{Constants.AppName}.ico");
+            var uri = new Uri($"avares://{Texts.AppName}/Assets/{Texts.AppName}.ico");
             var stream = AssetLoader.Open(uri);
 
             if (stream != default)

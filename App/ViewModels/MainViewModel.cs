@@ -250,7 +250,7 @@ namespace SportDJ.App.ViewModels
                 version.Append(assembly.Version.Build);
             }
 
-            var result = $"{Constants.AppName} ({version})";
+            var result = $"{Texts.AppName} ({version})";
 
             return result;
         }
@@ -258,8 +258,8 @@ namespace SportDJ.App.ViewModels
         private async void CheckClosing(IClassicDesktopStyleApplicationLifetime desktop)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Constants.CloseApplicationMessage,
-                contentTitle: Constants.CloseApplicationHeader);
+                contentMessage: Texts.CloseApplicationMessage,
+                contentTitle: Texts.CloseApplicationHeader);
 
             if (result == ButtonResult.Yes)
             {
@@ -308,7 +308,7 @@ namespace SportDJ.App.ViewModels
         private void LoadSessionService(IStorageService<Set> settingsService)
         {
             var sessionPath = settingsService?.GetPath(
-                appName: Constants.AppName,
+                appName: Texts.AppName,
                 fileName: Defaults.FileNameSession);
 
             sessionService?.Load(sessionPath);

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Prism.Events;
+﻿using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Services.StackService
 {
@@ -191,7 +191,7 @@ namespace SportDJ.Services.StackService
 
                 eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);
 
-                SetTrack();
+                SelectEntry(Entry);
             }
         }
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -15,6 +12,9 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -50,7 +50,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 canExecuteMethod: () => IsAvailableReset);
 
             eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
-                action: _ => base.Initialize(),
+                action: _ => UpdatePlayer(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
@@ -248,7 +248,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             var menuCells = GetMenuCells().ToArray();
 
             var editCellsItem = new MenuViewModel(
-                header: $"{Constants.GridEditHeader}...",
+                header: $"{Texts.GridEditHeader}...",
                 menuItems: menuCells);
 
             editCellsItem.MenuCloseEvent += OnMenuClosing;
@@ -258,14 +258,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
             yield return new SeparatorViewModel();
 
             var selectFileItem = new MenuViewModel(
-                header: $"{Constants.SelectionFileHeader}...",
+                header: $"{Texts.PlayerSelectionFileHeader}...",
                 callback: () => playerService?.SetFileAsync(),
                 icon: MaterialIconKind.FileMultipleOutline);
 
             yield return selectFileItem;
 
             var selectFolderItem = new MenuViewModel(
-                header: $"{Constants.SelectionFolderHeader}...",
+                header: $"{Texts.PlayerSelectionFolderHeader}...",
                 callback: () => playerService?.SetFolderAsync(),
                 icon: MaterialIconKind.FolderMultipleOutline);
 
@@ -274,21 +274,39 @@ namespace SportDJ.Modules.GridModule.ViewModels
             if (playerService?.HasPaths == true)
             {
                 var clearPlayerItem = new MenuViewModel(
-                    header: Constants.PlayerClearHeader,
+                    header: Texts.PlayerClearHeader,
                     callback: () => playerService.ClearAsync(),
                     icon: MaterialIconKind.CloseCircleOutline);
 
                 yield return clearPlayerItem;
 
+                if (playerService.HasStack)
+                {
+                    var shufflePlayerItem = new MenuViewModel(
+                        header: Texts.PlayerShuffleHeader,
+                        callback: () => playerService.ShuffleAsync(),
+                        icon: MaterialIconKind.ShuffleVariant);
+
+                    yield return shufflePlayerItem;
+                }
+
                 yield return new SeparatorViewModel();
 
                 var isForegroundItem = new MenuViewModel(
-                    header: Constants.PlayerOnForegroundHeader,
+                    header: Texts.PlayerOnForegroundHeader,
                     callback: () => IsForeground = !IsForeground,
                     isCheckedGetter: () => IsForeground,
-                    icon: MaterialIconKind.ChevronUpBox);
+                    icon: MaterialIconKind.ChevronUpBoxOutline);
 
                 yield return isForegroundItem;
+
+                var savePositionsItem = new MenuViewModel(
+                    header: Texts.PlayerSavePosition,
+                    callback: () => SavePosition = !SavePosition,
+                    isCheckedGetter: () => SavePosition,
+                    icon: MaterialIconKind.FileRestoreOutline);
+
+                yield return savePositionsItem;
 
                 var menuItems = GetMenuTracks()
                     .OrderBy(m => m.Header).ToArray();
@@ -403,6 +421,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             RaisePropertyChanged(nameof(Progress));
             RaisePropertyChanged(nameof(Remaining));
+        }
+
+        private void UpdatePlayer()
+        {
+            base.Initialize();
+            UpdateContent();
         }
 
         #endregion Private Methods

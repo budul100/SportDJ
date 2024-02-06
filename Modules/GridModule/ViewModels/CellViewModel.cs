@@ -107,7 +107,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Constants.GridAddPlayerHeader} {orientation}";
+                var header = $"{Texts.GridAddPlayerHeader} {orientation}";
 
                 void callback() => gridService.Add<Player>(
                     cell: cell,
@@ -124,7 +124,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Constants.GridMoveHeader} {orientation}";
+                var header = $"{Texts.GridMoveHeader} {orientation}";
 
                 void callback() => gridService.Move(
                     cell: cell,
@@ -140,13 +140,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
             yield return new SeparatorViewModel();
 
             var swapPlayerItem = new MenuViewModel(
-                header: $"{Constants.GridSwapHeader}...",
+                header: $"{Texts.GridSwapHeader}...",
                 callback: () => gridService.SwapAsync(cell));
 
             yield return swapPlayerItem;
 
             var removeElementItem = new MenuViewModel(
-                header: $"{Constants.GridRemoveHeader}...",
+                header: $"{Texts.GridRemoveHeader}...",
                 callback: () => gridService.RemoveAsync(cell));
 
             yield return removeElementItem;

@@ -2,12 +2,12 @@
 	<Grid>
 		<Cells>
 			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
-				<IsForeground>true</IsForeground>
+				<IsForeground>false</IsForeground>
 				<IsLoop>false</IsLoop>
 				<Paths>
 					<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen</Path>
 				</Paths>
-				<SavePosition>false</SavePosition>
+				<SavePosition>true</SavePosition>
 			</Cell>
 			<Cell xsi:type="Player" Column="1" Row="0" Name="Player 2">
 				<IsForeground>true</IsForeground>
@@ -37,7 +37,7 @@
 	</Options>
 	<Outputs>
 		<Output Type="Live">
-			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
+			<DeviceName>Lautsprecher (Realtek Audio)</DeviceName>
 			<SampleRate>44100</SampleRate>
 			<Volume>1</Volume>
 			<VolumePercentageApps>20</VolumePercentageApps>

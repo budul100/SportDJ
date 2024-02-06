@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -10,6 +7,9 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.GridService
 {
@@ -86,8 +86,8 @@ namespace SportDJ.Services.GridService
         public async Task RemoveAsync(Cell cell)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Constants.GridRemoveMessage,
-                contentTitle: Constants.GridRemoveHeader);
+                contentMessage: Texts.GridRemoveMessage,
+                contentTitle: Texts.GridRemoveHeader);
 
             if (result == ButtonResult.Yes)
             {
@@ -103,8 +103,8 @@ namespace SportDJ.Services.GridService
             if (cell is Player player)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.GridSwapPlayerMessage,
-                    contentTitle: Constants.GridSwapHeader);
+                    contentMessage: Texts.GridSwapPlayerMessage,
+                    contentTitle: Texts.GridSwapHeader);
 
                 if (result == ButtonResult.Yes)
                 {
@@ -116,8 +116,8 @@ namespace SportDJ.Services.GridService
             else if (cell is Group group)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Constants.GridSwapGroupMessage,
-                    contentTitle: Constants.GridSwapHeader);
+                    contentMessage: Texts.GridSwapGroupMessage,
+                    contentTitle: Texts.GridSwapHeader);
 
                 if (result == ButtonResult.Yes)
                 {
