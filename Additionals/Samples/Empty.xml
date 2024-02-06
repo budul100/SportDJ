@@ -19,6 +19,12 @@
 				</Paths>
 				<SavePosition>false</SavePosition>
 			</Cell>
+			<Cell xsi:type="Player" Column="1" Row="1" Name="Player 1">
+				<IsForeground>false</IsForeground>
+				<IsLoop>false</IsLoop>
+				<Paths />
+				<SavePosition>false</SavePosition>
+			</Cell>
 		</Cells>
 	</Grid>
 	<Options>

@@ -1,4 +1,7 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -7,9 +10,6 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -59,6 +59,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Protected Constructors
+
+        #region Public Events
+
+        public event EventHandler MenuCloseEvent;
+
+        #endregion Public Events
 
         #region Public Properties
 
@@ -117,6 +123,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     header: header,
                     callback: callback);
 
+                addPlayerItem.MenuCloseEvent += OnMenuClosing;
+
                 yield return addPlayerItem;
             }
 
@@ -134,6 +142,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     header: header,
                     callback: callback);
 
+                moveElementItem.MenuCloseEvent += OnMenuClosing;
+
                 yield return moveElementItem;
             }
 
@@ -143,11 +153,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 header: $"{Texts.GridSwapHeader}...",
                 callback: () => gridService.SwapAsync(cell));
 
+            swapPlayerItem.MenuCloseEvent += OnMenuClosing;
+
             yield return swapPlayerItem;
 
             var removeElementItem = new MenuViewModel(
                 header: $"{Texts.GridRemoveHeader}...",
                 callback: () => gridService.RemoveAsync(cell));
+
+            removeElementItem.MenuCloseEvent += OnMenuClosing;
 
             yield return removeElementItem;
         }
@@ -158,6 +172,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             UpdateOutput();
             UpdateMenu();
+        }
+
+        protected void OnMenuClosing(object sender, EventArgs e)
+        {
+            MenuCloseEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         protected void UpdateMenu()

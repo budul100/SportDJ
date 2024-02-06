@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -10,6 +6,10 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
