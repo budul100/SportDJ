@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -16,6 +12,8 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -97,15 +95,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Constructors
 
-        #region Public Events
-
-        public event EventHandler MenuOpenEvent;
-
-        #endregion Public Events
-
         #region Public Properties
-
-        public static int MaxLengthName => Constants.NameMaxLength;
 
         public Bitmap Bitmap => playerService?.Track?.Bitmap;
 
@@ -395,9 +385,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
                 else
                 {
-                    MenuOpenEvent?.Invoke(
-                        sender: this,
-                        e: default);
+                    OpenMenu();
                 }
             }
         }

@@ -33,10 +33,10 @@ namespace SportDJ.Services.GridService
             this.dialogService = dialogService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
-                action: InitializeGrid,
+                action: Initialize,
                 keepSubscriberReferenceAlive: true);
 
-            InitializeGrid();
+            Initialize();
         }
 
         #endregion Public Constructors
@@ -65,7 +65,7 @@ namespace SportDJ.Services.GridService
 
                 result.Move(orientation);
 
-                UpdateGrid();
+                Update();
             }
         }
 
@@ -75,7 +75,7 @@ namespace SportDJ.Services.GridService
             {
                 cell.Move(orientation);
 
-                UpdateGrid();
+                Update();
             }
         }
 
@@ -91,7 +91,7 @@ namespace SportDJ.Services.GridService
                 {
                     cell.Remove();
 
-                    UpdateGrid();
+                    Update();
                 }
             }
         }
@@ -111,7 +111,7 @@ namespace SportDJ.Services.GridService
                     {
                         player.ToGroup();
 
-                        UpdateGrid();
+                        Update();
                     }
                 }
                 else if (cell is Group group)
@@ -124,7 +124,7 @@ namespace SportDJ.Services.GridService
                     {
                         group.ToPlayer();
 
-                        UpdateGrid();
+                        Update();
                     }
                 }
             }
@@ -134,7 +134,7 @@ namespace SportDJ.Services.GridService
 
         #region Private Methods
 
-        private void InitializeGrid()
+        private void Initialize()
         {
             Grid = settingsService.Contents.Grid
                 ?? new Grid();
@@ -142,10 +142,10 @@ namespace SportDJ.Services.GridService
             Grid.Tidy();
             Grid.Initialize();
 
-            UpdateGrid();
+            Update();
         }
 
-        private void UpdateGrid()
+        private void Update()
         {
             Grid.Tidy();
 

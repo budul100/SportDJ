@@ -19,4 +19,8 @@
 	  <ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Views\Helpers\" />
+	</ItemGroup>
+
 </Project>

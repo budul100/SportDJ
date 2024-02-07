@@ -45,6 +45,8 @@ namespace SportDJ.Services.GridService.Extensions
                     {
                         foreach (var groupGrid in group.Grids)
                         {
+                            groupGrid.Group = group;
+
                             groupGrid.Initialize();
                         }
                     }

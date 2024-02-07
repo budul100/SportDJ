@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -10,6 +7,9 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -59,9 +59,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public event EventHandler MenuCloseEvent;
 
+        public event EventHandler MenuOpenEvent;
+
         #endregion Public Events
 
         #region Public Properties
+
+        public static int MaxLengthName => Constants.NameMaxLength;
 
         public int Column => cell.Column;
 
@@ -170,7 +174,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         protected virtual void Initialize()
         {
             UpdateOutput();
-            UpdateMenu();
+
+            var menus = GetMenuItems();
+            Menus = new ObservableCollection<BindableBase>(menus);
+
+            RaisePropertyChanged(nameof(Menus));
         }
 
         protected void OnMenuClosing(object sender, EventArgs e)
@@ -180,11 +188,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 e: default);
         }
 
-        protected void UpdateMenu()
+        protected void OpenMenu()
         {
-            var menus = GetMenuItems();
-
-            Menus = new ObservableCollection<BindableBase>(menus);
+            MenuOpenEvent?.Invoke(
+                sender: this,
+                e: default);
         }
 
         protected virtual void UpdateOutput()

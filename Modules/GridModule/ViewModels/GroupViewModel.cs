@@ -97,7 +97,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 isDisposing: isDisposing);
         }
 
-        protected override IEnumerable<BindableBase> GetMenuItems() => this.GetMenuCells().ToArray();
+        protected override IEnumerable<BindableBase> GetMenuItems() => GetMenuCells().ToArray();
 
         #endregion Protected Methods
 

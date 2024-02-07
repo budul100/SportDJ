@@ -1,15 +1,17 @@
-﻿using Prism.Ioc;
+﻿using Material.Icons;
+using Prism.Ioc;
 using Prism.Mvvm;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Models.Structure;
-using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class GridViewModel
-        : BindableBase, IDisposable
+        : CellViewModel
     {
         #region Private Fields
 
@@ -17,6 +19,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private int columns;
         private bool isDisposed;
+        private bool isRenaming;
         private bool isSelected;
         private string keyCode;
         private string name;
@@ -28,6 +31,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Constructors
 
         public GridViewModel(IContainerProvider containerProvider, Grid grid, GroupViewModel parent = default)
+            : base(containerProvider: containerProvider, cell: grid.Group)
         {
             this.parent = parent;
 
@@ -49,6 +53,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public bool HasKey => !string.IsNullOrWhiteSpace(Key);
+
+        public bool IsRenaming
+        {
+            get { return isRenaming; }
+            set { SetProperty(ref isRenaming, value); }
+        }
 
         public bool IsSelected
         {
@@ -96,22 +106,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Dispose()
-        {
-            Dispose(
-                isDisposing: true);
-
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        #endregion Public Methods
-
         #region Protected Methods
 
-        protected virtual void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
             if (!isDisposed)
             {
@@ -126,6 +123,33 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 isDisposed = true;
             }
+
+            base.Dispose(
+                isDisposing: isDisposing);
+        }
+
+        protected override IEnumerable<BindableBase> GetMenuItems()
+        {
+            var menuCells = GetMenuCells().ToArray();
+
+            var editCellsItem = new MenuViewModel(
+                header: $"{Texts.GridEditHeader}...",
+                menuItems: menuCells);
+
+            editCellsItem.MenuCloseEvent += OnMenuClosing;
+
+            yield return editCellsItem;
+
+            yield return new SeparatorViewModel();
+
+            var renameItem = new MenuViewModel(
+                header: Texts.PlayerRenameHeader,
+                callback: () => IsRenaming = true,
+                icon: MaterialIconKind.FormTextbox);
+
+            renameItem.MenuCloseEvent += OnMenuClosing;
+
+            yield return renameItem;
         }
 
         #endregion Protected Methods
@@ -194,6 +218,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 Rows = rowsCount;
                 Columns = columnsCount;
+
+                base.Initialize();
             }
         }
 

@@ -12,6 +12,9 @@ namespace SportDJ.Commons.Models.Structure
         [XmlIgnore]
         public int Columns { get; set; }
 
+        [XmlIgnore]
+        public Group Group { get; set; }
+
         [XmlAttribute]
         public string KeyCode { get; set; }
 

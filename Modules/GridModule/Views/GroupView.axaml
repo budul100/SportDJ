@@ -2,6 +2,7 @@
     x:Class="SportDJ.Modules.GridModule.Views.GroupView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Commons.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:gbac="using:GroupBox.Avalonia.Controls"
@@ -30,26 +31,9 @@
     </Design.DataContext>
 
     <TabControl
-        Margin="{DynamicResource ContentMargin}"
+        Margin="{StaticResource ContentMargin}"
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Selected}">
-
-        <TabControl.ContextMenu>
-            <ContextMenu
-                Name="ContextMenu"
-                IsVisible="{Binding IsAvailableMenu}"
-                ItemsSource="{Binding Menus}">
-
-                <ContextMenu.DataTemplates>
-                    <DataTemplate x:DataType="vm:MenuViewModel">
-                        <v:MenuView />
-                    </DataTemplate>
-                    <DataTemplate x:DataType="vm:SeparatorViewModel">
-                        <Separator />
-                    </DataTemplate>
-                </ContextMenu.DataTemplates>
-            </ContextMenu>
-        </TabControl.ContextMenu>
 
         <TabControl.ItemTemplate>
             <DataTemplate>
@@ -64,6 +48,23 @@
                         <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     </Grid.ColumnDefinitions>
 
+                    <Grid.ContextMenu>
+                        <ContextMenu
+                            Name="ContextMenu"
+                            IsVisible="{Binding IsAvailableMenu}"
+                            ItemsSource="{Binding Menus}">
+
+                            <ContextMenu.DataTemplates>
+                                <DataTemplate x:DataType="vm:MenuViewModel">
+                                    <v:MenuView />
+                                </DataTemplate>
+                                <DataTemplate x:DataType="vm:SeparatorViewModel">
+                                    <Separator />
+                                </DataTemplate>
+                            </ContextMenu.DataTemplates>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
+
                     <Viewbox
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
@@ -71,9 +72,11 @@
                         Stretch="Uniform"
                         StretchDirection="DownOnly">
 
-                        <TextBlock
+                        <ct:EditableText
                             Margin="{StaticResource GroupTabMargin}"
-                            FontSize="{DynamicResource FontSizeContent}"
+                            FontSize="{StaticResource FontSizeContent}"
+                            IsActive="{Binding IsRenaming}"
+                            MaxLength="{Binding MaxLengthName}"
                             Text="{Binding Name}" />
                     </Viewbox>
 

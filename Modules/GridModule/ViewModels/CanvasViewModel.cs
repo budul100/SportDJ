@@ -1,10 +1,10 @@
-﻿using Prism.Events;
+﻿using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
