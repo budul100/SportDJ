@@ -8,18 +8,12 @@ namespace SportDJ.Services.GridService.Extensions
     {
         #region Public Methods
 
-        public static int GetColumn(this Cell cell, OrientationType orientation)
+        public static Cell AddPlayer(this Grid grid, int column = 0, int row = 0)
         {
-            var result = cell.Column;
+            var result = grid.GetPlayer();
 
-            if (orientation == OrientationType.Right)
-            {
-                result++;
-            }
-            else if (orientation == OrientationType.Left)
-            {
-                result--;
-            }
+            result.Column = column;
+            result.Row = row;
 
             return result;
         }
@@ -31,6 +25,7 @@ namespace SportDJ.Services.GridService.Extensions
             var result = new Player
             {
                 Name = name,
+                Grid = grid,
             };
 
             grid.Cells.Add(result);
@@ -38,119 +33,102 @@ namespace SportDJ.Services.GridService.Extensions
             return result;
         }
 
-        public static int GetRow(this Cell cell, OrientationType orientation)
+        public static void Initialize(this Grid grid)
         {
-            var result = cell.Row;
-
-            if (orientation == OrientationType.Bottom)
+            if (grid?.Cells?.Any() == true)
             {
-                result++;
-            }
-            else if (orientation == OrientationType.Top)
-            {
-                result--;
-            }
+                foreach (var cell in grid.Cells)
+                {
+                    cell.Grid = grid;
 
-            return result;
+                    if (cell is Group group)
+                    {
+                        foreach (var groupGrid in group.Grids)
+                        {
+                            groupGrid.Initialize();
+                        }
+                    }
+                }
+            }
         }
 
-        public static string GetTabName(this Group group)
-        {
-            var result = default(string);
-
-            var relevants = group.Grids
-                .Select(p => p.Name).ToArray();
-
-            var number = 0;
-
-            do
-            {
-                result = $"Tab {++number}";
-            } while (relevants.Contains(result));
-
-            return result;
-        }
-
-        public static void Move(this Grid grid, OrientationType orientation, int column, int row)
+        public static void Move(this Cell cell, OrientationType orientation)
         {
             switch (orientation)
             {
                 case OrientationType.Right:
 
-                    var moversRight = grid.Cells
-                        .Where(c => c.Row == row
-                            && c.Column >= column)
-                        .OrderBy(c => c.Column).ToArray();
+                    cell.Column++;
+
+                    var moversRight = cell.Grid.Cells
+                        .Where(c => c != cell
+                            && c.Row <= cell.Row
+                            && c.Row + c.Rows >= cell.Row
+                            && c.Column == cell.Column).ToArray();
 
                     foreach (var mover in moversRight)
                     {
-                        if (mover.Column > column++)
-                        {
-                            break;
-                        }
-
-                        mover.Column++;
+                        mover.Column--;
                     }
 
                     break;
 
                 case OrientationType.Left:
 
-                    var moversLeft = grid.Cells
-                        .Where(c => c.Row == row
-                            && c.Column <= column)
-                        .OrderByDescending(c => c.Column).ToArray();
+                    cell.Column--;
+
+                    var moversLeft = cell.Grid.Cells
+                        .Where(c => c != cell
+                            && c.Row <= cell.Row
+                            && c.Row + c.Rows >= cell.Row
+                            && c.Column + c.Columns - 1 == cell.Column).ToArray();
 
                     foreach (var mover in moversLeft)
                     {
-                        if (mover.Column < column--)
-                        {
-                            break;
-                        }
-
-                        mover.Column--;
+                        mover.Column++;
                     }
 
                     break;
 
                 case OrientationType.Bottom:
 
-                    var moversBottom = grid.Cells
-                        .Where(c => c.Column == column
-                            && c.Row >= row)
-                        .OrderBy(c => c.Row).ToArray();
+                    cell.Row++;
+
+                    var moversBottom = cell.Grid.Cells
+                        .Where(c => c != cell
+                            && c.Column <= cell.Column
+                            && c.Column + c.Columns >= cell.Column
+                            && c.Row == cell.Row).ToArray();
 
                     foreach (var mover in moversBottom)
                     {
-                        if (mover.Row > row++)
-                        {
-                            break;
-                        }
-
-                        mover.Row++;
+                        mover.Row--;
                     }
 
                     break;
 
                 case OrientationType.Top:
 
-                    var moversTop = grid.Cells
-                        .Where(c => c.Column == column
-                            && c.Row <= row)
-                        .OrderByDescending(c => c.Row).ToArray();
+                    cell.Row--;
+
+                    var moversTop = cell.Grid.Cells
+                        .Where(c => c != cell
+                            && c.Column <= cell.Column
+                            && c.Column + c.Columns >= cell.Column
+                            && c.Row + c.Rows - 1 == cell.Row).ToArray();
 
                     foreach (var mover in moversTop)
                     {
-                        if (mover.Row < row--)
-                        {
-                            break;
-                        }
-
-                        mover.Row--;
+                        mover.Row++;
                     }
 
                     break;
             }
+        }
+
+        public static void Remove(this Cell cell)
+        {
+            cell.Grid.Cells.Remove(cell);
         }
 
         public static void Tidy(this Grid grid)
@@ -230,9 +208,62 @@ namespace SportDJ.Services.GridService.Extensions
             }
         }
 
+        public static void ToGroup(this Player player)
+        {
+            var group = new Group
+            {
+                Column = player.Column,
+                Row = player.Row,
+                Grid = player.Grid,
+            };
+
+            player.Grid.Cells.Add(group);
+
+            var tab = AddTab(group);
+
+            tab.Cells.Add(player);
+            player.Grid.Cells.Remove(player);
+
+            player.Grid = tab;
+        }
+
+        public static void ToPlayer(this Group group)
+        {
+            if (group?.Grids.Any() == true)
+            {
+                var cells = group.Grids
+                    .SelectMany(g => g.Cells)
+                    .Where(c => c != default).ToArray();
+
+                foreach (var cell in cells)
+                {
+                    cell.Column = group.Column;
+                    cell.Row = group.Row;
+                    cell.Grid = group.Grid;
+
+                    group.Grid.Cells.Add(cell);
+                    group.Grid.Cells.Remove(group);
+                }
+            }
+        }
+
         #endregion Public Methods
 
         #region Private Methods
+
+        private static Grid AddTab(this Group group)
+        {
+            var name = group.GetTabName();
+
+            var result = new Grid
+            {
+                Name = name,
+            };
+
+            group.Grids.Add(result);
+
+            return result;
+        }
 
         private static string GetPlayerName(this Grid grid)
         {
@@ -246,6 +277,23 @@ namespace SportDJ.Services.GridService.Extensions
             do
             {
                 result = $"Player {++number}";
+            } while (relevants.Contains(result));
+
+            return result;
+        }
+
+        private static string GetTabName(this Group group)
+        {
+            var result = default(string);
+
+            var relevants = group.Grids
+                .Select(p => p.Name).ToArray();
+
+            var number = 0;
+
+            do
+            {
+                result = $"Tab {++number}";
             } while (relevants.Contains(result));
 
             return result;

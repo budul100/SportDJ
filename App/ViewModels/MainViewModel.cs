@@ -1,4 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -12,12 +18,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -27,6 +27,7 @@ namespace SportDJ.App.ViewModels
         #region Private Fields
 
         private readonly string assemblyTitle;
+
         private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
@@ -57,6 +58,7 @@ namespace SportDJ.App.ViewModels
             this.dialogService = dialogService;
 
             assemblyTitle = GetAssemblyTitle();
+
             OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
 
             backgroundMixer = containerProvider?.Resolve<IMixerService>(

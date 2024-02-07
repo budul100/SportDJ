@@ -4,10 +4,11 @@ using Prism.Regions;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Prism;
+using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
-    internal class CanvasViewModel
+    public class CanvasViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -39,11 +40,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        public GridViewModel Grid
-        {
-            get { return grid; }
-            set { SetProperty(ref grid, value); }
-        }
+        public ObservableCollection<GridViewModel> Grids { get; } = new ObservableCollection<GridViewModel>();
 
         #endregion Public Properties
 
@@ -51,13 +48,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Initialize()
         {
-            Grid?.Dispose();
+            grid?.Dispose();
 
-            Grid = default;
-
-            Grid = new GridViewModel(
+            grid = new GridViewModel(
                 containerProvider: containerProvider,
                 grid: gridService.Grid);
+
+            Grids.Add(grid);
         }
 
         #endregion Private Methods

@@ -115,20 +115,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             if (!isDisposed)
             {
-                if (isDisposing)
+                if (isDisposing
+                    && Cells?.Any() == true)
                 {
-                    if (Cells?.Any() == true)
+                    foreach (var cell in Cells)
                     {
-                        foreach (var cell in Cells)
-                        {
-                            cell.Dispose();
-                        }
-
-                        Cells = default;
+                        cell.Dispose();
                     }
-
-                    Columns = default;
-                    Rows = default;
                 }
 
                 isDisposed = true;

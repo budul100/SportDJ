@@ -1,13 +1,13 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Services.StackService
 {
@@ -248,25 +248,27 @@ namespace SportDJ.Services.StackService
 
         private void SelectEntry(int index)
         {
+            if (Entry?.Track.IsSilent == false)
+            {
+                Entry.IsSelected = false;
+            }
+
             if (index < Entries.Count)
             {
-                if (Entry != default
-                    && !Entries[index].Track.IsSilent)
-                {
-                    Entry.IsSelected = false;
-
-                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
-                }
-
                 Entry = Entries[index];
                 Entry.IsSelected = true;
-
-                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
-
-                Index = index;
-
-                eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
             }
+            else
+            {
+                Entry = default;
+                index = 0;
+            }
+
+            eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+
+            Index = index;
+
+            eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
         }
 
         private void SetTrack()

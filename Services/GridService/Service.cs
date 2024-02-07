@@ -1,4 +1,6 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -7,9 +9,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.GridService
 {
@@ -19,7 +18,6 @@ namespace SportDJ.Services.GridService
         #region Private Fields
 
         private readonly IDialogService dialogService;
-        private readonly Dictionary<Cell, Grid> elements = new();
         private readonly IEventAggregator eventAggregator;
         private readonly IStorageService<Set> settingsService;
 
@@ -54,76 +52,80 @@ namespace SportDJ.Services.GridService
         public void Add<T>(Cell cell, OrientationType orientation)
             where T : Cell
         {
-            var column = cell.GetColumn(orientation);
-            var row = cell.GetRow(orientation);
-
-            elements[cell].Move(
-                orientation: orientation,
-                column: column,
-                row: row);
-
-            if (typeof(T) == typeof(Player))
+            if (cell != default)
             {
-                AddPlayer(
-                    grid: elements[cell],
-                    column: column,
-                    row: row);
-            }
+                var result = default(T);
 
-            UpdateGrid();
+                if (typeof(T) == typeof(Player))
+                {
+                    result = cell.Grid.AddPlayer(
+                        column: cell.Column,
+                        row: cell.Row) as T;
+                }
+
+                result.Move(orientation);
+
+                UpdateGrid();
+            }
         }
 
         public void Move(Cell cell, OrientationType orientation)
         {
-            elements[cell].Move(
-                orientation: orientation,
-                column: cell.Column,
-                row: cell.Row);
+            if (cell != default)
+            {
+                cell.Move(orientation);
 
-            UpdateGrid();
+                UpdateGrid();
+            }
         }
 
         public async Task RemoveAsync(Cell cell)
         {
-            var result = await dialogService.GetMessageBoxResultAsync(
+            if (cell != default)
+            {
+                var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Texts.GridRemoveMessage,
                 contentTitle: Texts.GridRemoveHeader);
 
-            if (result == ButtonResult.Yes)
-            {
-                RemoveElement(cell);
+                if (result == ButtonResult.Yes)
+                {
+                    cell.Remove();
 
-                UpdateGrid();
+                    UpdateGrid();
+                }
             }
         }
 
         public async Task SwapAsync<T>(T cell)
             where T : Cell
         {
-            if (cell is Player player)
+            if (cell != default)
             {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.GridSwapPlayerMessage,
-                    contentTitle: Texts.GridSwapHeader);
-
-                if (result == ButtonResult.Yes)
+                if (cell is Player player)
                 {
-                    SwapPlayer(player);
+                    var result = await dialogService.GetMessageBoxResultAsync(
+                        contentMessage: Texts.GridSwapPlayerMessage,
+                        contentTitle: Texts.GridSwapHeader);
 
-                    UpdateGrid();
+                    if (result == ButtonResult.Yes)
+                    {
+                        player.ToGroup();
+
+                        UpdateGrid();
+                    }
                 }
-            }
-            else if (cell is Group group)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.GridSwapGroupMessage,
-                    contentTitle: Texts.GridSwapHeader);
-
-                if (result == ButtonResult.Yes)
+                else if (cell is Group group)
                 {
-                    SwapGroup(group);
+                    var result = await dialogService.GetMessageBoxResultAsync(
+                        contentMessage: Texts.GridSwapGroupMessage,
+                        contentTitle: Texts.GridSwapHeader);
 
-                    UpdateGrid();
+                    if (result == ButtonResult.Yes)
+                    {
+                        group.ToPlayer();
+
+                        UpdateGrid();
+                    }
                 }
             }
         }
@@ -132,114 +134,15 @@ namespace SportDJ.Services.GridService
 
         #region Private Methods
 
-        private void AddPlayer(Grid grid, int column = 0, int row = 0)
-        {
-            var player = grid.GetPlayer();
-
-            player.Column = column;
-            player.Row = row;
-
-            elements.Add(
-                key: player,
-                value: grid);
-        }
-
         private void InitializeGrid()
         {
             Grid = settingsService.Contents.Grid
                 ?? new Grid();
 
             Grid.Tidy();
-
-            elements.Clear();
-
-            UpdateElements(Grid);
+            Grid.Initialize();
 
             UpdateGrid();
-        }
-
-        private void RemoveElement(Cell cell)
-        {
-            var grid = elements[cell];
-
-            grid.Cells.Remove(cell);
-
-            elements.Remove(cell);
-        }
-
-        private void SwapGroup(Group group)
-        {
-            var givenGrid = elements[group];
-
-            if (group?.Grids.Any() == true)
-            {
-                var cells = group.Grids
-                    .SelectMany(g => g.Cells)
-                    .Where(c => c != default).ToArray();
-
-                foreach (var cell in cells)
-                {
-                    cell.Column = group.Column;
-                    cell.Row = group.Row;
-
-                    givenGrid.Cells.Add(cell);
-                    givenGrid.Cells.Remove(group);
-
-                    elements[cell] = givenGrid;
-                }
-            }
-        }
-
-        private void SwapPlayer(Player player)
-        {
-            var givenGrid = elements[player];
-
-            var group = new Group
-            {
-                Column = player.Column,
-                Row = player.Row,
-            };
-
-            givenGrid.Cells.Add(group);
-
-            elements.Add(
-                key: group,
-                value: givenGrid);
-
-            var name = group.GetTabName();
-
-            var newGrid = new Grid
-            {
-                Name = name,
-            };
-
-            group.Grids.Add(newGrid);
-
-            newGrid.Cells.Add(player);
-            givenGrid.Cells.Remove(player);
-
-            elements[player] = newGrid;
-        }
-
-        private void UpdateElements(Grid grid)
-        {
-            if (grid?.Cells?.Any() == true)
-            {
-                foreach (var cell in grid.Cells)
-                {
-                    elements.Add(
-                        key: cell,
-                        value: grid);
-
-                    if (cell is Group group)
-                    {
-                        foreach (var groupGrid in group.Grids)
-                        {
-                            UpdateElements(groupGrid);
-                        }
-                    }
-                }
-            }
         }
 
         private void UpdateGrid()

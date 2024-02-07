@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Extensions;
+using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Providers.Extensions;
 
@@ -18,7 +19,9 @@ namespace SportDJ.Commons.Providers
 
         private long end;
         private bool eventSentCue;
+        private bool eventSentEnd;
         private bool eventSentPause;
+        private bool isDisposed;
         private long position;
 
         #endregion Private Fields
@@ -60,6 +63,8 @@ namespace SportDJ.Commons.Providers
 
         public bool IsLoop { get; set; }
 
+        public bool IsRunning => PlayType.IsRunning();
+
         public PlayType PlayType { get; private set; }
 
         public TimeSpan Position => (position - Track.Start).ToDuration(averageBytesPerSecond);
@@ -74,13 +79,24 @@ namespace SportDJ.Commons.Providers
 
         public void End()
         {
-            if (IsLoop)
+            if (PlayType.IsActive())
             {
-                Pause();
+                if (IsLoop)
+                {
+                    Pause();
+                }
+                else
+                {
+                    PlayType = PlayType.Ended;
+                }
             }
-            else
+            else if (!eventSentEnd)
             {
-                PlayType = PlayType.Ended;
+                eventSentEnd = true;
+
+                SignalEndedEvent?.Invoke(
+                    sender: this,
+                    e: default);
             }
         }
 
@@ -107,11 +123,11 @@ namespace SportDJ.Commons.Providers
                                 sender: this,
                                 e: default);
 
+                            eventSentPause = true;
+
                             SignalPausedEvent?.Invoke(
                                 sender: this,
                                 e: default);
-
-                            eventSentPause = true;
                         }
                         else
                         {
@@ -128,7 +144,7 @@ namespace SportDJ.Commons.Providers
                             sourceProvider.Position = position;
                         }
                     }
-                    else if (PlayType.IsRunning())
+                    else if (IsRunning)
                     {
                         if (sourceProvider.Position < Track.Start)
                         {
@@ -170,11 +186,11 @@ namespace SportDJ.Commons.Providers
                             {
                                 PlayType = PlayType.Stopping;
 
+                                eventSentCue = true;
+
                                 CueExceededEvent?.Invoke(
                                     sender: this,
                                     e: default);
-
-                                eventSentCue = true;
                             }
 
                             if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
@@ -192,8 +208,11 @@ namespace SportDJ.Commons.Providers
                             e: default);
                     }
 
-                    if (PlayType == PlayType.Ended)
+                    if (!eventSentEnd
+                        && PlayType == PlayType.Ended)
                     {
+                        eventSentEnd = true;
+
                         SignalEndedEvent?.Invoke(
                             sender: this,
                             e: default);
@@ -219,9 +238,17 @@ namespace SportDJ.Commons.Providers
 
         protected override void Dispose(bool isDisposing)
         {
-            End();
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    End();
 
-            sourceProvider?.Dispose();
+                    sourceProvider?.Dispose();
+                }
+
+                isDisposed = true;
+            }
 
             base.Dispose(isDisposing);
         }
@@ -233,6 +260,7 @@ namespace SportDJ.Commons.Providers
         private void MuteBuffer(float[] buffer, int offset, int count)
         {
             var sample = 0;
+
             while (sample < count)
             {
                 for (var ch = 0; ch < sourceProvider.WaveFormat.Channels; ch++)

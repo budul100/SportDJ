@@ -4,6 +4,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
@@ -35,7 +36,6 @@ namespace SportDJ.Services.PlayerService
 
         private bool isDisposed;
         private MixerType mixerType;
-        private string name;
         private Player player;
         private ISignalService signalService;
         private IStorageFolder startLocation;
@@ -54,6 +54,10 @@ namespace SportDJ.Services.PlayerService
             this.dialogService = dialogService;
             this.settingsService = settingsService;
             this.stackService = stackService;
+
+            eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
+                action: () => SetStartLocation(),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
@@ -77,7 +81,7 @@ namespace SportDJ.Services.PlayerService
                 action: s => OnSignalEnded(s),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalServices.Contains(s));
+                filter: s => s == signalService || signalServices.Contains(s));
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
                 action: _ => Next(),
@@ -88,7 +92,7 @@ namespace SportDJ.Services.PlayerService
                 && !IsLoop);
 
             eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
-                action: _ => eventAggregator.GetEvent<PlayerDefinedEvent>().Publish(this),
+                action: _ => eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => this.stackService == s);
@@ -193,16 +197,14 @@ namespace SportDJ.Services.PlayerService
 
         public string Name
         {
-            get => name ?? player.Name;
+            get => player.Name;
 
             set
             {
                 if (player != default
                     && player.Name != value)
                 {
-                    name = value;
-
-                    player.Name = name.Trim();
+                    player.Name = value;
 
                     settingsService.Save();
                 }
@@ -248,9 +250,10 @@ namespace SportDJ.Services.PlayerService
                 if (result == ButtonResult.Yes)
                 {
                     player.Paths.Clear();
+
                     settingsService.Save();
 
-                    Initialize();
+                    InitializePlayer();
                 }
             }
         }
@@ -283,7 +286,7 @@ namespace SportDJ.Services.PlayerService
         {
             this.player = player;
 
-            Initialize();
+            InitializePlayer();
         }
 
         public void Next()
@@ -303,8 +306,6 @@ namespace SportDJ.Services.PlayerService
 
         public async Task SetFileAsync()
         {
-            startLocation ??= await dialogService.GetFolderAsync(player.Paths);
-
             var results = await dialogService.OpenFilePickerAsync(
                 title: Texts.PlayerSelectionFileHeader,
                 allowMultiple: true,
@@ -318,14 +319,12 @@ namespace SportDJ.Services.PlayerService
 
                 settingsService.Save();
 
-                Initialize();
+                InitializePlayer();
             }
         }
 
         public async Task SetFolderAsync()
         {
-            startLocation ??= await dialogService.GetFolderAsync(player.Paths);
-
             var results = await dialogService.OpenFolderPickerAsync(
                 title: Texts.PlayerSelectionFolderHeader,
                 allowMultiple: true,
@@ -339,7 +338,7 @@ namespace SportDJ.Services.PlayerService
 
                 settingsService.Save();
 
-                Initialize();
+                InitializePlayer();
             }
         }
 
@@ -381,17 +380,17 @@ namespace SportDJ.Services.PlayerService
 
         #region Private Methods
 
-        private void Initialize()
+        private void InitializePlayer()
         {
             Counter = 0;
+
+            SetStartLocation();
 
             Task.Run(() => stackService.Initialize(
                 paths: player.Paths,
                 name: Name,
                 savePosition: SavePosition,
                 isLoop: IsLoop));
-
-            eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this);
         }
 
         private void OnSignalEnded(ISignalService signalService)
@@ -404,7 +403,7 @@ namespace SportDJ.Services.PlayerService
                     Next();
                 }
 
-                if (signalService.State == StateType.None)
+                if (signalService.IsSilent)
                 {
                     signalServices.Remove(signalService);
 
@@ -443,6 +442,11 @@ namespace SportDJ.Services.PlayerService
             UpdatePlayer();
         }
 
+        private void SetStartLocation()
+        {
+            Task.Run(async () => startLocation ??= await dialogService.GetFolderAsync(player.Paths));
+        }
+
         private void UpdateDuration()
         {
             var remaining = signalService?.Track == stackService.Track
@@ -472,13 +476,13 @@ namespace SportDJ.Services.PlayerService
 
         private void UpdateSignal()
         {
+            if (signalService?.IsSilent == true)
+            {
+                signalService?.Stop();
+            }
+
             if (stackService.Track != default)
             {
-                if (signalService?.State == StateType.Pause)
-                {
-                    signalService?.Stop();
-                }
-
                 mixerType = player.IsForeground
                     ? MixerType.Foreground
                     : MixerType.Background;
@@ -489,9 +493,9 @@ namespace SportDJ.Services.PlayerService
                 signalService = mixerService?.Add(
                     track: stackService.Track,
                     isLoop: IsLoop);
-
-                UpdateTrack();
             }
+
+            UpdateTrack();
         }
 
         private void UpdateTrack()
@@ -507,7 +511,6 @@ namespace SportDJ.Services.PlayerService
             }
 
             UpdatePlayer();
-
             UpdateDuration();
         }
 

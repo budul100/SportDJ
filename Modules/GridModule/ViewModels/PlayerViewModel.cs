@@ -1,4 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -12,9 +16,6 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -26,15 +27,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly IPlayerService playerService;
 
         private bool isDisposed;
-
         private bool isRenaming;
+        private string name;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-                   : base(containerProvider: containerProvider, cell: player)
+            : base(containerProvider: containerProvider, cell: player)
         {
             playerService = containerProvider?.Resolve<IPlayerService>();
 
@@ -53,12 +54,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Reset(),
                 canExecuteMethod: () => IsAvailableReset);
 
-            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
-                action: _ => UpdatePlayer(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
-
             eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
@@ -71,8 +66,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
-            eventAggregator?.GetEvent<PlayerDefinedEvent>().Subscribe(
-                action: _ => UpdateMenu(),
+            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
+                action: _ => UpdatePlayer(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
@@ -109,6 +104,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #endregion Public Events
 
         #region Public Properties
+
+        public static int MaxLengthName => Constants.NameMaxLength;
 
         public Bitmap Bitmap => playerService?.Track?.Bitmap;
 
@@ -194,17 +191,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public int MaxLengthName => Constants.NameMaxLength;
-
         public string Name
         {
-            get { return playerService.Name; }
+            get { return name ?? playerService.Name; }
             set
             {
                 if (playerService != default
                     && value != playerService.Name)
                 {
-                    playerService.Name = value;
+                    name = value;
+
+                    playerService.Name = name.Trim();
 
                     RaisePropertyChanged(nameof(Name));
                 }
@@ -299,15 +296,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             if (playerService?.HasPaths == true)
             {
-                var clearItem = new MenuViewModel(
-                    header: Texts.PlayerClearHeader,
-                    callback: () => playerService.ClearAsync(),
-                    icon: MaterialIconKind.CloseCircleOutline);
-
-                clearItem.MenuCloseEvent += OnMenuClosing;
-
-                yield return clearItem;
-
                 if (playerService.HasStack)
                 {
                     var shuffleItem = new MenuViewModel(
@@ -319,6 +307,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     yield return shuffleItem;
                 }
+
+                var clearItem = new MenuViewModel(
+                    header: Texts.PlayerClearHeader,
+                    callback: () => playerService.ClearAsync(),
+                    icon: MaterialIconKind.CloseCircleOutline);
+
+                clearItem.MenuCloseEvent += OnMenuClosing;
+
+                yield return clearItem;
 
                 yield return new SeparatorViewModel();
 
@@ -468,6 +465,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private void UpdatePlayer()
         {
             base.Initialize();
+
+            UpdateDuration();
             UpdateContent();
         }
 

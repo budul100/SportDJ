@@ -14,6 +14,9 @@ namespace SportDJ.Commons.Models.Structure
         [XmlIgnore]
         public virtual int Columns { get; set; }
 
+        [XmlIgnore]
+        public Grid Grid { get; set; }
+
         [XmlAttribute]
         public int Row { get; set; }
 

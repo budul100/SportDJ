@@ -1,9 +1,10 @@
-﻿using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using MsBox.Avalonia.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia.Enums;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -18,6 +19,8 @@ namespace SportDJ.Commons.Interfaces
             ButtonEnum buttonDefinitions = ButtonEnum.YesNo, ClickEnum enterDefaultButton = ClickEnum.Yes,
             ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool showInCenter = true,
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);
+
+        void Initialize(Application application);
 
         Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
             IReadOnlyList<FilePickerFileType> fileTypeFilter = default, bool allowMultiple = false,

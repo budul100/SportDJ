@@ -1,5 +1,6 @@
 ﻿using System;
 using NAudio.Wave;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Providers.Extensions
 {
@@ -23,6 +24,16 @@ namespace SportDJ.Commons.Providers.Extensions
                 channels: 2);
 
             return result;
+        }
+
+        public static bool IsActive(this PlayType playType)
+        {
+            return playType.IsRunning() || playType == PlayType.Pausing;
+        }
+
+        public static bool IsRunning(this PlayType playType)
+        {
+            return playType == PlayType.Playing || playType == PlayType.Stopping;
         }
 
         public static long ToBytes(this TimeSpan duration, int averageBytesPerSecond)

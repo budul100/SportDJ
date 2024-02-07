@@ -53,7 +53,7 @@ namespace SportDJ.Services.SignalService
             ? playingProvider?.Duration
             : TimeSpan.Zero;
 
-        public bool IsEnding => playingProvider?.PlayType.IsRunning() == true
+        public bool IsEnding => playingProvider?.IsRunning == true
             && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingSeconds);
 
         public bool IsLoop
@@ -104,7 +104,8 @@ namespace SportDJ.Services.SignalService
             Dispose(
                 isDisposing: true);
 
-            GC.SuppressFinalize(this);
+            GC.SuppressFinalize(
+                obj: this);
         }
 
         public void Initialize(Track track, WaveFormat waveFormat)
@@ -237,6 +238,8 @@ namespace SportDJ.Services.SignalService
 
                         playingProvider.Dispose();
                     }
+
+                    Track = default;
                 }
 
                 isDisposed = true;

@@ -53,7 +53,7 @@ namespace SportDJ.App
 
         protected override AvaloniaObject CreateShell()
         {
-            LoadSettings();
+            InitalizeApp();
 
             //if (IsSingleViewLifetime)
             //{
@@ -69,9 +69,7 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var dialogService = new DialogService.Service(App.Current);
-            containerRegistry.RegisterInstance<IDialogService>(dialogService);
-
+            containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IHookService, Services.HookService.Service>();
 
@@ -121,9 +119,12 @@ namespace SportDJ.App
             }
         }
 
-        private void LoadSettings()
+        private void InitalizeApp()
         {
+            var dialogService = Container.Resolve<IDialogService>();
             var settingsService = Container.Resolve<IStorageService<Set>>();
+
+            dialogService.Initialize(App.Current);
 
             var commandLinePath = Environment.GetCommandLineArgs().Length > 1
                 ? Environment.GetCommandLineArgs()[1]

@@ -1,4 +1,7 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -7,9 +10,6 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -67,7 +67,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public int ColumnSpan { get; protected set; } = 1;
 
-        public bool IsAvailableMenu => !outputServiceLive.IsPlaying
+        public bool IsAvailableMenu => outputServiceLive?.IsPlaying == false
             || !settingsService.Contents.Options.DisableInterruptingDialogs;
 
         public ObservableCollection<BindableBase> Menus { get; private set; }
