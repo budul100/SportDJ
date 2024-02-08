@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -10,6 +6,10 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -18,7 +18,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Action callback;
+        private readonly Action executeCallback;
         private readonly Func<bool> isCheckedGetter;
 
         private string header;
@@ -30,45 +30,53 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(string header, Action callback, Func<bool> isCheckedGetter = default,
+        public MenuViewModel(string header, Action executeCallback, Action closeCallback, Func<bool> isCheckedGetter = default,
             MaterialIconKind? icon = default)
         {
-            this.callback = callback;
+            this.executeCallback = executeCallback;
             this.isCheckedGetter = isCheckedGetter;
 
             Command = new DelegateCommand(ExecuteCallback);
             Header = header;
             Icon = icon;
 
+            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
+
             UpdateIsChecked();
         }
 
-        public MenuViewModel(string header, IEnumerable<BindableBase> menuItems, MaterialIconKind? icon = default)
+        public MenuViewModel(string header, IEnumerable<BindableBase> menuItems, Action closeCallback,
+            MaterialIconKind? icon = default)
         {
-            MenuItems = new ObservableCollection<BindableBase>(menuItems);
             Command = new DelegateCommand(ExecuteCallback);
             Header = header;
             Icon = icon;
 
+            MenuItems = new ObservableCollection<BindableBase>(menuItems);
+
+            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
+
             UpdateItems();
         }
 
-        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems)
+        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems, Action closeCallback)
         {
             eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
                 action: _ => UpdateItems(),
                 keepSubscriberReferenceAlive: true);
 
-            MenuItems = new ObservableCollection<BindableBase>(menuItems);
             Command = new DelegateCommand(ExecuteCallback);
             Header = GetHeader();
+
+            MenuItems = new ObservableCollection<BindableBase>(menuItems);
+            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
 
             UpdateItems();
         }
 
-        public MenuViewModel(IEventAggregator eventAggregator, Entry entry)
+        public MenuViewModel(IEventAggregator eventAggregator, Entry entry, Action closeCallback)
         {
-            this.callback = entry.Selector;
+            this.executeCallback = entry.Selector;
 
             eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
                 action: _ => UpdateItem(),
@@ -84,6 +92,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             Entry = entry;
             Command = new DelegateCommand(ExecuteCallback);
+
+            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
 
             UpdateTrack();
         }
@@ -144,7 +154,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 sender: this,
                 e: default);
 
-            callback?.Invoke();
+            executeCallback?.Invoke();
 
             UpdateIsChecked();
         }

@@ -1,12 +1,13 @@
-﻿using Material.Icons;
-using Prism.Ioc;
-using Prism.Mvvm;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Extensions;
-using SportDJ.Commons.Models.Structure;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Material.Icons;
+using Prism.Ioc;
+using Prism.Mvvm;
+using SportDJ.Commons.Assets;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -15,15 +16,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
+        private readonly Grid grid;
         private readonly GroupViewModel parent;
 
         private int columns;
         private bool isDisposed;
         private bool isRenaming;
         private bool isSelected;
-        private string keyCode;
-        private string name;
-
         private int rows;
 
         #endregion Private Fields
@@ -31,8 +30,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Public Constructors
 
         public GridViewModel(IContainerProvider containerProvider, Grid grid, GroupViewModel parent = default)
-            : base(containerProvider: containerProvider, cell: grid.Group)
+            : base(containerProvider: containerProvider, element: grid)
         {
+            this.grid = grid;
             this.parent = parent;
 
             Initialize(
@@ -51,8 +51,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             get { return columns; }
             set { SetProperty(ref columns, value); }
         }
-
-        public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         public bool IsRenaming
         {
@@ -74,29 +72,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsVisible => IsSelected
             && parent?.IsVisible != false;
-
-        public string Key => KeyCode.GetKey();
-
-        public string KeyCode
-        {
-            get { return keyCode; }
-            set
-            {
-                if (value != keyCode)
-                {
-                    keyCode = value;
-
-                    RaisePropertyChanged(nameof(Key));
-                    RaisePropertyChanged(nameof(HasKey));
-                }
-            }
-        }
-
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
 
         public int Rows
         {
@@ -128,26 +103,31 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 isDisposing: isDisposing);
         }
 
-        protected override IEnumerable<BindableBase> GetMenuItems()
+        protected override IEnumerable<BindableBase> GetElementMenus()
         {
-            var menuCells = GetMenuCells().ToArray();
+            var gridMenus = base.GetGridMenus().ToArray();
 
-            var editCellsItem = new MenuViewModel(
-                header: $"{Texts.GridEditHeader}...",
-                menuItems: menuCells);
+            var gridItems = new MenuViewModel(
+                header: $"{Texts.CellEditHeader}...",
+                menuItems: gridMenus,
+                closeCallback: CloseMenu);
 
-            editCellsItem.MenuCloseEvent += OnMenuClosing;
+            yield return gridItems;
 
-            yield return editCellsItem;
+            var tabMenus = GetTabMenus().ToArray();
 
-            yield return new SeparatorViewModel();
+            var tabItems = new MenuViewModel(
+                header: $"{Texts.TabEditHeader}...",
+                menuItems: tabMenus,
+                closeCallback: CloseMenu);
+
+            yield return tabItems;
 
             var renameItem = new MenuViewModel(
-                header: Texts.PlayerRenameHeader,
-                callback: () => IsRenaming = true,
+                header: Texts.TabRenameHeader,
+                executeCallback: () => IsRenaming = true,
+                closeCallback: CloseMenu,
                 icon: MaterialIconKind.FormTextbox);
-
-            renameItem.MenuCloseEvent += OnMenuClosing;
 
             yield return renameItem;
         }
@@ -155,6 +135,55 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #endregion Protected Methods
 
         #region Private Methods
+
+        private IEnumerable<BindableBase> GetTabMenus()
+        {
+            var orientations = Enum.GetValues<OrientationType>()
+                .Where(o => o == OrientationType.Left || o == OrientationType.Right).ToArray();
+
+            foreach (var orientation in orientations)
+            {
+                var header = $"{Texts.TabAddHeader} {orientation}";
+
+                void callback() => gridService.AddGrid(
+                    grid: grid,
+                    orientation: orientation);
+
+                var addItem = new MenuViewModel(
+                    header: header,
+                    executeCallback: callback,
+                    closeCallback: CloseMenu);
+
+                yield return addItem;
+            }
+
+            yield return new SeparatorViewModel();
+
+            foreach (var orientation in orientations)
+            {
+                var header = $"{Texts.TabMoveHeader} {orientation}";
+
+                void callback() => gridService.MoveGrid(
+                    grid: grid,
+                    orientation: orientation);
+
+                var moveItem = new MenuViewModel(
+                    header: header,
+                    executeCallback: callback,
+                    closeCallback: CloseMenu);
+
+                yield return moveItem;
+            }
+
+            yield return new SeparatorViewModel();
+
+            var removeItem = new MenuViewModel(
+                header: $"{Texts.TabRemoveHeader}...",
+                executeCallback: () => gridService.RemoveGridAsync(grid),
+                closeCallback: CloseMenu);
+
+            yield return removeItem;
+        }
 
         private void Initialize(IContainerProvider containerProvider, Grid grid)
         {

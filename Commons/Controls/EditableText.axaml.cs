@@ -30,6 +30,14 @@ namespace SportDJ.Commons.Controls
         public EditableText()
         {
             InitializeComponent();
+
+            var textBox = this
+                .FindControl<TextBox>("TextBox");
+
+            textBox?.AddHandler(
+                routedEvent: KeyDownEvent,
+                handler: OnKeyDown,
+                routes: RoutingStrategies.Tunnel);
         }
 
         #endregion Public Constructors
@@ -67,7 +75,7 @@ namespace SportDJ.Commons.Controls
 
         #region Private Methods
 
-        private void OnGotFocus(object? sender, GotFocusEventArgs e)
+        private void OnGotFocus(object sender, GotFocusEventArgs e)
         {
             if (!(sender is TextBox textBox))
             {
@@ -76,13 +84,10 @@ namespace SportDJ.Commons.Controls
 
             // Defer the SelectAll() method call using the dispatcher
 
-            Dispatcher.UIThread.Post(() =>
-            {
-                textBox.SelectAll();
-            });
+            Dispatcher.UIThread.Post(() => textBox.SelectAll());
         }
 
-        private void OnKeyDown(object? sender, KeyEventArgs e)
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (!(sender is TextBox))
             {
@@ -95,11 +100,9 @@ namespace SportDJ.Commons.Controls
             {
                 IsActive = false;
             }
-
-            e.Route = RoutingStrategies.Direct;
         }
 
-        private void OnLostFocus(object? sender, RoutedEventArgs e)
+        private void OnLostFocus(object sender, RoutedEventArgs e)
         {
             if (!(sender is TextBox))
             {

@@ -9,7 +9,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Key;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System.Collections.Generic;
@@ -26,14 +25,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private bool isDisposed;
         private bool isRenaming;
-        private string name;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
-            : base(containerProvider: containerProvider, cell: player)
+            : base(containerProvider: containerProvider, element: player)
         {
             playerService = containerProvider?.Resolve<IPlayerService>();
 
@@ -107,8 +105,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand ExecuteCommand { get; }
 
-        public bool HasKey => !string.IsNullOrWhiteSpace(Key);
-
         public bool HasPFL { get; private set; }
 
         public bool HasPFLOrKey => HasPFL || HasKey;
@@ -163,41 +159,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref isRenaming, value); }
         }
 
-        public string Key => KeyCode.GetKey();
-
-        public string KeyCode
-        {
-            get { return playerService?.KeyCode; }
-            set
-            {
-                if (playerService != default
-                    && value != playerService.KeyCode)
-                {
-                    playerService.KeyCode = value;
-
-                    RaisePropertyChanged(nameof(KeyCode));
-                    RaisePropertyChanged(nameof(HasKey));
-                }
-            }
-        }
-
-        public string Name
-        {
-            get { return name ?? playerService.Name; }
-            set
-            {
-                if (playerService != default
-                    && value != playerService.Name)
-                {
-                    name = value;
-
-                    playerService.Name = name.Trim();
-
-                    RaisePropertyChanged(nameof(Name));
-                }
-            }
-        }
-
         public double? Progress => playerService?.Progress;
 
         public string Remaining => playerService.Remaining?.ToString(Constants.FormatDuration);
@@ -243,44 +204,40 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 isDisposing: isDisposing);
         }
 
-        protected override IEnumerable<BindableBase> GetMenuItems()
+        protected override IEnumerable<BindableBase> GetElementMenus()
         {
-            var menuCells = GetMenuCells().ToArray();
+            var gridMenus = GetGridMenus().ToArray();
 
-            var editCellsItem = new MenuViewModel(
-                header: $"{Texts.GridEditHeader}...",
-                menuItems: menuCells);
+            var gridItem = new MenuViewModel(
+                header: $"{Texts.CellEditHeader}...",
+                menuItems: gridMenus,
+                closeCallback: CloseMenu);
 
-            editCellsItem.MenuCloseEvent += OnMenuClosing;
-
-            yield return editCellsItem;
-
-            yield return new SeparatorViewModel();
+            yield return gridItem;
 
             var renameItem = new MenuViewModel(
                 header: Texts.PlayerRenameHeader,
-                callback: () => RenamePlayer(),
+                () => RenamePlayer(),
+                closeCallback: CloseMenu,
                 icon: MaterialIconKind.FormTextbox);
-
-            renameItem.MenuCloseEvent += OnMenuClosing;
 
             yield return renameItem;
 
+            yield return new SeparatorViewModel();
+
             var selectFileItem = new MenuViewModel(
                 header: $"{Texts.PlayerSelectionFileHeader}...",
-                callback: () => playerService?.SetFileAsync(),
+                executeCallback: () => playerService?.SetFileAsync(),
+                closeCallback: CloseMenu,
                 icon: MaterialIconKind.FileMultipleOutline);
-
-            selectFileItem.MenuCloseEvent += OnMenuClosing;
 
             yield return selectFileItem;
 
             var selectFolderItem = new MenuViewModel(
                 header: $"{Texts.PlayerSelectionFolderHeader}...",
-                callback: () => playerService?.SetFolderAsync(),
+                executeCallback: () => playerService?.SetFolderAsync(),
+                closeCallback: CloseMenu,
                 icon: MaterialIconKind.FolderMultipleOutline);
-
-            selectFolderItem.MenuCloseEvent += OnMenuClosing;
 
             yield return selectFolderItem;
 
@@ -290,20 +247,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 {
                     var shuffleItem = new MenuViewModel(
                         header: Texts.PlayerShuffleHeader,
-                        callback: () => playerService.ShuffleAsync(),
+                        executeCallback: () => playerService.ShuffleAsync(),
+                        closeCallback: CloseMenu,
                         icon: MaterialIconKind.ShuffleVariant);
-
-                    shuffleItem.MenuCloseEvent += OnMenuClosing;
 
                     yield return shuffleItem;
                 }
 
                 var clearItem = new MenuViewModel(
                     header: Texts.PlayerClearHeader,
-                    callback: () => playerService.ClearAsync(),
+                    executeCallback: () => playerService.ClearAsync(),
+                    closeCallback: CloseMenu,
                     icon: MaterialIconKind.CloseCircleOutline);
-
-                clearItem.MenuCloseEvent += OnMenuClosing;
 
                 yield return clearItem;
 
@@ -311,21 +266,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 var isForegroundItem = new MenuViewModel(
                     header: Texts.PlayerOnForegroundHeader,
-                    callback: () => IsForeground = !IsForeground,
+                    executeCallback: () => IsForeground = !IsForeground,
+                    closeCallback: CloseMenu,
                     isCheckedGetter: () => IsForeground,
                     icon: MaterialIconKind.ChevronUpBoxOutline);
-
-                isForegroundItem.MenuCloseEvent += OnMenuClosing;
 
                 yield return isForegroundItem;
 
                 var savePositionsItem = new MenuViewModel(
                     header: Texts.PlayerSavePosition,
-                    callback: () => SavePosition = !SavePosition,
+                    executeCallback: () => SavePosition = !SavePosition,
+                    closeCallback: CloseMenu,
                     isCheckedGetter: () => SavePosition,
                     icon: MaterialIconKind.FileRestoreOutline);
-
-                savePositionsItem.MenuCloseEvent += OnMenuClosing;
 
                 yield return savePositionsItem;
 
@@ -345,9 +298,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     {
                         var result = new MenuViewModel(
                             eventAggregator: eventAggregator,
-                            menuItems: group);
-
-                        result.MenuCloseEvent += OnMenuClosing;
+                            menuItems: group,
+                            closeCallback: CloseMenu);
 
                         yield return result;
                     }
@@ -398,9 +350,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 {
                     var result = new MenuViewModel(
                         eventAggregator: eventAggregator,
-                        entry: entry);
-
-                    result.MenuCloseEvent += OnMenuClosing;
+                        entry: entry,
+                        closeCallback: CloseMenu);
 
                     yield return result;
                 }

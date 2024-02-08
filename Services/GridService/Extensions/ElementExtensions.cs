@@ -1,6 +1,7 @@
-﻿using System.Linq;
-using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Linq;
 
 namespace SportDJ.Services.GridService.Extensions
 {
@@ -8,27 +9,49 @@ namespace SportDJ.Services.GridService.Extensions
     {
         #region Public Methods
 
-        public static Cell AddPlayer(this Grid grid, int column = 0, int row = 0)
+        public static Cell Add(this Grid grid, Cell anchor, OrientationType orientation)
         {
             var result = grid.GetPlayer();
 
-            result.Column = column;
-            result.Row = row;
+            result.Column = anchor.Column;
+            result.Row = anchor.Row;
+
+            result.Move(orientation);
 
             return result;
         }
 
-        public static Player GetPlayer(this Grid grid)
+        public static Grid Add(this Group group, Grid anchor = default,
+            OrientationType orientation = OrientationType.Right)
         {
-            var name = grid.GetPlayerName();
-
-            var result = new Player
+            if (orientation != OrientationType.Right
+                && orientation != OrientationType.Left)
             {
-                Name = name,
-                Grid = grid,
-            };
+                throw new ArgumentException(
+                    message: "Orientation for tabs must be left or right.",
+                    paramName: nameof(orientation));
+            }
 
-            grid.Cells.Add(result);
+            var result = GetTab(group);
+
+            var index = (anchor?.Group.Grids.IndexOf(anchor)) ?? 0;
+
+            if (orientation == OrientationType.Right)
+            {
+                index++;
+            }
+
+            if (index >= group.Grids.Count)
+            {
+                group.Grids.Add(
+                    item: result);
+            }
+            else
+            {
+                group.Grids.Insert(
+                    index: index,
+                    item: result);
+            }
 
             return result;
         }
@@ -128,9 +151,30 @@ namespace SportDJ.Services.GridService.Extensions
             }
         }
 
-        public static void Remove(this Cell cell)
+        public static void Move(this Grid grid, OrientationType orientation)
         {
-            cell.Grid.Cells.Remove(cell);
+            var index = grid.Group.Grids.IndexOf(grid);
+
+            if (orientation == OrientationType.Right
+                && index < grid.Group.Grids.Count - 1)
+            {
+                var temp = grid.Group.Grids[index];
+
+                grid.Group.Grids.RemoveAt(index);
+                grid.Group.Grids.Insert(
+                    index: index + 1,
+                    item: temp);
+            }
+            else if (orientation == OrientationType.Left
+                && index > 0)
+            {
+                var temp = grid.Group.Grids[index];
+
+                grid.Group.Grids.RemoveAt(index);
+                grid.Group.Grids.Insert(
+                    index: index - 1,
+                    item: temp);
+            }
         }
 
         public static void Tidy(this Grid grid)
@@ -148,9 +192,16 @@ namespace SportDJ.Services.GridService.Extensions
 
                     foreach (var group in groups)
                     {
-                        foreach (var groupGrid in group.Grids)
+                        if (group.Grids?.Any() != true)
                         {
-                            groupGrid.Tidy();
+                            group.GetTab();
+                        }
+                        else
+                        {
+                            foreach (var groupGrid in group.Grids)
+                            {
+                                groupGrid.Tidy();
+                            }
                         }
 
                         group.Columns = group.Grids.Max(g => g.Columns);
@@ -221,7 +272,7 @@ namespace SportDJ.Services.GridService.Extensions
 
             player.Grid.Cells.Add(group);
 
-            var tab = AddTab(group);
+            var tab = group.Add();
 
             tab.Cells.Add(player);
             player.Grid.Cells.Remove(player);
@@ -253,16 +304,17 @@ namespace SportDJ.Services.GridService.Extensions
 
         #region Private Methods
 
-        private static Grid AddTab(this Group group)
+        private static Player GetPlayer(this Grid grid)
         {
-            var name = group.GetTabName();
+            var name = grid.GetPlayerName();
 
-            var result = new Grid
+            var result = new Player
             {
                 Name = name,
+                Grid = grid,
             };
 
-            group.Grids.Add(result);
+            grid.Cells.Add(result);
 
             return result;
         }
@@ -280,6 +332,19 @@ namespace SportDJ.Services.GridService.Extensions
             {
                 result = $"Player {++number}";
             } while (relevants.Contains(result));
+
+            return result;
+        }
+
+        private static Grid GetTab(this Group group)
+        {
+            var name = group.GetTabName();
+
+            var result = new Grid
+            {
+                Name = name,
+                Group = group,
+            };
 
             return result;
         }

@@ -35,10 +35,6 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsPlaying { get; }
 
-        string KeyCode { get; set; }
-
-        string Name { get; set; }
-
         double? Progress { get; }
 
         TimeSpan? Remaining { get; }

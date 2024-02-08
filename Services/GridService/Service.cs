@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -9,6 +7,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.GridService
 {
@@ -49,27 +48,25 @@ namespace SportDJ.Services.GridService
 
         #region Public Methods
 
-        public void Add<T>(Cell cell, OrientationType orientation)
-            where T : Cell
+        public void AddGrid(Grid grid, OrientationType orientation)
         {
-            if (cell != default)
-            {
-                var result = default(T);
+            grid.Group.Add(
+                anchor: grid,
+                orientation: orientation);
 
-                if (typeof(T) == typeof(Player))
-                {
-                    result = cell.Grid.AddPlayer(
-                        column: cell.Column,
-                        row: cell.Row) as T;
-                }
-
-                result.Move(orientation);
-
-                Update();
-            }
+            Update();
         }
 
-        public void Move(Cell cell, OrientationType orientation)
+        public void AddPlayer(Cell cell, OrientationType orientation)
+        {
+            cell.Grid.Add(
+                anchor: cell,
+                orientation: orientation);
+
+            Update();
+        }
+
+        public void MoveCell(Cell cell, OrientationType orientation)
         {
             if (cell != default)
             {
@@ -79,17 +76,45 @@ namespace SportDJ.Services.GridService
             }
         }
 
-        public async Task RemoveAsync(Cell cell)
+        public void MoveGrid(Grid grid, OrientationType orientation)
+        {
+            if (grid != default)
+            {
+                grid.Move(orientation);
+
+                Update();
+            }
+        }
+
+        public async Task RemoveCellAsync(Cell cell)
         {
             if (cell != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Texts.GridRemoveMessage,
-                contentTitle: Texts.GridRemoveHeader);
+                    contentMessage: Texts.CellRemoveMessage,
+                    contentTitle: Texts.CellRemoveHeader);
 
                 if (result == ButtonResult.Yes)
                 {
-                    cell.Remove();
+                    cell.Grid.Cells.Remove(cell);
+
+                    Update();
+                }
+            }
+        }
+
+        public async Task RemoveGridAsync(Grid grid)
+        {
+            if (grid != default)
+            {
+                var result = await dialogService.GetMessageBoxResultAsync(
+                    contentMessage: Texts.TabRemoveMessage,
+                    contentTitle: Texts.TabRemoveHeader);
+
+                if (result == ButtonResult.Yes)
+                {
+                    var index = grid.Group.Grids.IndexOf(grid);
+                    grid.Group.Grids.RemoveAt(index);
 
                     Update();
                 }
@@ -104,8 +129,8 @@ namespace SportDJ.Services.GridService
                 if (cell is Player player)
                 {
                     var result = await dialogService.GetMessageBoxResultAsync(
-                        contentMessage: Texts.GridSwapPlayerMessage,
-                        contentTitle: Texts.GridSwapHeader);
+                        contentMessage: Texts.CellSwapPlayerMessage,
+                        contentTitle: Texts.CellSwapHeader);
 
                     if (result == ButtonResult.Yes)
                     {
@@ -117,8 +142,8 @@ namespace SportDJ.Services.GridService
                 else if (cell is Group group)
                 {
                     var result = await dialogService.GetMessageBoxResultAsync(
-                        contentMessage: Texts.GridSwapGroupMessage,
-                        contentTitle: Texts.GridSwapHeader);
+                        contentMessage: Texts.CellSwapGroupMessage,
+                        contentTitle: Texts.CellSwapHeader);
 
                     if (result == ButtonResult.Yes)
                     {
@@ -140,6 +165,7 @@ namespace SportDJ.Services.GridService
                 ?? new Grid();
 
             Grid.Tidy();
+
             Grid.Initialize();
 
             Update();

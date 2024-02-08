@@ -1,25 +1,21 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid>
 		<Cells>
-			<Cell xsi:type="Group" Column="1" Row="0">
+			<Cell xsi:type="Group" Column="0" Row="0">
 				<Grids>
-					<Grid Name="Tab 1">
+					<Grid Name="Tab 2">
 						<Cells>
 							<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
-								<Paths />
+								<Paths>
+									<Path>C:\Users\mgr\SportDJ\Spiel_Person\Shorts - O La Paloma.mp3</Path>
+								</Paths>
 								<SavePosition>false</SavePosition>
 							</Cell>
 						</Cells>
 					</Grid>
 				</Grids>
-			</Cell>
-			<Cell xsi:type="Player" Column="0" Row="0" Name="Player 1">
-				<IsForeground>false</IsForeground>
-				<IsLoop>false</IsLoop>
-				<Paths />
-				<SavePosition>false</SavePosition>
 			</Cell>
 		</Cells>
 	</Grid>

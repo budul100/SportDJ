@@ -19,6 +19,7 @@
             Text="{Binding $parent[UserControl].Text}" />
 
         <TextBox
+            Name="TextBox"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             AcceptsReturn="False"
@@ -29,12 +30,12 @@
             GotFocus="OnGotFocus"
             IsUndoEnabled="True"
             IsVisible="{Binding $parent[UserControl].IsActive}"
-            KeyDown="OnKeyDown"
             LostFocus="OnLostFocus"
             MaxLength="{Binding $parent[UserControl].MaxLength}"
             MaxLines="1"
             Text="{Binding $parent[UserControl].Text}"
             TextAlignment="Justify"
             TextWrapping="NoWrap" />
+
     </Grid>
 </UserControl>

@@ -14,12 +14,17 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Add<T>(Cell cell, OrientationType orientation)
-            where T : Cell;
+        void AddGrid(Grid grid, OrientationType orientation);
 
-        void Move(Cell cell, OrientationType orientation);
+        void AddPlayer(Cell cell, OrientationType orientation);
 
-        Task RemoveAsync(Cell cell);
+        void MoveCell(Cell cell, OrientationType orientation);
+
+        void MoveGrid(Grid grid, OrientationType orientation);
+
+        Task RemoveCellAsync(Cell cell);
+
+        Task RemoveGridAsync(Grid grid);
 
         Task SwapAsync<T>(T cell)
             where T : Cell;
