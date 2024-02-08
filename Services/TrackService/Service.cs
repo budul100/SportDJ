@@ -138,7 +138,7 @@ namespace SportDJ.Services.TrackService
                     var info = atlTrack.GetInfo();
                     var duration = TimeSpan.FromSeconds(atlTrack.Duration);
 
-                    var result = new Track(
+                    var track = new Track(
                         path: file,
                         title: atlTrack.Title,
                         artist: atlTrack.Artist,
@@ -149,10 +149,12 @@ namespace SportDJ.Services.TrackService
                     {
                         tracks.Add(
                             key: file,
-                            value: result);
+                            value: track);
                     }
 
-                    Task.Run(() => TrimTrack(result));
+                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+
+                    Task.Run(() => TrimTrack(track));
                 }
             }
         }

@@ -163,7 +163,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var result = default(string);
 
-            var relevants = MenuItems
+            var relevants = MenuItems?
                 .OfType<MenuViewModel>().ToArray();
 
             if (relevants?.Any() == true)
