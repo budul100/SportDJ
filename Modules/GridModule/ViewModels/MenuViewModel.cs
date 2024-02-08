@@ -1,4 +1,8 @@
-﻿using Material.Icons;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -6,10 +10,6 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -66,7 +66,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             Command = new DelegateCommand(ExecuteCallback);
-            Header = GetHeader();
+            Header = GetHeader(menuItems);
 
             MenuItems = new ObservableCollection<BindableBase>(menuItems);
             MenuCloseEvent += (s, e) => closeCallback?.Invoke();
@@ -159,11 +159,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
             UpdateIsChecked();
         }
 
-        private string GetHeader()
+        private string GetHeader(IEnumerable<BindableBase> menuItems)
         {
             var result = default(string);
 
-            var relevants = MenuItems?
+            var relevants = menuItems?
                 .OfType<MenuViewModel>().ToArray();
 
             if (relevants?.Any() == true)
