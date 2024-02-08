@@ -55,6 +55,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 executeMethod: () => outputLiveService.Raise(),
                 canExecuteMethod: () => IsActive);
 
+            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
+                action: UpdateOptions,
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
                 action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
@@ -84,23 +88,21 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
                 action: k => OnKeyReleased(k),
                 keepSubscriberReferenceAlive: true);
-
-            UpdateOptions();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options.KeyCodeOutputPause);
+        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options?.KeyCodeOutputPause);
 
-        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options.KeyCodeVolumeTalk);
+        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
 
         public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
 
-        public string KeyPauseOutput => options.KeyCodeOutputPause.GetKey();
+        public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
 
-        public string KeyTalkVolume => options.KeyCodeVolumeTalk.GetKey();
+        public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
 
         public bool OthersMuted
         {

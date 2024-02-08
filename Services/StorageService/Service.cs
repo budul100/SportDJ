@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Prism.Events;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Prism.Events;
-using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.StorageService
 {
@@ -60,9 +60,10 @@ namespace SportDJ.Services.StorageService
                 obj: this);
         }
 
-        public string GetPath(string appName, string fileName)
+        public string GetPath(string appName, string fileName,
+            Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData)
         {
-            var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var appDataFolder = Environment.GetFolderPath(baseFolder);
 
             var result = Path.Combine(
                 path1: appDataFolder,

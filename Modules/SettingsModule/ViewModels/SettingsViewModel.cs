@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
@@ -9,6 +7,8 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -18,13 +18,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         #region Private Fields
 
         private readonly IOutputService outputService;
-        private readonly Output outputSettings;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
         private string device;
         private bool devicesNotAvailable;
         private bool isUpdate;
+        private Output outputSettings;
 
         #endregion Private Fields
 
@@ -44,10 +44,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             outputService = containerProvider.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
-            outputSettings = settingsService.Contents.Outputs?
-                .SingleOrDefault(o => o.Type == OutputType.Live);
-
-            Options = settingsService.Contents.Options;
+            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
+                action: UpdateOptions,
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
                 action: UpdateOptions,
@@ -91,16 +90,17 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public bool IsActive => sessionService.Contents.SettingsVisible;
 
-        public Options Options { get; }
+        public Options Options => settingsService?.Contents?.Options;
 
         public DelegateCommand UpdateDevicesCommand { get; }
 
         public float Volume
         {
-            get { return outputSettings.Volume; }
+            get { return outputSettings?.Volume ?? 0; }
             set
             {
-                if (value != outputService.Volume)
+                if (outputSettings != default
+                    && value != outputService.Volume)
                 {
                     outputService.Volume = value;
 
@@ -113,10 +113,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public int VolumePercentageApps
         {
-            get { return outputSettings.VolumePercentageApps; }
+            get { return outputSettings?.VolumePercentageApps ?? 0; }
             set
             {
-                if (value != outputSettings.VolumePercentageApps)
+                if (outputSettings != default
+                    && value != outputSettings.VolumePercentageApps)
                 {
                     outputSettings.VolumePercentageApps = value;
 
@@ -129,10 +130,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public int VolumePercentageBackground
         {
-            get { return outputSettings.VolumePercentageBackground; }
+            get { return outputSettings?.VolumePercentageBackground ?? 0; }
             set
             {
-                if (value != outputSettings.VolumePercentageBackground)
+                if (outputSettings != default
+                    && value != outputSettings.VolumePercentageBackground)
                 {
                     outputSettings.VolumePercentageBackground = value;
 
@@ -161,6 +163,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void UpdateOptions()
         {
+            outputSettings = settingsService.Contents.Outputs?
+                .SingleOrDefault(o => o.Type == OutputType.Live);
+
             RaisePropertyChanged(nameof(IsActive));
         }
 

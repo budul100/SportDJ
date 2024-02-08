@@ -2,6 +2,7 @@
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -31,11 +32,9 @@ namespace SportDJ.Services.GridService
             this.settingsService = settingsService;
             this.dialogService = dialogService;
 
-            eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
+            eventAggregator.GetEvent<AppInitializedEvent>().Subscribe(
                 action: Initialize,
                 keepSubscriberReferenceAlive: true);
-
-            Initialize();
         }
 
         #endregion Public Constructors

@@ -14,7 +14,8 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        string GetPath(string appName, string fileName);
+        string GetPath(string appName, string fileName,
+            Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData);
 
         void Load(string filePath);
 

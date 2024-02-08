@@ -1,21 +1,29 @@
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Modularity;
+using SportDJ.App.ViewModels;
 using SportDJ.App.Views;
-using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
     public class App
         : PrismApplication
     {
+        #region Private Fields
+
+        private SplashView splashView;
+
+        #endregion Private Fields
+
         #region Public Properties
 
         public static bool IsSingleViewLifetime => Environment.GetCommandLineArgs()
@@ -33,6 +41,32 @@ namespace SportDJ.App
         {
             AvaloniaXamlLoader.Load(this);
             base.Initialize();              // <-- Required
+        }
+
+        public override void OnFrameworkInitializationCompleted()
+        {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                splashView = Container.Resolve<SplashView>();
+
+                desktop.MainWindow = splashView;
+                splashView.Show();
+
+                try
+                {
+                    var dispatcherService = Container.Resolve<IDispatcherService>();
+
+                    Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
+                }
+                catch (TaskCanceledException)
+                {
+                    splashView.Close();
+
+                    return;
+                }
+
+                desktop.MainWindow = default;
+            }
         }
 
         #endregion Public Methods
@@ -53,18 +87,11 @@ namespace SportDJ.App
 
         protected override AvaloniaObject CreateShell()
         {
-            InitalizeApp();
+            var result = !IsSingleViewLifetime
+                ? new MainView()
+                : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
 
-            //if (IsSingleViewLifetime)
-            //{
-            //    return Container.Resolve<MainControl>(); // For Linux Framebuffer or DRM
-            //}
-            //else
-            //{
-            //    return Container.Resolve<MainView>();
-            //}
-
-            return Container.Resolve<MainView>();
+            return result;
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -97,7 +124,7 @@ namespace SportDJ.App
             containerRegistry.Register<ISignalService, Services.SignalService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
 
-            containerRegistry.Register<MainView>();
+            containerRegistry.RegisterSingleton<MainViewModel>();
         }
 
         #endregion Protected Methods
@@ -119,24 +146,23 @@ namespace SportDJ.App
             }
         }
 
-        private void InitalizeApp()
+        private void InitializeApp()
         {
-            var dialogService = Container.Resolve<IDialogService>();
-            var settingsService = Container.Resolve<IStorageService<Set>>();
-
-            dialogService.Initialize(App.Current);
-
             var commandLinePath = Environment.GetCommandLineArgs().Length > 1
                 ? Environment.GetCommandLineArgs()[1]
                 : default;
 
             var settingsPath = commandLinePath?.StartsWith("--") == false
                 ? commandLinePath
-                : settingsService.GetPath(
-                    appName: Texts.AppName,
-                    fileName: Defaults.FileNameSettings);
+                : default;
 
-            settingsService.Load(settingsPath);
+            var mainViewModel = Container.Resolve<MainViewModel>();
+
+            mainViewModel.Initialize(
+                application: App.Current,
+                settingsPath: settingsPath);
+
+            splashView.Close();
         }
 
         #endregion Private Methods

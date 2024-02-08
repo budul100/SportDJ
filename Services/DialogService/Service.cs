@@ -7,10 +7,8 @@ using Avalonia.Platform.Storage;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
-using Prism.Events;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
-using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -25,22 +23,11 @@ namespace SportDJ.Services.DialogService
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
-
         private IClassicDesktopStyleApplicationLifetime desktop;
         private TopLevel topLevel;
         private WindowIcon windowIcon;
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator)
-        {
-            this.eventAggregator = eventAggregator;
-        }
-
-        #endregion Public Constructors
 
         #region Public Methods
 
@@ -208,8 +195,6 @@ namespace SportDJ.Services.DialogService
             topLevel = mainWindow != default
                 ? Window.GetTopLevel(mainWindow)
                 : default;
-
-            eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
 
         #endregion Private Methods

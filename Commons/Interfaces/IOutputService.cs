@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using System;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {

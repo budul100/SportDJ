@@ -357,7 +357,7 @@ namespace SportDJ.Services.OutputService
 
         private Output GetOptions(OutputType type)
         {
-            if (!settingsService.Contents.Outputs.Any(o => o.Type == type))
+            if (settingsService?.Contents?.Outputs.Any(o => o.Type == type) != true)
             {
                 var outputOptions = new Output
                 {

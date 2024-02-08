@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
@@ -13,11 +8,18 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -32,6 +34,7 @@ namespace SportDJ.App.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
         private readonly IDispatcherService dispatcherService;
+        private readonly IEventAggregator eventAggregator;
         private readonly IHookService hookService;
         private readonly HashSet<IOutputService> liveServices = new();
         private readonly HashSet<IOutputService> outputServices = new();
@@ -51,6 +54,7 @@ namespace SportDJ.App.ViewModels
             IStorageService<Session> sessionService, IDialogService dialogService)
         {
             this.containerProvider = containerProvider;
+            this.eventAggregator = eventAggregator;
             this.dispatcherService = dispatcherService;
             this.hookService = hookService;
             this.settingsService = settingsService;
@@ -74,32 +78,7 @@ namespace SportDJ.App.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: m => backgroundMixer == m);
 
-            LoadSessionService(
-                settingsService: settingsService);
-
-            InitializeOutput(
-                type: OutputType.Live);
-
-            InitializeMixer(
-                outputType: OutputType.Live,
-                mixerType: MixerType.Background,
-                onForeground: false);
-
-            InitializeMixer(
-                outputType: OutputType.Live,
-                mixerType: MixerType.Foreground,
-                onForeground: true);
-
-            InitializeOutput(
-                type: OutputType.PFL);
-
-            InitializeMixer(
-                outputType: OutputType.PFL,
-                mixerType: MixerType.PFL,
-                onForeground: true);
-
-            UpdateOptions();
-            UpdateTitle();
+            LoadSessionService();
         }
 
         #endregion Public Constructors
@@ -208,6 +187,48 @@ namespace SportDJ.App.ViewModels
                 obj: this);
         }
 
+        public void Initialize(Application application, string settingsPath)
+        {
+            if (string.IsNullOrWhiteSpace(settingsPath))
+            {
+                settingsPath = settingsService.GetPath(
+                    appName: Texts.AppName,
+                    fileName: Defaults.FileNameSettings);
+            }
+
+            settingsService.Load(
+                filePath: settingsPath);
+
+            dialogService.Initialize(
+                application: application);
+
+            InitializeOutput(
+                type: OutputType.Live);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Background,
+                onForeground: false);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Foreground,
+                onForeground: true);
+
+            InitializeOutput(
+                type: OutputType.PFL);
+
+            InitializeMixer(
+                outputType: OutputType.PFL,
+                mixerType: MixerType.PFL,
+                onForeground: true);
+
+            UpdateOptions();
+            UpdateTitle();
+
+            eventAggregator.GetEvent<AppInitializedEvent>().Publish();
+        }
+
         #endregion Public Methods
 
         #region Protected Methods
@@ -307,7 +328,7 @@ namespace SportDJ.App.ViewModels
             }
         }
 
-        private void LoadSessionService(IStorageService<Set> settingsService)
+        private void LoadSessionService()
         {
             var sessionPath = settingsService?.GetPath(
                 appName: Texts.AppName,
