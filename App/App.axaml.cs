@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -9,9 +12,6 @@ using SportDJ.App.Views;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
@@ -20,7 +20,9 @@ namespace SportDJ.App
     {
         #region Private Fields
 
-        private SplashView splashView;
+        private IClassicDesktopStyleApplicationLifetime desktop;
+        private MainView mainWindow;
+        private SplashView splashWindow;
 
         #endregion Private Fields
 
@@ -45,27 +47,17 @@ namespace SportDJ.App
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+
+            if (desktop != default)
             {
-                splashView = Container.Resolve<SplashView>();
+                splashWindow = Container.Resolve<SplashView>();
 
-                desktop.MainWindow = splashView;
-                splashView.Show();
+                desktop.MainWindow = splashWindow;
+                splashWindow.Show();
 
-                try
-                {
-                    var dispatcherService = Container.Resolve<IDispatcherService>();
-
-                    Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
-                }
-                catch (TaskCanceledException)
-                {
-                    splashView.Close();
-
-                    return;
-                }
-
-                desktop.MainWindow = default;
+                var dispatcherService = Container.Resolve<IDispatcherService>();
+                Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
             }
         }
 
@@ -87,11 +79,11 @@ namespace SportDJ.App
 
         protected override AvaloniaObject CreateShell()
         {
-            var result = !IsSingleViewLifetime
-                ? new MainView()
+            mainWindow = !IsSingleViewLifetime
+                ? Container.Resolve<MainView>()
                 : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
 
-            return result;
+            return mainWindow;
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -148,21 +140,32 @@ namespace SportDJ.App
 
         private void InitializeApp()
         {
-            var commandLinePath = Environment.GetCommandLineArgs().Length > 1
+            try
+            {
+                var commandLinePath = Environment.GetCommandLineArgs().Length > 1
                 ? Environment.GetCommandLineArgs()[1]
                 : default;
 
-            var settingsPath = commandLinePath?.StartsWith("--") == false
-                ? commandLinePath
-                : default;
+                var settingsPath = commandLinePath?.StartsWith("--") == false
+                    ? commandLinePath
+                    : default;
 
-            var mainViewModel = Container.Resolve<MainViewModel>();
+                var mainViewModel = Container.Resolve<MainViewModel>();
 
-            mainViewModel.Initialize(
-                application: App.Current,
-                settingsPath: settingsPath);
+                mainViewModel.Initialize(
+                    application: App.Current,
+                    settingsPath: settingsPath);
 
-            splashView.Close();
+                desktop.MainWindow = mainWindow;
+            }
+            catch (TaskCanceledException)
+            {
+                desktop.MainWindow = default;
+            }
+            finally
+            {
+                splashWindow.Close();
+            }
         }
 
         #endregion Private Methods
