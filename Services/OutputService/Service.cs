@@ -5,6 +5,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -50,6 +51,10 @@ namespace SportDJ.Services.OutputService
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
+
+            eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
+                action: InitializeOutput,
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
                 action: p => OnMixerStarted(p),
@@ -153,17 +158,6 @@ namespace SportDJ.Services.OutputService
         public void Initialize(OutputType type)
         {
             Type = type;
-
-            outputOptions = GetOptions(type);
-
-            volumeService = containerProvider.Resolve<IVolumeService>(
-                name: type.ToString());
-
-            var takeDefaultIfMissing = type == OutputType.Live;
-
-            Set(
-                deviceName: outputOptions.DeviceName,
-                takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
         public void Lower()
@@ -274,8 +268,8 @@ namespace SportDJ.Services.OutputService
                 {
                     CloseOutput();
 
-                    volumeService.Deactivate();
-                    volumeService.Dispose();
+                    volumeService?.Deactivate();
+                    volumeService?.Dispose();
 
                     mixersForeground.Clear();
                     mixersAll.Clear();
@@ -372,6 +366,20 @@ namespace SportDJ.Services.OutputService
                 .Single(s => s.Type == type);
 
             return result;
+        }
+
+        private void InitializeOutput()
+        {
+            outputOptions = GetOptions(Type);
+
+            volumeService = containerProvider.Resolve<IVolumeService>(
+                name: Type.ToString());
+
+            var takeDefaultIfMissing = Type == OutputType.Live;
+
+            Set(
+                deviceName: outputOptions.DeviceName,
+                takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
         private void OnMixerEnded(IMixerService mixerService)

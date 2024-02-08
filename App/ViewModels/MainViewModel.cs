@@ -110,7 +110,7 @@ namespace SportDJ.App.ViewModels
         {
             get
             {
-                return sessionService.Contents.SettingsVisible
+                return settingsService?.Contents?.Options != default && sessionService.Contents.SettingsVisible
                     ? sessionService.Contents.SettingsWidth
                     : 0;
             }

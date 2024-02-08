@@ -3,6 +3,7 @@ using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -44,15 +45,19 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             outputService = containerProvider.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+                action: _ => UpdateDevices(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => o == outputService);
+
             eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
                 action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: UpdateOptions,
+                action: () => RaisePropertyChanged(nameof(IsActive)),
                 keepSubscriberReferenceAlive: true);
-
-            UpdateDevices();
         }
 
         #endregion Public Constructors
@@ -88,7 +93,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             set { SetProperty(ref devicesNotAvailable, value); }
         }
 
-        public bool IsActive => sessionService.Contents.SettingsVisible;
+        public bool IsActive => Options != default
+            && sessionService.Contents.SettingsVisible;
 
         public Options Options => settingsService?.Contents?.Options;
 
@@ -151,12 +157,14 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void UpdateDevices()
         {
-            Device = outputService.DeviceName;
-
             isUpdate = true;
 
             Devices = new ObservableCollection<string>(outputService.GetDevices()
                 .Select(d => d.Value));
+
+            RaisePropertyChanged(nameof(Devices));
+
+            Device = outputService.DeviceName;
 
             isUpdate = false;
         }
@@ -165,6 +173,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         {
             outputSettings = settingsService.Contents.Outputs?
                 .SingleOrDefault(o => o.Type == OutputType.Live);
+
+            RaisePropertyChanged(nameof(Options));
+
+            RaisePropertyChanged(nameof(Volume));
+            RaisePropertyChanged(nameof(VolumePercentageApps));
+            RaisePropertyChanged(nameof(VolumePercentageBackground));
 
             RaisePropertyChanged(nameof(IsActive));
         }

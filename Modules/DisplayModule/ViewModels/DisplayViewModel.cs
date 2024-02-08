@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Prism.Events;
@@ -13,6 +12,7 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
 {
@@ -51,6 +51,10 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
+
+            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
+                action: () => RaisePropertyChanged(nameof(ShowSettings)),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => OnMixerUpdated(),
@@ -151,7 +155,8 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         {
             get
             {
-                return sessionService.Contents.SettingsVisible;
+                return settingsService?.Contents?.Options != default
+                    && sessionService.Contents.SettingsVisible;
             }
             set
             {
