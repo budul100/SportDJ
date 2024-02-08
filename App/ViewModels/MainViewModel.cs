@@ -68,8 +68,8 @@ namespace SportDJ.App.ViewModels
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: UpdateOptions,
+            eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
+                action: UpdateLayout,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
@@ -117,7 +117,7 @@ namespace SportDJ.App.ViewModels
             set
             {
                 if (sessionService.Contents.SettingsVisible
-                    && value != sessionService.Contents.SettingsWidth)
+                    && value != SettingsWidth)
                 {
                     sessionService.Contents.SettingsWidth = value > 0
                         ? value
@@ -223,7 +223,7 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.PFL,
                 onForeground: true);
 
-            UpdateOptions();
+            UpdateLayout();
             UpdateTitle();
 
             eventAggregator.GetEvent<AppInitializedEvent>().Publish();
@@ -358,7 +358,7 @@ namespace SportDJ.App.ViewModels
             }
         }
 
-        private void UpdateOptions()
+        private void UpdateLayout()
         {
             RaisePropertyChanged(nameof(Height));
             RaisePropertyChanged(nameof(Width));

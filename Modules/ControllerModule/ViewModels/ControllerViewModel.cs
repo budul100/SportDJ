@@ -20,7 +20,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Private Fields
 
         private readonly IOutputService outputLiveService;
-        private readonly IStorageService<Set> settingsService;
         private readonly IVolumeService volumeService;
 
         private Options options;
@@ -35,8 +34,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             IEventAggregator eventAggregator, IStorageService<Set> settingsService)
             : base(regionManager)
         {
-            this.settingsService = settingsService;
-
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
@@ -55,11 +52,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 executeMethod: () => outputLiveService.Raise(),
                 canExecuteMethod: () => IsActive);
 
-            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
-                action: UpdateOptions,
+            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+                action: () => options = settingsService?.Contents?.Options,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
                 action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
 
@@ -142,11 +139,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyPressed(string keyCode)
         {
-            if (keyCode == options.KeyCodeOutputPause)
+            if (keyCode == options?.KeyCodeOutputPause)
             {
                 outputLiveService.Pause();
             }
-            else if (keyCode == options.KeyCodeVolumeTalk)
+            else if (keyCode == options?.KeyCodeVolumeTalk)
             {
                 outputLiveService.Lower();
             }
@@ -154,7 +151,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void OnKeyReleased(string keyCode)
         {
-            if (keyCode == options.KeyCodeVolumeTalk)
+            if (keyCode == options?.KeyCodeVolumeTalk)
             {
                 outputLiveService.Raise();
             }
@@ -172,8 +169,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void UpdateOptions()
         {
-            options = settingsService.Contents.Options;
-
             RaisePropertyChanged(nameof(KeyPauseOutput));
             RaisePropertyChanged(nameof(HasKeyPauseOutput));
 

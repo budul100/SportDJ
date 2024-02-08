@@ -82,7 +82,7 @@ namespace SportDJ.Services.StorageService
                 Contents = Activator.CreateInstance<T>();
             }
 
-            eventAggregator.GetEvent<SettingsLoadedEvent>().Publish();
+            eventAggregator.GetEvent<SettingsLoadedEvent<T>>().Publish();
         }
 
         public void Save()

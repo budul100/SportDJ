@@ -18,6 +18,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IEventAggregator eventAggregator;
         private readonly IOutputService outputService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
@@ -36,6 +37,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             IStorageService<Session> sessionService)
             : base(regionManager)
         {
+            this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
 
@@ -51,12 +53,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: o => o == outputService);
 
-            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
-                action: UpdateOptions,
+            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+                action: InitializeOptions,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<SettingsUpdatedEvent>().Subscribe(
-                action: () => RaisePropertyChanged(nameof(IsActive)),
+            eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
+                action: () => UpdateOptions(),
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -155,6 +157,20 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Private Methods
 
+        private void InitializeOptions()
+        {
+            outputSettings = settingsService.Contents.Outputs?
+                .SingleOrDefault(o => o.Type == OutputType.Live);
+
+            RaisePropertyChanged(nameof(Options));
+
+            RaisePropertyChanged(nameof(Volume));
+            RaisePropertyChanged(nameof(VolumePercentageApps));
+            RaisePropertyChanged(nameof(VolumePercentageBackground));
+
+            RaisePropertyChanged(nameof(IsActive));
+        }
+
         private void UpdateDevices()
         {
             isUpdate = true;
@@ -171,14 +187,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void UpdateOptions()
         {
-            outputSettings = settingsService.Contents.Outputs?
-                .SingleOrDefault(o => o.Type == OutputType.Live);
+            if (IsActive)
+            {
+                settingsService.Save();
 
-            RaisePropertyChanged(nameof(Options));
-
-            RaisePropertyChanged(nameof(Volume));
-            RaisePropertyChanged(nameof(VolumePercentageApps));
-            RaisePropertyChanged(nameof(VolumePercentageBackground));
+                eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Publish();
+            }
 
             RaisePropertyChanged(nameof(IsActive));
         }

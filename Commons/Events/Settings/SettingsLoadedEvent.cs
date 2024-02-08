@@ -2,7 +2,8 @@
 
 namespace SportDJ.Commons.Events.Settings
 {
-    public class SettingsLoadedEvent
+    public class SettingsLoadedEvent<T>
         : PubSubEvent
+        where T : class
     { }
 }

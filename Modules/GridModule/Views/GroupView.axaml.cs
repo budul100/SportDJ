@@ -16,24 +16,7 @@ public partial class GroupView
 
     #endregion Public Constructors
 
-    #region Protected Methods
-
-    protected override void OnDataContextBeginUpdate()
-    {
-        base.OnDataContextBeginUpdate();
-    }
-
-    #endregion Protected Methods
-
     #region Private Methods
-
-    private static void CloseMenu(ContextMenu contextMenu)
-    {
-        if (contextMenu?.IsOpen == true)
-        {
-            contextMenu.Close();
-        }
-    }
 
     private void OnContextMenuOpened(object? sender, RoutedEventArgs e)
     {
@@ -43,7 +26,7 @@ public partial class GroupView
 
             if (viewModel != default)
             {
-                viewModel.MenuCloseEvent += (s, e) => CloseMenu(contextMenu);
+                viewModel.MenuCloseEvent += (s, e) => contextMenu.Close();
             }
         }
     }

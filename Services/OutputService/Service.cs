@@ -52,8 +52,8 @@ namespace SportDJ.Services.OutputService
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
 
-            eventAggregator.GetEvent<SettingsLoadedEvent>().Subscribe(
-                action: InitializeOutput,
+            eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+                action: () => InitializeOutput(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(

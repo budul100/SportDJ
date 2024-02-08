@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace SportDJ.Commons.Events.Settings
+namespace SportDJ.Commons.Events.Grid
 {
     public class GridUpdatedEvent
         : PubSubEvent

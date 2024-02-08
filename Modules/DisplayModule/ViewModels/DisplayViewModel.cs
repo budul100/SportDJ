@@ -52,7 +52,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            eventAggregator?.GetEvent<SettingsLoadedEvent>().Subscribe(
+            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(ShowSettings)),
                 keepSubscriberReferenceAlive: true);
 
@@ -146,7 +146,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
                     RaisePropertyChanged(nameof(ShowFullscreen));
 
-                    eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
+                    eventAggregator.GetEvent<SettingsUpdatedEvent<Session>>().Publish();
                 }
             }
         }
@@ -160,7 +160,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             }
             set
             {
-                if (sessionService.Contents.SettingsVisible != value)
+                if (ShowSettings != value)
                 {
                     sessionService.Contents.SettingsVisible = value;
 
@@ -168,7 +168,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
                     RaisePropertyChanged(nameof(ShowSettings));
 
-                    eventAggregator.GetEvent<SettingsUpdatedEvent>().Publish();
+                    eventAggregator.GetEvent<SettingsUpdatedEvent<Session>>().Publish();
                 }
             }
         }
