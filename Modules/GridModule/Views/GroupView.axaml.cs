@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using SportDJ.Modules.GridModule.ViewModels;
 
 namespace SportDJ.Modules.GridModule.Views;
@@ -11,8 +12,6 @@ public partial class GroupView
     public GroupView()
     {
         InitializeComponent();
-
-        this.DataContextChanged += OnDataContextChanged;
     }
 
     #endregion Public Constructors
@@ -22,8 +21,6 @@ public partial class GroupView
     protected override void OnDataContextBeginUpdate()
     {
         base.OnDataContextBeginUpdate();
-
-        UpdateContextMenu();
     }
 
     #endregion Protected Methods
@@ -38,28 +35,14 @@ public partial class GroupView
         }
     }
 
-    private static void OpenMenu(ContextMenu contextMenu)
+    private void OnContextMenuOpened(object? sender, RoutedEventArgs e)
     {
-        contextMenu?.Open();
-    }
-
-    private void OnDataContextChanged(object sender, System.EventArgs e)
-    {
-        UpdateContextMenu();
-    }
-
-    private void UpdateContextMenu()
-    {
-        var contextMenu = this
-            .FindControl<ContextMenu>("ContextMenu");
-
-        if (contextMenu != default)
+        if (sender is ContextMenu contextMenu)
         {
-            var viewModel = DataContext as CellViewModel;
+            var viewModel = contextMenu.DataContext as CellViewModel;
 
             if (viewModel != default)
             {
-                viewModel.MenuOpenEvent += (s, e) => OpenMenu(contextMenu);
                 viewModel.MenuCloseEvent += (s, e) => CloseMenu(contextMenu);
             }
         }

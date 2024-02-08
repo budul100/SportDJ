@@ -50,9 +50,9 @@
 
                     <Grid.ContextMenu>
                         <ContextMenu
-                            Name="ContextMenu"
                             IsVisible="{Binding IsAvailableMenu}"
-                            ItemsSource="{Binding Menus}">
+                            ItemsSource="{Binding Menus}"
+                            Opened="OnContextMenuOpened">
 
                             <ContextMenu.DataTemplates>
                                 <DataTemplate x:DataType="vm:MenuViewModel">
