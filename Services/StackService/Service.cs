@@ -152,7 +152,7 @@ namespace SportDJ.Services.StackService
                     {
                         SelectEntry(index);
 
-                        break;
+                        return;
                     }
                 }
                 while (Index != index);
