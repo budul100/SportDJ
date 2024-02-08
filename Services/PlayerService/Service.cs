@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -18,6 +13,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -55,7 +55,7 @@ namespace SportDJ.Services.PlayerService
             this.settingsService = settingsService;
             this.stackService = stackService;
 
-            eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
+            eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
                 action: () => SetStartLocation(),
                 keepSubscriberReferenceAlive: true);
 
@@ -275,14 +275,14 @@ namespace SportDJ.Services.PlayerService
 
         public async Task SetFileAsync()
         {
-            var results = await dialogService.OpenFilePickerAsync(
+            var paths = await dialogService.OpenFilePickerAsync(
                 title: Texts.PlayerSelectionFileHeader,
                 allowMultiple: true,
                 startLocation: startLocation);
 
-            if (results?.Any() == true)
+            if (paths?.Any() == true)
             {
-                player.Paths = results
+                player.Paths = paths
                     .Select(p => p.Path.LocalPath)
                     .Where(p => File.Exists(p)).ToList();
 
@@ -294,14 +294,14 @@ namespace SportDJ.Services.PlayerService
 
         public async Task SetFolderAsync()
         {
-            var results = await dialogService.OpenFolderPickerAsync(
+            var paths = await dialogService.OpenFolderPickerAsync(
                 title: Texts.PlayerSelectionFolderHeader,
                 allowMultiple: true,
                 startLocation: startLocation);
 
-            if (results?.Any() == true)
+            if (paths?.Any() == true)
             {
-                player.Paths = results
+                player.Paths = paths
                     .Select(p => p.Path.LocalPath)
                     .Where(p => Directory.Exists(p)).ToList();
 
@@ -413,7 +413,7 @@ namespace SportDJ.Services.PlayerService
 
         private void SetStartLocation()
         {
-            Task.Run(async () => startLocation ??= await dialogService.GetFolderAsync(player.Paths));
+            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(player.Paths));
         }
 
         private void UpdateDuration()

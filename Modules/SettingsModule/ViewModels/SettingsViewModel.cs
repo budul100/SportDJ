@@ -1,15 +1,20 @@
-﻿using Prism.Commands;
+﻿using Avalonia.Platform.Storage;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -18,7 +23,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
+        private readonly FilePickerFileType[] fileTypeFilter = new FilePickerFileType[] { new(Constants.SettingsExtension) };
         private readonly IOutputService outputService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
@@ -27,25 +34,37 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private bool devicesNotAvailable;
         private bool isUpdate;
         private Output outputSettings;
+        private IStorageFolder startLocation;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public SettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+            IEventAggregator eventAggregator, IDialogService dialogService, IStorageService<Set> settingsService,
             IStorageService<Session> sessionService)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;
+            this.dialogService = dialogService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
+
+            SettingsLoadCommand = new DelegateCommand(
+                async () => await LoadSettingsAsync());
+
+            SettingsSaveCommand = new DelegateCommand(
+                async () => await SaveSettingsAsync());
 
             UpdateDevicesCommand = new DelegateCommand(
                 executeMethod: () => UpdateDevices());
 
             outputService = containerProvider.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
+
+            eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
+                action: () => SetStartLocation(),
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateDevices(),
@@ -99,6 +118,10 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             && sessionService.Contents.SettingsVisible;
 
         public Options Options => settingsService?.Contents?.Options;
+
+        public DelegateCommand SettingsLoadCommand { get; }
+
+        public DelegateCommand SettingsSaveCommand { get; }
 
         public DelegateCommand UpdateDevicesCommand { get; }
 
@@ -169,6 +192,62 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             RaisePropertyChanged(nameof(VolumePercentageBackground));
 
             RaisePropertyChanged(nameof(IsActive));
+        }
+
+        private async Task LoadSettingsAsync()
+        {
+            var paths = await dialogService.OpenFilePickerAsync(
+                title: Texts.SettingsLoadHeader,
+                fileTypeFilter: fileTypeFilter,
+                allowMultiple: false,
+                startLocation: startLocation);
+
+            if (paths?.Any() == true)
+            {
+                var path = paths
+                    .Select(p => p.Path.LocalPath)
+                    .FirstOrDefault(p => File.Exists(p));
+
+                if (path != default)
+                {
+                    sessionService.Contents.SettingsPath = path;
+
+                    settingsService.Load(path);
+
+                    SetStartLocation();
+
+                    sessionService.Save();
+                }
+            }
+        }
+
+        private async Task SaveSettingsAsync()
+        {
+            var fileName = Path.GetFileNameWithoutExtension(sessionService?.Contents?.SettingsPath);
+
+            var path = await dialogService.SaveFilePickerAsync(
+                title: Texts.SettingsLoadHeader,
+                defaultExtension: Constants.SettingsExtension,
+                fileTypeChoices: fileTypeFilter,
+                showOverwritePrompt: true,
+                suggestedFileName: fileName,
+                suggestedStartLocation: startLocation);
+
+            if (path != default)
+            {
+                sessionService.Contents.SettingsPath = path.Path.LocalPath;
+
+                settingsService.Save(path.Path.LocalPath);
+
+                SetStartLocation();
+
+                sessionService.Save();
+            }
+        }
+
+        private void SetStartLocation()
+        {
+            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(sessionService?.Contents?.SettingsPath));
         }
 
         private void UpdateDevices()

@@ -1,12 +1,12 @@
-﻿using Prism.Events;
-using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Prism.Events;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.StorageService
 {
@@ -29,7 +29,6 @@ namespace SportDJ.Services.StorageService
         private readonly SemaphoreSlim saveLock = new(1, 1);
         private readonly XmlSerializer serializer = new(typeof(T));
 
-        private string filePath;
         private bool isDisposed;
 
         #endregion Private Fields
@@ -46,6 +45,8 @@ namespace SportDJ.Services.StorageService
         #region Public Properties
 
         public T Contents { get; private set; }
+
+        public string Path { get; private set; }
 
         #endregion Public Properties
 
@@ -65,7 +66,7 @@ namespace SportDJ.Services.StorageService
         {
             var appDataFolder = Environment.GetFolderPath(baseFolder);
 
-            var result = Path.Combine(
+            var result = System.IO.Path.Combine(
                 path1: appDataFolder,
                 path2: appName,
                 path3: fileName);
@@ -75,7 +76,9 @@ namespace SportDJ.Services.StorageService
 
         public void Load(string filePath)
         {
-            LoadSettings(filePath);
+            SetPath(filePath);
+
+            LoadSettings();
 
             if (Contents is default(T))
             {
@@ -85,8 +88,10 @@ namespace SportDJ.Services.StorageService
             eventAggregator.GetEvent<SettingsLoadedEvent<T>>().Publish();
         }
 
-        public void Save()
+        public void Save(string filePath = default)
         {
+            SetPath(filePath);
+
             Task.Run(() => SaveSettingsAsync());
         }
 
@@ -111,16 +116,14 @@ namespace SportDJ.Services.StorageService
 
         #region Private Methods
 
-        private void LoadSettings(string filePath)
+        private void LoadSettings()
         {
-            this.filePath = Path.GetFullPath(filePath);
-
-            if (!File.Exists(filePath))
+            if (!File.Exists(Path))
             {
                 SaveSettings();
             }
 
-            using var file = new StreamReader(filePath);
+            using var file = new StreamReader(Path);
 
             try
             {
@@ -131,14 +134,14 @@ namespace SportDJ.Services.StorageService
 
         private void SaveSettings()
         {
-            var folderPath = Path.GetDirectoryName(filePath);
+            var folderPath = System.IO.Path.GetDirectoryName(Path);
 
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            using var file = File.Create(filePath);
+            using var file = File.Create(Path);
 
             using var writer = XmlWriter.Create(
                 output: file,
@@ -165,6 +168,14 @@ namespace SportDJ.Services.StorageService
             finally
             {
                 saveLock.Release();
+            }
+        }
+
+        private void SetPath(string filePath)
+        {
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                Path = System.IO.Path.GetFullPath(filePath);
             }
         }
 

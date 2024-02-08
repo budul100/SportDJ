@@ -1,17 +1,19 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Modularity;
 using SportDJ.App.ViewModels;
 using SportDJ.App.Views;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
@@ -151,19 +153,22 @@ namespace SportDJ.App
                     : default;
 
                 var mainViewModel = Container.Resolve<MainViewModel>();
-
-                mainViewModel.Initialize(
-                    application: App.Current,
-                    settingsPath: settingsPath);
+                mainViewModel.Initialize(settingsPath);
 
                 desktop.MainWindow = mainWindow;
+
+                var dialogService = Container.Resolve<IDialogService>();
+                dialogService.Initialize(mainWindow);
+
+                splashWindow.Close();
+
+                var eventAggregator = Container.Resolve<IEventAggregator>();
+                eventAggregator.GetEvent<AppStartedEvent>().Publish();
             }
             catch (TaskCanceledException)
             {
                 desktop.MainWindow = default;
-            }
-            finally
-            {
+
                 splashWindow.Close();
             }
         }

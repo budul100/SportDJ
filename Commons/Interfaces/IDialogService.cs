@@ -12,6 +12,9 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Methods
 
+        Task<IStorageFolder> GetFolderAsync(string path = default,
+            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile);
+
         Task<IStorageFolder> GetFolderAsync(IEnumerable<string> paths = default,
             Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile);
 
@@ -20,7 +23,7 @@ namespace SportDJ.Commons.Interfaces
             ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool showInCenter = true,
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);
 
-        void Initialize(Application application);
+        void Initialize(Window window);
 
         Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
             IReadOnlyList<FilePickerFileType> fileTypeFilter = default, bool allowMultiple = false,
@@ -28,6 +31,10 @@ namespace SportDJ.Commons.Interfaces
 
         Task<IEnumerable<IStorageFolder>> OpenFolderPickerAsync(string title, bool allowMultiple = false,
             IStorageFolder startLocation = default);
+
+        Task<IStorageFile> SaveFilePickerAsync(string title, string defaultExtension = default,
+            IReadOnlyList<FilePickerFileType> fileTypeChoices = default, bool showOverwritePrompt = default,
+            string suggestedFileName = default, IStorageFolder suggestedStartLocation = default);
 
         Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,
             bool showInCenter = true, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner);

@@ -28,6 +28,9 @@
         public const string PlayerShuffleHeader = "Shuffle tracks";
         public const string PlayerShuffleMessage = "Shall the player tracks be shuffled?";
 
+        public const string SettingsLoadHeader = "Load settings";
+        public const string SettingsSaveHeader = "Save settings";
+
         public const string SplashCancellingMessage = "Cancelling ...";
         public const string SplashLoadingMessage = "Loading ...";
 

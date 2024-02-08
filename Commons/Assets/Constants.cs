@@ -28,6 +28,8 @@ namespace SportDJ.Commons.Assets
         public const double PercentageMax = 100;
         public const double PercentageMin = 0;
 
+        public const string SettingsExtension = ".xml";
+
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
 

@@ -7,7 +7,7 @@
 
         public SettingsViewModel()
             : base(regionManager: default, containerProvider: default, eventAggregator: default,
-                   settingsService: default, sessionService: default)
+                  dialogService: default, settingsService: default, sessionService: default)
         { }
 
         #endregion Public Constructors

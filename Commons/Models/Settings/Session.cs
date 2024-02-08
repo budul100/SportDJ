@@ -1,5 +1,5 @@
-﻿using SportDJ.Commons.Assets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -10,6 +10,8 @@ namespace SportDJ.Commons.Models.Settings
         public int Height { get; set; } = Defaults.AppHeightDefault;
 
         public List<Position> Positions { get; set; } = new List<Position>();
+
+        public string SettingsPath { get; set; }
 
         public bool SettingsVisible { get; set; }
 

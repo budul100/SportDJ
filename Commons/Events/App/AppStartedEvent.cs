@@ -2,7 +2,7 @@
 
 namespace SportDJ.Commons.Events.App
 {
-    public class AppInitializedEvent
+    public class AppStartedEvent
         : PubSubEvent
     { }
 }

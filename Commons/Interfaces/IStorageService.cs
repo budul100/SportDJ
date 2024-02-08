@@ -10,6 +10,8 @@ namespace SportDJ.Commons.Interfaces
 
         T Contents { get; }
 
+        string Path { get; }
+
         #endregion Public Properties
 
         #region Public Methods
@@ -19,7 +21,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Load(string filePath);
 
-        void Save();
+        void Save(string filePath = default);
 
         #endregion Public Methods
     }

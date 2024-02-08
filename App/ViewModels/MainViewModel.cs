@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -8,7 +7,6 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
@@ -187,20 +185,22 @@ namespace SportDJ.App.ViewModels
                 obj: this);
         }
 
-        public void Initialize(Application application, string settingsPath)
+        public void Initialize(string settingsPath)
         {
+            if (string.IsNullOrWhiteSpace(settingsPath))
+            {
+                settingsPath = sessionService?.Contents?.SettingsPath;
+            }
+
             if (string.IsNullOrWhiteSpace(settingsPath))
             {
                 settingsPath = settingsService.GetPath(
                     appName: Texts.AppName,
-                    fileName: Defaults.FileNameSettings);
+                    fileName: Defaults.FileNameSettings + Constants.SettingsExtension);
             }
 
             settingsService.Load(
                 filePath: settingsPath);
-
-            dialogService.Initialize(
-                application: application);
 
             InitializeOutput(
                 type: OutputType.Live);
@@ -225,8 +225,6 @@ namespace SportDJ.App.ViewModels
 
             UpdateLayout();
             UpdateTitle();
-
-            eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
 
         #endregion Public Methods
@@ -332,7 +330,7 @@ namespace SportDJ.App.ViewModels
         {
             var sessionPath = settingsService?.GetPath(
                 appName: Texts.AppName,
-                fileName: Defaults.FileNameSession);
+                fileName: Defaults.FileNameSession + Constants.SettingsExtension);
 
             sessionService?.Load(sessionPath);
         }

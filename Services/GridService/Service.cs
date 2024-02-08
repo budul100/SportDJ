@@ -32,7 +32,7 @@ namespace SportDJ.Services.GridService
             this.settingsService = settingsService;
             this.dialogService = dialogService;
 
-            eventAggregator.GetEvent<AppInitializedEvent>().Subscribe(
+            eventAggregator.GetEvent<AppStartedEvent>().Subscribe(
                 action: Initialize,
                 keepSubscriberReferenceAlive: true);
         }

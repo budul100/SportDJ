@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -15,6 +8,11 @@ using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.DialogService
 {
@@ -23,8 +21,8 @@ namespace SportDJ.Services.DialogService
     {
         #region Private Fields
 
-        private IClassicDesktopStyleApplicationLifetime desktop;
         private TopLevel topLevel;
+        private Window window;
         private WindowIcon windowIcon;
 
         #endregion Private Fields
@@ -38,29 +36,50 @@ namespace SportDJ.Services.DialogService
 
             if (topLevel != default)
             {
-                var relevant = default(string);
+                var path = default(string);
 
                 if (paths?.Any() == true)
                 {
-                    relevant = paths?.FirstOrDefault(p => Directory.Exists(p));
+                    path = paths?.FirstOrDefault(p => Directory.Exists(p));
 
-                    if (string.IsNullOrEmpty(relevant))
+                    if (string.IsNullOrEmpty(path))
                     {
-                        relevant = paths?
+                        path = paths?
                             .Select(p => Path.GetDirectoryName(p))
                             .FirstOrDefault(p => Directory.Exists(p));
                     }
                 }
 
-                if (string.IsNullOrEmpty(relevant)
-                    && alternative != default)
+                result = await GetFolderAsync(
+                    path: path,
+                    alternative: alternative);
+            }
+
+            return result;
+        }
+
+        public async Task<IStorageFolder> GetFolderAsync(string path = default,
+            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
+        {
+            var result = default(IStorageFolder);
+
+            if (topLevel != default)
+            {
+                if (!Directory.Exists(path)
+                    && File.Exists(path))
                 {
-                    relevant = Environment.GetFolderPath(alternative.Value);
+                    path = Path.GetDirectoryName(path);
                 }
 
-                if (Directory.Exists(relevant))
+                if (!Directory.Exists(path)
+                    && alternative != default)
                 {
-                    result = await topLevel.StorageProvider.TryGetFolderFromPathAsync(relevant);
+                    path = Environment.GetFolderPath(alternative.Value);
+                }
+
+                if (Directory.Exists(path))
+                {
+                    result = await topLevel.StorageProvider.TryGetFolderFromPathAsync(path);
                 }
             }
 
@@ -87,27 +106,27 @@ namespace SportDJ.Services.DialogService
 
             var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
 
-            var result = await dialog.ShowWindowDialogAsync(desktop.MainWindow);
+            var result = await dialog.ShowWindowDialogAsync(window);
 
             return result;
         }
 
-        public void Initialize(Application application)
+        public void Initialize(Window window)
         {
-            if (application is null)
+            if (window is null)
             {
-                throw new ArgumentNullException(nameof(application));
+                throw new ArgumentNullException(nameof(window));
             }
 
-            desktop = application?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-            windowIcon = GetWindowIcon();
+            this.window = window;
 
-            desktop.Startup += (s, e) => OnStartup();
+            topLevel = Window.GetTopLevel(window);
+            windowIcon = GetWindowIcon();
         }
 
         public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
             IReadOnlyList<FilePickerFileType> fileTypeFilter = default, bool allowMultiple = false,
-            IStorageFolder startLocation = default)
+            IStorageFolder suggestedStartLocation = default)
         {
             var result = default(IEnumerable<IStorageFile>);
 
@@ -117,7 +136,7 @@ namespace SportDJ.Services.DialogService
                 {
                     AllowMultiple = allowMultiple,
                     FileTypeFilter = fileTypeFilter,
-                    SuggestedStartLocation = startLocation,
+                    SuggestedStartLocation = suggestedStartLocation,
                     Title = title,
                 };
 
@@ -128,7 +147,7 @@ namespace SportDJ.Services.DialogService
         }
 
         public async Task<IEnumerable<IStorageFolder>> OpenFolderPickerAsync(string title, bool allowMultiple = false,
-            IStorageFolder startLocation = default)
+            IStorageFolder suggestedStartLocation = default)
         {
             var result = default(IEnumerable<IStorageFolder>);
 
@@ -137,11 +156,35 @@ namespace SportDJ.Services.DialogService
                 var options = new FolderPickerOpenOptions
                 {
                     AllowMultiple = allowMultiple,
-                    SuggestedStartLocation = startLocation,
+                    SuggestedStartLocation = suggestedStartLocation,
                     Title = title,
                 };
 
                 result = await topLevel?.StorageProvider.OpenFolderPickerAsync(options);
+            }
+
+            return result;
+        }
+
+        public async Task<IStorageFile> SaveFilePickerAsync(string title, string defaultExtension = default,
+            IReadOnlyList<FilePickerFileType> fileTypeChoices = default, bool showOverwritePrompt = default,
+            string suggestedFileName = default, IStorageFolder suggestedStartLocation = default)
+        {
+            var result = default(IStorageFile);
+
+            if (topLevel != default)
+            {
+                var options = new FilePickerSaveOptions
+                {
+                    DefaultExtension = defaultExtension,
+                    FileTypeChoices = fileTypeChoices,
+                    ShowOverwritePrompt = showOverwritePrompt,
+                    SuggestedFileName = suggestedFileName,
+                    SuggestedStartLocation = suggestedStartLocation,
+                    Title = title,
+                };
+
+                result = await topLevel?.StorageProvider.SaveFilePickerAsync(options);
             }
 
             return result;
@@ -165,7 +208,7 @@ namespace SportDJ.Services.DialogService
 
             var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
 
-            await dialog.ShowWindowDialogAsync(desktop.MainWindow);
+            await dialog.ShowWindowDialogAsync(window);
         }
 
         #endregion Public Methods
@@ -186,15 +229,6 @@ namespace SportDJ.Services.DialogService
             }
 
             return result;
-        }
-
-        private void OnStartup()
-        {
-            var mainWindow = desktop?.MainWindow;
-
-            topLevel = mainWindow != default
-                ? Window.GetTopLevel(mainWindow)
-                : default;
         }
 
         #endregion Private Methods

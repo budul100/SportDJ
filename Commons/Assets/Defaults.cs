@@ -12,8 +12,8 @@
         public const int FadeOnMixOutMilliseconds = 500;
         public const int FadeOnPauseMilliseconds = 500;
 
-        public const string FileNameSession = "Session.xml";
-        public const string FileNameSettings = "Settings.xml";
+        public const string FileNameSession = "Session";
+        public const string FileNameSettings = "Settings";
 
         public const double FlashingDurationMilliSecs = 500;
         public const double FlashingOpacityMax = 0.5;
