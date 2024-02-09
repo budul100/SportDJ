@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -8,11 +6,14 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -21,10 +22,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IHookService hookService;
         private readonly IPlayerService playerService;
-
         private bool isDisposed;
+        private bool isListening;
         private bool isRenaming;
+        private Action listenChecker;
 
         #endregion Private Fields
 
@@ -34,6 +37,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             : base(containerProvider: containerProvider, element: player)
         {
             playerService = containerProvider?.Resolve<IPlayerService>();
+            hookService = containerProvider?.Resolve<IHookService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecutePlayer);
@@ -156,7 +160,22 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool IsRenaming
         {
             get { return isRenaming; }
-            set { SetProperty(ref isRenaming, value); }
+            set
+            {
+                if (IsRenaming != value)
+                {
+                    SetProperty(ref isRenaming, value);
+
+                    if (value)
+                    {
+                        hookService.Deactivate(this);
+                    }
+                    else
+                    {
+                        hookService.Activate(this);
+                    }
+                }
+            }
         }
 
         public double? Progress => playerService?.Progress;
@@ -208,80 +227,24 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var gridMenus = GetGridMenus().ToArray();
 
-            var gridItem = new MenuViewModel(
-                header: $"{Texts.CellEditHeader}...",
+            var gridMenu = new MenuViewModel(
+                header: $"{Texts.GridEditHeader}...",
                 menuItems: gridMenus,
                 closeCallback: CloseMenu);
 
-            yield return gridItem;
+            yield return gridMenu;
 
-            var renameItem = new MenuViewModel(
-                header: Texts.PlayerRenameHeader,
-                () => RenamePlayer(),
-                closeCallback: CloseMenu,
-                icon: MaterialIconKind.FormTextbox);
+            var playerMenus = GetPlayerMenus().ToArray();
 
-            yield return renameItem;
+            var playerMenu = new MenuViewModel(
+                header: $"{Texts.PlayerEditHeader}...",
+                menuItems: playerMenus,
+                closeCallback: CloseMenu);
 
-            yield return new SeparatorViewModel();
-
-            var selectFileItem = new MenuViewModel(
-                header: $"{Texts.PlayerSelectionFileHeader}...",
-                executeCallback: () => playerService?.SetFileAsync(),
-                closeCallback: CloseMenu,
-                icon: MaterialIconKind.FileMultipleOutline);
-
-            yield return selectFileItem;
-
-            var selectFolderItem = new MenuViewModel(
-                header: $"{Texts.PlayerSelectionFolderHeader}...",
-                executeCallback: () => playerService?.SetFolderAsync(),
-                closeCallback: CloseMenu,
-                icon: MaterialIconKind.FolderMultipleOutline);
-
-            yield return selectFolderItem;
+            yield return playerMenu;
 
             if (playerService?.HasPaths == true)
             {
-                if (playerService.HasStack)
-                {
-                    var shuffleItem = new MenuViewModel(
-                        header: Texts.PlayerShuffleHeader,
-                        executeCallback: () => playerService.ShuffleAsync(),
-                        closeCallback: CloseMenu,
-                        icon: MaterialIconKind.ShuffleVariant);
-
-                    yield return shuffleItem;
-                }
-
-                var clearItem = new MenuViewModel(
-                    header: Texts.PlayerClearHeader,
-                    executeCallback: () => playerService.ClearAsync(),
-                    closeCallback: CloseMenu,
-                    icon: MaterialIconKind.CloseCircleOutline);
-
-                yield return clearItem;
-
-                yield return new SeparatorViewModel();
-
-                var isForegroundItem = new MenuViewModel(
-                    header: Texts.PlayerOnForegroundHeader,
-                    executeCallback: () => IsForeground = !IsForeground,
-                    closeCallback: CloseMenu,
-                    isCheckedGetter: () => IsForeground,
-                    icon: MaterialIconKind.ChevronUpBoxOutline);
-
-                yield return isForegroundItem;
-
-                var savePositionsItem = new MenuViewModel(
-                    header: Texts.PlayerSavePosition,
-                    executeCallback: () => SavePosition = !SavePosition,
-                    closeCallback: CloseMenu,
-                    isCheckedGetter: () => SavePosition,
-                    icon: MaterialIconKind.FileRestoreOutline);
-
-                yield return savePositionsItem;
-
                 var menuItems = GetMenuTracks()
                     .OrderBy(m => m.Header).ToArray();
 
@@ -355,6 +318,120 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     yield return result;
                 }
+            }
+        }
+
+        private IEnumerable<BindableBase> GetPlayerMenus()
+        {
+            var selectFileItem = new MenuViewModel(
+                header: $"{Texts.PlayerSelectionFileHeader}...",
+                executeCallback: () => playerService?.SetFileAsync(),
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.FileMultipleOutline);
+
+            yield return selectFileItem;
+
+            var selectFolderItem = new MenuViewModel(
+                header: $"{Texts.PlayerSelectionFolderHeader}...",
+                executeCallback: () => playerService?.SetFolderAsync(),
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.FolderMultipleOutline);
+
+            yield return selectFolderItem;
+
+            var resetItem = new MenuViewModel(
+                header: Texts.PlayerResetHeader,
+                executeCallback: () => playerService.ClearAsync(),
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.CloseCircleOutline);
+
+            yield return resetItem;
+
+            yield return new SeparatorViewModel();
+
+            var renameItem = new MenuViewModel(
+                header: Texts.PlayerRenameHeader,
+                () => RenamePlayer(),
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.FormTextbox);
+
+            yield return renameItem;
+
+            var listenItem = new MenuViewModel(
+                header: Texts.KeyListenHeader,
+                executeCallback: () => ListenHook(),
+                isCheckedGetter: () => isListening,
+                icon: MaterialIconKind.KeyboardOutline);
+
+            listenChecker = () => listenItem.Update();
+
+            yield return listenItem;
+
+            var unhookItem = new MenuViewModel(
+                header: Texts.KeyUnhookHeader,
+                executeCallback: () => KeyCode = default,
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.KeyboardOffOutline);
+
+            yield return unhookItem;
+
+            if (playerService?.HasPaths == true)
+            {
+                yield return new SeparatorViewModel();
+
+                var isForegroundItem = new MenuViewModel(
+                    header: Texts.PlayerOnForegroundHeader,
+                    executeCallback: () => IsForeground = !IsForeground,
+                    closeCallback: CloseMenu,
+                    isCheckedGetter: () => IsForeground,
+                    icon: MaterialIconKind.ChevronUpBoxOutline);
+
+                yield return isForegroundItem;
+
+                var savePositionsItem = new MenuViewModel(
+                    header: Texts.PlayerSavePosition,
+                    executeCallback: () => SavePosition = !SavePosition,
+                    closeCallback: CloseMenu,
+                    isCheckedGetter: () => SavePosition,
+                    icon: MaterialIconKind.FileRestoreOutline);
+
+                yield return savePositionsItem;
+
+                if (playerService.HasStack)
+                {
+                    yield return new SeparatorViewModel();
+
+                    var shuffleItem = new MenuViewModel(
+                        header: Texts.PlayerShuffleHeader,
+                        executeCallback: () => playerService.ShuffleAsync(),
+                        closeCallback: CloseMenu,
+                        icon: MaterialIconKind.ShuffleVariant);
+
+                    yield return shuffleItem;
+                }
+            }
+        }
+
+        private void ListenHook()
+        {
+            if (!isListening)
+            {
+                isListening = true;
+
+                hookService.Listen(k => ReceiveHook(k));
+            }
+        }
+
+        private void ReceiveHook(string keyCode)
+        {
+            if (isListening)
+            {
+                KeyCode = keyCode;
+                isListening = false;
+
+                listenChecker.Invoke();
+
+                CloseMenu();
             }
         }
 

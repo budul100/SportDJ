@@ -1,14 +1,14 @@
-﻿using System.Threading.Tasks;
-using MsBox.Avalonia.Enums;
+﻿using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Grid;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.GridService
 {
@@ -32,7 +32,7 @@ namespace SportDJ.Services.GridService
             this.settingsService = settingsService;
             this.dialogService = dialogService;
 
-            eventAggregator.GetEvent<AppStartedEvent>().Subscribe(
+            eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: Initialize,
                 keepSubscriberReferenceAlive: true);
         }

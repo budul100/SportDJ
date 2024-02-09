@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Prism.Events;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Prism.Events;
-using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.StorageService
 {
@@ -15,6 +15,8 @@ namespace SportDJ.Services.StorageService
         where T : class
     {
         #region Private Fields
+
+        private const int WaitingPositions = 2;
 
         private static readonly XmlWriterSettings xmlSettings = new()
         {
@@ -26,8 +28,12 @@ namespace SportDJ.Services.StorageService
         };
 
         private readonly IEventAggregator eventAggregator;
-        private readonly SemaphoreSlim saveLock = new(1, 1);
+        private readonly object saveLock = new();
         private readonly XmlSerializer serializer = new(typeof(T));
+
+        private readonly SemaphoreSlim waitLock = new(
+            initialCount: 1,
+            maxCount: WaitingPositions);
 
         private bool isDisposed;
 
@@ -159,15 +165,21 @@ namespace SportDJ.Services.StorageService
 
         private async Task SaveSettingsAsync()
         {
-            await saveLock.WaitAsync();
+            if (waitLock.CurrentCount < WaitingPositions)
+            {
+                await waitLock.WaitAsync();
 
-            try
-            {
-                SaveSettings();
-            }
-            finally
-            {
-                saveLock.Release();
+                try
+                {
+                    lock (saveLock)
+                    {
+                        SaveSettings();
+                    }
+                }
+                finally
+                {
+                    waitLock.Release();
+                }
             }
         }
 

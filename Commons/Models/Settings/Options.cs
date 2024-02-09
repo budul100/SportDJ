@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SportDJ.Commons.Assets;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -12,6 +12,9 @@ namespace SportDJ.Commons.Models.Settings
 
         [DisplayName("Disable interrupting dialogs")]
         public bool DisableInterruptingDialogs { get; set; }
+
+        [DisplayName("Disable key hook")]
+        public bool DisableKeyHook { get; set; }
 
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]

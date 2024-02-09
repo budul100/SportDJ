@@ -48,8 +48,8 @@
                 DockPanel.Dock="Right"
                 Focusable="False">
                 <mat:MaterialIcon
-                    Width="{StaticResource SettingsIconSize}"
-                    Height="{StaticResource SettingsIconSize}"
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
                     Kind="Reload" />
             </Button>
 
@@ -83,8 +83,8 @@
                 Command="{Binding SettingsLoadCommand}"
                 Focusable="False">
                 <mat:MaterialIcon
-                    Width="{StaticResource SettingsIconSize}"
-                    Height="{StaticResource SettingsIconSize}"
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
                     Kind="FolderOpenOutline" />
             </Button>
             <Button
@@ -95,8 +95,8 @@
                 Command="{Binding SettingsSaveCommand}"
                 Focusable="False">
                 <mat:MaterialIcon
-                    Width="{StaticResource SettingsIconSize}"
-                    Height="{StaticResource SettingsIconSize}"
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
                     Kind="ContentSaveOutline" />
             </Button>
         </Grid>

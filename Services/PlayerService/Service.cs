@@ -211,8 +211,8 @@ namespace SportDJ.Services.PlayerService
             if (HasPaths)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.PlayerClearMessage,
-                    contentTitle: Texts.PlayerClearHeader,
+                    contentMessage: Texts.PlayerResetMessage,
+                    contentTitle: Texts.PlayerResetHeader,
                     buttonDefinitions: ButtonEnum.YesNo,
                     enterDefaultButton: ClickEnum.No);
 

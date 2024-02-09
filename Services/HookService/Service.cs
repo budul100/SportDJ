@@ -1,9 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using Prism.Events;
+﻿using Prism.Events;
 using SharpHook;
-using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Events.Hook;
+using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.HookService
 {
@@ -13,31 +17,68 @@ namespace SportDJ.Services.HookService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private readonly TaskPoolGlobalHook hook;
+        private readonly TaskPoolGlobalHook hook = new();
+        private readonly HashSet<object> locks = new();
+        private readonly IStorageService<Set> settingsService;
 
+        private Action<string> callback;
         private bool isDisposed;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator)
+        public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService,
+            IStorageService<Set> settingsService)
         {
             this.eventAggregator = eventAggregator;
+            this.settingsService = settingsService;
 
-            hook = new TaskPoolGlobalHook();
+            eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+                action: () => CheckState(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
+                action: () => CheckState(),
+                keepSubscriberReferenceAlive: true);
 
             hook.KeyPressed += OnKeyPressed;
             hook.KeyReleased += OnKeyReleased;
 
-#if (!DEBUG)
             Task.Run(() => hook.Run());
-#endif
         }
 
         #endregion Public Constructors
 
         #region Public Methods
+
+        public void Activate(object obj)
+        {
+            if (locks.Any())
+            {
+                locks.Remove(obj);
+
+                if (!locks.Any())
+                {
+                    hook.KeyPressed += OnKeyPressed;
+                    hook.KeyReleased += OnKeyReleased;
+                }
+            }
+        }
+
+        public void Deactivate(object obj)
+        {
+            if (!locks.Contains(obj))
+            {
+                locks.Add(obj);
+
+                if (locks.Count == 1)
+                {
+                    hook.KeyPressed -= OnKeyPressed;
+                    hook.KeyReleased -= OnKeyReleased;
+                }
+            }
+        }
 
         public void Dispose()
         {
@@ -46,6 +87,15 @@ namespace SportDJ.Services.HookService
 
             GC.SuppressFinalize(
                 obj: this);
+        }
+
+        public void Listen(Action<string> callback)
+        {
+            if (this.callback == default)
+            {
+                this.callback = callback;
+                hook.KeyTyped += OnListening;
+            }
         }
 
         #endregion Public Methods
@@ -72,23 +122,58 @@ namespace SportDJ.Services.HookService
 
         #region Private Methods
 
+        private void CheckState()
+        {
+            if (settingsService?.Contents?.Options != default)
+            {
+                if (settingsService.Contents.Options.DisableKeyHook)
+                {
+                    Activate(settingsService);
+                }
+                else
+                {
+                    Deactivate(settingsService);
+                }
+            }
+        }
+
         private void OnKeyPressed(object sender, KeyboardHookEventArgs e)
         {
-            var keyCode = e?.Data.KeyCode.ToString();
-
-            if (!string.IsNullOrWhiteSpace(keyCode))
+            if (!locks.Any())
             {
-                eventAggregator.GetEvent<KeyPressedEvent>().Publish(keyCode);
+                var keyCode = e?.Data.KeyCode.ToString();
+
+                if (!string.IsNullOrWhiteSpace(keyCode))
+                {
+                    eventAggregator.GetEvent<KeyPressedEvent>().Publish(keyCode);
+                }
             }
         }
 
         private void OnKeyReleased(object sender, KeyboardHookEventArgs e)
         {
+            if (!locks.Any())
+            {
+                var keyCode = e?.Data.KeyCode.ToString();
+
+                if (!string.IsNullOrWhiteSpace(keyCode))
+                {
+                    eventAggregator.GetEvent<KeyReleasedEvent>().Publish(keyCode);
+                }
+            }
+        }
+
+        private void OnListening(object sender, KeyboardHookEventArgs e)
+        {
             var keyCode = e?.Data.KeyCode.ToString();
 
-            if (!string.IsNullOrWhiteSpace(keyCode))
+            if (callback != default
+                && !string.IsNullOrWhiteSpace(keyCode))
             {
-                eventAggregator.GetEvent<KeyReleasedEvent>().Publish(keyCode);
+                callback.Invoke(keyCode);
+
+                hook.KeyTyped -= OnListening;
+                callback = default;
             }
         }
 

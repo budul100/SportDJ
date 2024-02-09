@@ -3,7 +3,7 @@ using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Events.Volume;

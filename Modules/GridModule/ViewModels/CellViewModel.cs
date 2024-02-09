@@ -104,6 +104,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     RaisePropertyChanged(nameof(KeyCode));
                     RaisePropertyChanged(nameof(HasKey));
+                    RaisePropertyChanged(nameof(Key));
                 }
             }
         }
@@ -159,6 +160,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             MenuCloseEvent?.Invoke(
                 sender: this,
                 e: default);
+
+            RaisePropertyChanged(nameof(Menus));
         }
 
         protected virtual void Dispose(bool isDisposing)
@@ -185,7 +188,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.CellAddHeader} {orientation}";
+                var header = $"{Texts.GridAddHeader} {orientation}";
 
                 void callback() => gridService.AddPlayer(
                     cell: cell,
@@ -203,7 +206,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.CellMoveHeader} {orientation}";
+                var header = $"{Texts.GridMoveHeader} {orientation}";
 
                 void callback() => gridService.MoveCell(
                     cell: cell,

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -10,6 +6,10 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -30,8 +30,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
-        public MenuViewModel(string header, Action executeCallback, Action closeCallback, Func<bool> isCheckedGetter = default,
-            MaterialIconKind? icon = default)
+        public MenuViewModel(string header, Action executeCallback, Action closeCallback = default,
+            Func<bool> isCheckedGetter = default, MaterialIconKind? icon = default)
         {
             this.executeCallback = executeCallback;
             this.isCheckedGetter = isCheckedGetter;
@@ -42,7 +42,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             MenuCloseEvent += (s, e) => closeCallback?.Invoke();
 
-            UpdateIsChecked();
+            Update();
         }
 
         public MenuViewModel(string header, IEnumerable<BindableBase> menuItems, Action closeCallback,
@@ -146,20 +146,21 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
-        #region Private Methods
+        #region Public Methods
 
-        private void ExecuteCallback()
+        public void Update()
         {
-            MenuCloseEvent?.Invoke(
-                sender: this,
-                e: default);
-
-            executeCallback?.Invoke();
-
-            UpdateIsChecked();
+            if (isCheckedGetter != default)
+            {
+                IsChecked = isCheckedGetter.Invoke();
+            }
         }
 
-        private string GetHeader(IEnumerable<BindableBase> menuItems)
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private static string GetHeader(IEnumerable<BindableBase> menuItems)
         {
             var result = default(string);
 
@@ -187,12 +188,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
             return result;
         }
 
-        private void UpdateIsChecked()
+        private void ExecuteCallback()
         {
-            if (isCheckedGetter != default)
-            {
-                IsChecked = isCheckedGetter.Invoke();
-            }
+            MenuCloseEvent?.Invoke(
+                sender: this,
+                e: default);
+
+            executeCallback?.Invoke();
+
+            Update();
         }
 
         private void UpdateItem()

@@ -212,11 +212,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 {
                     sessionService.Contents.SettingsPath = path;
 
+                    sessionService.Save();
+
                     settingsService.Load(path);
 
                     SetStartLocation();
-
-                    sessionService.Save();
                 }
             }
         }
@@ -237,11 +237,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             {
                 sessionService.Contents.SettingsPath = path.Path.LocalPath;
 
+                sessionService.Save();
+
                 settingsService.Save(path.Path.LocalPath);
 
                 SetStartLocation();
-
-                sessionService.Save();
             }
         }
 

@@ -3,6 +3,7 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly Grid grid;
+        private readonly IHookService hookService;
         private readonly GroupViewModel parent;
 
         private int columns;
         private bool isDisposed;
+        private bool isListening;
         private bool isRenaming;
         private bool isSelected;
+        private Action listenChecker;
         private int rows;
 
         #endregion Private Fields
@@ -34,6 +38,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.grid = grid;
             this.parent = parent;
+
+            hookService = containerProvider?.Resolve<IHookService>();
 
             Initialize(
                 containerProvider: containerProvider,
@@ -55,7 +61,22 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool IsRenaming
         {
             get { return isRenaming; }
-            set { SetProperty(ref isRenaming, value); }
+            set
+            {
+                if (IsRenaming != value)
+                {
+                    SetProperty(ref isRenaming, value);
+
+                    if (value)
+                    {
+                        hookService.Deactivate(this);
+                    }
+                    else
+                    {
+                        hookService.Activate(this);
+                    }
+                }
+            }
         }
 
         public bool IsSelected
@@ -107,43 +128,44 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var gridMenus = base.GetGridMenus().ToArray();
 
-            var gridItems = new MenuViewModel(
-                header: $"{Texts.CellEditHeader}...",
+            var gridMenu = new MenuViewModel(
+                header: $"{Texts.GridEditHeader}...",
                 menuItems: gridMenus,
                 closeCallback: CloseMenu);
 
-            yield return gridItems;
+            yield return gridMenu;
+
+            var groupMenus = GetGroupMenus().ToArray();
+
+            var groupMenu = new MenuViewModel(
+                header: $"{Texts.GroupEditHeader}...",
+                menuItems: groupMenus,
+                closeCallback: CloseMenu);
+
+            yield return groupMenu;
 
             var tabMenus = GetTabMenus().ToArray();
 
-            var tabItems = new MenuViewModel(
+            var tabMenu = new MenuViewModel(
                 header: $"{Texts.TabEditHeader}...",
                 menuItems: tabMenus,
                 closeCallback: CloseMenu);
 
-            yield return tabItems;
-
-            var renameItem = new MenuViewModel(
-                header: Texts.TabRenameHeader,
-                executeCallback: () => IsRenaming = true,
-                closeCallback: CloseMenu,
-                icon: MaterialIconKind.FormTextbox);
-
-            yield return renameItem;
+            yield return tabMenu;
         }
 
         #endregion Protected Methods
 
         #region Private Methods
 
-        private IEnumerable<BindableBase> GetTabMenus()
+        private IEnumerable<BindableBase> GetGroupMenus()
         {
             var orientations = Enum.GetValues<OrientationType>()
                 .Where(o => o == OrientationType.Left || o == OrientationType.Right).ToArray();
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.TabAddHeader} {orientation}";
+                var header = $"{Texts.GroupAddHeader} {orientation}";
 
                 void callback() => gridService.AddGrid(
                     grid: grid,
@@ -161,7 +183,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.TabMoveHeader} {orientation}";
+                var header = $"{Texts.GroupMoveHeader} {orientation}";
 
                 void callback() => gridService.MoveGrid(
                     grid: grid,
@@ -183,6 +205,35 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 closeCallback: CloseMenu);
 
             yield return removeItem;
+        }
+
+        private IEnumerable<BindableBase> GetTabMenus()
+        {
+            var renameItem = new MenuViewModel(
+                header: Texts.TabRenameHeader,
+                executeCallback: () => IsRenaming = true,
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.FormTextbox);
+
+            yield return renameItem;
+
+            var listenItem = new MenuViewModel(
+                header: Texts.KeyListenHeader,
+                executeCallback: () => ListenHook(),
+                isCheckedGetter: () => isListening,
+                icon: MaterialIconKind.KeyboardOutline);
+
+            listenChecker = () => listenItem.Update();
+
+            yield return listenItem;
+
+            var unhookItem = new MenuViewModel(
+                header: Texts.KeyUnhookHeader,
+                executeCallback: () => KeyCode = default,
+                closeCallback: CloseMenu,
+                icon: MaterialIconKind.KeyboardOffOutline);
+
+            yield return unhookItem;
         }
 
         private void Initialize(IContainerProvider containerProvider, Grid grid)
@@ -249,6 +300,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 Columns = columnsCount;
 
                 base.Initialize();
+            }
+        }
+
+        private void ListenHook()
+        {
+            if (!isListening)
+            {
+                isListening = true;
+
+                hookService.Listen(k => ReceiveHook(k));
+            }
+        }
+
+        private void ReceiveHook(string keyCode)
+        {
+            if (isListening)
+            {
+                KeyCode = keyCode;
+                isListening = false;
+
+                listenChecker.Invoke();
+
+                CloseMenu();
             }
         }
 

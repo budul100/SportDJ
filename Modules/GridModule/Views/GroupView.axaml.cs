@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using SportDJ.Modules.GridModule.ViewModels;
 
 namespace SportDJ.Modules.GridModule.Views;
@@ -18,7 +19,7 @@ public partial class GroupView
 
     #region Private Methods
 
-    private void OnContextMenuOpened(object? sender, RoutedEventArgs e)
+    private void OnContextMenuOpened(object sender, RoutedEventArgs e)
     {
         if (sender is ContextMenu contextMenu)
         {
@@ -26,7 +27,7 @@ public partial class GroupView
 
             if (viewModel != default)
             {
-                viewModel.MenuCloseEvent += (s, e) => contextMenu.Close();
+                viewModel.MenuCloseEvent += (s, e) => Dispatcher.UIThread.Invoke(() => contextMenu.Close());
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Prism.Events;
@@ -6,13 +7,12 @@ using Prism.Ioc;
 using Prism.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Key;
+using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels
 {
@@ -227,7 +227,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private void OnKeyPressed(string keyCode)
         {
-            if (keyCode == settingsService.Contents.Options.KeyCodeScreenChange)
+            if (keyCode == settingsService?.Contents?.Options.KeyCodeScreenChange)
             {
                 ShowFullscreen = !ShowFullscreen;
             }

@@ -279,8 +279,8 @@ namespace SportDJ.App.ViewModels
         private async void CheckClosing(IClassicDesktopStyleApplicationLifetime desktop)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Texts.CloseApplicationMessage,
-                contentTitle: Texts.CloseApplicationHeader);
+                contentMessage: Texts.AppCloseMessage,
+                contentTitle: Texts.AppCloseHeader);
 
             if (result == ButtonResult.Yes)
             {

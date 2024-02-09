@@ -1,6 +1,6 @@
 ﻿using Prism.Events;
 
-namespace SportDJ.Commons.Events.Key
+namespace SportDJ.Commons.Events.Hook
 {
     public class KeyReleasedEvent
         : PubSubEvent<string>

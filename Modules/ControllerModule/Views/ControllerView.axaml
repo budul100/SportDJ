@@ -60,8 +60,8 @@
             Focusable="False"
             IsChecked="{Binding VolumeMonitoringActive}">
             <mat:MaterialIcon
-                Width="{StaticResource ControllerIconSize}"
-                Height="{StaticResource ControllerIconSize}"
+                Width="{StaticResource LargeIconSize}"
+                Height="{StaticResource LargeIconSize}"
                 Kind="VolumeMute" />
         </ToggleButton>
 
@@ -87,8 +87,8 @@
 
                 <mat:MaterialIcon
                     Grid.Column="0"
-                    Width="{StaticResource ControllerIconSize}"
-                    Height="{StaticResource ControllerIconSize}"
+                    Width="{StaticResource LargeIconSize}"
+                    Height="{StaticResource LargeIconSize}"
                     Kind="Microphone" />
 
                 <Border
@@ -134,8 +134,8 @@
 
                 <mat:MaterialIcon
                     Grid.Column="0"
-                    Width="{StaticResource ControllerIconSize}"
-                    Height="{StaticResource ControllerIconSize}"
+                    Width="{StaticResource LargeIconSize}"
+                    Height="{StaticResource LargeIconSize}"
                     Kind="PauseCircle" />
 
                 <Border

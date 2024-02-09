@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using SportDJ.Modules.GridModule.ViewModels;
 
 namespace SportDJ.Modules.GridModule.Views;
@@ -20,7 +21,12 @@ public partial class PlayerView
 
     #region Private Methods
 
-    private void OnContextMenuOpened(object? sender, RoutedEventArgs e)
+    private void OnButtonKeyDown(object sender, Avalonia.Input.KeyEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void OnContextMenuOpened(object sender, RoutedEventArgs e)
     {
         if (sender is ContextMenu contextMenu)
         {
@@ -28,7 +34,7 @@ public partial class PlayerView
 
             if (viewModel != default)
             {
-                viewModel.MenuCloseEvent += (s, e) => contextMenu.Close();
+                viewModel.MenuCloseEvent += (s, e) => Dispatcher.UIThread.Invoke(() => contextMenu.Close());
             }
         }
     }
