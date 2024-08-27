@@ -54,11 +54,7 @@ namespace SportDJ.Services.HookService
 
         public void Activate(object obj)
         {
-            if (locks.Any())
-            {
-                locks.Remove(obj);
-
-                if (!locks.Any())
+            if (!hook.IsRunning)
                 {
                     hook.KeyPressed += OnKeyPressed;
                     hook.KeyReleased += OnKeyReleased;
