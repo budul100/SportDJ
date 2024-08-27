@@ -331,7 +331,7 @@
 	</Grid>
 	<Options>
 		<DisableInterruptingDialogs>false</DisableInterruptingDialogs>
-		<DisableKeyHook>false</DisableKeyHook>
+		<DisableKeyHook>true</DisableKeyHook>
 		<FadeOnLowerMilliseconds>200</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>

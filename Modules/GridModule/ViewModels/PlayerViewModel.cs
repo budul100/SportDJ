@@ -24,6 +24,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly IHookService hookService;
         private readonly IPlayerService playerService;
+
         private bool isDisposed;
         private bool isListening;
         private bool isRenaming;
