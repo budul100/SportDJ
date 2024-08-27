@@ -1,10 +1,12 @@
-﻿using Moq;
+﻿using System.Linq;
+using Moq;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System.Linq;
 using Xunit;
 
 namespace SportDJ.Tests.OutputServiceTests
@@ -14,7 +16,6 @@ namespace SportDJ.Tests.OutputServiceTests
         #region Private Fields
 
         private readonly Mock<IContainerProvider> mockContainerProvider;
-
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
 
@@ -25,8 +26,12 @@ namespace SportDJ.Tests.OutputServiceTests
         public Tests()
         {
             mockContainerProvider = new Mock<IContainerProvider>();
-
             mockEventAggregator = new Mock<IEventAggregator>();
+
+            var settingsLoadedEvent = new Mock<SettingsLoadedEvent<Set>>();
+            mockEventAggregator.
+                Setup(m => m.GetEvent<SettingsLoadedEvent<Set>>()).
+                Returns(settingsLoadedEvent.Object);
 
             var mockMixerStartedEvent = new Mock<MixerStartedEvent>();
             mockEventAggregator.

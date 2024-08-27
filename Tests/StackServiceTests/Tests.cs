@@ -1,12 +1,13 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -54,6 +55,11 @@ namespace SportDJ.Tests.StackServiceTests
             mockEventAggregator.
                 Setup(m => m.GetEvent<EntryUpdatedEvent>()).
                 Returns(mockTrackUpdatedEvent.Object);
+
+            var trackUpdatedEvent = new Mock<TrackUpdatedEvent>();
+            mockEventAggregator.
+                Setup(m => m.GetEvent<TrackUpdatedEvent>()).
+                Returns(trackUpdatedEvent.Object);
 
             mockDispatcherService = new Mock<IDispatcherService>();
             mockDispatcherService
