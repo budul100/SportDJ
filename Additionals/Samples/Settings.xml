@@ -11,17 +11,19 @@
 								<Paths />
 								<SavePosition>false</SavePosition>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="0" KeyCode="VcNumPad8" Name="Sonstiges">
-								<IsForeground>false</IsForeground>
-								<IsLoop>false</IsLoop>
-								<Paths />
-								<SavePosition>false</SavePosition>
-							</Cell>
-							<Cell xsi:type="Player" Column="2" Row="0" KeyCode="VcNumPad9" Name="Warm-Up">
+							<Cell xsi:type="Player" Column="1" Row="0" KeyCode="VcNumPad8" Name="Warm-Up">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Paths>
 									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Sky News Theme.mp3</Path>
+								</Paths>
+								<SavePosition>false</SavePosition>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="0" KeyCode="VcNumPad9" Name="Referees">
+								<IsForeground>false</IsForeground>
+								<IsLoop>false</IsLoop>
+								<Paths>
+									<Path>C:\Users\mgr\HiDrive\SportDJ\Beginn\Start - Law & Order.mp3</Path>
 								</Paths>
 								<SavePosition>false</SavePosition>
 							</Cell>
@@ -83,17 +85,19 @@
 								<Paths />
 								<SavePosition>false</SavePosition>
 							</Cell>
-							<Cell xsi:type="Player" Column="1" Row="0" KeyCode="VcNumPad8" Name="Sonstiges">
-								<IsForeground>false</IsForeground>
-								<IsLoop>false</IsLoop>
-								<Paths />
-								<SavePosition>false</SavePosition>
-							</Cell>
-							<Cell xsi:type="Player" Column="2" Row="0" KeyCode="VcNumPad9" Name="Warm-Up">
+							<Cell xsi:type="Player" Column="1" Row="0" KeyCode="VcNumPad8" Name="Warm-Up">
 								<IsForeground>false</IsForeground>
 								<IsLoop>false</IsLoop>
 								<Paths>
 									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Home With a Vengeance.mp3</Path>
+								</Paths>
+								<SavePosition>false</SavePosition>
+							</Cell>
+							<Cell xsi:type="Player" Column="2" Row="0" KeyCode="VcNumPad9" Name="Referees">
+								<IsForeground>false</IsForeground>
+								<IsLoop>false</IsLoop>
+								<Paths>
+									<Path>C:\Users\mgr\HiDrive\SportDJ\Beginn\Start - Law & Order.mp3</Path>
 								</Paths>
 								<SavePosition>false</SavePosition>
 							</Cell>
