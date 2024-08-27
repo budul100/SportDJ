@@ -1,4 +1,8 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,10 +15,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -182,6 +182,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void InitializeOptions()
         {
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                settingsService.Contents.Options.DisableKeyHook = true;
+            }
+
             outputSettings = settingsService.Contents.Outputs?
                 .SingleOrDefault(o => o.Type == OutputType.Live);
 
@@ -266,12 +271,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void UpdateOptions()
         {
-            if (IsActive)
-            {
-                settingsService.Save();
+            settingsService.Save();
 
-                eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Publish();
-            }
+            eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Publish();
 
             RaisePropertyChanged(nameof(IsActive));
         }

@@ -1,4 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -11,9 +14,6 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {

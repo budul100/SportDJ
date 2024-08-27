@@ -128,8 +128,7 @@ namespace SportDJ.Services.TrackService
 
         private void AddTrack(string file)
         {
-            if (File.Exists(file)
-                && !tracks.ContainsKey(file))
+            if (File.Exists(file))
             {
                 var atlTrack = new ATL.Track(file);
 
@@ -138,23 +137,33 @@ namespace SportDJ.Services.TrackService
                     var info = atlTrack.GetInfo();
                     var duration = TimeSpan.FromSeconds(atlTrack.Duration);
 
-                    var track = new Track(
-                        path: file,
-                        title: atlTrack.Title,
-                        artist: atlTrack.Artist,
-                        info: info,
-                        duration: duration);
+                    var track = default(Track);
 
                     lock (lockTracks)
                     {
-                        tracks.Add(
-                            key: file,
-                            value: track);
+                        if (!tracks.ContainsKey(file))
+                        {
+                            // This must be checked here to avoid problems due to track duplicates in different playlists
+
+                            track = new Track(
+                                path: file,
+                                title: atlTrack.Title,
+                                artist: atlTrack.Artist,
+                                info: info,
+                                duration: duration);
+
+                            tracks.Add(
+                                key: file,
+                                value: track);
+                        }
                     }
 
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                    if (track != default)
+                    {
+                        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
 
-                    Task.Run(() => TrimTrack(track));
+                        Task.Run(() => TrimTrack(track));
+                    }
                 }
             }
         }

@@ -6,7 +6,6 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
-using SportDJ.Commons.Assets;
 using SportDJ.Commons.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -111,7 +110,7 @@ namespace SportDJ.Services.DialogService
             return result;
         }
 
-        public void Initialize(Window window)
+        public void Initialize(Window window, string iconUri = default)
         {
             if (window is null)
             {
@@ -121,7 +120,7 @@ namespace SportDJ.Services.DialogService
             this.window = window;
 
             topLevel = Window.GetTopLevel(window);
-            windowIcon = GetWindowIcon();
+            windowIcon = GetWindowIcon(iconUri);
         }
 
         public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
@@ -215,17 +214,24 @@ namespace SportDJ.Services.DialogService
 
         #region Private Methods
 
-        private static WindowIcon GetWindowIcon()
+        private static WindowIcon GetWindowIcon(string iconUri)
         {
             var result = default(WindowIcon);
 
-            var uri = new Uri($"avares://{Texts.AppName}/Assets/{Texts.AppName}.png");
-            var stream = AssetLoader.Open(uri);
-
-            if (stream != default)
+            if (!string.IsNullOrWhiteSpace(iconUri))
             {
-                var bitmap = new Bitmap(stream);
-                result = new WindowIcon(bitmap);
+                var uri = new Uri(iconUri);
+
+                if (AssetLoader.Exists(uri))
+                {
+                    var stream = AssetLoader.Open(uri);
+
+                    if (stream != default)
+                    {
+                        var bitmap = new Bitmap(stream);
+                        result = new WindowIcon(bitmap);
+                    }
+                }
             }
 
             return result;

@@ -17,19 +17,17 @@
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate x:DataType="vm:CanvasViewModel">
-
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 
         <ItemsControl.DataTemplates>
-
             <DataTemplate x:DataType="vm:GridViewModel">
-
                 <Grid Background="Black">
                     <v:GridView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                 </Grid>
             </DataTemplate>
         </ItemsControl.DataTemplates>
+
     </ItemsControl>
 </UserControl>

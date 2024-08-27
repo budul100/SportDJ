@@ -1,7 +1,9 @@
-﻿using Prism.Commands;
+﻿using Material.Icons;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Regions;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
@@ -11,6 +13,7 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -19,9 +22,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IHookService hookService;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
 
+        private bool isListening;
         private Options options;
         private bool othersMuted;
         private bool volumeMonitoringActive;
@@ -31,9 +36,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+            IEventAggregator eventAggregator, IHookService hookService, IStorageService<Set> settingsService)
             : base(regionManager)
         {
+            this.hookService = hookService;
+
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
@@ -89,6 +96,12 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #endregion Public Constructors
 
+        #region Public Events
+
+        public event EventHandler ListenerCheckEvent;
+
+        #endregion Public Events
+
         #region Public Properties
 
         public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options?.KeyCodeOutputPause);
@@ -137,6 +150,32 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         #region Private Methods
 
+        private void InitializeMenus()
+        {
+            var navigationParameters = new NavigationParameters
+            {
+                { "header", Texts.KeyListenHeader },
+                { "executeCallback", () => ListenHook() },
+                { "isCheckedGetter", isListening },
+                { "isCheckedEvent", ListenerCheckEvent },
+                { "icon", MaterialIconKind.KeyboardOutline }
+            };
+
+            //navigationService.RequestNavigate(
+            //    target: nameof(RegionType.MenuRegion),
+            //    navigationParameters: navigationParameters);
+        }
+
+        private void ListenHook()
+        {
+            if (!isListening)
+            {
+                isListening = true;
+
+                //hookService.Listen(k => ReceiveHook(k));
+            }
+        }
+
         private void OnKeyPressed(string keyCode)
         {
             if (keyCode == options?.KeyCodeOutputPause)
@@ -156,6 +195,43 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 outputLiveService.Raise();
             }
         }
+
+        //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
+
+        //public string Key => KeyCode.GetKey();
+
+        //public string KeyCode
+        //{
+        //    get { return keyable?.KeyCode; }
+
+        //    set
+        //    {
+        //        if (keyable != default
+        //            && value != keyable.KeyCode)
+        //        {
+        //            keyable.KeyCode = value;
+
+        //            settingsService.Save();
+
+        //            RaisePropertyChanged(nameof(KeyCode));
+        //            RaisePropertyChanged(nameof(HasKey));
+        //            RaisePropertyChanged(nameof(Key));
+        //        }
+        //    }
+        //}
+
+        //private void ReceiveHook(string keyCode)
+        //{
+        //    if (isListening)
+        //    {
+        //        KeyCode = keyCode;
+        //        isListening = false;
+
+        //        listenChecker.Invoke();
+
+        //        CloseMenu();
+        //    }
+        //}
 
         private void UpdateContent()
         {

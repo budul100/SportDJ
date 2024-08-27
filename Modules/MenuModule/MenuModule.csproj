@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>SportDJ.Modules.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.0.7" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.7" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.0.6" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.0.6" />
+		<PackageReference Include="Material.Icons.Avalonia" Version="2.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\MenuView.axaml.cs">
+	    <DependentUpon>MenuView.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+
+
+</Project>

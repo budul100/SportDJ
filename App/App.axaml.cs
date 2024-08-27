@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Prism.DryIoc;
@@ -13,6 +14,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SportDJ.App
@@ -44,7 +46,8 @@ namespace SportDJ.App
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-            base.Initialize();              // <-- Required
+
+            base.Initialize();
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -53,6 +56,8 @@ namespace SportDJ.App
 
             if (desktop != default)
             {
+                desktop.Startup += OnStartup;
+
                 splashWindow = Container.Resolve<SplashView>();
 
                 desktop.MainWindow = splashWindow;
@@ -61,6 +66,8 @@ namespace SportDJ.App
                 var dispatcherService = Container.Resolve<IDispatcherService>();
                 Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
             }
+
+            base.OnFrameworkInitializationCompleted();
         }
 
         #endregion Public Methods
@@ -77,6 +84,8 @@ namespace SportDJ.App
                 name: nameof(Modules.ControllerModule));
             moduleCatalog.AddModule<Modules.SettingsModule.Module>(
                 name: nameof(Modules.SettingsModule));
+            moduleCatalog.AddModule<Modules.MenuModule.Module>(
+                name: nameof(Modules.MenuModule));
         }
 
         protected override AvaloniaObject CreateShell()
@@ -157,8 +166,13 @@ namespace SportDJ.App
 
                 desktop.MainWindow = mainWindow;
 
+                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
+
                 var dialogService = Container.Resolve<IDialogService>();
-                dialogService.Initialize(mainWindow);
+                dialogService.Initialize(
+                    window: mainWindow,
+                    iconUri: iconUri);
 
                 splashWindow.Close();
 
@@ -171,6 +185,12 @@ namespace SportDJ.App
 
                 splashWindow.Close();
             }
+        }
+
+        private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
+        {
+            Control.GotFocusEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
+            Control.DoubleTappedEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
         }
 
         #endregion Private Methods

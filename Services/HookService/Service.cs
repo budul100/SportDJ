@@ -1,13 +1,15 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Prism.Events;
 using SharpHook;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.HookService
 {
@@ -16,6 +18,7 @@ namespace SportDJ.Services.HookService
     {
         #region Private Fields
 
+        private readonly CancellationTokenSource cancellationTokenSource;
         private readonly IEventAggregator eventAggregator;
         private readonly TaskPoolGlobalHook hook = new();
         private readonly HashSet<object> locks = new();
@@ -28,11 +31,12 @@ namespace SportDJ.Services.HookService
 
         #region Public Constructors
 
-        public Service(IEventAggregator eventAggregator, IDispatcherService dispatcherService,
-            IStorageService<Set> settingsService)
+        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
         {
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
+
+            cancellationTokenSource = new CancellationTokenSource();
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: () => CheckState(),
@@ -41,11 +45,6 @@ namespace SportDJ.Services.HookService
             eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
                 action: () => CheckState(),
                 keepSubscriberReferenceAlive: true);
-
-            hook.KeyPressed += OnKeyPressed;
-            hook.KeyReleased += OnKeyReleased;
-
-            Task.Run(() => hook.Run());
         }
 
         #endregion Public Constructors
@@ -54,10 +53,21 @@ namespace SportDJ.Services.HookService
 
         public void Activate(object obj)
         {
-            if (!hook.IsRunning)
+            if (locks.Contains(obj))
+            {
+                locks.Remove(obj);
+
+                if (!locks.Any())
                 {
                     hook.KeyPressed += OnKeyPressed;
                     hook.KeyReleased += OnKeyReleased;
+
+                    if (!hook.IsRunning)
+                    {
+                        Task.Run(
+                            action: () => hook.Run(),
+                            cancellationToken: cancellationTokenSource.Token);
+                    }
                 }
             }
         }
@@ -68,11 +78,10 @@ namespace SportDJ.Services.HookService
             {
                 locks.Add(obj);
 
-                if (locks.Count == 1)
-                {
-                    hook.KeyPressed -= OnKeyPressed;
-                    hook.KeyReleased -= OnKeyReleased;
-                }
+                cancellationTokenSource?.Cancel();
+
+                hook.KeyPressed -= OnKeyPressed;
+                hook.KeyReleased -= OnKeyReleased;
             }
         }
 
@@ -104,6 +113,8 @@ namespace SportDJ.Services.HookService
             {
                 if (isDisposing)
                 {
+                    cancellationTokenSource?.Cancel();
+
                     hook.KeyPressed -= OnKeyPressed;
                     hook.KeyReleased -= OnKeyReleased;
 
@@ -124,11 +135,11 @@ namespace SportDJ.Services.HookService
             {
                 if (settingsService.Contents.Options.DisableKeyHook)
                 {
-                    Activate(settingsService);
+                    Deactivate(settingsService);
                 }
                 else
                 {
-                    Deactivate(settingsService);
+                    Activate(settingsService);
                 }
             }
         }

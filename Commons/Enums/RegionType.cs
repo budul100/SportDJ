@@ -9,5 +9,7 @@
         ControllerRegion,
 
         SettingsRegion,
+
+        MenuRegion,
     }
 }

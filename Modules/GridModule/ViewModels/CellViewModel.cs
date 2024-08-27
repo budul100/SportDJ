@@ -85,7 +85,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         public bool IsAvailableMenu => outputServiceLive?.IsPlaying == false
-                    || !settingsService.Contents.Options.DisableInterruptingDialogs;
+            || !settingsService.Contents.Options.DisableInterruptingDialogs;
 
         public string Key => KeyCode.GetKey();
 

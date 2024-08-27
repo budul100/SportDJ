@@ -1,4 +1,5 @@
-﻿using MsBox.Avalonia.Enums;
+﻿using System.Threading.Tasks;
+using MsBox.Avalonia.Enums;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -8,7 +9,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.GridService
 {
