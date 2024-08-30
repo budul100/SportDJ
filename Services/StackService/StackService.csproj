@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="z440.atl.core" Version="5.18.0" />
+		<PackageReference Include="z440.atl.core" Version="6.1.0" />
 	</ItemGroup>
 
 </Project>

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Prism.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.MenuModule.ViewModels
 {
@@ -171,7 +170,7 @@ namespace SportDJ.Modules.MenuModule.ViewModels
             if (relevants?.Any() == true)
             {
                 var first = relevants[0].Entry.Track.Info;
-                var last = relevants.Last().Entry.Track.Info;
+                var last = relevants[^1].Entry.Track.Info;
 
                 var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupTextLength;
 

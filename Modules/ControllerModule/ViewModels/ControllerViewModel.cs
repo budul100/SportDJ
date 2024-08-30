@@ -2,7 +2,8 @@
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Regions;
+using Prism.Navigation;
+using Prism.Navigation.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;

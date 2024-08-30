@@ -138,7 +138,7 @@ namespace SportDJ.Tests.StackServiceTests
         }
 
         [Fact]
-        public void LoadFiles()
+        public async Task LoadFilesAsync()
         {
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
@@ -151,7 +151,7 @@ namespace SportDJ.Tests.StackServiceTests
                 savePosition: false,
                 isLoop: false);
 
-            Task.Delay(3000).Wait();
+            await Task.Delay(3000);
 
             Assert.Equal(
                 expected: 3,
