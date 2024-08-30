@@ -16,7 +16,7 @@ namespace SportDJ.Modules.GridModule.DesignTime
         public GroupViewModel()
             : base(containerProvider: default, group: default, parent: default, isOnCanvas: false)
         {
-            for (int index = 0; index < ElementsCount; index += 2)
+            for (int index = 0; index < ElementsCount; ++index)
             {
                 Tabs.Add(new GridViewModel());
             }

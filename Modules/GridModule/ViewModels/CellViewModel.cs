@@ -48,7 +48,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.containerProvider = containerProvider;
 
             this.cell = element is Grid grid
-                ? grid.Group
+                ? grid?.Group
                 : element as Cell;
 
             nameable = element as INameable;
@@ -85,9 +85,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         public bool IsAvailableMenu => outputServiceLive?.IsPlaying == false
-            || settingsService.Contents.Options.EnableInterruptingDialogs;
+            || settingsService?.Contents?.Options?.EnableInterruptingDialogs == true;
 
-        public string Key => KeyCode.GetKey();
+        public string Key => KeyCode?.GetKey();
 
         public string KeyCode
         {
@@ -100,7 +100,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 {
                     keyable.KeyCode = value;
 
-                    settingsService.Save();
+                    settingsService?.Save();
 
                     RaisePropertyChanged(nameof(KeyCode));
                     RaisePropertyChanged(nameof(HasKey));
@@ -126,7 +126,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     {
                         nameable.Name = value.Trim();
 
-                        settingsService.Save();
+                        settingsService?.Save();
                     }
 
                     RaisePropertyChanged(nameof(Name));

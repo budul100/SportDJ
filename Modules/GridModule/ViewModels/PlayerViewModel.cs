@@ -34,6 +34,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Constructors
 
+        public PlayerViewModel(Player player, IPlayerService playerService)
+            : base(containerProvider: default, element: player)
+        {
+            this.playerService = playerService;
+        }
+
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(containerProvider: containerProvider, element: player)
         {

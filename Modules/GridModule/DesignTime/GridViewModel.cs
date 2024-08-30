@@ -5,7 +5,7 @@
     {
         #region Private Fields
 
-        private const int SideCount = 4;
+        private const int SideCount = 2;
 
         #endregion Private Fields
 
@@ -15,6 +15,8 @@
             : base(containerProvider: default, grid: default, parent: default)
         {
             Name = "Group";
+            Columns = SideCount;
+            Rows = SideCount;
 
             for (int row = 0; row < SideCount; row++)
             {
