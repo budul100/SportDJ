@@ -133,13 +133,13 @@ namespace SportDJ.Services.HookService
         {
             if (settingsService?.Contents?.Options != default)
             {
-                if (settingsService.Contents.Options.DisableKeyHook)
+                if (settingsService.Contents.Options.EnableKeyHook)
                 {
-                    Deactivate(settingsService);
+                    Activate(settingsService);
                 }
                 else
                 {
-                    Activate(settingsService);
+                    Deactivate(settingsService);
                 }
             }
         }

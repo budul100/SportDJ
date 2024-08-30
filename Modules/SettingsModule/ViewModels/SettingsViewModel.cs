@@ -1,4 +1,8 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,10 +15,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -184,7 +184,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         {
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                settingsService.Contents.Options.DisableKeyHook = true;
+                settingsService.Contents.Options.EnableKeyHook = false;
             }
 
             outputSettings = settingsService.Contents.Outputs?

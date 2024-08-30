@@ -10,11 +10,11 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        [DisplayName("Disable interrupting dialogs")]
-        public bool DisableInterruptingDialogs { get; set; }
+        [DisplayName("Enable interrupting dialogs")]
+        public bool EnableInterruptingDialogs { get; set; }
 
-        [DisplayName("Disable key hook")]
-        public bool DisableKeyHook { get; set; }
+        [DisplayName("Enable key hook")]
+        public bool EnableKeyHook { get; set; }
 
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]
