@@ -5,8 +5,8 @@
 
     <x:Double x:Key="SplashViewSize">500</x:Double>
 
-    <x:Double x:Key="MediumIconSize">30</x:Double>
-    <x:Double x:Key="LargeIconSize">40</x:Double>
+    <x:Double x:Key="MediumIconSize">20</x:Double>
+    <x:Double x:Key="LargeIconSize">30</x:Double>
 
     <Thickness x:Key="ContentMargin">4</Thickness>
 
@@ -16,9 +16,9 @@
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
 
-    <x:Double x:Key="FontSizeContent">30</x:Double>
-    <x:Double x:Key="FontSizeDisplay">20</x:Double>
-    <x:Double x:Key="FontSizeState">20</x:Double>
+    <x:Double x:Key="FontSizeContent">20</x:Double>
+    <x:Double x:Key="FontSizeDisplay">15</x:Double>
+    <x:Double x:Key="FontSizeState">15</x:Double>
     <x:Double x:Key="FontSizeVolume">10</x:Double>
 
     <Color x:Key="KeyBackgroundColor">DimGray</Color>
