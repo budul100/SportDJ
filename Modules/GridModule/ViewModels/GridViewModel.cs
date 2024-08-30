@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -50,7 +50,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<CellViewModel> Cells { get; private set; }
+        public ObservableCollection<CellViewModel> Cells { get; } = [];
 
         public int Columns
         {
@@ -238,12 +238,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Initialize(IContainerProvider containerProvider, Grid grid)
         {
-            Cells = new ObservableCollection<CellViewModel>();
+            Name = grid?.Name;
+            KeyCode = grid?.KeyCode;
 
-            Name = grid.Name;
-            KeyCode = grid.KeyCode;
-
-            if (grid?.Cells?.Any() == true)
+            if (grid?.Cells?.Count > 0)
             {
                 var rowsCount = 0;
                 var columnsCount = 0;

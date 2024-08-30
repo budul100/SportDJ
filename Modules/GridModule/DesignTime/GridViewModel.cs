@@ -12,19 +12,10 @@
         #region Public Constructors
 
         public GridViewModel()
-            : base(default, default, default)
+            : base(containerProvider: default, grid: default, parent: default)
         {
             Name = "Group";
 
-            SetElements();
-        }
-
-        #endregion Public Constructors
-
-        #region Private Methods
-
-        private void SetElements()
-        {
             for (int row = 0; row < SideCount; row++)
             {
                 for (int column = 0; column < SideCount; column++)
@@ -39,6 +30,6 @@
             }
         }
 
-        #endregion Private Methods
+        #endregion Public Constructors
     }
 }

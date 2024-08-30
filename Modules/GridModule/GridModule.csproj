@@ -4,6 +4,8 @@
 		<OutputType>Library</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<RootNamespace>SportDJ.Modules.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+		<AvaloniaXamlReportImportance>High</AvaloniaXamlReportImportance>
+		<AvaloniaXamlVerboseExceptions>true</AvaloniaXamlVerboseExceptions>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -14,6 +11,9 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -92,7 +92,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: k => parent.IsVisible
                     && k == player.KeyCode);
 
-            playerService.Initialize(
+            playerService?.Initialize(
                 player: player);
         }
 
@@ -181,13 +181,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public double? Progress => playerService?.Progress;
 
-        public string Remaining => playerService.Remaining?.ToString(Constants.FormatDuration);
+        public string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
         public DelegateCommand ResetCommand { get; }
 
         public bool SavePosition
         {
-            get { return playerService.SavePosition; }
+            get { return playerService?.SavePosition == true; }
             set
             {
                 if (playerService != default

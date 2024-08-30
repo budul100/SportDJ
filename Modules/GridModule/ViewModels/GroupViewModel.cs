@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Models.Structure;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -26,10 +26,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.parent = parent;
 
-            var eventAggregator = containerProvider.Resolve<IEventAggregator>();
+            var eventAggregator = containerProvider?.Resolve<IEventAggregator>();
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: k => SelectTab(k),
+                action: SelectTab,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: _ => parent.IsVisible);
@@ -46,7 +46,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public int Columns { get; private set; }
 
-        public bool IsVisible => parent.IsVisible;
+        public bool IsVisible => parent?.IsVisible == true;
 
         public int Rows { get; private set; }
 
@@ -68,7 +68,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public ObservableCollection<GridViewModel> Tabs { get; } = new ObservableCollection<GridViewModel>();
+        public ObservableCollection<GridViewModel> Tabs { get; } = [];
 
         #endregion Public Properties
 
@@ -104,7 +104,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             Tabs?.Clear();
 
-            if (group.Grids?.Any() == true)
+            if (group?.Grids?.Count > 0)
             {
                 foreach (var grid in group.Grids)
                 {

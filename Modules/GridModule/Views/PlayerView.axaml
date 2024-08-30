@@ -15,6 +15,7 @@
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
+    x:DataType="dt:PlayerViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>

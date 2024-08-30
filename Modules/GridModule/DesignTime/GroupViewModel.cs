@@ -1,4 +1,6 @@
-﻿namespace SportDJ.Modules.GridModule.DesignTime
+﻿using System.Linq;
+
+namespace SportDJ.Modules.GridModule.DesignTime
 {
     public class GroupViewModel
         : ViewModels.GroupViewModel
@@ -12,12 +14,14 @@
         #region Public Constructors
 
         public GroupViewModel()
-            : base(default, default, default, false)
+            : base(containerProvider: default, group: default, parent: default, isOnCanvas: false)
         {
             for (int index = 0; index < ElementsCount; index += 2)
             {
                 Tabs.Add(new GridViewModel());
             }
+
+            Selected = Tabs.First();
         }
 
         #endregion Public Constructors

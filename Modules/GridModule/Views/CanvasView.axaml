@@ -28,6 +28,5 @@
                 </Grid>
             </DataTemplate>
         </ItemsControl.DataTemplates>
-
     </ItemsControl>
 </UserControl>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -12,6 +9,9 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -54,10 +54,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             nameable = element as INameable;
             keyable = element as IKeyable;
 
-            eventAggregator = containerProvider.Resolve<IEventAggregator>();
-            settingsService = containerProvider.Resolve<IStorageService<Set>>();
-            dialogService = containerProvider.Resolve<IDialogService>();
-            gridService = containerProvider.Resolve<IGridService>();
+            eventAggregator = containerProvider?.Resolve<IEventAggregator>();
+            settingsService = containerProvider?.Resolve<IStorageService<Set>>();
+            dialogService = containerProvider?.Resolve<IDialogService>();
+            gridService = containerProvider?.Resolve<IGridService>();
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
