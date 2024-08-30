@@ -89,7 +89,7 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: new string[] { @"..\..\..\Samples" },
+                paths: [@"..\..\..\Samples"],
                 name: default,
                 savePosition: false,
                 isLoop: false);
@@ -146,7 +146,7 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: new string[] { @"..\..\..\Samples" },
+                paths: [@"..\..\..\Samples"],
                 name: default,
                 savePosition: false,
                 isLoop: false);
@@ -173,7 +173,7 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: new string[] { @"..\..\..\Samples" },
+                paths: [@"..\..\..\Samples"],
                 name: default,
                 savePosition: false,
                 isLoop: false);
