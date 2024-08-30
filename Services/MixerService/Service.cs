@@ -23,10 +23,10 @@ namespace SportDJ.Services.MixerService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly Dictionary<ISignalService, FadedControlProvider> fadingProviders = new();
+        private readonly Dictionary<ISignalService, FadedControlProvider> fadingProviders = [];
         private readonly object lockMixer = new();
         private readonly IStorageService<Set> settingsService;
-        private readonly HashSet<ISignalService> signalServices = new();
+        private readonly HashSet<ISignalService> signalServices = [];
 
         private bool isDisposed;
         private ContinuousMixingProvider mixingProvider;
@@ -251,14 +251,16 @@ namespace SportDJ.Services.MixerService
 
             signalServices
                 .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold))
-                .OnEach(s => RemoveSignal(s));
+                .OnEach(RemoveSignal);
         }
 
         private void OnSignalStarted(ISignalService signalService)
         {
             this.signalService = signalService;
 
-            if (fadingProviders.ContainsKey(signalService))
+            if (fadingProviders.TryGetValue(
+                key: signalService,
+                value: out var fadingProvider))
             {
                 var playingServices = signalServices
                     .Where(s => s != signalService
@@ -268,15 +270,15 @@ namespace SportDJ.Services.MixerService
                     .Where(s => s != signalService
                         && s?.State == StateType.Pause).ToArray();
 
-                var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && playingServices.Any()
+                var fadeInMilliseconds = settingsService.Contents.Options.FadeOnMixInMilliseconds > 0 && playingServices.Length != 0
                     ? settingsService.Contents.Options.FadeOnMixInMilliseconds
                     : 0;
 
-                var fadeOutMilliSeconds = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0 && playingServices.Any()
+                var fadeOutMilliSeconds = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0 && playingServices.Length != 0
                     ? settingsService.Contents.Options.FadeOnMixOutMilliseconds
                     : 0;
 
-                fadingProviders[signalService].Fade(
+                fadingProvider.Fade(
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeInMilliseconds);
 
@@ -310,11 +312,13 @@ namespace SportDJ.Services.MixerService
 
         private void RemoveSignal(ISignalService signalService)
         {
-            if (fadingProviders.ContainsKey(signalService))
+            if (fadingProviders.TryGetValue(
+                signalService,
+                out var fadingProvider))
             {
-                fadingProviders[signalService].FadingEndedEvent -= OnFadingEnded;
+                fadingProvider.FadingEndedEvent -= OnFadingEnded;
 
-                mixingProvider.Remove(fadingProviders[signalService]);
+                mixingProvider.Remove(fadingProvider);
                 fadingProviders.Remove(signalService);
             }
             else if (signalService.Output != default)

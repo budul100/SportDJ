@@ -30,7 +30,7 @@ namespace SportDJ.Services.PlayerService
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IStorageService<Set> settingsService;
-        private readonly HashSet<ISignalService> signalServices = new();
+        private readonly HashSet<ISignalService> signalServices = [];
         private readonly IStackService stackService;
         private readonly ITrackService trackService;
 
@@ -124,7 +124,7 @@ namespace SportDJ.Services.PlayerService
 
         public IEnumerable<Entry> Entries => stackService.Entries;
 
-        public bool HasPaths => player?.Paths?.Any() == true;
+        public bool HasPaths => player?.Paths?.Count > 0;
 
         public bool HasPlayeds => stackService.HasPlayeds;
 
@@ -440,7 +440,7 @@ namespace SportDJ.Services.PlayerService
 
         private void UpdatePlayer()
         {
-            eventAggregator.GetEvent<PlayerUpdatedEvent>().Publish(this);
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(this);
         }
 
         private void UpdateSignal()

@@ -120,13 +120,13 @@
                         Stretch="Uniform"
                         StretchDirection="Both">
 
-                        <Border
+                        <Button
                             Padding="{StaticResource KeyPadding}"
                             Background="{StaticResource KeyBackgroundColor}"
                             BorderBrush="{StaticResource KeyBorderColor}"
                             BorderThickness="{StaticResource KeyBorderThickness}"
                             CornerRadius="{StaticResource KeyCornerRadius}"
-                            IsEnabled="{Binding IsAvailableExecute}">
+                            IsEnabled="{Binding IsAvailableHook}">
 
                             <TextBlock
                                 HorizontalAlignment="Center"
@@ -134,7 +134,7 @@
                                 FontSize="{StaticResource FontSizeContent}"
                                 FontWeight="Bold"
                                 Text="{Binding Key}" />
-                        </Border>
+                        </Button>
                     </Viewbox>
                 </Panel>
             </Grid>

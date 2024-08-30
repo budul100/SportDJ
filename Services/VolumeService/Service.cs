@@ -106,7 +106,7 @@ namespace SportDJ.Services.VolumeService
                     .Where(p => !p.IsBaseSession
                         && p.Session.SimpleAudioVolume.Volume != p.VolumeGiven).ToArray();
 
-                if (relevantProcesses.Any())
+                if (relevantProcesses.Length != 0)
                 {
                     volumeTarget = volume
                         ?? Constants.VolumeMax;
@@ -162,7 +162,7 @@ namespace SportDJ.Services.VolumeService
                     .Where(p => !p.IsBaseSession
                         && p.VolumeGiven > volume).ToArray();
 
-                if (relevantProcesses.Any())
+                if (relevantProcesses.Length != 0)
                 {
                     cancellationTokenSource = new CancellationTokenSource();
                     var cancellationToken = cancellationTokenSource.Token;

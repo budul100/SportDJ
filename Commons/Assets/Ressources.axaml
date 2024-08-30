@@ -25,7 +25,7 @@
     <Color x:Key="KeyBorderColor">LightGray</Color>
     <Thickness x:Key="KeyBorderThickness">1</Thickness>
     <CornerRadius x:Key="KeyCornerRadius">0</CornerRadius>
-    <Thickness x:Key="KeyPadding">15,0,15,0</Thickness>
+    <Thickness x:Key="KeyPadding">5,0,5,0</Thickness>
     <Thickness x:Key="KeyMargin">5</Thickness>
 
     <Thickness x:Key="PlayerBorderThickness">2</Thickness>

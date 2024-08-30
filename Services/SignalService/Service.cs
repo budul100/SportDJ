@@ -1,4 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -8,10 +12,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService
 {
@@ -109,10 +109,7 @@ namespace SportDJ.Services.SignalService
 
         public void Initialize(Track track, WaveFormat waveFormat)
         {
-            if (track == default)
-            {
-                throw new ArgumentNullException(nameof(track));
-            }
+            ArgumentNullException.ThrowIfNull(track);
 
             if (File.Exists(track.Path)
                 && State == StateType.None)

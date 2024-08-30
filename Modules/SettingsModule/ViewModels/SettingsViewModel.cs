@@ -1,8 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -15,6 +11,10 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -25,7 +25,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
-        private readonly FilePickerFileType[] fileTypeFilter = new FilePickerFileType[] { new(Constants.SettingsExtension) };
+        private readonly FilePickerFileType[] fileTypeFilter = [new(Constants.SettingsExtension)];
         private readonly IOutputService outputService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
@@ -57,13 +57,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 async () => await SaveSettingsAsync());
 
             UpdateDevicesCommand = new DelegateCommand(
-                executeMethod: () => UpdateDevices());
+                executeMethod: UpdateDevices);
 
             outputService = containerProvider.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
             eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
-                action: () => SetStartLocation(),
+                action: SetStartLocation,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
@@ -77,7 +77,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
-                action: () => UpdateOptions(),
+                action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -211,7 +211,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             {
                 var path = paths
                     .Select(p => p.Path.LocalPath)
-                    .FirstOrDefault(p => File.Exists(p));
+                    .FirstOrDefault(File.Exists);
 
                 if (path != default)
                 {

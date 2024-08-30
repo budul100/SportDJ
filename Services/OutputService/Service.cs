@@ -1,4 +1,9 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -11,11 +16,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
@@ -26,9 +26,9 @@ namespace SportDJ.Services.OutputService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly HashSet<IMixerService> mixersAll = new HashSet<IMixerService>();
-        private readonly HashSet<IMixerService> mixersBackground = new HashSet<IMixerService>();
-        private readonly HashSet<IMixerService> mixersForeground = new HashSet<IMixerService>();
+        private readonly HashSet<IMixerService> mixersAll = [];
+        private readonly HashSet<IMixerService> mixersBackground = [];
+        private readonly HashSet<IMixerService> mixersForeground = [];
         private readonly IStorageService<Set> settingsService;
 
         private CancellationTokenSource cancellationTokenSource;
@@ -99,7 +99,7 @@ namespace SportDJ.Services.OutputService
             {
                 if (value < Constants.VolumeMin || value > Constants.VolumeMax)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(Volume));
                 }
 
                 if (value != outputOptions.Volume)
@@ -283,21 +283,7 @@ namespace SportDJ.Services.OutputService
 
         #region Private Methods
 
-        private void CloseOutput()
-        {
-            if (providerOutput != default)
-            {
-                cancellationTokenSource?.Cancel();
-
-                providerOutput.Stop();
-
-                providerForeground.Dispose();
-                providerBackground.Dispose();
-                providerOutput.Dispose();
-            }
-        }
-
-        private Dictionary<int, WaveOutCapabilities> GetCapabilities()
+        private static Dictionary<int, WaveOutCapabilities> GetCapabilities()
         {
             var result = new Dictionary<int, WaveOutCapabilities>();
 
@@ -316,7 +302,7 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private int GetDeviceNumber(Dictionary<int, WaveOutCapabilities> capabilities, string deviceName,
+        private static int GetDeviceNumber(Dictionary<int, WaveOutCapabilities> capabilities, string deviceName,
             bool takeDefaultIfMissing)
         {
             var result = default(int?);
@@ -347,6 +333,20 @@ namespace SportDJ.Services.OutputService
             }
 
             return result.Value;
+        }
+
+        private void CloseOutput()
+        {
+            if (providerOutput != default)
+            {
+                cancellationTokenSource?.Cancel();
+
+                providerOutput.Stop();
+
+                providerForeground.Dispose();
+                providerBackground.Dispose();
+                providerOutput.Dispose();
+            }
         }
 
         private Output GetOptions(OutputType type)
@@ -384,10 +384,7 @@ namespace SportDJ.Services.OutputService
 
         private void OnMixerEnded(IMixerService mixerService)
         {
-            if (mixersForeground.Contains(mixerService))
-            {
-                mixersForeground.Remove(mixerService);
-            }
+            mixersForeground.Remove(mixerService);
 
             mixersAll.Remove(mixerService);
         }

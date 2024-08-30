@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Player
 {
-    public class PlayerUpdatedEvent
+    public class PlayerUpdateEvent
         : PubSubEvent<IPlayerService>
     { }
 }

@@ -1,4 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -6,14 +9,12 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -22,13 +23,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IHookService hookService;
         private readonly IPlayerService playerService;
 
         private bool isDisposed;
-        private bool isListening;
-        private bool isRenaming;
-        private Action listenChecker;
 
         #endregion Private Fields
 
@@ -44,7 +41,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             : base(containerProvider: containerProvider, element: player)
         {
             playerService = containerProvider?.Resolve<IPlayerService>();
-            hookService = containerProvider?.Resolve<IHookService>();
 
             ExecuteCommand = new DelegateCommand(
                 executeMethod: ExecutePlayer);
@@ -61,7 +57,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Reset(),
                 canExecuteMethod: () => IsAvailableReset);
 
-            eventAggregator?.GetEvent<PlayerUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
@@ -126,6 +122,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsAvailableExecute => playerService?.IsAvailable == true;
 
+        public override bool IsAvailableHook => base.IsAvailableHook
+            && IsAvailableExecute;
+
         public bool IsAvailableReset => playerService?.HasPlayeds == true;
 
         public bool IsAvailableSelection => playerService?.HasUnplayeds == true;
@@ -163,27 +162,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
-
-        public bool IsRenaming
-        {
-            get { return isRenaming; }
-            set
-            {
-                if (IsRenaming != value)
-                {
-                    SetProperty(ref isRenaming, value);
-
-                    if (value)
-                    {
-                        hookService.Deactivate(this);
-                    }
-                    else
-                    {
-                        hookService.Activate(this);
-                    }
-                }
-            }
-        }
 
         public double? Progress => playerService?.Progress;
 
@@ -358,7 +336,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             var renameItem = new MenuViewModel(
                 header: Texts.PlayerRenameHeader,
-                () => RenamePlayer(),
+                executeCallback: RenamePlayer,
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.FormTextbox);
 
@@ -366,11 +344,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             var listenItem = new MenuViewModel(
                 header: Texts.KeyListenHeader,
-                executeCallback: () => ListenHook(),
+                executeCallback: ListenHook,
                 isCheckedGetter: () => isListening,
                 icon: MaterialIconKind.KeyboardOutline);
 
-            listenChecker = () => listenItem.Update();
+            listenChecker = listenItem.Update;
 
             yield return listenItem;
 
@@ -416,29 +394,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     yield return shuffleItem;
                 }
-            }
-        }
-
-        private void ListenHook()
-        {
-            if (!isListening)
-            {
-                isListening = true;
-
-                hookService.Listen(k => ReceiveHook(k));
-            }
-        }
-
-        private void ReceiveHook(string keyCode)
-        {
-            if (isListening)
-            {
-                KeyCode = keyCode;
-                isListening = false;
-
-                listenChecker.Invoke();
-
-                CloseMenu();
             }
         }
 

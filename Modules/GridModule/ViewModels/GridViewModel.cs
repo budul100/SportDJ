@@ -219,11 +219,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             var listenItem = new MenuViewModel(
                 header: Texts.KeyListenHeader,
-                executeCallback: () => ListenHook(),
+                executeCallback: ListenHook,
                 isCheckedGetter: () => isListening,
                 icon: MaterialIconKind.KeyboardOutline);
 
-            listenChecker = () => listenItem.Update();
+            listenChecker = listenItem.Update;
 
             yield return listenItem;
 
@@ -307,7 +307,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             {
                 isListening = true;
 
-                hookService.Listen(k => ReceiveHook(k));
+                hookService.Listen(ReceiveHook);
             }
         }
 
