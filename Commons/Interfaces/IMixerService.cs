@@ -38,7 +38,7 @@ namespace SportDJ.Commons.Interfaces
 
         ISignalService Add(Track track, bool isLoop);
 
-        void Initialize(MixerType type, WaveFormat waveFormat, bool playsMultipleSignals);
+        void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap);
 
         void Pause();
 

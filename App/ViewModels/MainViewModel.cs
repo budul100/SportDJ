@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -18,6 +12,12 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -68,6 +68,12 @@ namespace SportDJ.App.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
+                action: _ => UpdateTitle(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => backgroundMixer == m);
+
+            eventAggregator?.GetEvent<MixerStoppedEvent>().Subscribe(
                 action: _ => UpdateTitle(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
@@ -299,7 +305,7 @@ namespace SportDJ.App.ViewModels
                 mixerService.Initialize(
                     type: mixerType,
                     waveFormat: outputService.Format,
-                    playsMultipleSignals: onForeground);
+                    signalsCanOverlap: onForeground);
 
                 outputService.Add(
                     mixerService: mixerService,
@@ -368,24 +374,27 @@ namespace SportDJ.App.ViewModels
 
             result.Append(assemblyTitle);
 
-            if (!string.IsNullOrWhiteSpace(backgroundMixer?.Track?.Info))
+            if (backgroundMixer?.IsPlaying == true)
             {
-                if (result.Length > 0)
+                if (!string.IsNullOrWhiteSpace(backgroundMixer.Track?.Info))
                 {
-                    result.Append(Constants.SplitterTitle);
+                    if (result.Length > 0)
+                    {
+                        result.Append(Constants.SplitterTitle);
+                    }
+
+                    result.Append(backgroundMixer.Track.Info);
                 }
 
-                result.Append(backgroundMixer.Track.Info);
-            }
-
-            if (backgroundMixer?.Remaining.HasValue == true)
-            {
-                if (result.Length > 0)
+                if (backgroundMixer.Remaining.HasValue)
                 {
-                    result.Append(Constants.SplitterTitle);
-                }
+                    if (result.Length > 0)
+                    {
+                        result.Append(Constants.SplitterTitle);
+                    }
 
-                result.Append(backgroundMixer.Remaining?.ToString(Constants.FormatDuration));
+                    result.Append(backgroundMixer.Remaining.Value.ToString(Constants.FormatDuration));
+                }
             }
 
             Title = result.ToString();

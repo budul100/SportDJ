@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -13,6 +10,9 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Services.MixerService
 {
@@ -31,7 +31,7 @@ namespace SportDJ.Services.MixerService
         private bool isDisposed;
         private ContinuousMixingProvider mixingProvider;
         private FadedControlProvider outputProvider;
-        private bool playsMultipleSignals;
+        private bool signalsCanOverlap;
         private ISignalService signalService;
 
         #endregion Private Fields
@@ -137,7 +137,7 @@ namespace SportDJ.Services.MixerService
 
                         ISampleProvider signalProvider;
 
-                        if (playsMultipleSignals)
+                        if (signalsCanOverlap)
                         {
                             signalProvider = result.Output;
                         }
@@ -170,11 +170,11 @@ namespace SportDJ.Services.MixerService
             GC.SuppressFinalize(this);
         }
 
-        public void Initialize(MixerType type, WaveFormat waveFormat, bool playsMultipleSignals)
+        public void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap)
         {
             Type = type;
 
-            this.playsMultipleSignals = playsMultipleSignals;
+            this.signalsCanOverlap = signalsCanOverlap;
 
             mixingProvider = new ContinuousMixingProvider(waveFormat);
 
@@ -304,7 +304,7 @@ namespace SportDJ.Services.MixerService
 
         private void OnSignalUpdated()
         {
-            if (!playsMultipleSignals)
+            if (!signalsCanOverlap)
             {
                 eventAggregator.GetEvent<MixerUpdatedEvent>().Publish(this);
             }
