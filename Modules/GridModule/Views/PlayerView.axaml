@@ -131,8 +131,7 @@
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeContent}"
-                                FontWeight="Bold"
+                                FontSize="{StaticResource FontSizeContentMain}"
                                 Text="{Binding Key}" />
                         </Button>
                     </Viewbox>
@@ -202,7 +201,7 @@
                             <Viewbox
                                 Grid.Column="0"
                                 HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Center"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
                                 <TextBlock
@@ -215,14 +214,14 @@
                             <Viewbox
                                 Grid.Column="1"
                                 HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Center"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
                                 <ct:EditableText
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
-                                    FontSize="{StaticResource FontSizeContent}"
-                                    FontWeight="Bold"
+                                    FontSize="{StaticResource FontSizeState}"
+                                    FontStyle="Italic"
                                     IsActive="{Binding IsRenaming}"
                                     MaxLength="{Binding MaxLengthName}"
                                     Text="{Binding Name}" />
@@ -231,7 +230,7 @@
                             <Viewbox
                                 Grid.Column="2"
                                 HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Center"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
                                 <TextBlock
@@ -249,7 +248,7 @@
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeContent}"
+                                FontSize="{StaticResource FontSizeContentMain}"
                                 Text="{Binding Content}" />
                         </Viewbox>
 

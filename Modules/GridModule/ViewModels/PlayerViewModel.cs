@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -11,8 +13,6 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -28,12 +28,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #endregion Private Fields
 
         #region Public Constructors
-
-        public PlayerViewModel(Player player, IPlayerService playerService)
-            : base(containerProvider: default, element: player)
-        {
-            this.playerService = playerService;
-        }
 
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(containerProvider: containerProvider, element: player)
@@ -102,9 +96,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public Bitmap Bitmap => playerService?.Track?.Bitmap;
 
-        public string Content => playerService?.Track?.Info;
+        public virtual string Content => playerService?.Track?.Info;
 
-        public string Counter => playerService?.Track != default
+        public virtual string Counter => playerService?.Counter > 0
             ? $"({playerService.Counter})"
             : default;
 
@@ -163,7 +157,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public double? Progress => playerService?.Progress;
 
-        public string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
+        public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
         public DelegateCommand ResetCommand { get; }
 

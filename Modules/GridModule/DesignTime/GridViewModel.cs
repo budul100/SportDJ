@@ -15,6 +15,7 @@
             : base(containerProvider: default, grid: default, parent: default)
         {
             Name = "Group";
+
             Columns = SideCount;
             Rows = SideCount;
 

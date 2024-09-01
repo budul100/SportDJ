@@ -1,6 +1,5 @@
 ﻿using System;
-using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Modules.GridModule.DesignTime
 {
@@ -9,8 +8,13 @@ namespace SportDJ.Modules.GridModule.DesignTime
     {
         #region Private Fields
 
+        private readonly int column;
+        private readonly string content;
+        private readonly string counter;
         private readonly bool isActive;
         private readonly bool isPlaying;
+        private readonly TimeSpan remaining;
+        private readonly int row;
 
         #endregion Private Fields
 
@@ -20,12 +24,19 @@ namespace SportDJ.Modules.GridModule.DesignTime
             : this(name: "Player", row: 0, column: 0)
         { }
 
-        public PlayerViewModel(string name, int row, int column, string title = default, string artist = default,
+        public PlayerViewModel(string name, int row, int column, string title = "Title", string artist = "Artist",
             TimeSpan? remaining = default)
-            : base(player: GetPlayer(row: row, column: column, name: name), playerService: GetPlayerService())
+            : base(containerProvider: default, player: default, parent: default)
         {
+            this.remaining = remaining ?? new TimeSpan(0, 3, 6);
+
             Name = name;
 
+            this.column = column;
+            this.row = row;
+
+            content = $"{title} - {artist}";
+            counter = "(1)";
             isPlaying = name.EndsWith("00");
             isActive = name.EndsWith("11");
         }
@@ -34,44 +45,22 @@ namespace SportDJ.Modules.GridModule.DesignTime
 
         #region Public Properties
 
+        public override int Column => column;
+
+        public override string Content => content;
+
+        public override string Counter => counter;
+
         public override bool IsActive => isActive;
 
         public override bool IsPlaying => isPlaying;
 
+        public override string Name { get; set; }
+
+        public override string Remaining => remaining.ToString(Constants.FormatDuration);
+
+        public override int Row => row;
+
         #endregion Public Properties
-
-        #region Private Methods
-
-        private static Player GetPlayer(int row, int column, string name)
-        {
-            var result = new Player
-            {
-                Column = column,
-                KeyCode = default,
-                Name = name,
-                Row = row,
-            };
-
-            return result;
-        }
-
-        private static PlayerService GetPlayerService()
-        {
-            var track = new Track(
-                path: default,
-                title: "Title",
-                artist: "Artist",
-                info: "Info",
-                duration: new TimeSpan(0, 3, 6));
-
-            var result = new PlayerService
-            {
-                Track = track,
-            };
-
-            return result;
-        }
-
-        #endregion Private Methods
     }
 }

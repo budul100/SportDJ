@@ -105,8 +105,7 @@
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContent}"
-                        FontWeight="Bold"
+                        FontSize="{StaticResource FontSizeContentMain}"
                         Text="{Binding KeyTalkVolume}" />
                 </Border>
             </Grid>
@@ -152,8 +151,7 @@
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContent}"
-                        FontWeight="Bold"
+                        FontSize="{StaticResource FontSizeContentMain}"
                         Text="{Binding KeyPauseOutput}" />
                 </Border>
             </Grid>

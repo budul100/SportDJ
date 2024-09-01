@@ -12,7 +12,7 @@
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
     xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
     d:DesignHeight="300"
-    d:DesignWidth="300"
+    d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="False"
     x:DataType="dt:GroupViewModel"
     mc:Ignorable="d">
@@ -75,7 +75,8 @@
 
                         <ct:EditableText
                             Margin="{StaticResource GroupTabMargin}"
-                            FontSize="{StaticResource FontSizeContent}"
+                            FontSize="{StaticResource FontSizeContentSub}"
+                            FontStyle="Italic"
                             IsActive="{Binding IsRenaming}"
                             MaxLength="{Binding MaxLengthName}"
                             Text="{Binding Name}" />
@@ -100,8 +101,7 @@
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeContent}"
-                                FontWeight="Bold"
+                                FontSize="{StaticResource FontSizeState}"
                                 Text="{Binding Key}" />
                         </Border>
                     </Viewbox>

@@ -11,12 +11,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     d:DesignHeight="50"
-    d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    d:DesignWidth="600"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
@@ -44,7 +42,6 @@
             Focusable="False"
             IsChecked="{Binding ShowFullscreen}">
             <mat:MaterialIcon
-                Grid.Column="0"
                 Width="{StaticResource DisplayIconSize}"
                 Height="{StaticResource DisplayIconSize}"
                 Kind="Fullscreen" />
@@ -84,7 +81,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeDisplay}"
+                    FontSize="{StaticResource FontSizeContentSub}"
                     FontWeight="Bold"
                     Text="{Binding Clock}" />
             </Border>
@@ -130,7 +127,7 @@
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeDisplay}"
+                        FontSize="{StaticResource FontSizeContentSub}"
                         Text="{Binding Content}" />
                 </Grid>
             </Border>
@@ -221,7 +218,7 @@
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeDisplay}"
+                        FontSize="{StaticResource FontSizeContentSub}"
                         Text="{Binding Remaining}" />
                 </Grid>
             </Border>

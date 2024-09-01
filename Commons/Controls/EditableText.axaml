@@ -14,7 +14,6 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             FontSize="{Binding $parent[UserControl].FontSize}"
-            FontWeight="Bold"
             IsVisible="{Binding !$parent[UserControl].IsActive}"
             Text="{Binding $parent[UserControl].Text}" />
 
@@ -26,7 +25,6 @@
             AcceptsTab="False"
             Focusable="True"
             FontSize="{Binding $parent[UserControl].FontSize}"
-            FontWeight="Bold"
             GotFocus="OnGotFocus"
             IsUndoEnabled="True"
             IsVisible="{Binding $parent[UserControl].IsActive}"

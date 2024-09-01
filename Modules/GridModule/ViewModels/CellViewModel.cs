@@ -1,4 +1,7 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -10,9 +13,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -88,7 +88,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public static int MaxLengthName => Constants.NameMaxLength;
 
-        public int Column => cell.Column;
+        public virtual int Column => cell.Column;
 
         public int ColumnSpan { get; protected set; } = 1;
 
@@ -97,7 +97,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public virtual bool IsAvailableHook => hookService?.IsRunning == true;
 
         public bool IsAvailableMenu => outputServiceLive?.IsPlaying == false
-                    || settingsService?.Contents?.Options?.EnableInterruptingDialogs == true;
+            || settingsService?.Contents?.Options?.EnableInterruptingDialogs == true;
 
         public bool IsRenaming
         {
@@ -150,7 +150,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public ObservableCollection<BindableBase> Menus { get; private set; }
 
-        public string Name
+        public virtual string Name
         {
             get { return name ?? nameable?.Name; }
 
@@ -173,7 +173,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public int Row => cell.Row;
+        public virtual int Row => cell.Row;
 
         public int RowSpan { get; protected set; } = 1;
 
