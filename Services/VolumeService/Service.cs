@@ -55,7 +55,7 @@ namespace SportDJ.Services.VolumeService
         {
             audioProcesses = default;
 
-            Task.Run(() => DetermineAudioProcesses());
+            Task.Run(DetermineAudioProcesses);
         }
 
         public void Deactivate()

@@ -12,7 +12,7 @@ namespace SportDJ.Commons.Providers
         #region Private Fields
 
         private readonly object lockProvider = new object();
-        private readonly List<ISampleProvider> sourceProviders = new List<ISampleProvider>();
+        private readonly List<ISampleProvider> sourceProviders = [];
 
         private float[] sourceBuffer;
 

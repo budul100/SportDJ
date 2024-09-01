@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace SportDJ.Commons.Exceptions
 {
@@ -21,13 +20,5 @@ namespace SportDJ.Commons.Exceptions
         { }
 
         #endregion Public Constructors
-
-        #region Protected Constructors
-
-        protected NoDeviceAvailableException(SerializationInfo info, StreamingContext context)
-            : base(info: info, context: context)
-        { }
-
-        #endregion Protected Constructors
     }
 }

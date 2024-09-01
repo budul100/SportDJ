@@ -39,7 +39,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public string Path { get; }
 
-        public List<Register> Registers { get; } = new List<Register>();
+        public List<Register> Registers { get; } = [];
 
         public long Start { get; set; }
 

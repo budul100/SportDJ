@@ -1,4 +1,9 @@
-﻿using ATL.AudioData;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using ATL.AudioData;
 using ATL.Playlist;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -7,11 +12,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService
 {
@@ -27,7 +27,7 @@ namespace SportDJ.Services.TrackService
         private readonly object lockTracks = new();
         private readonly PlaylistIOFactory playlistIOFactory;
         private readonly IStorageService<Set> settingsService;
-        private readonly Dictionary<string, Track> tracks = new();
+        private readonly Dictionary<string, Track> tracks = [];
 
         #endregion Private Fields
 
@@ -41,8 +41,10 @@ namespace SportDJ.Services.TrackService
             playlistIOFactory = PlaylistIOFactory.GetInstance();
             audioDataIOFactory = AudioDataIOFactory.GetInstance();
 
-            formatsAudio = GetFormatsAudio();
-            formatsPlaylist = GetFormatsPlaylist();
+            formatsAudio = audioDataIOFactory.getFormats()
+                .Where(f => f.Readable).ToArray();
+            formatsPlaylist = playlistIOFactory.getFormats()
+                .Where(f => f.Readable).ToArray();
         }
 
         #endregion Public Constructors
@@ -51,10 +53,7 @@ namespace SportDJ.Services.TrackService
 
         public void Begin(Track track)
         {
-            if (track is null)
-            {
-                throw new ArgumentNullException(nameof(track));
-            }
+            ArgumentNullException.ThrowIfNull(track);
 
             var register = new Register
             {
@@ -68,10 +67,7 @@ namespace SportDJ.Services.TrackService
 
         public void End(Track track)
         {
-            if (track is null)
-            {
-                throw new ArgumentNullException(nameof(track));
-            }
+            ArgumentNullException.ThrowIfNull(track);
 
             var register = track.Registers.LastOrDefault();
 
@@ -84,10 +80,7 @@ namespace SportDJ.Services.TrackService
 
         public int GetCount(Track track)
         {
-            if (track is null)
-            {
-                throw new ArgumentNullException(nameof(track));
-            }
+            ArgumentNullException.ThrowIfNull(track);
 
             var result = tracks[track.Path].Registers.Count;
 
@@ -97,16 +90,18 @@ namespace SportDJ.Services.TrackService
         public IEnumerable<Track> GetTracks(IEnumerable<string> paths)
         {
             var files = GetFiles(paths)
-                .Select(p => Path.GetFullPath(p)).ToArray();
+                .Select(Path.GetFullPath).ToArray();
 
-            if (files?.Any() == true)
+            if (files?.Length > 0)
             {
                 foreach (var file in files)
                 {
                     AddTrack(file);
 
-                    var result = tracks.ContainsKey(file)
-                        ? tracks[file]
+                    var result = tracks.TryGetValue(
+                        key: file,
+                        value: out var value)
+                        ? value
                         : default;
 
                     if (result != default)
@@ -208,22 +203,6 @@ namespace SportDJ.Services.TrackService
                     }
                 }
             }
-        }
-
-        private IEnumerable<ATL.Format> GetFormatsAudio()
-        {
-            var result = audioDataIOFactory.getFormats()
-                .Where(f => f.Readable).ToArray();
-
-            return result;
-        }
-
-        private IEnumerable<ATL.Format> GetFormatsPlaylist()
-        {
-            var result = playlistIOFactory.getFormats()
-                .Where(f => f.Readable).ToArray();
-
-            return result;
         }
 
         private void RenderTrack(Track track)

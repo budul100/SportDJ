@@ -84,7 +84,7 @@ namespace SportDJ.Commons.Controls
 
             // Defer the SelectAll() method call using the dispatcher
 
-            Dispatcher.UIThread.Post(() => textBox.SelectAll());
+            Dispatcher.UIThread.Post(textBox.SelectAll);
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)

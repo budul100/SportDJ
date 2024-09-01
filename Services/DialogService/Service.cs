@@ -39,13 +39,13 @@ namespace SportDJ.Services.DialogService
 
                 if (paths?.Any() == true)
                 {
-                    path = paths?.FirstOrDefault(p => Directory.Exists(p));
+                    path = paths?.FirstOrDefault(Directory.Exists);
 
                     if (string.IsNullOrEmpty(path))
                     {
                         path = paths?
-                            .Select(p => Path.GetDirectoryName(p))
-                            .FirstOrDefault(p => Directory.Exists(p));
+                            .Select(Path.GetDirectoryName)
+                            .FirstOrDefault(Directory.Exists);
                     }
                 }
 

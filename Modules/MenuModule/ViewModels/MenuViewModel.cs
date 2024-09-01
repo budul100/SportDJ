@@ -1,7 +1,7 @@
-﻿using Prism.Mvvm;
-using Prism.Navigation.Regions;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
+using Prism.Mvvm;
+using Prism.Navigation.Regions;
 
 namespace SportDJ.Modules.MenuModule.ViewModels
 {

@@ -9,7 +9,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public int Height { get; set; } = Defaults.AppHeightDefault;
 
-        public List<Position> Positions { get; set; } = new List<Position>();
+        public List<Position> Positions { get; set; } = [];
 
         public string SettingsPath { get; set; }
 

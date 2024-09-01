@@ -1,4 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -12,12 +18,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -32,8 +32,8 @@ namespace SportDJ.App.ViewModels
         private readonly IDialogService dialogService;
         private readonly IDispatcherService dispatcherService;
         private readonly IHookService hookService;
-        private readonly HashSet<IOutputService> liveServices = new();
-        private readonly HashSet<IOutputService> outputServices = new();
+        private readonly HashSet<IOutputService> liveServices = [];
+        private readonly HashSet<IOutputService> outputServices = [];
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 

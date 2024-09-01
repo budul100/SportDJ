@@ -69,7 +69,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
                 filter: m => mixerService == m);
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: k => OnKeyPressed(k),
+                action: OnKeyPressed,
                 keepSubscriberReferenceAlive: true);
 
             clockTimer = GetClockTimer();

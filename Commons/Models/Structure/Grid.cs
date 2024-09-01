@@ -9,7 +9,7 @@ namespace SportDJ.Commons.Models.Structure
     {
         #region Public Properties
 
-        public List<Cell> Cells { get; set; } = new List<Cell>();
+        public List<Cell> Cells { get; set; } = [];
 
         [XmlIgnore]
         public int Columns { get; set; }

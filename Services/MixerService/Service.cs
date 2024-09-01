@@ -46,10 +46,10 @@ namespace SportDJ.Services.MixerService
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<SignalStartedEvent>().Subscribe(
-                action: s => OnSignalStarted(s),
+                action: OnSignalStarted,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalServices.Contains(s));
+                filter: signalServices.Contains);
 
             eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
                 action: _ => OnSignalUpdated(),
@@ -64,10 +64,10 @@ namespace SportDJ.Services.MixerService
                 filter: s => s == signalService);
 
             eventAggregator.GetEvent<SignalEndedEvent>().Subscribe(
-                action: s => OnSignalEnded(s),
+                action: OnSignalEnded,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalServices.Contains(s));
+                filter: signalServices.Contains);
         }
 
         #endregion Public Constructors

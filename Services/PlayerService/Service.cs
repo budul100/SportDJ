@@ -1,4 +1,9 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -13,11 +18,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -56,7 +56,7 @@ namespace SportDJ.Services.PlayerService
             this.stackService = stackService;
 
             eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
-                action: () => SetStartLocation(),
+                action: SetStartLocation,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
@@ -66,19 +66,19 @@ namespace SportDJ.Services.PlayerService
                 filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
-                action: s => OnSignalStarted(s),
+                action: OnSignalStarted,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s);
 
             eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
-                action: s => OnSignalStopped(s),
+                action: OnSignalStopped,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => signalServices.Contains(s));
+                filter: signalServices.Contains);
 
             eventAggregator?.GetEvent<SignalEndedEvent>().Subscribe(
-                action: s => OnSignalEnded(s),
+                action: OnSignalEnded,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => s == signalService || signalServices.Contains(s));
@@ -88,8 +88,8 @@ namespace SportDJ.Services.PlayerService
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s
-                && mixerType == MixerType.Background
-                && !IsLoop);
+                    && mixerType == MixerType.Background
+                    && !IsLoop);
 
             eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
                 action: _ => eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this),
@@ -284,7 +284,7 @@ namespace SportDJ.Services.PlayerService
             {
                 player.Paths = paths
                     .Select(p => p.Path.LocalPath)
-                    .Where(p => File.Exists(p)).ToList();
+                    .Where(File.Exists).ToList();
 
                 settingsService.Save();
 
@@ -303,7 +303,7 @@ namespace SportDJ.Services.PlayerService
             {
                 player.Paths = paths
                     .Select(p => p.Path.LocalPath)
-                    .Where(p => Directory.Exists(p)).ToList();
+                    .Where(Directory.Exists).ToList();
 
                 settingsService.Save();
 

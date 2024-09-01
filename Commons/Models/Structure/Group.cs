@@ -7,7 +7,7 @@ namespace SportDJ.Commons.Models.Structure
     {
         #region Public Properties
 
-        public List<Grid> Grids { get; set; } = new List<Grid>();
+        public List<Grid> Grids { get; set; } = [];
 
         #endregion Public Properties
     }

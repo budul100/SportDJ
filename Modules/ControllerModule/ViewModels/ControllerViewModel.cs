@@ -87,11 +87,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 filter: o => outputLiveService == o);
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: k => OnKeyPressed(k),
+                action: OnKeyPressed,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
-                action: k => OnKeyReleased(k),
+                action: OnKeyReleased,
                 keepSubscriberReferenceAlive: true);
         }
 

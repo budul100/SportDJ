@@ -98,7 +98,7 @@ namespace SportDJ.Services.StorageService
         {
             SetPath(filePath);
 
-            Task.Run(() => SaveSettingsAsync());
+            Task.Run(SaveSettingsAsync);
         }
 
         #endregion Public Methods

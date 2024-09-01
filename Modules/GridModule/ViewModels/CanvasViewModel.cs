@@ -38,7 +38,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<GridViewModel> Grids { get; } = new ObservableCollection<GridViewModel>();
+        public ObservableCollection<GridViewModel> Grids { get; } = [];
 
         #endregion Public Properties
 

@@ -85,7 +85,7 @@ namespace SportDJ.Services.StackService
 
         public void Next()
         {
-            if (Entries?.Any() == true)
+            if (Entries?.Count > 0)
             {
                 var index = Index;
 
@@ -134,7 +134,7 @@ namespace SportDJ.Services.StackService
 
         public void Previous()
         {
-            if (Entries?.Any() == true)
+            if (Entries?.Count > 0)
             {
                 var index = Index;
 
@@ -163,7 +163,7 @@ namespace SportDJ.Services.StackService
 
         public void Reset()
         {
-            if (Entries?.Any() == true)
+            if (Entries?.Count > 0)
             {
                 foreach (var entry in Entries)
                 {
@@ -178,7 +178,7 @@ namespace SportDJ.Services.StackService
 
         public void Shuffle()
         {
-            if (Entries?.Any() == true)
+            if (Entries?.Count > 0)
             {
                 var count = Entries.Count;
 
@@ -207,7 +207,7 @@ namespace SportDJ.Services.StackService
                 {
                     var result = new Entry(
                         track: track,
-                        selector: e => SelectEntry(e));
+                        selector: SelectEntry);
 
                     yield return result;
                 }

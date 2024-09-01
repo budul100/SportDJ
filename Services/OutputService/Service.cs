@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -16,6 +11,11 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
@@ -24,6 +24,7 @@ namespace SportDJ.Services.OutputService
     {
         #region Private Fields
 
+        private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
         private readonly HashSet<IMixerService> mixersAll = [];
@@ -31,7 +32,6 @@ namespace SportDJ.Services.OutputService
         private readonly HashSet<IMixerService> mixersForeground = [];
         private readonly IStorageService<Set> settingsService;
 
-        private CancellationTokenSource cancellationTokenSource;
         private bool isDisposed;
         private bool isLowered;
         private Output outputOptions;
@@ -53,26 +53,26 @@ namespace SportDJ.Services.OutputService
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: () => InitializeOutput(),
+                action: InitializeOutput,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
-                action: p => OnMixerStarted(p),
+                action: OnMixerStarted,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixersAll.Contains(p));
+                filter: mixersAll.Contains);
 
             eventAggregator.GetEvent<MixerStoppedEvent>().Subscribe(
-                action: p => OnMixerStopped(p),
+                action: OnMixerStopped,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixersAll.Contains(p));
+                filter: mixersAll.Contains);
 
             eventAggregator.GetEvent<MixerEndedEvent>().Subscribe(
-                action: p => OnMixerEnded(p),
+                action: OnMixerEnded,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => mixersAll.Contains(p));
+                filter: mixersAll.Contains);
         }
 
         #endregion Public Constructors
@@ -242,10 +242,8 @@ namespace SportDJ.Services.OutputService
                     UpdateForeground();
                     UpdateOutput(deviceNumber.Value);
 
-                    cancellationTokenSource = new CancellationTokenSource();
-
                     Task.Run(
-                        action: () => providerOutput.Play(),
+                        action: providerOutput.Play,
                         cancellationToken: cancellationTokenSource.Token);
 
                     volumeService.Set(

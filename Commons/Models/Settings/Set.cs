@@ -11,7 +11,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public Options Options { get; set; } = new Options();
 
-        public List<Output> Outputs { get; set; } = new List<Output>();
+        public List<Output> Outputs { get; set; } = [];
 
         #endregion Public Properties
     }

@@ -3,7 +3,6 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 using System;
 using System.Collections.Generic;
@@ -18,15 +17,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly Grid grid;
-        private readonly IHookService hookService;
         private readonly GroupViewModel parent;
 
         private int columns;
         private bool isDisposed;
-        private bool isListening;
-        private bool isRenaming;
         private bool isSelected;
-        private Action listenChecker;
         private int rows;
 
         #endregion Private Fields
@@ -38,8 +33,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.grid = grid;
             this.parent = parent;
-
-            hookService = containerProvider?.Resolve<IHookService>();
 
             Initialize(
                 containerProvider: containerProvider,
@@ -56,27 +49,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             get { return columns; }
             set { SetProperty(ref columns, value); }
-        }
-
-        public bool IsRenaming
-        {
-            get { return isRenaming; }
-            set
-            {
-                if (IsRenaming != value)
-                {
-                    SetProperty(ref isRenaming, value);
-
-                    if (value)
-                    {
-                        hookService.Deactivate(this);
-                    }
-                    else
-                    {
-                        hookService.Activate(this);
-                    }
-                }
-            }
         }
 
         public bool IsSelected
@@ -298,29 +270,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 Columns = columnsCount;
 
                 base.Initialize();
-            }
-        }
-
-        private void ListenHook()
-        {
-            if (!isListening)
-            {
-                isListening = true;
-
-                hookService.Listen(ReceiveHook);
-            }
-        }
-
-        private void ReceiveHook(string keyCode)
-        {
-            if (isListening)
-            {
-                KeyCode = keyCode;
-                isListening = false;
-
-                listenChecker.Invoke();
-
-                CloseMenu();
             }
         }
 
