@@ -1,7 +1,7 @@
-﻿using SportDJ.Commons.Enums;
-using SportDJ.Commons.Models.Structure;
-using System;
+﻿using System;
 using System.Linq;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Services.GridService.Extensions
 {
@@ -32,7 +32,7 @@ namespace SportDJ.Services.GridService.Extensions
                     paramName: nameof(orientation));
             }
 
-            var result = GetTab(group);
+            var result = GetGrid(group);
 
             var index = (anchor?.Group.Grids.IndexOf(anchor)) ?? 0;
 
@@ -58,7 +58,7 @@ namespace SportDJ.Services.GridService.Extensions
 
         public static void Initialize(this Grid grid)
         {
-            if (grid?.Cells?.Any() == true)
+            if (grid?.Cells?.Count > 0)
             {
                 foreach (var cell in grid.Cells)
                 {
@@ -181,7 +181,7 @@ namespace SportDJ.Services.GridService.Extensions
         {
             if (grid != default)
             {
-                if (grid.Cells?.Any() != true)
+                if ((grid.Cells?.Count ?? 0) == 0)
                 {
                     grid.GetPlayer();
                 }
@@ -192,9 +192,9 @@ namespace SportDJ.Services.GridService.Extensions
 
                     foreach (var group in groups)
                     {
-                        if (group.Grids?.Any() != true)
+                        if ((group.Grids?.Count ?? 0) == 0)
                         {
-                            group.GetTab();
+                            group.GetGrid();
                         }
                         else
                         {
@@ -256,6 +256,10 @@ namespace SportDJ.Services.GridService.Extensions
                     }
                 }
 
+                grid.Cells = [.. grid.Cells
+                    .OrderBy(c => c.Row)
+                    .ThenBy(c => c.Column)];
+
                 grid.Columns = grid.Cells.Max(c => c.Column + c.Columns);
                 grid.Rows = grid.Cells.Max(c => c.Row + c.Rows);
             }
@@ -282,7 +286,7 @@ namespace SportDJ.Services.GridService.Extensions
 
         public static void ToPlayer(this Group group)
         {
-            if (group?.Grids.Any() == true)
+            if (group?.Grids.Count > 0)
             {
                 var cells = group.Grids
                     .SelectMany(g => g.Cells)
@@ -303,6 +307,36 @@ namespace SportDJ.Services.GridService.Extensions
         #endregion Public Methods
 
         #region Private Methods
+
+        private static Grid GetGrid(this Group group)
+        {
+            var name = group.GetGridName();
+
+            var result = new Grid
+            {
+                Name = name,
+                Group = group,
+            };
+
+            return result;
+        }
+
+        private static string GetGridName(this Group group)
+        {
+            var result = default(string);
+
+            var relevants = group.Grids
+                .Select(p => p.Name).ToArray();
+
+            var number = 0;
+
+            do
+            {
+                result = $"Tab {++number}";
+            } while (relevants.Contains(result));
+
+            return result;
+        }
 
         private static Player GetPlayer(this Grid grid)
         {
@@ -331,36 +365,6 @@ namespace SportDJ.Services.GridService.Extensions
             do
             {
                 result = $"Player {++number}";
-            } while (relevants.Contains(result));
-
-            return result;
-        }
-
-        private static Grid GetTab(this Group group)
-        {
-            var name = group.GetTabName();
-
-            var result = new Grid
-            {
-                Name = name,
-                Group = group,
-            };
-
-            return result;
-        }
-
-        private static string GetTabName(this Group group)
-        {
-            var result = default(string);
-
-            var relevants = group.Grids
-                .Select(p => p.Name).ToArray();
-
-            var number = 0;
-
-            do
-            {
-                result = $"Tab {++number}";
             } while (relevants.Contains(result));
 
             return result;
