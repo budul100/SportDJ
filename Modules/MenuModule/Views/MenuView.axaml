@@ -22,9 +22,6 @@
             <DataTemplate x:DataType="vm:SeparatorViewModel">
                 <Separator />
             </DataTemplate>
-
         </ContextMenu.DataTemplates>
-
     </ContextMenu>
-
 </UserControl>

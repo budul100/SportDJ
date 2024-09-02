@@ -18,10 +18,7 @@ namespace SportDJ.Modules.ControllerModule
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterForNavigation<Views.ControllerView>(
-                name: typeof(Views.ControllerView).FullName);
-        }
+        { }
 
         #endregion Public Methods
     }

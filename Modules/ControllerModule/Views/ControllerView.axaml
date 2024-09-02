@@ -5,6 +5,7 @@
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
+    xmlns:en="using:SportDJ.Commons.Enums"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -74,6 +75,10 @@
             VerticalAlignment="Stretch"
             Focusable="False"
             IsEnabled="{Binding IsActive}">
+
+            <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
+            </prism:RegionManager.RegionName>
 
             <Grid
                 HorizontalAlignment="Stretch"

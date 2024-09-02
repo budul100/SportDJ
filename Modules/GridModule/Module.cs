@@ -18,10 +18,7 @@ namespace SportDJ.Modules.GridModule
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterForNavigation<Views.CanvasView>(
-                name: typeof(Views.CanvasView).FullName);
-        }
+        { }
 
         #endregion Public Methods
     }
