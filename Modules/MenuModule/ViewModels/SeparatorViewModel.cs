@@ -3,6 +3,5 @@
 namespace SportDJ.Modules.MenuModule.ViewModels
 {
     public class SeparatorViewModel
-        : BindableBase
-    { }
+        : BindableBase;
 }
