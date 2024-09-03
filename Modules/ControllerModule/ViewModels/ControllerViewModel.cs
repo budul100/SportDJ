@@ -24,6 +24,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Private Fields
 
         private readonly IHookService hookService;
+        private readonly IRegionNavigationService navigationService;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
 
@@ -37,9 +38,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IHookService hookService, IStorageService<Set> settingsService)
+            IEventAggregator eventAggregator, IRegionNavigationService navigationService, IHookService hookService,
+            IStorageService<Set> settingsService)
             : base(regionManager)
         {
+            this.navigationService = navigationService;
             this.hookService = hookService;
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
@@ -69,19 +72,19 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
-                action: _ => UpdateContent(),
+                action: _ => UpdateControls(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: v => volumeService == v);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
-                action: _ => UpdateContent(),
+                action: _ => UpdateControls(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
-                action: _ => UpdateContent(),
+                action: _ => UpdateControls(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
@@ -93,6 +96,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
                 action: OnKeyReleased,
                 keepSubscriberReferenceAlive: true);
+
+            InitializeMenus();
         }
 
         #endregion Public Constructors
@@ -111,6 +116,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
 
+        public bool IsVolumeMonitoringAvailable => volumeService?.IsInitialized == true;
+
         public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
 
         public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
@@ -127,21 +134,24 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool VolumeMonitoringActive
         {
-            get { return volumeService.IsActive; }
+            get { return volumeService?.IsActive == true; }
             set
             {
-                if (value)
+                if (volumeService != default)
                 {
-                    volumeService.Activate();
-                }
-                else
-                {
-                    volumeService.Deactivate();
+                    if (value)
+                    {
+                        volumeService.Activate();
+                    }
+                    else
+                    {
+                        volumeService.Deactivate();
+                    }
+
+                    SetProperty(ref volumeMonitoringActive, value);
                 }
 
-                SetProperty(ref volumeMonitoringActive, value);
-
-                UpdateContent();
+                UpdateControls();
             }
         }
 
@@ -162,9 +172,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 { "icon", MaterialIconKind.KeyboardOutline }
             };
 
-            //navigationService.RequestNavigate(
-            //    target: nameof(RegionType.MenuRegion),
-            //    navigationParameters: navigationParameters);
+            navigationService?.RequestNavigate(
+                target: nameof(RegionType.MenuRegion),
+                navigationParameters: navigationParameters);
         }
 
         private void ListenHook()
@@ -234,8 +244,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         //    }
         //}
 
-        private void UpdateContent()
+        private void UpdateControls()
         {
+            RaisePropertyChanged(nameof(IsVolumeMonitoringAvailable));
             RaisePropertyChanged(nameof(VolumeMonitoringActive));
             RaisePropertyChanged(nameof(IsActive));
 

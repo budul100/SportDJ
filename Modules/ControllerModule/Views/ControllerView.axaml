@@ -59,7 +59,8 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Focusable="False"
-            IsChecked="{Binding VolumeMonitoringActive}">
+            IsChecked="{Binding VolumeMonitoringActive}"
+            IsEnabled="{Binding IsVolumeMonitoringAvailable}">
             <mat:MaterialIcon
                 Width="{StaticResource LargeIconSize}"
                 Height="{StaticResource LargeIconSize}"
@@ -76,9 +77,9 @@
             Focusable="False"
             IsEnabled="{Binding IsActive}">
 
-            <prism:RegionManager.RegionName>
+            <!--<prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
-            </prism:RegionManager.RegionName>
+            </prism:RegionManager.RegionName>-->
 
             <Grid
                 HorizontalAlignment="Stretch"

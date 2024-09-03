@@ -1,5 +1,5 @@
-﻿using SportDJ.Commons.Enums;
-using System;
+﻿using System;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -10,6 +10,8 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsActive { get; }
 
+        bool IsInitialized { get; }
+
         VolumeType VolumeType { get; }
 
         #endregion Public Properties
@@ -19,6 +21,8 @@ namespace SportDJ.Commons.Interfaces
         void Activate();
 
         void Deactivate();
+
+        void Initialize();
 
         void Mute(int? milliSeconds = default);
 

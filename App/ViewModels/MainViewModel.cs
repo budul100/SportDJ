@@ -310,6 +310,11 @@ namespace SportDJ.App.ViewModels
                 outputService.Add(
                     mixerService: mixerService,
                     onForeground: onForeground);
+
+                var volumeService = containerProvider?.Resolve<IVolumeService>(
+                    name: outputType.ToString());
+
+                volumeService?.Initialize();
             }
         }
 

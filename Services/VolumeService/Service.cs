@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -11,19 +6,23 @@ using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Services.VolumeService.Extensions;
 using SportDJ.Services.VolumeService.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.VolumeService
 {
-    public class Service
+    public class Service(IEventAggregator eventAggregator)
         : IVolumeService
     {
         #region Private Fields
 
-        private readonly int baseProcessId;
-        private readonly IEventAggregator eventAggregator;
+        private readonly int baseProcessId = Environment.ProcessId;
+
         private IEnumerable<AudioProcess> audioProcesses;
         private CancellationTokenSource cancellationTokenSource;
-
         private string deviceName;
         private bool isDisposed;
         private bool isToMute;
@@ -31,19 +30,11 @@ namespace SportDJ.Services.VolumeService
 
         #endregion Private Fields
 
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator)
-        {
-            this.eventAggregator = eventAggregator;
-            baseProcessId = Environment.ProcessId;
-        }
-
-        #endregion Public Constructors
-
         #region Public Properties
 
         public bool IsActive { get; private set; }
+
+        public bool IsInitialized { get; private set; }
 
         public VolumeType VolumeType { get; private set; }
 
@@ -55,7 +46,8 @@ namespace SportDJ.Services.VolumeService
         {
             audioProcesses = default;
 
-            Task.Run(DetermineAudioProcesses);
+            Task.Run(() => DetermineAudioProcesses(
+                isInitialization: false));
         }
 
         public void Deactivate()
@@ -70,6 +62,12 @@ namespace SportDJ.Services.VolumeService
 
             GC.SuppressFinalize(
                 obj: this);
+        }
+
+        public void Initialize()
+        {
+            Task.Run(() => DetermineAudioProcesses(
+                isInitialization: true));
         }
 
         public void Mute(int? milliSeconds = default)
@@ -102,11 +100,10 @@ namespace SportDJ.Services.VolumeService
                     cancellationTokenSource?.Cancel();
                 }
 
-                var relevantProcesses = audioProcesses
-                    .Where(p => !p.IsBaseSession
-                        && p.Session.SimpleAudioVolume.Volume != p.VolumeGiven).ToArray();
+                var relevantProcesses = audioProcesses?
+                    .Where(p => p.Session.SimpleAudioVolume.Volume != p.VolumeGiven).ToArray();
 
-                if (relevantProcesses.Length != 0)
+                if (relevantProcesses?.Length > 0)
                 {
                     volumeTarget = volume
                         ?? Constants.VolumeMax;
@@ -158,11 +155,10 @@ namespace SportDJ.Services.VolumeService
                     ? Constants.FadeStepInMilliSec / (float)milliSeconds
                     : 1F;
 
-                var relevantProcesses = audioProcesses
-                    .Where(p => !p.IsBaseSession
-                        && p.VolumeGiven > volume).ToArray();
+                var relevantProcesses = audioProcesses?
+                    .Where(p => p.VolumeGiven > volume).ToArray();
 
-                if (relevantProcesses.Length != 0)
+                if (relevantProcesses?.Length > 0)
                 {
                     cancellationTokenSource = new CancellationTokenSource();
                     var cancellationToken = cancellationTokenSource.Token;
@@ -203,11 +199,19 @@ namespace SportDJ.Services.VolumeService
 
         #region Private Methods
 
-        private void DetermineAudioProcesses()
+        private void DetermineAudioProcesses(bool isInitialization)
         {
-            audioProcesses = GetAudioProcesses().ToArray();
+            if (isInitialization)
+            {
+                IsInitialized = true;
+            }
+            else
+            {
+                audioProcesses = GetAudioProcesses()?
+                    .Where(p => !p.IsBaseSession).ToArray();
 
-            IsActive = audioProcesses?.Any(p => !p.IsBaseSession) == true;
+                IsActive = audioProcesses?.Count() > 0;
+            }
 
             eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
@@ -229,12 +233,8 @@ namespace SportDJ.Services.VolumeService
 
                     foreach (var session in sessions)
                     {
-                        var sessionFound = false;
-
                         for (var index = Constants.IndexAudioSessionMin; index < session.Count; index++)
                         {
-                            sessionFound = true;
-
                             var current = session[index];
 
                             if (current.GetProcessID.ProcessExists())
@@ -247,11 +247,6 @@ namespace SportDJ.Services.VolumeService
                                 yield return result;
                             }
                         }
-
-                        if (sessionFound)
-                        {
-                            yield break;
-                        }
                     }
                 }
             }
@@ -260,29 +255,32 @@ namespace SportDJ.Services.VolumeService
         private void RaiseVolume(IEnumerable<AudioProcess> processes, float fadeStep,
             CancellationToken? cancellationToken = default)
         {
-            var volumeCurrent = processes.Min(v => v.VolumeLower);
-
-            while (volumeCurrent < volumeTarget
-                && cancellationToken?.IsCancellationRequested != true)
+            if (processes?.Count() > 0)
             {
-                volumeCurrent += fadeStep;
+                var volumeCurrent = processes.Min(v => v.VolumeLower);
 
-                if (volumeCurrent > volumeTarget)
+                while (volumeCurrent < volumeTarget
+                    && cancellationToken?.IsCancellationRequested != true)
                 {
-                    volumeCurrent = volumeTarget;
+                    volumeCurrent += fadeStep;
+
+                    if (volumeCurrent > volumeTarget)
+                    {
+                        volumeCurrent = volumeTarget;
+                    }
+
+                    foreach (var process in processes)
+                    {
+                        process.Session.SimpleAudioVolume.Volume = volumeCurrent > process.VolumeGiven
+                            ? process.VolumeGiven
+                            : volumeCurrent;
+
+                        process.VolumeLower = volumeCurrent;
+                    }
+
+                    cancellationToken?.WaitHandle.WaitOne(
+                        millisecondsTimeout: Constants.FadeStepInMilliSec);
                 }
-
-                foreach (var process in processes)
-                {
-                    process.Session.SimpleAudioVolume.Volume = volumeCurrent > process.VolumeGiven
-                        ? process.VolumeGiven
-                        : volumeCurrent;
-
-                    process.VolumeLower = volumeCurrent;
-                }
-
-                cancellationToken?.WaitHandle.WaitOne(
-                    millisecondsTimeout: Constants.FadeStepInMilliSec);
             }
 
             VolumeType = volumeTarget < Constants.VolumeMax
@@ -293,30 +291,33 @@ namespace SportDJ.Services.VolumeService
         private void ReduceVolume(IEnumerable<AudioProcess> processes, float fadeStep,
             CancellationToken cancellationToken)
         {
-            var volumeCurrent = processes.Max(v => v.VolumeGiven);
-
-            while (volumeCurrent > volumeTarget
-                && !cancellationToken.IsCancellationRequested)
+            if (processes?.Count() > 0)
             {
-                volumeCurrent -= fadeStep;
+                var volumeCurrent = processes.Max(v => v.VolumeGiven);
 
-                if (volumeCurrent < volumeTarget)
+                while (volumeCurrent > volumeTarget
+                    && !cancellationToken.IsCancellationRequested)
                 {
-                    volumeCurrent = volumeTarget;
+                    volumeCurrent -= fadeStep;
+
+                    if (volumeCurrent < volumeTarget)
+                    {
+                        volumeCurrent = volumeTarget;
+                    }
+
+                    var relevantProcesses = processes
+                        .Where(p => p.VolumeGiven > volumeCurrent).ToArray();
+
+                    foreach (var relevantProcess in relevantProcesses)
+                    {
+                        relevantProcess.Session.SimpleAudioVolume.Volume = volumeCurrent;
+
+                        relevantProcess.VolumeLower = volumeCurrent;
+                    }
+
+                    cancellationToken.WaitHandle.WaitOne(
+                        millisecondsTimeout: Constants.FadeStepInMilliSec);
                 }
-
-                var relevantProcesses = processes
-                    .Where(p => p.VolumeGiven > volumeCurrent).ToArray();
-
-                foreach (var relevantProcess in relevantProcesses)
-                {
-                    relevantProcess.Session.SimpleAudioVolume.Volume = volumeCurrent;
-
-                    relevantProcess.VolumeLower = volumeCurrent;
-                }
-
-                cancellationToken.WaitHandle.WaitOne(
-                    millisecondsTimeout: Constants.FadeStepInMilliSec);
             }
 
             VolumeType = isToMute
@@ -333,11 +334,8 @@ namespace SportDJ.Services.VolumeService
 
                 VolumeType = VolumeType.Raise;
 
-                var relevantProcesses = audioProcesses
-                    .Where(p => !p.IsBaseSession).ToArray();
-
                 RaiseVolume(
-                    processes: relevantProcesses,
+                    processes: audioProcesses,
                     fadeStep: 1F);
 
                 IsActive = false;
