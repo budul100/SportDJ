@@ -1,4 +1,9 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -13,11 +18,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -284,7 +284,8 @@ namespace SportDJ.Services.PlayerService
             {
                 player.Paths = paths
                     .Select(p => p.Path.LocalPath)
-                    .Where(File.Exists).ToList();
+                    .Where(File.Exists)
+                    .Select(settingsService.GetPathRelative).ToList();
 
                 settingsService.Save();
 
@@ -303,7 +304,8 @@ namespace SportDJ.Services.PlayerService
             {
                 player.Paths = paths
                     .Select(p => p.Path.LocalPath)
-                    .Where(Directory.Exists).ToList();
+                    .Where(Directory.Exists)
+                    .Select(settingsService.GetPathRelative).ToList();
 
                 settingsService.Save();
 
@@ -355,8 +357,11 @@ namespace SportDJ.Services.PlayerService
 
             SetStartLocation();
 
+            var paths = player.Paths
+                .Select(settingsService.GetPathFull).ToArray();
+
             Task.Run(() => stackService.Initialize(
-                paths: player.Paths,
+                paths: paths,
                 name: player.Name,
                 savePosition: SavePosition,
                 isLoop: IsLoop));
@@ -413,7 +418,10 @@ namespace SportDJ.Services.PlayerService
 
         private void SetStartLocation()
         {
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(player.Paths));
+            var paths = player.Paths
+                .Select(settingsService.GetPathFull).ToArray();
+
+            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(paths));
         }
 
         private void UpdateDuration()

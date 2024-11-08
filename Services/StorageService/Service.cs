@@ -1,16 +1,16 @@
-﻿using Prism.Events;
-using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Interfaces;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Prism.Events;
+using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.StorageService
 {
-    public class Service<T>
+    public class Service<T>(IEventAggregator eventAggregator)
         : IStorageService<T>
         where T : class
     {
@@ -27,7 +27,6 @@ namespace SportDJ.Services.StorageService
             OmitXmlDeclaration = true,
         };
 
-        private readonly IEventAggregator eventAggregator;
         private readonly object saveLock = new();
         private readonly XmlSerializer serializer = new(typeof(T));
 
@@ -38,15 +37,6 @@ namespace SportDJ.Services.StorageService
         private bool isDisposed;
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator)
-        {
-            this.eventAggregator = eventAggregator;
-        }
-
-        #endregion Public Constructors
 
         #region Public Properties
 
@@ -78,6 +68,37 @@ namespace SportDJ.Services.StorageService
                 path3: fileName);
 
             return result;
+        }
+
+        public string GetPathFull(string path)
+        {
+            if (!string.IsNullOrWhiteSpace(Path)
+                && Directory.Exists(System.IO.Path.GetDirectoryName(Path))
+                && !(Directory.Exists(path) || File.Exists(path)))
+            {
+                return System.IO.Path.Combine(
+                    path1: System.IO.Path.GetDirectoryName(Path),
+                    path2: path);
+            }
+            else
+            {
+                return path;
+            }
+        }
+
+        public string GetPathRelative(string path)
+        {
+            if (!string.IsNullOrWhiteSpace(Path)
+                && Directory.Exists(System.IO.Path.GetDirectoryName(Path)))
+            {
+                return System.IO.Path.GetRelativePath(
+                    relativeTo: System.IO.Path.GetDirectoryName(Path),
+                    path: path);
+            }
+            else
+            {
+                return path;
+            }
         }
 
         public void Load(string filePath)

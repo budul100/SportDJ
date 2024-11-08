@@ -19,6 +19,10 @@ namespace SportDJ.Commons.Interfaces
         string GetPath(string appName, string fileName,
             Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData);
 
+        string GetPathFull(string path);
+
+        string GetPathRelative(string path);
+
         void Load(string filePath);
 
         void Save(string filePath = default);
