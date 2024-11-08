@@ -14,11 +14,13 @@ namespace SportDJ.Commons.Extensions
             if (action != default
                 && instances?.Any() == true)
             {
-                foreach (var instance in instances)
+                var relevants = instances.ToArray();
+
+                for (var index = 0; index < relevants.Length; index++)
                 {
-                    if (instance != default)
+                    if (relevants[index] != default)
                     {
-                        action?.Invoke(instance);
+                        action.Invoke(relevants[index]);
                     }
                 }
             }
