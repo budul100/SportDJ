@@ -331,7 +331,7 @@
 	</Grid>
 	<Options>
 		<EnableInterruptingDialogs>false</EnableInterruptingDialogs>
-		<EnableKeyHook>false</EnableKeyHook>
+		<EnableKeyHook>true</EnableKeyHook>
 		<FadeOnLowerMilliseconds>200</FadeOnLowerMilliseconds>
 		<FadeOnMixInMilliseconds>100</FadeOnMixInMilliseconds>
 		<FadeOnMixOutMilliseconds>500</FadeOnMixOutMilliseconds>
@@ -346,11 +346,11 @@
 	</Options>
 	<Outputs>
 		<Output Type="Live">
-			<DeviceName>Lautsprecher (Realtek(R) Audio)</DeviceName>
+			<DeviceName>Kopfhörer (Jabra Evolve2 65 Ste</DeviceName>
 			<SampleRate>44100</SampleRate>
 			<Volume>1</Volume>
 			<VolumePercentageApps>19</VolumePercentageApps>
-			<VolumePercentageBackground>19</VolumePercentageBackground>
+			<VolumePercentageBackground>82</VolumePercentageBackground>
 		</Output>
 		<Output Type="PFL">
 			<SampleRate>0</SampleRate>

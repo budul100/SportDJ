@@ -49,7 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService", "Services\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GridService", "Services\GridService\GridService.csproj", "{1612E9DD-ADD2-4AD4-AE54-A46A6A534954}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MenuModule", "Modules\MenuModule\MenuModule.csproj", "{5BA67167-60CE-4501-985C-32552247A268}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuModule", "Modules\MenuModule\MenuModule.csproj", "{5BA67167-60CE-4501-985C-32552247A268}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridServiceTests", "Tests\GridServiceTests\GridServiceTests.csproj", "{77040353-2F79-49CF-B0FC-3BCE12C4504D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,6 +143,10 @@ Global
 		{5BA67167-60CE-4501-985C-32552247A268}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BA67167-60CE-4501-985C-32552247A268}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BA67167-60CE-4501-985C-32552247A268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77040353-2F79-49CF-B0FC-3BCE12C4504D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77040353-2F79-49CF-B0FC-3BCE12C4504D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77040353-2F79-49CF-B0FC-3BCE12C4504D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77040353-2F79-49CF-B0FC-3BCE12C4504D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +171,7 @@ Global
 		{087DACE7-62EE-463E-8809-445076522EE6} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{1612E9DD-ADD2-4AD4-AE54-A46A6A534954} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{5BA67167-60CE-4501-985C-32552247A268} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
+		{77040353-2F79-49CF-B0FC-3BCE12C4504D} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

@@ -1,10 +1,8 @@
-﻿using System.Linq;
-using Moq;
+﻿using Moq;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using Xunit;
@@ -68,7 +66,7 @@ namespace SportDJ.Tests.OutputServiceTests
 
             var devices = service.GetDevices();
 
-            Assert.True(devices.Any());
+            Assert.True(devices.Count != 0);
         }
 
         #endregion Public Methods
