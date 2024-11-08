@@ -1,4 +1,8 @@
-﻿using Avalonia.Platform.Storage;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,10 +15,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
@@ -66,6 +66,18 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 action: SetStartLocation,
                 keepSubscriberReferenceAlive: true);
 
+            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+                action: _ => DevicesNotAvailable = true,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => o == outputService);
+
+            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+                action: _ => DevicesNotAvailable = false,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => o == outputService);
+
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateDevices(),
                 threadOption: ThreadOption.PublisherThread,
@@ -90,7 +102,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             get { return device; }
             set
             {
-                if (value != device)
+                if (value != device
+                    && !DevicesNotAvailable)
                 {
                     SetProperty(ref device, value);
 

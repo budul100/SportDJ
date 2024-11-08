@@ -43,7 +43,7 @@
             <Button
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+                VerticalAlignment="Bottom"
                 Command="{Binding UpdateDevicesCommand}"
                 DockPanel.Dock="Right"
                 Focusable="False">
