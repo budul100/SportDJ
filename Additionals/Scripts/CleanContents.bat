@@ -1,5 +1,13 @@
 @ECHO off
 
+SET APPDATAFOLDER=%LOCALAPPDATA%\SportDJ
+
+ECHO.
+ECHO Clean app data folder %APPDATAFOLDER%
+ECHO.
+
+del /q "%APPDATAFOLDER%\*.*"
+
 pushd %~dp0..\..
 
 ECHO.
