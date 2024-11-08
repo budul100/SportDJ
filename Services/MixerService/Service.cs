@@ -1,4 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -10,9 +13,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Services.MixerService
 {
@@ -188,6 +188,11 @@ namespace SportDJ.Services.MixerService
             signalServices.OnEach(s => s?.Pause());
         }
 
+        public void Stop()
+        {
+            signalServices.OnEach(s => s?.Stop());
+        }
+
         #endregion Public Methods
 
         #region Protected Methods
@@ -198,7 +203,7 @@ namespace SportDJ.Services.MixerService
             {
                 if (isDisposing)
                 {
-                    Pause();
+                    Stop();
 
                     eventAggregator.GetEvent<MixerEndedEvent>().Publish(this);
 
@@ -247,11 +252,16 @@ namespace SportDJ.Services.MixerService
                 this.signalService = default;
             }
 
-            EndMixer();
+            lock (lockMixer)
+            {
+                EndMixer();
 
-            signalServices
-                .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold))
-                .OnEach(RemoveSignal);
+                var relevants = signalServices
+                    .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold)).ToArray();
+
+                relevants.OnEach(RemoveSignal);
+                signalServices.ExceptWith(relevants);
+            }
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -325,8 +335,6 @@ namespace SportDJ.Services.MixerService
             {
                 mixingProvider.Remove(signalService.Output);
             }
-
-            signalServices.Remove(signalService);
         }
 
         #endregion Private Methods

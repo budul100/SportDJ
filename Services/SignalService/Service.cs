@@ -1,4 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -8,22 +12,16 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService
 {
-    public class Service
+    public class Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+        ITrackService trackService)
         : ISignalService
     {
         #region Private Fields
 
-        private readonly CancellationTokenSource cancellationTokenSource;
-        private readonly IEventAggregator eventAggregator;
-        private readonly IStorageService<Set> settingsService;
-        private readonly ITrackService trackService;
+        private readonly CancellationTokenSource cancellationTokenSource = new();
 
         private bool isDisposed;
         private TimeSpan? nextThresholdOnPlay;
@@ -31,20 +29,6 @@ namespace SportDJ.Services.SignalService
         private PlayingFileProvider playingProvider;
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-            ITrackService trackService)
-        {
-            this.eventAggregator = eventAggregator;
-            this.settingsService = settingsService;
-            this.trackService = trackService;
-
-            cancellationTokenSource = new CancellationTokenSource();
-        }
-
-        #endregion Public Constructors
 
         #region Public Properties
 

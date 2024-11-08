@@ -10,7 +10,7 @@ namespace SportDJ.Commons.Providers
     {
         #region Private Fields
 
-        private readonly object lockProvider = new object();
+        private readonly object lockProvider = new();
         private readonly ISampleProvider sourceProvider;
 
         private long fadeSampleCount;
