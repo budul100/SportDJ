@@ -1,3 +1,8 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -12,10 +17,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
@@ -58,10 +59,13 @@ namespace SportDJ.App
             {
                 desktop.Startup += OnStartup;
 
-                splashWindow = Container.Resolve<SplashView>();
+                if (!Debugger.IsAttached)
+                {
+                    splashWindow = Container.Resolve<SplashView>();
 
-                desktop.MainWindow = splashWindow;
-                splashWindow.Show();
+                    desktop.MainWindow = splashWindow;
+                    splashWindow.Show();
+                }
 
                 var dispatcherService = Container.Resolve<IDispatcherService>();
                 Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
@@ -174,7 +178,7 @@ namespace SportDJ.App
                     window: mainWindow,
                     iconUri: iconUri);
 
-                splashWindow.Close();
+                splashWindow?.Close();
 
                 var eventAggregator = Container.Resolve<IEventAggregator>();
                 eventAggregator.GetEvent<AppStartedEvent>().Publish();
@@ -183,7 +187,7 @@ namespace SportDJ.App
             {
                 desktop.MainWindow = default;
 
-                splashWindow.Close();
+                splashWindow?.Close();
             }
         }
 
