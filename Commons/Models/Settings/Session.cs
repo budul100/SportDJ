@@ -13,7 +13,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public string SettingsPath { get; set; }
 
-        public bool SettingsVisible { get; set; }
+        public bool SettingsVisible { get; set; } = true;
 
         public double SettingsWidth { get; set; } = Defaults.SettingsWidth;
 
