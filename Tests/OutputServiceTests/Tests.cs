@@ -66,7 +66,7 @@ namespace SportDJ.Tests.OutputServiceTests
 
             var devices = service.GetDevices();
 
-            Assert.True(devices.Count != 0);
+            Assert.NotEmpty(devices);
         }
 
         #endregion Public Methods
