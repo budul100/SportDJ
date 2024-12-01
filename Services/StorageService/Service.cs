@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,23 +104,24 @@ namespace SportDJ.Services.StorageService
 
         public void Load(string filePath)
         {
-            SetPath(filePath);
-
-            LoadSettings();
+            var settingsLoaded = LoadSettings(filePath);
 
             if (Contents is default(T))
             {
                 Contents = Activator.CreateInstance<T>();
+
+                settingsLoaded = true;
             }
 
-            eventAggregator.GetEvent<SettingsLoadedEvent<T>>().Publish();
+            if (settingsLoaded)
+            {
+                eventAggregator.GetEvent<SettingsLoadedEvent<T>>().Publish();
+            }
         }
 
         public void Save(string filePath = default)
         {
-            SetPath(filePath);
-
-            Task.Run(SaveSettingsAsync);
+            Task.Run(() => SaveSettingsAsync(filePath));
         }
 
         #endregion Public Methods
@@ -143,32 +145,50 @@ namespace SportDJ.Services.StorageService
 
         #region Private Methods
 
-        private void LoadSettings()
+        private bool LoadSettings(string filePath)
         {
-            if (!File.Exists(Path))
+            var result = false;
+
+            var fullPath = !string.IsNullOrWhiteSpace(filePath)
+                ? System.IO.Path.GetFullPath(filePath)
+                : Path;
+
+            if (!File.Exists(fullPath))
             {
-                SaveSettings();
+                SaveSettings(fullPath);
             }
 
-            using var file = new StreamReader(Path);
+            using var file = new StreamReader(fullPath);
 
             try
             {
                 Contents = serializer.Deserialize(file) as T;
+                Path = fullPath;
+
+                result = true;
             }
-            catch { }
+            catch (Exception exception)
+            {
+                Debugger.Break();
+            }
+
+            return result;
         }
 
-        private void SaveSettings()
+        private void SaveSettings(string filePath = default)
         {
-            var folderPath = System.IO.Path.GetDirectoryName(Path);
+            var fullPath = !string.IsNullOrWhiteSpace(filePath)
+                ? System.IO.Path.GetFullPath(filePath)
+                : Path;
+
+            var folderPath = System.IO.Path.GetDirectoryName(fullPath);
 
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            using var file = File.Create(Path);
+            using var file = File.Create(fullPath);
 
             using var writer = XmlWriter.Create(
                 output: file,
@@ -179,12 +199,16 @@ namespace SportDJ.Services.StorageService
                 serializer.Serialize(
                     xmlWriter: writer,
                     o: Contents);
+
+                Path = fullPath;
             }
-            catch
-            { }
+            catch (Exception exception)
+            {
+                Debugger.Break();
+            }
         }
 
-        private async Task SaveSettingsAsync()
+        private async Task SaveSettingsAsync(string filePath)
         {
             if (waitLock.CurrentCount < WaitingPositions)
             {
@@ -194,21 +218,13 @@ namespace SportDJ.Services.StorageService
                 {
                     lock (saveLock)
                     {
-                        SaveSettings();
+                        SaveSettings(filePath);
                     }
                 }
                 finally
                 {
                     waitLock.Release();
                 }
-            }
-        }
-
-        private void SetPath(string filePath)
-        {
-            if (!string.IsNullOrWhiteSpace(filePath))
-            {
-                Path = System.IO.Path.GetFullPath(filePath);
             }
         }
 
