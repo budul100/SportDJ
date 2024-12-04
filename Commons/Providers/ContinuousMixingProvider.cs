@@ -6,25 +6,17 @@ using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Providers
 {
-    public class ContinuousMixingProvider
-        : BaseSampleProvider
+    public class ContinuousMixingProvider(WaveFormat waveFormat)
+        : BaseSampleProvider(waveFormat: waveFormat)
     {
         #region Private Fields
 
-        private readonly object lockProvider = new object();
+        private readonly object lockProvider = new();
         private readonly List<ISampleProvider> sourceProviders = [];
 
         private float[] sourceBuffer;
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public ContinuousMixingProvider(WaveFormat waveFormat)
-            : base(waveFormat: waveFormat)
-        { }
-
-        #endregion Public Constructors
 
         #region Public Methods
 

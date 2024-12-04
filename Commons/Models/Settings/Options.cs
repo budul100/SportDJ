@@ -29,8 +29,12 @@ namespace SportDJ.Commons.Models.Settings
         public int FadeOnMixOutMilliseconds { get; set; } = Defaults.FadeOnMixOutMilliseconds;
 
         [Category("Fade durations")]
-        [DisplayName("Fade pause (ms)")]
-        public int FadeOnPauseMilliseconds { get; set; } = Defaults.FadeOnPauseMilliseconds;
+        [DisplayName("Fade pause w/ effect (ms)")]
+        public int FadeOnPauseFilteredMilliseconds { get; set; } = Defaults.FadeOnPauseFilteredMilliseconds;
+
+        [Category("Fade durations")]
+        [DisplayName("Fade pause w/o effect (ms)")]
+        public int FadeOnPauseUnfilteredMilliseconds { get; set; } = Defaults.FadeOnPauseUnfilteredMilliseconds;
 
         [IgnoreDataMember]
         public string KeyCodeOutputPause { get; set; } = Defaults.KeyCodeOutputPause;

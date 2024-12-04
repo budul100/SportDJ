@@ -12,9 +12,9 @@ namespace SportDJ.Modules.MenuModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.MenuRegion),
-                viewType: typeof(Views.MenuView));
+            //regionManager.RegisterViewWithRegion(
+            //    regionName: nameof(RegionType.MenuRegion),
+            //    viewType: typeof(Views.MenuView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

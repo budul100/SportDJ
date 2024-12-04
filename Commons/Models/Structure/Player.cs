@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Models.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using SportDJ.Commons.Models.Interfaces;
 
 namespace SportDJ.Commons.Models.Structure
 {
@@ -25,10 +25,10 @@ namespace SportDJ.Commons.Models.Structure
         [XmlArrayItem(ElementName = "Path")]
         public List<string> Paths { get; set; } = [];
 
+        public bool ResetPosition { get; set; }
+
         [XmlIgnore]
         public override int Rows => 1;
-
-        public bool SavePosition { get; set; }
 
         #endregion Public Properties
     }

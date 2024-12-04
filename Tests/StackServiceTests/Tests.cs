@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using Prism.Events;
 using SportDJ.Commons.Events.Entry;
@@ -5,9 +8,6 @@ using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -91,7 +91,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                savePosition: false,
+                resetPosition: true,
                 isLoop: false);
 
             var track = stackService.Track;
@@ -148,7 +148,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                savePosition: false,
+                resetPosition: true,
                 isLoop: false);
 
             await Task.Delay(3000);
@@ -175,7 +175,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                savePosition: false,
+                resetPosition: true,
                 isLoop: false);
 
             var track = stackService.Track;

@@ -11,7 +11,7 @@
     xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
     xmlns:prism="http://prismlibrary.com/"
     d:DesignHeight="500"
-    d:DesignWidth="100"
+    d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
 
@@ -173,7 +173,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
                 FontSize="{StaticResource FontSizeVolume}"
-                Text="Apps" />
+                Text="External apps" />
 
             <Slider
                 Grid.Row="1"
@@ -186,7 +186,7 @@
                 Minimum="0"
                 Orientation="Vertical"
                 SmallChange="1"
-                Value="{Binding VolumePercentageApps}" />
+                Value="{Binding VolumePercentageExternals}" />
         </Grid>
     </DockPanel>
 </UserControl>

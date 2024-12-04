@@ -4,13 +4,17 @@
     {
         #region Public Fields
 
-        public const int AppHeightDefault = 800;
-        public const int AppWidthDefault = 1200;
+        public const int AppHeight = 800;
+        public const int AppWidth = 1200;
+
+        public const int EchoBpm = 120;
 
         public const int FadeOnLowerMilliseconds = 200;
         public const int FadeOnMixInMilliseconds = 100;
         public const int FadeOnMixOutMilliseconds = 500;
-        public const int FadeOnPauseMilliseconds = 500;
+
+        public const int FadeOnPauseFilteredMilliseconds = 2000;
+        public const int FadeOnPauseUnfilteredMilliseconds = 1000;
 
         public const string FileNameSession = "Session";
         public const string FileNameSettings = "Settings";
@@ -35,8 +39,8 @@
         public const int TrimRearPercentage = 10;
         public const int TrimVolumePercentage = 0;
 
-        public const int VolumePercentageApps = 20;
         public const int VolumePercentageBackground = 20;
+        public const int VolumePercentageExternals = 20;
 
         #endregion Public Fields
     }

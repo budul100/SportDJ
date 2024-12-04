@@ -23,9 +23,9 @@ namespace SportDJ.Services.SignalService
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
 
+        private DynamicFadingProvider fadingProvider;
         private bool isDisposed;
         private TimeSpan? nextThresholdOnPlay;
-        private FadedControlProvider outputProvider;
         private PlayingFileProvider playingProvider;
 
         #endregion Private Fields
@@ -58,9 +58,9 @@ namespace SportDJ.Services.SignalService
 
         public bool IsPlaying => playingProvider?.PlayType == PlayType.Playing;
 
-        public bool IsSilent => outputProvider?.IsSilent != false;
+        public bool IsSilent => fadingProvider?.IsSilent != false;
 
-        public ISampleProvider Output => outputProvider;
+        public ISampleProvider Output => fadingProvider;
 
         public TimeSpan? Position => !(playingProvider?.Position < TimeSpan.Zero)
             ? playingProvider?.Position
@@ -142,10 +142,10 @@ namespace SportDJ.Services.SignalService
                         newSampleRate: waveFormat.SampleRate);
                 }
 
-                outputProvider = new FadedControlProvider(resampleProvider);
+                fadingProvider = new DynamicFadingProvider(resampleProvider);
 
-                outputProvider.FadingStartedEvent += OnFadingStarted;
-                outputProvider.FadingEndedEvent += OnFadingEnded;
+                fadingProvider.FadingStartedEvent += OnFadingStarted;
+                fadingProvider.FadingEndedEvent += OnFadingEnded;
 
                 if (settingsService.Contents.Options.SelectNextOnPlaySeconds.HasValue)
                 {
@@ -157,16 +157,19 @@ namespace SportDJ.Services.SignalService
             }
         }
 
-        public void Pause()
+        public void Pause(bool useFilterEffect = false)
         {
             if (playingProvider != default
                 && State == StateType.Play)
             {
-                var milliSeconds = settingsService.Contents.Options.FadeOnPauseMilliseconds;
+                var fadeMilliSeconds = useFilterEffect
+                    ? settingsService.Contents.Options.FadeOnPauseFilteredMilliseconds
+                    : settingsService.Contents.Options.FadeOnPauseUnfilteredMilliseconds;
 
-                outputProvider.Fade(
+                fadingProvider.Fade(
                     volumeTarget: Constants.VolumeMin,
-                    milliSeconds: milliSeconds);
+                    milliSeconds: fadeMilliSeconds,
+                    useFilterEffect: useFilterEffect);
             }
         }
 
@@ -175,15 +178,15 @@ namespace SportDJ.Services.SignalService
             if (playingProvider != default
                 && (State == StateType.None || State == StateType.Pause))
             {
-                var milliSeconds = State == StateType.Pause
-                    ? settingsService.Contents.Options.FadeOnPauseMilliseconds
+                var fadeMilliSeconds = State == StateType.Pause
+                    ? settingsService.Contents.Options.FadeOnPauseUnfilteredMilliseconds
                     : 0;
 
                 playingProvider.Start();
 
-                outputProvider.Fade(
+                fadingProvider.Fade(
                     volumeTarget: Constants.VolumeMax,
-                    milliSeconds: milliSeconds);
+                    milliSeconds: fadeMilliSeconds);
             }
         }
 
@@ -208,10 +211,10 @@ namespace SportDJ.Services.SignalService
 
                     if (playingProvider != default)
                     {
-                        outputProvider.FadingStartedEvent -= OnFadingStarted;
-                        outputProvider.FadingEndedEvent -= OnFadingEnded;
+                        fadingProvider.FadingStartedEvent -= OnFadingStarted;
+                        fadingProvider.FadingEndedEvent -= OnFadingEnded;
 
-                        outputProvider.Dispose();
+                        fadingProvider.Dispose();
 
                         playingProvider.CueExceededEvent -= OnCueExceeded;
                         playingProvider.SignalPausedEvent -= OnSignalPaused;
@@ -243,7 +246,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnFadingEnded(object sender, EventArgs e)
         {
-            if (outputProvider?.IsSilent == true)
+            if (fadingProvider?.IsSilent == true)
             {
                 playingProvider.Pause();
             }
@@ -251,7 +254,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnFadingStarted(object sender, EventArgs e)
         {
-            if (outputProvider?.IsSilent == true)
+            if (fadingProvider?.IsSilent == true)
             {
                 State = StateType.Play;
 
@@ -286,7 +289,8 @@ namespace SportDJ.Services.SignalService
 
                 if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
                 {
-                    var selectNextDelay = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPauseSeconds.Value);
+                    var selectNextDelay = TimeSpan.FromSeconds(
+                        value: settingsService.Contents.Options.SelectNextOnPauseSeconds.Value);
 
                     Task.Delay(
                         delay: selectNextDelay,
@@ -303,7 +307,8 @@ namespace SportDJ.Services.SignalService
             if (!IsOverNextThreshold
                 && nextThresholdOnPlay.HasValue)
             {
-                IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+                IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
+                    || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
 
                 if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
                 {

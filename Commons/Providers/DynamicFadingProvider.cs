@@ -1,20 +1,24 @@
-﻿using NAudio.Wave;
+﻿using System;
+using NAudio.Dsp;
+using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using System;
 
 namespace SportDJ.Commons.Providers
 {
-    public class FadedControlProvider
+    public class DynamicFadingProvider
         : BaseSampleProvider
     {
         #region Private Fields
 
         private readonly object lockProvider = new();
+        private readonly BiQuadFilter[] lowPassFilters;
+        private readonly Random random;
         private readonly ISampleProvider sourceProvider;
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
+        private bool useFilterEffect;
         private float volumeCurrent;
         private float volumeFadeDiff;
         private float volumeFadeStart;
@@ -23,13 +27,16 @@ namespace SportDJ.Commons.Providers
 
         #region Public Constructors
 
-        public FadedControlProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
+        public DynamicFadingProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
             : base(waveFormat: sourceProvider?.WaveFormat)
         {
             this.sourceProvider = sourceProvider;
 
             Volume = volume;
             volumeCurrent = Volume;
+
+            random = new Random();
+            lowPassFilters = GetFilters();
         }
 
         #endregion Public Constructors
@@ -54,7 +61,7 @@ namespace SportDJ.Commons.Providers
 
         #region Public Methods
 
-        public void Fade(float volumeTarget, int? milliSeconds = default)
+        public void Fade(float volumeTarget, int? milliSeconds = default, bool useFilterEffect = false)
         {
             if (volumeTarget < Constants.VolumeMin || volumeTarget > Constants.VolumeMax)
             {
@@ -72,6 +79,7 @@ namespace SportDJ.Commons.Providers
                     : default;
 
                 Volume = volumeTarget;
+                this.useFilterEffect = useFilterEffect;
 
                 FadingStartedEvent?.Invoke(
                     sender: this,
@@ -104,35 +112,36 @@ namespace SportDJ.Commons.Providers
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            var read = sourceProvider.Read(
+            var samplesRead = sourceProvider.Read(
                 buffer: buffer,
                 offset: offset,
                 count: count);
 
             lock (lockProvider)
             {
-                AdjustBuffer(
+                AdjustSamples(
                     buffer: buffer,
                     offset: offset,
-                    count: read);
+                    count: samplesRead);
             }
 
-            return read;
+            return samplesRead;
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void AdjustBuffer(float[] buffer, int offset, int count)
+        private void AdjustSamples(float[] buffer, int offset, int count)
         {
-            var sample = 0;
-
-            while (sample < count)
+            for (var index = 0; index < count; index += WaveFormat.Channels)
             {
+                var cutoffFrequency = default(float);
+                var resonance = default(float);
+
                 if (FadeType != FadeType.None)
                 {
-                    fadeSamplePosition += sourceProvider.WaveFormat.BlockAlign;
+                    fadeSamplePosition += WaveFormat.BlockAlign;
 
                     if (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount)
                     {
@@ -146,13 +155,50 @@ namespace SportDJ.Commons.Providers
                     {
                         volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                     }
+
+                    if (useFilterEffect)
+                    {
+                        var fadeSampleProgress = (float)fadeSamplePosition / fadeSampleCount;
+                        var fadeSampleFactor = (float)Math.Pow(1 - fadeSampleProgress, 2); // Exponential fade for smoothness
+
+                        cutoffFrequency = Math.Max(500, Constants.FilterCutoffFrequency * fadeSampleFactor) +
+                            (float)(random.NextDouble() * 100);
+                        resonance = 1.0f + ((1 - fadeSampleFactor) * 2.0f);
+                    }
                 }
 
-                for (var channel = 0; channel < sourceProvider.WaveFormat.Channels; channel++)
+                for (var channel = 0; channel < WaveFormat.Channels; channel++)
                 {
-                    buffer[offset + sample++] *= volumeCurrent;
+                    var sample = offset + channel + index;
+
+                    if (useFilterEffect)
+                    {
+                        lowPassFilters[channel].SetLowPassFilter(
+                            sampleRate: WaveFormat.SampleRate,
+                            cutoffFrequency: cutoffFrequency,
+                            q: resonance);
+
+                        buffer[sample] = lowPassFilters[channel].Transform(buffer[sample]);
+                    }
+
+                    buffer[sample] *= volumeCurrent;
                 }
             }
+        }
+
+        private BiQuadFilter[] GetFilters()
+        {
+            var result = new BiQuadFilter[WaveFormat.Channels];
+
+            for (var index = 0; index < WaveFormat.Channels; index++)
+            {
+                result[index] = BiQuadFilter.LowPassFilter(
+                    sampleRate: WaveFormat.SampleRate,
+                    cutoffFrequency: Constants.FilterCutoffFrequency,
+                    q: 1.0f);
+            }
+
+            return result;
         }
 
         private void OnFadingEnded()

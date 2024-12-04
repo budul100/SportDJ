@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System;
+using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
-using System;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -40,7 +40,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Initialize(Track track, WaveFormat waveFormat);
 
-        void Pause();
+        void Pause(bool useFilterEffect = false);
 
         void Start();
 

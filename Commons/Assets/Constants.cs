@@ -9,6 +9,8 @@ namespace SportDJ.Commons.Assets
         // Duration of a volume change step. Should not be greater than 100.
         public const int FadeStepInMilliSec = 30;
 
+        public const int FilterCutoffFrequency = 20000;
+
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";
 
@@ -38,8 +40,8 @@ namespace SportDJ.Commons.Assets
 
         public const long WidthBase = 1000;
 
-        public static Color ColorPeakBottom = Color.DarkGreen;
-        public static Color ColorPeakTop = Color.Green;
+        public static readonly Color ColorPeakBottom = Color.DarkGreen;
+        public static readonly Color ColorPeakTop = Color.Green;
 
         #endregion Public Fields
     }

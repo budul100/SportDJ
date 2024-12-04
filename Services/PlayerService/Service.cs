@@ -184,16 +184,16 @@ namespace SportDJ.Services.PlayerService
 
         public TimeSpan? Remaining { get; private set; }
 
-        public bool SavePosition
+        public bool ResetPosition
         {
-            get => player?.SavePosition == true;
+            get => player?.ResetPosition == true;
 
             set
             {
                 if (player != default
-                    && player.SavePosition != value)
+                    && player.ResetPosition != value)
                 {
-                    player.SavePosition = value;
+                    player.ResetPosition = value;
 
                     settingsService.Save();
                 }
@@ -363,7 +363,7 @@ namespace SportDJ.Services.PlayerService
             Task.Run(() => stackService.Initialize(
                 paths: paths,
                 name: player.Name,
-                savePosition: SavePosition,
+                resetPosition: ResetPosition,
                 isLoop: IsLoop));
         }
 

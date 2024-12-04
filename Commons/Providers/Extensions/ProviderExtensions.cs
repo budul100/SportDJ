@@ -8,24 +8,6 @@ namespace SportDJ.Commons.Providers.Extensions
     {
         #region Public Methods
 
-        public static WaveFormat GetMono(this ISampleProvider provider)
-        {
-            var result = WaveFormat.CreateIeeeFloatWaveFormat(
-                sampleRate: provider.WaveFormat.SampleRate,
-                channels: 1);
-
-            return result;
-        }
-
-        public static WaveFormat GetStereo(this ISampleProvider provider)
-        {
-            var result = WaveFormat.CreateIeeeFloatWaveFormat(
-                sampleRate: provider.WaveFormat.SampleRate,
-                channels: 2);
-
-            return result;
-        }
-
         public static bool IsActive(this PlayType playType)
         {
             return playType.IsRunning() || playType == PlayType.Pausing;

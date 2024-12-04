@@ -59,7 +59,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             UpdateDevicesCommand = new DelegateCommand(
                 executeMethod: UpdateDevices);
 
-            outputService = containerProvider.Resolve<IOutputService>(
+            outputService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
             eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
@@ -102,18 +102,15 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             get { return device; }
             set
             {
-                if (value != device
-                    && !DevicesNotAvailable)
+                if (value != device)
                 {
                     SetProperty(ref device, value);
 
-                    if (!isUpdate)
+                    if (!DevicesNotAvailable)
                     {
                         DevicesNotAvailable = true;
 
                         outputService.Set(device);
-
-                        DevicesNotAvailable = false;
                     }
                 }
             }
@@ -155,23 +152,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
-        public int VolumePercentageApps
-        {
-            get { return outputSettings?.VolumePercentageApps ?? 0; }
-            set
-            {
-                if (outputSettings != default
-                    && value != outputSettings.VolumePercentageApps)
-                {
-                    outputSettings.VolumePercentageApps = value;
-
-                    settingsService.Save();
-
-                    RaisePropertyChanged(nameof(VolumePercentageApps));
-                }
-            }
-        }
-
         public int VolumePercentageBackground
         {
             get { return outputSettings?.VolumePercentageBackground ?? 0; }
@@ -185,6 +165,23 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                     settingsService.Save();
 
                     RaisePropertyChanged(nameof(VolumePercentageBackground));
+                }
+            }
+        }
+
+        public int VolumePercentageExternals
+        {
+            get { return outputSettings?.VolumePercentageExternals ?? 0; }
+            set
+            {
+                if (outputSettings != default
+                    && value != outputSettings.VolumePercentageExternals)
+                {
+                    outputSettings.VolumePercentageExternals = value;
+
+                    settingsService.Save();
+
+                    RaisePropertyChanged(nameof(VolumePercentageExternals));
                 }
             }
         }
@@ -206,7 +203,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             RaisePropertyChanged(nameof(Options));
 
             RaisePropertyChanged(nameof(Volume));
-            RaisePropertyChanged(nameof(VolumePercentageApps));
+            RaisePropertyChanged(nameof(VolumePercentageExternals));
             RaisePropertyChanged(nameof(VolumePercentageBackground));
 
             RaisePropertyChanged(nameof(IsActive));
@@ -270,16 +267,21 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void UpdateDevices()
         {
-            isUpdate = true;
+            if (!isUpdate)
+            {
+                isUpdate = true;
 
-            Devices = new ObservableCollection<string>(outputService.GetDevices()
-                .Select(d => d.Value));
+                Devices = new ObservableCollection<string>(outputService.GetDevices()
+                    .Select(d => d.Value));
+                RaisePropertyChanged(nameof(Devices));
 
-            RaisePropertyChanged(nameof(Devices));
+                Device = outputService.DeviceName;
+                RaisePropertyChanged(nameof(Device));
 
-            Device = outputService.DeviceName;
+                isUpdate = false;
+            }
 
-            isUpdate = false;
+            DevicesNotAvailable = false;
         }
 
         private void UpdateOptions()

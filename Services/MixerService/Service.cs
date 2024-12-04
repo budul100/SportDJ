@@ -23,14 +23,15 @@ namespace SportDJ.Services.MixerService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly Dictionary<ISignalService, FadedControlProvider> fadingProviders = [];
-        private readonly object lockMixer = new();
+        private readonly Dictionary<ISignalService, DynamicFadingProvider> fadingProviders = [];
+        private readonly object lockFadingProviders = new();
+        private readonly object lockSignalServices = new();
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = [];
 
         private bool isDisposed;
         private ContinuousMixingProvider mixingProvider;
-        private FadedControlProvider outputProvider;
+        private DynamicFadingProvider outputProvider;
         private bool signalsCanOverlap;
         private ISignalService signalService;
 
@@ -131,31 +132,34 @@ namespace SportDJ.Services.MixerService
                 {
                     result.IsLoop = isLoop;
 
-                    lock (lockMixer)
+                    lock (lockSignalServices)
                     {
                         signalServices.Add(result);
+                    }
 
-                        ISampleProvider signalProvider;
+                    ISampleProvider signalProvider;
 
-                        if (signalsCanOverlap)
+                    if (signalsCanOverlap)
+                    {
+                        signalProvider = result.Output;
+                    }
+                    else
+                    {
+                        var fadingProvider = new DynamicFadingProvider(result.Output);
+
+                        fadingProvider.FadingEndedEvent += OnFadingEnded;
+
+                        lock (lockFadingProviders)
                         {
-                            signalProvider = result.Output;
-                        }
-                        else
-                        {
-                            var fadingProvider = new FadedControlProvider(result.Output);
-
-                            fadingProvider.FadingEndedEvent += OnFadingEnded;
-
                             fadingProviders.Add(
                                 key: result,
                                 value: fadingProvider);
-
-                            signalProvider = fadingProvider;
                         }
 
-                        mixingProvider.Add(signalProvider);
+                        signalProvider = fadingProvider;
                     }
+
+                    mixingProvider.Add(signalProvider);
                 }
             }
 
@@ -178,14 +182,16 @@ namespace SportDJ.Services.MixerService
 
             mixingProvider = new ContinuousMixingProvider(waveFormat);
 
-            outputProvider = new FadedControlProvider(
+            outputProvider = new DynamicFadingProvider(
                 sourceProvider: mixingProvider,
                 volume: Constants.VolumeMax);
         }
 
         public void Pause()
         {
-            signalServices.OnEach(s => s?.Pause());
+            var useFilterEffect = Type == MixerType.Background;
+
+            signalServices.OnEach(s => s?.Pause(useFilterEffect));
         }
 
         public void Stop()
@@ -235,7 +241,7 @@ namespace SportDJ.Services.MixerService
 
         private void OnFadingEnded(object sender, EventArgs e)
         {
-            if (sender is FadedControlProvider fadingProvider
+            if (sender is DynamicFadingProvider fadingProvider
                 && fadingProvider.IsSilent)
             {
                 var signalService = fadingProviders
@@ -252,10 +258,10 @@ namespace SportDJ.Services.MixerService
                 this.signalService = default;
             }
 
-            lock (lockMixer)
-            {
-                EndMixer();
+            EndMixer();
 
+            lock (lockSignalServices)
+            {
                 var relevants = signalServices
                     .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold)).ToArray();
 
@@ -328,8 +334,12 @@ namespace SportDJ.Services.MixerService
             {
                 fadingProvider.FadingEndedEvent -= OnFadingEnded;
 
+                lock (lockFadingProviders)
+                {
+                    fadingProviders.Remove(signalService);
+                }
+
                 mixingProvider.Remove(fadingProvider);
-                fadingProviders.Remove(signalService);
             }
             else if (signalService.Output != default)
             {

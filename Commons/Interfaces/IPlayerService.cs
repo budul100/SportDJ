@@ -39,7 +39,7 @@ namespace SportDJ.Commons.Interfaces
 
         TimeSpan? Remaining { get; }
 
-        bool SavePosition { get; set; }
+        bool ResetPosition { get; set; }
 
         Track Track { get; }
 

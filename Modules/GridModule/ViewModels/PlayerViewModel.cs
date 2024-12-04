@@ -161,17 +161,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public DelegateCommand ResetCommand { get; }
 
-        public bool SavePosition
+        public bool ResetPosition
         {
-            get { return playerService?.SavePosition == true; }
+            get { return playerService?.ResetPosition == true; }
             set
             {
                 if (playerService != default
-                    && value != playerService.SavePosition)
+                    && value != playerService.ResetPosition)
                 {
-                    playerService.SavePosition = value;
+                    playerService.ResetPosition = value;
 
-                    RaisePropertyChanged(nameof(SavePosition));
+                    RaisePropertyChanged(nameof(ResetPosition));
                 }
             }
         }
@@ -365,14 +365,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                 yield return isForegroundItem;
 
-                var savePositionsItem = new MenuViewModel(
+                var resetPositionsItem = new MenuViewModel(
                     header: Texts.PlayerSavePosition,
-                    executeCallback: () => SavePosition = !SavePosition,
+                    executeCallback: () => ResetPosition = !ResetPosition,
                     closeCallback: CloseMenu,
-                    isCheckedGetter: () => SavePosition,
+                    isCheckedGetter: () => ResetPosition,
                     icon: MaterialIconKind.FileRestoreOutline);
 
-                yield return savePositionsItem;
+                yield return resetPositionsItem;
 
                 if (playerService.HasStack)
                 {

@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Assets;
+﻿using System.Xml.Serialization;
+using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -20,9 +20,9 @@ namespace SportDJ.Commons.Models.Settings
 
         public float Volume { get; set; } = Constants.VolumeMax;
 
-        public int VolumePercentageApps { get; set; } = Defaults.VolumePercentageApps;
-
         public int VolumePercentageBackground { get; set; } = Defaults.VolumePercentageBackground;
+
+        public int VolumePercentageExternals { get; set; } = Defaults.VolumePercentageExternals;
 
         #endregion Public Properties
     }

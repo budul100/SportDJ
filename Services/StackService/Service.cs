@@ -11,30 +11,17 @@ using SportDJ.Services.StackService.Extensions;
 
 namespace SportDJ.Services.StackService
 {
-    public class Service
+    public class Service(IEventAggregator eventAggregator, IStorageService<Session> sessionService,
+        ITrackService trackService)
         : IStackService
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
-        private readonly IStorageService<Session> sessionService;
-        private readonly ITrackService trackService;
+        private static readonly object lockPositions = new();
 
         private Position position;
 
         #endregion Private Fields
-
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator, IStorageService<Session> sessionService,
-            ITrackService trackService)
-        {
-            this.eventAggregator = eventAggregator;
-            this.sessionService = sessionService;
-            this.trackService = trackService;
-        }
-
-        #endregion Public Constructors
 
         #region Public Properties
 
@@ -55,7 +42,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(IEnumerable<string> paths, string name, bool savePosition, bool isLoop)
+        public void Initialize(IEnumerable<string> paths, string name, bool resetPosition, bool isLoop)
         {
             var tracks = trackService
                 .GetTracks(paths).ToArray();
@@ -64,11 +51,11 @@ namespace SportDJ.Services.StackService
 
             position = GetPosition(
                 playerName: name,
-                savePosition: savePosition);
+                resetPosition: resetPosition);
 
             SetTrack();
 
-            if (savePosition)
+            if (!resetPosition)
             {
                 if (isLoop)
                 {
@@ -214,29 +201,34 @@ namespace SportDJ.Services.StackService
             }
         }
 
-        private Position GetPosition(string playerName, bool savePosition)
+        private Position GetPosition(string playerName, bool resetPosition)
         {
-            if (!savePosition)
+            var result = default(Position);
+
+            if (resetPosition)
             {
-                return new Position();
+                result = new Position();
             }
             else
             {
-                if (!sessionService.Contents.Positions.Any(p => p.Name == playerName))
+                lock (lockPositions)
                 {
-                    var position = new Position
+                    if (!sessionService.Contents.Positions.Any(p => p.Name == playerName))
                     {
-                        Name = playerName,
-                    };
+                        var position = new Position
+                        {
+                            Name = playerName,
+                        };
 
-                    sessionService.Contents.Positions.Add(position);
+                        sessionService.Contents.Positions.Add(position);
+                    }
+
+                    result = sessionService.Contents.Positions
+                        .First(p => p.Name == playerName);
                 }
-
-                var result = sessionService.Contents.Positions
-                    .First(p => p.Name == playerName);
-
-                return result;
             }
+
+            return result;
         }
 
         private void SelectEntry(Entry entry)

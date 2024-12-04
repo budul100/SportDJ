@@ -1,8 +1,6 @@
 ﻿using System;
 using NAudio.Wave;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Extensions;
-using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Providers.Extensions;
 
@@ -14,7 +12,7 @@ namespace SportDJ.Commons.Providers
         #region Private Fields
 
         private readonly long? cue;
-        private readonly object lockProvider = new object();
+        private readonly object lockProvider = new();
         private readonly AudioFileReader sourceProvider;
 
         private long end;
@@ -109,7 +107,7 @@ namespace SportDJ.Commons.Providers
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            var read = 0;
+            var samplesRead = 0;
 
             try
             {
@@ -131,7 +129,7 @@ namespace SportDJ.Commons.Providers
                         }
                         else
                         {
-                            read = sourceProvider.Read(
+                            samplesRead = sourceProvider.Read(
                                 buffer: buffer,
                                 offset: offset,
                                 count: count);
@@ -153,13 +151,13 @@ namespace SportDJ.Commons.Providers
 
                         if (IsLoop)
                         {
-                            while (read < count)
+                            while (samplesRead < count)
                             {
-                                var required = count - read;
+                                var required = count - samplesRead;
 
                                 var readThisTime = sourceProvider.Read(
                                     buffer: buffer,
-                                    offset: offset + read,
+                                    offset: offset + samplesRead,
                                     count: required);
 
                                 if (readThisTime < required || sourceProvider.Position >= end
@@ -168,14 +166,14 @@ namespace SportDJ.Commons.Providers
                                     sourceProvider.Position = Track.Start;
                                 }
 
-                                read += readThisTime;
+                                samplesRead += readThisTime;
                             }
                         }
                         else
                         {
                             var lastPosition = sourceProvider.Position;
 
-                            read = sourceProvider.Read(
+                            samplesRead = sourceProvider.Read(
                                 buffer: buffer,
                                 offset: offset,
                                 count: count);
@@ -222,7 +220,7 @@ namespace SportDJ.Commons.Providers
             catch
             { }
 
-            return read;
+            return samplesRead;
         }
 
         public void Start()

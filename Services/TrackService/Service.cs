@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using ATL.AudioData;
+
 using ATL.Playlist;
+
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Track;
@@ -123,42 +126,42 @@ namespace SportDJ.Services.TrackService
 
         private void AddTrack(string file)
         {
-            if (File.Exists(file))
+            var atlTrack = File.Exists(file)
+                ? new ATL.Track(file)
+                : default;
+
+            if (atlTrack != default)
             {
-                var atlTrack = new ATL.Track(file);
+                var info = atlTrack.GetInfo();
+                var duration = TimeSpan.FromSeconds(atlTrack.Duration);
 
-                if (atlTrack != default)
+                var track = default(Track);
+
+                lock (lockTracks)
                 {
-                    var info = atlTrack.GetInfo();
-                    var duration = TimeSpan.FromSeconds(atlTrack.Duration);
-
-                    var track = default(Track);
-
-                    lock (lockTracks)
+                    if (!tracks.ContainsKey(file))
                     {
-                        if (!tracks.ContainsKey(file))
-                        {
-                            // This must be checked here to avoid problems due to track duplicates in different playlists
+                        // This must be checked here to avoid problems due to track duplicates in different playlists
 
-                            track = new Track(
-                                path: file,
-                                title: atlTrack.Title,
-                                artist: atlTrack.Artist,
-                                info: info,
-                                duration: duration);
+                        track = new Track(
+                            path: file,
+                            title: atlTrack.Title,
+                            artist: atlTrack.Artist,
+                            info: info,
+                            duration: duration,
+                            bpm: atlTrack.BPM);
 
-                            tracks.Add(
-                                key: file,
-                                value: track);
-                        }
+                        tracks.Add(
+                            key: file,
+                            value: track);
                     }
+                }
 
-                    if (track != default)
-                    {
-                        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                if (track != default)
+                {
+                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
 
-                        Task.Run(() => TrimTrack(track));
-                    }
+                    Task.Run(() => TrimTrack(track));
                 }
             }
         }
