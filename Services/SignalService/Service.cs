@@ -254,13 +254,16 @@ namespace SportDJ.Services.SignalService
 
         private void OnFadingStarted(object sender, EventArgs e)
         {
-            if (fadingProvider?.IsSilent == true)
+            if (fadingProvider.FadeType == FadeType.Raise)
             {
                 State = StateType.Play;
 
-                trackService.Begin(Track);
+                if (fadingProvider.IsSilent)
+                {
+                    trackService.Begin(Track);
 
-                eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
+                    eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
+                }
             }
             else
             {

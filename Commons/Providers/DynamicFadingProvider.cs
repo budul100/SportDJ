@@ -32,8 +32,8 @@ namespace SportDJ.Commons.Providers
         {
             this.sourceProvider = sourceProvider;
 
-            Volume = volume;
-            volumeCurrent = Volume;
+            volumeCurrent = volume;
+            Volume = volumeCurrent;
 
             random = new Random();
             lowPassFilters = GetFilters();
@@ -68,25 +68,26 @@ namespace SportDJ.Commons.Providers
                 throw new ArgumentOutOfRangeException(nameof(volumeTarget));
             }
 
-            if (volumeTarget != Volume)
+            if (volumeTarget != volumeCurrent)
             {
                 FadeType = volumeTarget > volumeCurrent
                     ? FadeType.Raise
                     : FadeType.Reduce;
 
+                Volume = volumeTarget;
+
+                this.useFilterEffect = useFilterEffect;
+
                 fadeSampleCount = milliSeconds.HasValue
                     ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
                     : default;
-
-                Volume = volumeTarget;
-                this.useFilterEffect = useFilterEffect;
 
                 FadingStartedEvent?.Invoke(
                     sender: this,
                     e: default);
             }
 
-            if (fadeSampleCount == 0 || volumeCurrent == Volume)
+            if (fadeSampleCount == 0 || volumeCurrent == volumeTarget)
             {
                 OnFadingEnded();
             }
@@ -97,12 +98,12 @@ namespace SportDJ.Commons.Providers
                     if (FadeType == FadeType.Raise)
                     {
                         volumeFadeStart = volumeCurrent;
-                        volumeFadeDiff = (Volume - volumeCurrent) / fadeSampleCount;
+                        volumeFadeDiff = (volumeTarget - volumeCurrent) / fadeSampleCount;
                     }
                     else if (FadeType == FadeType.Reduce)
                     {
                         volumeFadeStart = volumeCurrent;
-                        volumeFadeDiff = (volumeCurrent - Volume) / fadeSampleCount;
+                        volumeFadeDiff = (volumeCurrent - volumeTarget) / fadeSampleCount;
                     }
 
                     fadeSamplePosition = 0;
