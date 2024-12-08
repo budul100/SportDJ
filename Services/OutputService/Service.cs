@@ -54,7 +54,7 @@ namespace SportDJ.Services.OutputService
             this.settingsService = settingsService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: InitializeOutput,
+                action: SetOutput,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
@@ -334,6 +334,17 @@ namespace SportDJ.Services.OutputService
             return result.Value;
         }
 
+        private void CloseOutput()
+        {
+            mixersAll.OnEach(p => p.Stop());
+            providerOutput?.Stop();
+
+            providerOutput?.Dispose();
+            providerForeground?.Dispose();
+            providerFader?.Dispose();
+            providerBackground?.Dispose();
+        }
+
         private Output GetOptions(OutputType type)
         {
             if (settingsService?.Contents?.Outputs.Any(o => o.Type == type) != true)
@@ -353,29 +364,9 @@ namespace SportDJ.Services.OutputService
             return result;
         }
 
-        private void InitializeOutput()
-        {
-            outputOptions = GetOptions(Type);
-
-            volumeService = containerProvider.Resolve<IVolumeService>(
-                name: Type.ToString());
-
-            var takeDefaultIfMissing = Type == OutputType.Live;
-
-            Set(
-                deviceName: outputOptions.DeviceName,
-                takeDefaultIfMissing: takeDefaultIfMissing);
-        }
-
         private void InitializeOutput(int deviceNumber)
         {
-            var givenProviderBackground = providerBackground;
-            var givenProviderFader = providerFader;
-            var givenProviderForeground = providerForeground;
-            var givenProviderOutput = providerOutput;
-
-            mixersAll.OnEach(p => p.Stop());
-            givenProviderOutput?.Stop();
+            CloseOutput();
 
             providerBackground = new ContinuousMixingProvider(Format);
 
@@ -394,21 +385,18 @@ namespace SportDJ.Services.OutputService
                 Volume = outputOptions.Volume,
             };
 
+            providerOutput.PlaybackStopped += OnPlaybackStopped;
+
             providerOutput.Init(
                 waveProvider: providerWave);
-
-            mixersAll.OnEach(m => Add(
-                mixerService: m,
-                onForeground: mixersForeground.Contains(m)));
 
             Task.Run(
                 action: providerOutput.Play,
                 cancellationToken: cancellationTokenSource.Token);
 
-            givenProviderOutput?.Dispose();
-            givenProviderForeground?.Dispose();
-            givenProviderFader?.Dispose();
-            givenProviderBackground?.Dispose();
+            mixersAll.OnEach(m => Add(
+                mixerService: m,
+                onForeground: mixersForeground.Contains(m)));
         }
 
         private void MuteExternals()
@@ -458,6 +446,34 @@ namespace SportDJ.Services.OutputService
 
                 eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
             }
+        }
+
+        private void OnPlaybackStopped(object sender, StoppedEventArgs e)
+        {
+            if (e.Exception != default)
+            {
+                // TODO: Log exception
+
+                CloseOutput();
+
+                outputOptions.DeviceName = default;
+
+                eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
+            }
+        }
+
+        private void SetOutput()
+        {
+            outputOptions = GetOptions(Type);
+
+            volumeService = containerProvider.Resolve<IVolumeService>(
+                name: Type.ToString());
+
+            var takeDefaultIfMissing = Type == OutputType.Live;
+
+            Set(
+                deviceName: outputOptions.DeviceName,
+                takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
         #endregion Private Methods

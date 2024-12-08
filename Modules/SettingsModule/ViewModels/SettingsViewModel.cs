@@ -269,6 +269,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         {
             if (!isUpdate)
             {
+                // TODO Show settings if not opened
+
                 isUpdate = true;
 
                 Devices = new ObservableCollection<string>(outputService.GetDevices()
