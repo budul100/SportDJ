@@ -38,6 +38,7 @@
         <DockPanel
             Margin="{StaticResource ContentMargin}"
             DockPanel.Dock="Top"
+            IsEnabled="{Binding !DevicesNotAvailable}"
             LastChildFill="True">
 
             <Button
@@ -65,7 +66,6 @@
                     Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Stretch"
                     Focusable="False"
-                    IsEnabled="{Binding !DevicesNotAvailable}"
                     ItemsSource="{Binding Devices}"
                     SelectedItem="{Binding Device}" />
             </StackPanel>
