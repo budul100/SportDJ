@@ -10,7 +10,7 @@
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<ApplicationIcon>Assets\SportDJ.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
-		<VersionMinor>3</VersionMinor>
+		<VersionMinor>4</VersionMinor>
 		<VersionBuild>0</VersionBuild>
 	</PropertyGroup>
 
@@ -43,6 +43,7 @@
 	  <ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
 	  <ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
 	  <ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
+	  <ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 	  <ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 	  <ProjectReference Include="..\Services\GridService\GridService.csproj" />
