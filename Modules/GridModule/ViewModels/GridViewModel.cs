@@ -1,13 +1,13 @@
-﻿using Material.Icons;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Material.Icons;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {

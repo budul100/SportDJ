@@ -107,8 +107,6 @@ namespace SportDJ.App
         {
             containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
-            containerRegistry.RegisterSingleton<IHookService, Services.HookService.Service>();
-
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
             containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();

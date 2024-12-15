@@ -13,9 +13,6 @@ namespace SportDJ.Commons.Models.Settings
         [DisplayName("Enable interrupting dialogs")]
         public bool EnableInterruptingDialogs { get; set; }
 
-        [DisplayName("Enable key hook")]
-        public bool EnableKeyHook { get; set; }
-
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]
         public int FadeOnLowerMilliseconds { get; set; } = Defaults.FadeOnLowerMilliseconds;

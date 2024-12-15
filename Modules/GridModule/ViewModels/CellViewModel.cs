@@ -1,18 +1,17 @@
-﻿using Prism.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -34,7 +33,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Fields
 
-        private readonly IHookService hookService;
         private readonly IKeyable keyable;
         private readonly INameable nameable;
         private readonly IStorageService<Set> settingsService;
@@ -63,14 +61,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             settingsService = containerProvider?.Resolve<IStorageService<Set>>();
             dialogService = containerProvider?.Resolve<IDialogService>();
             gridService = containerProvider?.Resolve<IGridService>();
-            hookService = containerProvider?.Resolve<IHookService>();
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<HookUpdatedEvent>().Subscribe(
-                action: UpdateKey,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -94,8 +87,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
-        public virtual bool IsAvailableHook => hookService?.IsRunning == true;
-
         public bool IsAvailableMenu => outputServiceLive?.IsPlaying == false
             || settingsService?.Contents?.Options?.EnableInterruptingDialogs == true;
 
@@ -107,15 +98,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 if (IsRenaming != value)
                 {
                     SetProperty(ref isRenaming, value);
-
-                    if (value)
-                    {
-                        hookService.Deactivate(this);
-                    }
-                    else
-                    {
-                        hookService.Activate(this);
-                    }
                 }
             }
         }
@@ -126,15 +108,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             get
             {
-                return hookService?.IsAvailable == true
-                    ? keyable?.KeyCode
-                    : default;
+                return keyable?.KeyCode;
             }
 
             set
             {
-                if (hookService?.IsAvailable == true
-                    && keyable != default
+                if (keyable != default
                     && value != keyable.KeyCode)
                 {
                     keyable.KeyCode = value;
@@ -288,12 +267,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected void ListenHook()
         {
-            if (hookService != default
-                && !isListening)
+            if (!isListening)
             {
                 isListening = true;
-
-                hookService.Listen(ReceiveHook);
             }
         }
 
@@ -304,6 +280,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 e: default);
         }
 
+        protected void ReceiveKey(string keyCode)
+        {
+            KeyCode = keyCode;
+            isListening = false;
+
+            listenChecker.Invoke();
+
+            CloseMenu();
+        }
+
         protected virtual void UpdateOutput()
         {
             outputServiceLive = containerProvider?.Resolve<IOutputService>(
@@ -311,30 +297,5 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Protected Methods
-
-        #region Private Methods
-
-        private void ReceiveHook(string keyCode)
-        {
-            if (isListening)
-            {
-                KeyCode = keyCode;
-                isListening = false;
-
-                listenChecker.Invoke();
-
-                CloseMenu();
-            }
-        }
-
-        private void UpdateKey()
-        {
-            RaisePropertyChanged(nameof(KeyCode));
-            RaisePropertyChanged(nameof(Key));
-            RaisePropertyChanged(nameof(HasKey));
-            RaisePropertyChanged(nameof(IsAvailableHook));
-        }
-
-        #endregion Private Methods
     }
 }

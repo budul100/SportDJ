@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -11,8 +13,6 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -80,7 +80,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: o => outputServiceLive == o);
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: _ => ExecutePlayer(),
+                action: OnKeyPressed,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: k => parent.IsVisible
@@ -115,9 +115,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public virtual bool IsActive => playerService?.IsActive == true;
 
         public bool IsAvailableExecute => playerService?.IsAvailable == true;
-
-        public override bool IsAvailableHook => base.IsAvailableHook
-            && IsAvailableExecute;
 
         public bool IsAvailableReset => playerService?.HasPlayeds == true;
 
@@ -396,6 +393,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     yield return shuffleItem;
                 }
+            }
+        }
+
+        private void OnKeyPressed(string keyCode)
+        {
+            if (isListening)
+            {
+                ReceiveKey(keyCode);
+            }
+            else
+            {
+                ExecutePlayer();
             }
         }
 

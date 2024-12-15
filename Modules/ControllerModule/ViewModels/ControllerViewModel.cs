@@ -1,4 +1,5 @@
-﻿using Material.Icons;
+﻿using System;
+using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -14,7 +15,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -23,7 +23,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IHookService hookService;
         private readonly IRegionNavigationService navigationService;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
@@ -38,12 +37,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IRegionNavigationService navigationService, IHookService hookService,
+            IEventAggregator eventAggregator, IRegionNavigationService navigationService,
             IStorageService<Set> settingsService)
             : base(regionManager)
         {
             this.navigationService = navigationService;
-            this.hookService = hookService;
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));

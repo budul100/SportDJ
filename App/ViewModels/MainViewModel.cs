@@ -1,4 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
@@ -12,12 +18,6 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace SportDJ.App.ViewModels
 {
@@ -31,7 +31,6 @@ namespace SportDJ.App.ViewModels
         private readonly IContainerProvider containerProvider;
         private readonly IDialogService dialogService;
         private readonly IDispatcherService dispatcherService;
-        private readonly IHookService hookService;
         private readonly HashSet<IOutputService> liveServices = [];
         private readonly HashSet<IOutputService> outputServices = [];
         private readonly IStorageService<Session> sessionService;
@@ -46,12 +45,11 @@ namespace SportDJ.App.ViewModels
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IDispatcherService dispatcherService, IHookService hookService, IStorageService<Set> settingsService,
+            IDispatcherService dispatcherService, IStorageService<Set> settingsService,
             IStorageService<Session> sessionService, IDialogService dialogService)
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
-            this.hookService = hookService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
             this.dialogService = dialogService;
@@ -244,8 +242,6 @@ namespace SportDJ.App.ViewModels
                     sessionService.Save();
 
                     outputServices.OnEach(s => s.Dispose());
-
-                    hookService.Dispose();
                 }
 
                 isDisposed = true;

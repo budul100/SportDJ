@@ -4,8 +4,7 @@
     {
         #region Private Fields
 
-        private const string PrefixDefault = "Vc";
-        private const string PrefixNumpad = "VcNumPad";
+        private const string PrefixNumpad = "NumPad";
 
         #endregion Private Fields
 
@@ -19,11 +18,7 @@
             {
                 if (keyCode.StartsWith(PrefixNumpad))
                 {
-                    result = $"[{keyCode[8..]}]";
-                }
-                else if (keyCode.StartsWith(PrefixDefault))
-                {
-                    result = $"[{keyCode[2..]}]";
+                    result = $"[{keyCode[6..]}]";
                 }
                 else
                 {

@@ -1,9 +1,9 @@
-﻿using Prism.Events;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Models.Structure;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -29,7 +29,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             var eventAggregator = containerProvider?.Resolve<IEventAggregator>();
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: SelectTab,
+                action: OnKeyPressed,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: _ => parent.IsVisible);
@@ -139,6 +139,18 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(ColumnSpan));
 
             base.Initialize();
+        }
+
+        private void OnKeyPressed(string keyCode)
+        {
+            if (isListening)
+            {
+                ReceiveKey(keyCode);
+            }
+            else
+            {
+                SelectTab(keyCode);
+            }
         }
 
         private void SelectTab(string keyCode)
