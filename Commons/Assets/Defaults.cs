@@ -7,14 +7,12 @@
         public const int AppHeight = 800;
         public const int AppWidth = 1200;
 
-        public const int EchoBpm = 120;
-
         public const int FadeOnLowerMilliseconds = 200;
-        public const int FadeOnMixInMilliseconds = 100;
+        public const int FadeOnMixInMilliseconds = 200;
         public const int FadeOnMixOutMilliseconds = 500;
 
-        public const int FadeOnPauseFilteredMilliseconds = 2000;
-        public const int FadeOnPauseUnfilteredMilliseconds = 1000;
+        public const int FadeOnPauseFilteredMilliseconds = 1500;
+        public const int FadeOnPauseUnfilteredMilliseconds = 800;
 
         public const string FileNameSession = "Session";
         public const string FileNameSettings = "Settings";
@@ -23,9 +21,9 @@
         public const double FlashingOpacityMax = 0.5;
         public const double FlashingOpacityMin = 0.2;
 
-        public const string KeyCodeOutputPause = "VcEnter";
-        public const string KeyCodeScreenChange = "VcF11";
-        public const string KeyCodeVolumeTalk = "VcSpace";
+        public const string KeyCodeOutputPause = "Enter";
+        public const string KeyCodeScreenChange = "F11";
+        public const string KeyCodeVolumeTalk = "Space";
 
         public const int SampleRate = 44100;
 

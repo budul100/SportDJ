@@ -1,4 +1,9 @@
-﻿using NAudio.CoreAudioApi;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.CoreAudioApi;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
@@ -6,11 +11,6 @@ using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Services.VolumeService.Extensions;
 using SportDJ.Services.VolumeService.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.VolumeService
 {

@@ -167,13 +167,13 @@ namespace SportDJ.Services.OutputService
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = providerOutput.Volume * outputOptions.VolumePercentageBackground / (float)Constants.PercentageMax;
+                var volumeBackground = providerOutput.Volume * outputOptions.VolumePercentageBackground / (float)Constants.OptionsPercentageMax;
 
                 providerFader.Fade(
                     volumeTarget: volumeBackground,
                     milliSeconds: fadeMilliseconds);
 
-                var volumeExternals = providerOutput.Volume * outputOptions.VolumePercentageExternals / (float)Constants.PercentageMax;
+                var volumeExternals = providerOutput.Volume * outputOptions.VolumePercentageExternals / (float)Constants.OptionsPercentageMax;
 
                 volumeService.Reduce(
                     volumeTarget: volumeExternals,

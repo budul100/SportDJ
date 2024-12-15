@@ -26,9 +26,17 @@ namespace SportDJ.Commons.Assets
 
         public const int NameMaxLength = 30;
 
-        public const double PercentageIncrement = 1;
-        public const double PercentageMax = 100;
-        public const double PercentageMin = 0;
+        public const int OptionsFadeInc = 100;
+        public const int OptionsFadeMax = 10000;
+        public const int OptionsFadeMin = 0;
+
+        public const double OptionsPercentageInc = 5;
+        public const double OptionsPercentageMax = 100;
+        public const double OptionsPercentageMin = 0;
+
+        public const int OptionsSelectionInc = 100;
+        public const int OptionsSelectionMax = 10000;
+        public const int OptionsSelectionMin = 0;
 
         public const string SettingsExtension = ".xml";
 
