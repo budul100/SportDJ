@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>SportDJ.Modules.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.2.2" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.2.2" />
+		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.2.0.1" />
+		<PackageReference Include="Avalonia.Xaml.Interactions.Custom" Version="11.2.0.1" />
+		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.2.0.1" />
+		<PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
+		<PackageReference Include="System.ComponentModel" Version="4.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+	</ItemGroup>
+
+</Project>

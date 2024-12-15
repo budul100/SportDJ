@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SportDJ.Commons.Models.Contents;
+﻿using SportDJ.Commons.Models.Contents;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -11,11 +11,11 @@ namespace SportDJ.Commons.Interfaces
 
         void End(Track track);
 
-        int GetCount(Track track);
+        IEnumerable<Track> Get(IEnumerable<string> paths);
 
-        IEnumerable<Track> GetTracks(IEnumerable<string> paths);
+        IEnumerable<Track> Search(string search);
 
-        void Render(Track track);
+        void Update(Track track);
 
         #endregion Public Methods
     }

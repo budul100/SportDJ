@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SportDJ.Commons.Assets;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {

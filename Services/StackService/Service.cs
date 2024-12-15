@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Prism.Events;
+﻿using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.StackService.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Services.StackService
 {
@@ -18,7 +18,6 @@ namespace SportDJ.Services.StackService
         #region Private Fields
 
         private static readonly object lockPositions = new();
-
         private Position position;
 
         #endregion Private Fields
@@ -45,7 +44,7 @@ namespace SportDJ.Services.StackService
         public void Initialize(IEnumerable<string> paths, string name, bool resetPosition, bool isLoop)
         {
             var tracks = trackService
-                .GetTracks(paths).ToArray();
+                .Get(paths).ToArray();
 
             Entries = GetEntries(tracks).ToList();
 
@@ -53,21 +52,27 @@ namespace SportDJ.Services.StackService
                 playerName: name,
                 resetPosition: resetPosition);
 
-            SetTrack();
-
-            if (!resetPosition)
+            if (resetPosition
+                || Entries?.Any(e => e.Track.Path == position.Path) != true
+                || position.Index >= Entries.Count)
             {
+                SelectEntry(0);
+            }
+            else
+            {
+                Index = Entries[position.Index].Track != Track
+                    ? Entries.IndexOf(Entries.First(e => e.Track.Path == position.Path))
+                    : position.Index;
+
                 if (isLoop)
                 {
-                    SelectEntry(position.Index);
+                    SelectEntry(Index);
                 }
                 else
                 {
                     Next();
                 }
             }
-
-            eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);
         }
 
         public void Next()
@@ -110,7 +115,7 @@ namespace SportDJ.Services.StackService
 
                 Entry.IsPlayed = true;
 
-                eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+                eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(Entry);
 
                 position.Index = Index;
                 position.Path = Track.Path;
@@ -156,11 +161,11 @@ namespace SportDJ.Services.StackService
                 {
                     entry.IsPlayed = false;
 
-                    eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(entry);
+                    eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(entry);
                 }
             }
 
-            eventAggregator.GetEvent<StackResetEvent>()?.Publish(this);
+            eventAggregator.GetEvent<StackResetEvent>().Publish(this);
         }
 
         public void Shuffle()
@@ -175,8 +180,6 @@ namespace SportDJ.Services.StackService
 
                     (Entries[index], Entries[count]) = (Entries[count], Entries[index]);
                 }
-
-                eventAggregator.GetEvent<StackDefinedEvent>()?.Publish(this);
 
                 SelectEntry(Entry);
             }
@@ -256,26 +259,11 @@ namespace SportDJ.Services.StackService
                 index = 0;
             }
 
-            eventAggregator.GetEvent<EntryUpdatedEvent>()?.Publish(Entry);
+            eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(Entry);
 
             Index = index;
 
-            eventAggregator.GetEvent<StackUpdatedEvent>()?.Publish(this);
-        }
-
-        private void SetTrack()
-        {
-            if (Entries?.Any(e => e.Track.Path == position.Path) != true
-                || position.Index >= Entries.Count)
-            {
-                SelectEntry(0);
-            }
-            else if (Entries[position.Index].Track != Track)
-            {
-                var index = Entries.IndexOf(Entries.First(e => e.Track.Path == position.Path));
-
-                SelectEntry(index);
-            }
+            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(this);
         }
 
         #endregion Private Methods

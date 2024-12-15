@@ -1,0 +1,88 @@
+<UserControl
+    x:Class="SportDJ.Modules.SearchModule.Views.TrackView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Commons.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dt="using:SportDJ.Modules.SearchModule.DesignTime"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    d:DesignHeight="40"
+    d:DesignWidth="300"
+    prism:ViewModelLocator.AutoWireViewModel="False"
+    x:DataType="dt:TrackViewModel"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+        <Thickness x:Key="InnerMargin">1</Thickness>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
+
+    <Design.DataContext>
+        <dt:TrackViewModel />
+    </Design.DataContext>
+
+    <Border
+        Margin="{StaticResource ContentMargin}"
+        BorderThickness="{StaticResource PlayerBorderThickness}"
+        CornerRadius="{StaticResource PlayerCornerRadius}">
+
+        <Grid Grid.Row="0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Viewbox
+                Grid.Column="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Stretch="Uniform"
+                StretchDirection="DownOnly">
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    FontSize="{StaticResource FontSizeState}"
+                    Text="{Binding Counter}" />
+            </Viewbox>
+
+            <Viewbox
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Stretch="Uniform"
+                StretchDirection="DownOnly">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource FontSizeContentMain}"
+                    Text="{Binding Content}" />
+            </Viewbox>
+
+            <Viewbox
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Stretch="Uniform"
+                StretchDirection="DownOnly">
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    FontSize="{StaticResource FontSizeState}"
+                    Text="{Binding Duration}" />
+            </Viewbox>
+        </Grid>
+    </Border>
+</UserControl>

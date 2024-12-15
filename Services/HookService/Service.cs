@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Prism.Events;
+﻿using Prism.Events;
 using SharpHook;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Collections.Generic;
 
 namespace SportDJ.Services.HookService
 {

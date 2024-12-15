@@ -1,8 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -17,6 +12,11 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
@@ -88,6 +88,8 @@ namespace SportDJ.App
                 name: nameof(Modules.ControllerModule));
             moduleCatalog.AddModule<Modules.SettingsModule.Module>(
                 name: nameof(Modules.SettingsModule));
+            moduleCatalog.AddModule<Modules.SearchModule.Module>(
+                name: nameof(Modules.SearchModule));
             moduleCatalog.AddModule<Modules.MenuModule.Module>(
                 name: nameof(Modules.MenuModule));
         }
@@ -181,7 +183,7 @@ namespace SportDJ.App
                 splashWindow?.Close();
 
                 var eventAggregator = Container.Resolve<IEventAggregator>();
-                eventAggregator.GetEvent<AppStartedEvent>().Publish();
+                eventAggregator.GetEvent<AppInitializedEvent>().Publish();
             }
             catch (TaskCanceledException)
             {

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SportDJ.Commons.Assets;
+﻿using SportDJ.Commons.Assets;
+using System.Collections.Generic;
 
 namespace SportDJ.Commons.Models.Settings
 {

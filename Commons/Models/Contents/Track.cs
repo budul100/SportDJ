@@ -1,31 +1,38 @@
-﻿using System;
+﻿using Avalonia.Media.Imaging;
+using System;
 using System.Collections.Generic;
-using Avalonia.Media.Imaging;
 
 namespace SportDJ.Commons.Models.Contents
 {
-    public class Track(string path, string title, string artist, string info,
-        TimeSpan duration, int? bpm)
+    public class Track(string path, string file)
     {
         #region Public Properties
 
-        public string Artist { get; } = artist;
+        public string Artist { get; set; }
 
         public Bitmap Bitmap { get; set; }
 
-        public int? Bpm { get; } = bpm;
+        public int? Bpm { get; set; }
+
+        public int Counter => Registers?.Count ?? 0;
 
         public long? Cue { get; set; }
 
-        public TimeSpan Duration { get; set; } = duration;
+        public TimeSpan? Duration { get; set; }
 
         public long? End { get; set; }
 
-        public string Info { get; } = info;
+        public string File { get; } = file;
 
-        public bool IsChecked { get; set; }
+        public string Info { get; set; }
+
+        public bool IsRendered { get; set; }
 
         public bool IsSilent { get; set; }
+
+        public bool IsTrimmed { get; set; }
+
+        public bool IsUpdated { get; set; }
 
         public string Path { get; } = path;
 
@@ -33,7 +40,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public long Start { get; set; }
 
-        public string Title { get; } = title;
+        public string Title { get; set; }
 
         #endregion Public Properties
     }

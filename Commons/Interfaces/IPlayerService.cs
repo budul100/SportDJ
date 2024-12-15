@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Structure;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -10,8 +10,6 @@ namespace SportDJ.Commons.Interfaces
         : IDisposable
     {
         #region Public Properties
-
-        int Counter { get; }
 
         IEnumerable<Entry> Entries { get; }
 

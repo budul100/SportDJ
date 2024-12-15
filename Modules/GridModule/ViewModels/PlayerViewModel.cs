@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -13,6 +11,8 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -49,6 +49,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Reset(),
                 canExecuteMethod: () => IsAvailableReset);
 
+            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
+                action: _ => Initialize(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true,
+                filter: p => playerService == p);
+
             eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
@@ -57,12 +63,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
-
-            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
-                action: _ => UpdatePlayer(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
@@ -88,6 +88,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             playerService?.Initialize(
                 player: player);
+
+            Initialize();
         }
 
         #endregion Public Constructors
@@ -98,8 +100,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual string Content => playerService?.Track?.Info;
 
-        public virtual string Counter => playerService?.Counter > 0
-            ? $"({playerService.Counter})"
+        public virtual string Counter => playerService?.Track?.Counter > 0
+            ? $"({playerService.Track.Counter})"
             : default;
 
         public DelegateCommand ExecuteCommand { get; }
@@ -245,6 +247,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     }
                 }
             }
+        }
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+
+            UpdateDuration();
+            UpdateContent();
         }
 
         protected override void UpdateOutput()
@@ -430,14 +440,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             RaisePropertyChanged(nameof(Progress));
             RaisePropertyChanged(nameof(Remaining));
-        }
-
-        private void UpdatePlayer()
-        {
-            base.Initialize();
-
-            UpdateDuration();
-            UpdateContent();
         }
 
         #endregion Private Methods

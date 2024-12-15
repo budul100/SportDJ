@@ -1,36 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-
-using ATL.AudioData;
-
+﻿using ATL.AudioData;
 using ATL.Playlist;
-
 using Prism.Events;
+using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService
 {
     public class Service
-        : ITrackService
+        : ITrackService, IDisposable
     {
         #region Private Fields
 
+        private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly AudioDataIOFactory audioDataIOFactory;
         private readonly IEventAggregator eventAggregator;
         private readonly IEnumerable<ATL.Format> formatsAudio;
         private readonly IEnumerable<ATL.Format> formatsPlaylist;
-        private readonly object lockTracks = new();
         private readonly PlaylistIOFactory playlistIOFactory;
         private readonly IStorageService<Set> settingsService;
-        private readonly Dictionary<string, Track> tracks = [];
+        private readonly ConcurrentDictionary<string, Track> tracks = [];
+        private readonly ConcurrentQueue<Track> trackUpdates = [];
+        private readonly ConcurrentQueue<Track> trackTrims = [];
+        private readonly ConcurrentQueue<Track> currentRenders = [];
+        private readonly ConcurrentQueue<Track> currentUpdates = [];
+        private readonly ConcurrentQueue<Track> currentTrims = [];
+        private readonly ConcurrentQueue<Track> activeRenders = [];
+        private readonly ConcurrentQueue<Track> activeUpdates = [];
+
+        private bool isDisposed;
 
         #endregion Private Fields
 
@@ -48,6 +57,12 @@ namespace SportDJ.Services.TrackService
                 .Where(f => f.Readable).ToArray();
             formatsPlaylist = playlistIOFactory.getFormats()
                 .Where(f => f.Readable).ToArray();
+
+            var cancellationToken = cancellationTokenSource.Token;
+
+            Task.Run(
+                action: () => ShapeTracks(cancellationToken),
+                cancellationToken: cancellationToken);
         }
 
         #endregion Public Constructors
@@ -65,7 +80,10 @@ namespace SportDJ.Services.TrackService
 
             track.Registers.Add(register);
 
-            eventAggregator.GetEvent<TrackUpdatedEvent>()?.Publish(track);
+            activeUpdates.Enqueue(track);
+            activeRenders.Enqueue(track);
+
+            eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
         }
 
         public void End(Track track)
@@ -81,31 +99,16 @@ namespace SportDJ.Services.TrackService
             }
         }
 
-        public int GetCount(Track track)
+        public IEnumerable<Track> Get(IEnumerable<string> paths)
         {
-            ArgumentNullException.ThrowIfNull(track);
-
-            var result = tracks[track.Path].Registers.Count;
-
-            return result;
-        }
-
-        public IEnumerable<Track> GetTracks(IEnumerable<string> paths)
-        {
-            var files = GetFiles(paths)
+            var filePaths = GetFiles(paths)
                 .Select(Path.GetFullPath).ToArray();
 
-            if (files?.Length > 0)
+            if (filePaths?.Length > 0)
             {
-                foreach (var file in files)
+                foreach (var filePath in filePaths)
                 {
-                    AddTrack(file);
-
-                    var result = tracks.TryGetValue(
-                        key: file,
-                        value: out var value)
-                        ? value
-                        : default;
+                    var result = GetTrack(filePath);
 
                     if (result != default)
                     {
@@ -115,56 +118,35 @@ namespace SportDJ.Services.TrackService
             }
         }
 
-        public void Render(Track track)
+        public IEnumerable<Track> Search(string search)
         {
-            Task.Run(() => RenderTrack(track));
+            var result = default(IEnumerable<Track>);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                result = tracks
+                    .Where(p => p.Value.Contains(search))
+                    .Select(p => p.Value).ToArray();
+            }
+
+            return result;
+        }
+
+        public void Update(Track track)
+        {
+            if (track != default)
+            {
+                currentUpdates.Enqueue(track);
+                currentTrims.Enqueue(track);
+                currentRenders.Enqueue(track);
+            }
         }
 
         #endregion Public Methods
 
         #region Private Methods
-
-        private void AddTrack(string file)
-        {
-            var atlTrack = File.Exists(file)
-                ? new ATL.Track(file)
-                : default;
-
-            if (atlTrack != default)
-            {
-                var info = atlTrack.GetInfo();
-                var duration = TimeSpan.FromSeconds(atlTrack.Duration);
-
-                var track = default(Track);
-
-                lock (lockTracks)
-                {
-                    if (!tracks.ContainsKey(file))
-                    {
-                        // This must be checked here to avoid problems due to track duplicates in different playlists
-
-                        track = new Track(
-                            path: file,
-                            title: atlTrack.Title,
-                            artist: atlTrack.Artist,
-                            info: info,
-                            duration: duration,
-                            bpm: atlTrack.BPM);
-
-                        tracks.Add(
-                            key: file,
-                            value: track);
-                    }
-                }
-
-                if (track != default)
-                {
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-
-                    Task.Run(() => TrimTrack(track));
-                }
-            }
-        }
 
         private IEnumerable<string> GetFiles(IEnumerable<string> paths)
         {
@@ -208,9 +190,41 @@ namespace SportDJ.Services.TrackService
             }
         }
 
+        private Track GetTrack(string path)
+        {
+            var result = default(Track);
+
+            if (File.Exists(path))
+            {
+                result = tracks.TryGetValue(
+                    key: path,
+                    value: out var value)
+                    ? value
+                    : default;
+
+                if (result == default)
+                {
+                    var file = Path.GetFileNameWithoutExtension(path);
+
+                    result = new Track(
+                        path: path,
+                        file: file)
+                    {
+                        Info = file
+                    };
+
+                    tracks.TryAdd(
+                        key: path,
+                        value: result);
+                }
+            }
+
+            return result;
+        }
+
         private void RenderTrack(Track track)
         {
-            if (track.Bitmap == default)
+            if (track?.IsRendered == false)
             {
                 track.Render();
 
@@ -223,8 +237,10 @@ namespace SportDJ.Services.TrackService
 
         private void TrimTrack(Track track)
         {
-            if (!track.IsChecked)
+            if (track?.IsTrimmed == false)
             {
+                var currentDuration = track.Duration;
+
                 var trimVolume = settingsService.Contents.Options.TrimVolumePercentage / (float)Constants.PercentageMax;
                 var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage / Constants.PercentageMax;
 
@@ -232,10 +248,85 @@ namespace SportDJ.Services.TrackService
                     cueVolume: trimVolume,
                     trimRearPortion: trimRearPortion);
 
+                if (track.Duration != currentDuration)
+                {
+                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                }
+            }
+        }
+
+        private void UpdateTrack(Track track)
+        {
+            if (track?.IsUpdated == false)
+            {
+                track.Update();
+
                 eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
             }
         }
 
-        #endregion Private Methods
+        private void ShapeTracks(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (!activeUpdates.IsEmpty
+                    && activeUpdates.TryDequeue(out Track activeUpdate))
+                {
+                    UpdateTrack(activeUpdate);
+                }
+                else if (!activeRenders.IsEmpty
+                    && activeRenders.TryDequeue(out Track activeRender))
+                {
+                    RenderTrack(activeRender);
+                }
+                else if (!currentUpdates.IsEmpty
+                    && currentUpdates.TryDequeue(out Track currentUpdate))
+                {
+                    UpdateTrack(currentUpdate);
+                }
+                else if (!currentTrims.IsEmpty
+                    && currentTrims.TryDequeue(out Track currentTrim))
+                {
+                    TrimTrack(currentTrim);
+                }
+                else if (!currentRenders.IsEmpty
+                    && currentRenders.TryDequeue(out Track currentRender))
+                {
+                    RenderTrack(currentRender);
+                }
+                else if (!trackUpdates.IsEmpty
+                    && trackUpdates.TryDequeue(out Track trackUpdate))
+                {
+                    UpdateTrack(trackUpdate);
+                }
+                else if (!trackTrims.IsEmpty
+                    && trackTrims.TryDequeue(out Track trackTrim))
+                {
+                    TrimTrack(trackTrim);
+                }
+            }
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!isDisposed)
+            {
+                if (isDisposing)
+                {
+                    cancellationTokenSource.Cancel();
+                }
+
+                isDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
     }
+
+    #endregion Private Methods
 }

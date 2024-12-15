@@ -1,6 +1,5 @@
-﻿using System;
-using NAudio.Wave;
-using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Enums;
+using System;
 
 namespace SportDJ.Commons.Providers.Extensions
 {

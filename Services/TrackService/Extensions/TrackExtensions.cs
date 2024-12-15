@@ -3,9 +3,12 @@ using NAudio.WaveFormRenderer;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Models.Contents;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace SportDJ.Services.TrackService.Extensions
 {
@@ -13,16 +16,32 @@ namespace SportDJ.Services.TrackService.Extensions
     {
         #region Private Fields
 
-        private static readonly Avalonia.Vector dpi = new Avalonia.Vector(
+        private const string InfoDelimiter = " - ";
+
+        private static readonly Avalonia.Vector dpi = new(
             x: 96,
             y: 96);
 
-        private static readonly object lockTrim = new object();
-        private static readonly object lockRender = new object();
+        private static readonly object lockRender = new();
+        private static readonly object lockTrim = new();
 
         #endregion Private Fields
 
         #region Public Methods
+
+        public static bool Contains(this Track track, string search)
+        {
+            bool containsPredicate(string s) => s.Contains(
+                value: search,
+                comparisonType: StringComparison.OrdinalIgnoreCase);
+
+            var result = containsPredicate(track.File)
+                || containsPredicate(track.Title)
+                || containsPredicate(track.Artist)
+                || containsPredicate(track.Info);
+
+            return result;
+        }
 
         public static void Render(this Track track)
         {
@@ -81,7 +100,32 @@ namespace SportDJ.Services.TrackService.Extensions
                     temporary.UnlockBits(bitmapdata);
                     temporary.Dispose();
                 }
+
+                track.IsRendered = true;
             }
+        }
+
+        public static bool Set(this IEnumerable<Track> tracks, object tracksLock, Predicate<Track> checker,
+            Action<Track> setter)
+        {
+            var track = default(Track);
+
+            lock (tracksLock)
+            {
+                if (tracks?.Count() > 0)
+                {
+                    track = tracks.FirstOrDefault(t => checker(t));
+                }
+            }
+
+            if (track != default)
+            {
+                setter(track);
+
+                return true;
+            }
+
+            return false;
         }
 
         public static void Trim(this Track track, float cueVolume, double trimRearPortion = 0.1)
@@ -172,10 +216,59 @@ namespace SportDJ.Services.TrackService.Extensions
                     track.IsSilent = true;
                 }
 
-                track.IsChecked = true;
+                track.IsTrimmed = true;
             }
         }
-    }
 
-    #endregion Public Methods
+        public static void Update(this Track track)
+        {
+            var atlTrack = new ATL.Track(track.Path);
+
+            track.Info = atlTrack.GetInfo();
+            track.Title = atlTrack.Title;
+            track.Artist = atlTrack.Artist;
+            track.Bpm = atlTrack.BPM;
+
+            if (track.Duration == default)
+            {
+                track.Duration = TimeSpan.FromSeconds(atlTrack.Duration);
+            }
+
+            track.IsUpdated = true;
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private static string GetInfo(this ATL.Track atlTrack)
+        {
+            var content = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(atlTrack.Artist))
+            {
+                content.Append(atlTrack.Artist);
+            }
+            if (!string.IsNullOrWhiteSpace(atlTrack.Title))
+            {
+                if (content.Length > 0)
+                {
+                    content.Append(InfoDelimiter);
+                }
+
+                content.Append(atlTrack.Title);
+            }
+
+            var result = content.ToString();
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = Path.GetFileNameWithoutExtension(atlTrack.Path);
+            }
+
+            return result;
+        }
+
+        #endregion Private Methods
+    }
 }

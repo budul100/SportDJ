@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using SportDJ.Commons.Enums;
+﻿using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
+using System.Threading.Tasks;
 
 namespace SportDJ.Commons.Interfaces
 {

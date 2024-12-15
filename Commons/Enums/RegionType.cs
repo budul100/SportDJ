@@ -10,6 +10,8 @@
 
         SettingsRegion,
 
+        SearchRegion,
+
         MenuRegion,
     }
 }

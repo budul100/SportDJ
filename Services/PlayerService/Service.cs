@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
+using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
@@ -18,6 +14,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.PlayerService
 {
@@ -55,8 +56,13 @@ namespace SportDJ.Services.PlayerService
             this.settingsService = settingsService;
             this.stackService = stackService;
 
-            eventAggregator?.GetEvent<AppStartedEvent>().Subscribe(
+            eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
                 action: SetStartLocation,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<MixerInitializedEvent>().Subscribe(
+                action: _ => InitializeSignal(),
+                threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
@@ -91,20 +97,14 @@ namespace SportDJ.Services.PlayerService
                     && mixerType == MixerType.Background
                     && !IsLoop);
 
-            eventAggregator?.GetEvent<StackDefinedEvent>().Subscribe(
-                action: _ => eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: s => this.stackService == s);
-
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
-                action: _ => UpdateSignal(),
+                action: _ => InitializeSignal(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => this.stackService == s);
 
             eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
-                action: _ => UpdatePlayer(),
+                action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => this.stackService == s);
@@ -119,8 +119,6 @@ namespace SportDJ.Services.PlayerService
         #endregion Public Constructors
 
         #region Public Properties
-
-        public int Counter { get; private set; }
 
         public IEnumerable<Entry> Entries => stackService.Entries;
 
@@ -152,7 +150,7 @@ namespace SportDJ.Services.PlayerService
 
                     settingsService.Save();
 
-                    UpdateSignal();
+                    InitializeSignal();
                 }
             }
         }
@@ -353,8 +351,6 @@ namespace SportDJ.Services.PlayerService
 
         private void InitializePlayer()
         {
-            Counter = 0;
-
             SetStartLocation();
 
             var paths = player.Paths
@@ -365,6 +361,37 @@ namespace SportDJ.Services.PlayerService
                 name: player.Name,
                 resetPosition: ResetPosition,
                 isLoop: IsLoop));
+        }
+
+        private void InitializeSignal()
+        {
+            if (stackService.Track != default)
+            {
+                mixerType = player.IsForeground
+                    ? MixerType.Foreground
+                    : MixerType.Background;
+
+                var mixerService = containerProvider?.Resolve<IMixerService>(
+                    name: mixerType.ToString());
+
+                if (mixerService.IsInitialized)
+                {
+                    if (signalService?.State == StateType.Pause)
+                    {
+                        signalService.Stop();
+                    }
+
+                    signalService = mixerService?.Add(
+                        track: stackService.Track,
+                        isLoop: IsLoop);
+
+                    UpdateDuration();
+
+                    eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this);
+                }
+            }
+
+            trackService?.Update(stackService.Track);
         }
 
         private void OnSignalEnded(ISignalService signalService)
@@ -385,7 +412,7 @@ namespace SportDJ.Services.PlayerService
                 }
             }
 
-            UpdatePlayer();
+            UpdateContent();
         }
 
         private void OnSignalStarted(ISignalService signalService)
@@ -400,7 +427,7 @@ namespace SportDJ.Services.PlayerService
                 signalServices.Add(signalService);
             }
 
-            UpdatePlayer();
+            UpdateContent();
         }
 
         private void OnSignalStopped(ISignalService signalService)
@@ -413,15 +440,23 @@ namespace SportDJ.Services.PlayerService
                 signalService.Stop();
             }
 
-            UpdatePlayer();
+            UpdateContent();
         }
 
         private void SetStartLocation()
         {
-            var paths = player.Paths
+            var paths = player?.Paths?
                 .Select(settingsService.GetPathFull).ToArray();
 
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(paths));
+            if (paths?.Length > 0)
+            {
+                Task.Run(async () => startLocation = await dialogService.GetFolderAsync(paths));
+            }
+        }
+
+        private void UpdateContent()
+        {
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(this);
         }
 
         private void UpdateDuration()
@@ -446,43 +481,9 @@ namespace SportDJ.Services.PlayerService
             eventAggregator.GetEvent<PlayerShiftedEvent>().Publish(this);
         }
 
-        private void UpdatePlayer()
-        {
-            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(this);
-        }
-
-        private void UpdateSignal()
-        {
-            if (stackService.Track != default)
-            {
-                mixerType = player.IsForeground
-                    ? MixerType.Foreground
-                    : MixerType.Background;
-
-                var mixerService = containerProvider?.Resolve<IMixerService>(
-                    name: mixerType.ToString());
-
-                signalService = mixerService?.Add(
-                    track: stackService.Track,
-                    isLoop: IsLoop);
-            }
-
-            UpdateTrack();
-        }
-
         private void UpdateTrack()
         {
-            if (stackService.Track != default)
-            {
-                Counter = trackService.GetCount(stackService.Track);
-                trackService?.Render(stackService.Track);
-            }
-            else
-            {
-                Counter = default;
-            }
-
-            UpdatePlayer();
+            UpdateContent();
             UpdateDuration();
         }
 

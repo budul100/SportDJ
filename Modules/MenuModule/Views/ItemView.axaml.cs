@@ -1,8 +1,8 @@
-using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
+using System.Linq;
 
 namespace SportDJ.Modules.MenuModule.Views;
 

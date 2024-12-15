@@ -114,7 +114,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
 
-        public bool IsActive => outputLiveService.IsPlaying || VolumeMonitoringActive;
+        public bool IsActive => (outputLiveService?.IsPlaying == true) || VolumeMonitoringActive;
 
         public bool IsVolumeMonitoringAvailable => volumeService?.IsInitialized == true;
 

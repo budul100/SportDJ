@@ -1,6 +1,6 @@
-﻿using System.Xml.Serialization;
-using SportDJ.Commons.Assets;
+﻿using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using System.Xml.Serialization;
 
 namespace SportDJ.Commons.Models.Settings
 {

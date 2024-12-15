@@ -215,7 +215,7 @@ namespace SportDJ.Modules.MenuModule.ViewModels
 
         private void UpdateTrack()
         {
-            var duration = Entry.Track?.Duration.ToString(Constants.FormatDuration);
+            var duration = Entry.Track?.Duration?.ToString(Constants.FormatDuration);
 
             Header = $"{Entry.Track.Info} ({duration}) [{Entry.Track.Registers.Count}]";
 
