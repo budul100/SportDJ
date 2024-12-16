@@ -12,8 +12,10 @@ namespace SportDJ.Commons.Models.Structure
         [XmlIgnore]
         public override int Columns => 1;
 
+        [XmlAttribute]
         public bool IsForeground { get; set; }
 
+        [XmlAttribute]
         public bool IsLoop { get; set; }
 
         [XmlAttribute]
@@ -25,6 +27,7 @@ namespace SportDJ.Commons.Models.Structure
         [XmlArrayItem(ElementName = "Path")]
         public List<string> Paths { get; set; } = [];
 
+        [XmlAttribute]
         public bool ResetPosition { get; set; }
 
         [XmlIgnore]

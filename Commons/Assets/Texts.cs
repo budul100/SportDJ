@@ -31,7 +31,7 @@
         public const string PlayerRenameHeader = "Rename player";
         public const string PlayerResetHeader = "Reset player";
         public const string PlayerResetMessage = "Shall the player be reset?";
-        public const string PlayerSavePosition = "Save position";
+        public const string PlayerResetPosition = "Reset position";
         public const string PlayerSelectionFileHeader = "Select file";
         public const string PlayerSelectionFolderHeader = "Select folder";
         public const string PlayerShuffleHeader = "Shuffle tracks";

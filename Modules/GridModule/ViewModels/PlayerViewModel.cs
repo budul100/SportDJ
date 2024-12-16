@@ -373,7 +373,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 yield return isForegroundItem;
 
                 var resetPositionsItem = new MenuViewModel(
-                    header: Texts.PlayerSavePosition,
+                    header: Texts.PlayerResetPosition,
                     executeCallback: () => ResetPosition = !ResetPosition,
                     closeCallback: CloseMenu,
                     isCheckedGetter: () => ResetPosition,
