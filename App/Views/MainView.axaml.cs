@@ -38,7 +38,8 @@ namespace SportDJ.App.Views
         {
             var focusedElement = FocusManager.GetFocusedElement();
 
-            return focusedElement != default;
+            return focusedElement != default
+                && focusedElement?.GetType() != typeof(TabItem);
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)

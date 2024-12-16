@@ -116,6 +116,7 @@
                         Margin="{StaticResource KeyMargin}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        Focusable="False"
                         IsVisible="{Binding HasKey}"
                         Stretch="Uniform"
                         StretchDirection="Both">
@@ -125,11 +126,13 @@
                             Background="{StaticResource KeyBackgroundColor}"
                             BorderBrush="{StaticResource KeyBorderColor}"
                             BorderThickness="{StaticResource KeyBorderThickness}"
-                            CornerRadius="{StaticResource KeyCornerRadius}">
+                            CornerRadius="{StaticResource KeyCornerRadius}"
+                            Focusable="False">
 
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
+                                Focusable="False"
                                 FontSize="{StaticResource FontSizeContentMain}"
                                 Text="{Binding Key}" />
                         </Button>
@@ -201,11 +204,13 @@
                                 Grid.Column="0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
+                                Focusable="False"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
                                 <TextBlock
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
+                                    Focusable="False"
                                     FontSize="{StaticResource FontSizeState}"
                                     Text="{Binding Counter}" />
                             </Viewbox>
@@ -235,6 +240,7 @@
                                 <TextBlock
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
+                                    Focusable="False"
                                     FontSize="{StaticResource FontSizeState}"
                                     Text="{Binding Remaining}" />
                             </Viewbox>
@@ -247,6 +253,7 @@
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
+                                Focusable="False"
                                 FontSize="{StaticResource FontSizeContentMain}"
                                 Text="{Binding Content}" />
                         </Viewbox>
@@ -254,6 +261,7 @@
                         <ct:TrackRenderer
                             Grid.Row="2"
                             Bitmap="{Binding Bitmap}"
+                            Focusable="False"
                             OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                             Progress="{Binding Progress}" />
                     </Grid>

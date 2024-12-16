@@ -33,6 +33,7 @@
 
     <TabControl
         Margin="{StaticResource ContentMargin}"
+        Focusable="False"
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Selected}">
 
@@ -42,7 +43,8 @@
                 <Grid
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="{StaticResource ColorBackground}">
+                    Background="{StaticResource ColorBackground}"
+                    Focusable="False">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -70,6 +72,7 @@
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        Focusable="False"
                         Stretch="Uniform"
                         StretchDirection="DownOnly">
 
@@ -87,6 +90,7 @@
                         Margin="{StaticResource KeyMargin}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
+                        Focusable="False"
                         IsVisible="{Binding HasKey}"
                         Stretch="Uniform"
                         StretchDirection="DownOnly">
