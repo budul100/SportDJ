@@ -16,6 +16,10 @@ namespace SportDJ.App.Views
 
         #region Public Constructors
 
+        public MainView()
+            : this(default)
+        { }
+
         public MainView(IEventAggregator eventAggregator)
         {
             this.eventAggregator = eventAggregator;
@@ -45,7 +49,7 @@ namespace SportDJ.App.Views
 
                 if (!string.IsNullOrWhiteSpace(keyCode))
                 {
-                    eventAggregator.GetEvent<KeyPressedEvent>().Publish(keyCode);
+                    eventAggregator?.GetEvent<KeyPressedEvent>()?.Publish(keyCode);
                 }
             }
         }
@@ -58,7 +62,7 @@ namespace SportDJ.App.Views
 
                 if (!string.IsNullOrWhiteSpace(keyCode))
                 {
-                    eventAggregator.GetEvent<KeyReleasedEvent>().Publish(keyCode);
+                    eventAggregator?.GetEvent<KeyReleasedEvent>()?.Publish(keyCode);
                 }
             }
         }

@@ -10,6 +10,7 @@ namespace SportDJ.Commons.Assets
         public const int FadeStepInMilliSec = 30;
 
         public const int FilterCutoffFrequency = 20000;
+        public const int FilterCutoffMax = 500;
 
         public const string FormatClock = "HH:mm:ss";
         public const string FormatDuration = @"mm\:ss\.f";

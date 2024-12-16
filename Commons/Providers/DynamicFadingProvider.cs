@@ -12,13 +12,12 @@ namespace SportDJ.Commons.Providers
         #region Private Fields
 
         private readonly object lockProvider = new();
-        private readonly BiQuadFilter[] lowPassFilters;
         private readonly Random random;
         private readonly ISampleProvider sourceProvider;
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
-        private bool useFilterEffect;
+        private BiQuadFilter[] lowPassFilters;
         private float volumeCurrent;
         private float volumeFadeDiff;
         private float volumeFadeStart;
@@ -36,7 +35,6 @@ namespace SportDJ.Commons.Providers
             Volume = volumeCurrent;
 
             random = new Random();
-            lowPassFilters = GetFilters();
         }
 
         #endregion Public Constructors
@@ -70,31 +68,24 @@ namespace SportDJ.Commons.Providers
 
             if (volumeTarget != volumeCurrent)
             {
-                FadeType = volumeTarget > volumeCurrent
-                    ? FadeType.Raise
-                    : FadeType.Reduce;
-
-                Volume = volumeTarget;
-
-                this.useFilterEffect = useFilterEffect;
-
-                fadeSampleCount = milliSeconds.HasValue
-                    ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
-                    : default;
-
-                FadingStartedEvent?.Invoke(
-                    sender: this,
-                    e: default);
-            }
-
-            if (fadeSampleCount == 0 || volumeCurrent == volumeTarget)
-            {
-                OnFadingEnded();
-            }
-            else
-            {
                 lock (lockProvider)
                 {
+                    Volume = volumeTarget;
+
+                    FadeType = volumeTarget > volumeCurrent
+                        ? FadeType.Raise
+                        : FadeType.Reduce;
+
+                    lowPassFilters = useFilterEffect
+                        ? GetFilters()
+                        : default;
+
+                    fadeSamplePosition = 0;
+
+                    fadeSampleCount = milliSeconds.HasValue
+                        ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
+                        : default;
+
                     if (FadeType == FadeType.Raise)
                     {
                         volumeFadeStart = volumeCurrent;
@@ -105,8 +96,15 @@ namespace SportDJ.Commons.Providers
                         volumeFadeStart = volumeCurrent;
                         volumeFadeDiff = (volumeCurrent - volumeTarget) / fadeSampleCount;
                     }
+                }
 
-                    fadeSamplePosition = 0;
+                FadingStartedEvent?.Invoke(
+                    sender: this,
+                    e: default);
+
+                if (fadeSampleCount == 0 || volumeCurrent == volumeTarget)
+                {
+                    OnFadingEnded();
                 }
             }
         }
@@ -157,13 +155,16 @@ namespace SportDJ.Commons.Providers
                         volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                     }
 
-                    if (useFilterEffect)
+                    if (lowPassFilters != default)
                     {
                         var fadeSampleProgress = (float)fadeSamplePosition / fadeSampleCount;
                         var fadeSampleFactor = (float)Math.Pow(1 - fadeSampleProgress, 2); // Exponential fade for smoothness
 
-                        cutoffFrequency = Math.Max(500, Constants.FilterCutoffFrequency * fadeSampleFactor) +
-                            (float)(random.NextDouble() * 100);
+                        cutoffFrequency = (float)(random.NextDouble() * 100) +
+                            Math.Max(
+                                val1: Constants.FilterCutoffMax,
+                                val2: Constants.FilterCutoffFrequency * fadeSampleFactor);
+
                         resonance = 1.0f + ((1 - fadeSampleFactor) * 2.0f);
                     }
                 }
@@ -172,7 +173,7 @@ namespace SportDJ.Commons.Providers
                 {
                     var sample = offset + channel + index;
 
-                    if (useFilterEffect)
+                    if (lowPassFilters != default)
                     {
                         lowPassFilters[channel].SetLowPassFilter(
                             sampleRate: WaveFormat.SampleRate,

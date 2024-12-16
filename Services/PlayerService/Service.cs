@@ -1,4 +1,5 @@
 ﻿using Avalonia.Platform.Storage;
+using DryIoc.ImTools;
 using MsBox.Avalonia.Enums;
 using Prism.Events;
 using Prism.Ioc;
@@ -10,6 +11,7 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
@@ -87,7 +89,7 @@ namespace SportDJ.Services.PlayerService
                 action: OnSignalEnded,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => s == signalService || signalServices.Contains(s));
+                filter: signalServices.Contains);
 
             eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
                 action: _ => Next(),
@@ -359,7 +361,7 @@ namespace SportDJ.Services.PlayerService
             Task.Run(() => stackService.Initialize(
                 paths: paths,
                 name: player.Name,
-                resetPosition: ResetPosition,
+                resetPosition: player.ResetPosition,
                 isLoop: IsLoop));
         }
 
@@ -374,12 +376,12 @@ namespace SportDJ.Services.PlayerService
                 var mixerService = containerProvider?.Resolve<IMixerService>(
                     name: mixerType.ToString());
 
-                if (mixerService.IsInitialized)
+                if (mixerService.IsInitialized
+                    && (signalService?.State != StateType.None || signalService?.Track != stackService.Track))
                 {
-                    if (signalService?.State == StateType.Pause)
-                    {
-                        signalService.Stop();
-                    }
+                    signalServices
+                        .Where(s => s.IsSilent)
+                        .OnEach(s => s.Stop());
 
                     signalService = mixerService?.Add(
                         track: stackService.Track,
@@ -432,7 +434,7 @@ namespace SportDJ.Services.PlayerService
 
         private void OnSignalStopped(ISignalService signalService)
         {
-            if ((signalService == this.signalService)
+            if (signalService == this.signalService
                 && (signalService.State == StateType.None
                 || signalService.IsOverNextThreshold
                 || IsForeground))

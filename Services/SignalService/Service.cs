@@ -258,12 +258,9 @@ namespace SportDJ.Services.SignalService
             {
                 State = StateType.Play;
 
-                if (fadingProvider.IsSilent)
-                {
-                    trackService.Begin(Track);
+                trackService.Begin(Track);
 
-                    eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
-                }
+                eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
             }
             else
             {
