@@ -10,9 +10,6 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
-        [DisplayName("Enable interrupting dialogs")]
-        public bool EnableInterruptingDialogs { get; set; }
-
         [Category("Fade durations")]
         [DisplayName("Fade lower (ms)")]
         [Range(Constants.OptionsFadeMin, Constants.OptionsFadeMax)]

@@ -170,7 +170,6 @@
                     <Button.ContextMenu>
                         <ContextMenu
                             Name="ContextMenu"
-                            IsVisible="{Binding IsAvailableMenu}"
                             ItemsSource="{Binding Menus}"
                             Opened="OnContextMenuOpened">
 

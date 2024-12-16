@@ -52,10 +52,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid.ContextMenu>
-                        <ContextMenu
-                            IsVisible="{Binding IsAvailableMenu}"
-                            ItemsSource="{Binding Menus}"
-                            Opened="OnContextMenuOpened">
+                        <ContextMenu ItemsSource="{Binding Menus}" Opened="OnContextMenuOpened">
 
                             <ContextMenu.DataTemplates>
                                 <DataTemplate x:DataType="vm:MenuViewModel">

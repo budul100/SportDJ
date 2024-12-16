@@ -12,7 +12,6 @@
 
 	<ContentControl>
 		<ContextMenu
-			IsVisible="{Binding IsAvailableMenu}"
 			ItemsSource="{Binding MenuItems}"
 			Opened="OnContextMenuOpened">
 
