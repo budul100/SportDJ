@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using NAudio.Dsp;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
@@ -17,7 +18,6 @@ namespace SportDJ.Commons.Providers
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
-        private bool isFading;
         private BiQuadFilter[] lowPassFilters;
         private float volumeCurrent;
         private float volumeFadeDiff;
@@ -118,15 +118,12 @@ namespace SportDJ.Commons.Providers
                 offset: offset,
                 count: count);
 
-            if (isFading)
+            lock (lockProvider)
             {
-                lock (lockProvider)
-                {
-                    AdjustSamples(
-                        buffer: buffer,
-                        offset: offset,
-                        count: samplesRead);
-                }
+                AdjustSamples(
+                    buffer: buffer,
+                    offset: offset,
+                    count: samplesRead);
             }
 
             return samplesRead;
@@ -143,8 +140,7 @@ namespace SportDJ.Commons.Providers
                 var cutoffFrequency = default(float);
                 var resonance = default(float);
 
-                if (isFading
-                    && FadeType != FadeType.None)
+                if (FadeType != FadeType.None)
                 {
                     fadeSamplePosition += WaveFormat.BlockAlign;
 
@@ -216,10 +212,10 @@ namespace SportDJ.Commons.Providers
             {
                 volumeCurrent = Volume;
 
+                Debug.WriteLine(volumeCurrent);
+
                 FadeType = FadeType.None;
             }
-
-            isFading = false;
 
             FadingEndedEvent?.Invoke(
                 sender: this,
@@ -231,8 +227,6 @@ namespace SportDJ.Commons.Providers
             FadingStartedEvent?.Invoke(
                 sender: this,
                 e: default);
-
-            isFading = true;
         }
 
         #endregion Private Methods

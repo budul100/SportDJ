@@ -376,8 +376,7 @@ namespace SportDJ.Services.PlayerService
                 var mixerService = containerProvider?.Resolve<IMixerService>(
                     name: mixerType.ToString());
 
-                if (mixerService.IsInitialized
-                    && (signalService?.State == StateType.None || signalService?.Track != stackService.Track))
+                if (mixerService.IsInitialized)
                 {
                     signalServices
                         .Where(s => s.IsSilent)

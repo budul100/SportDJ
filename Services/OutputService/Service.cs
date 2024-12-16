@@ -31,6 +31,7 @@ namespace SportDJ.Services.OutputService
         private readonly IEventAggregator eventAggregator;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
+        private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
         private bool isDisposed;
@@ -47,11 +48,12 @@ namespace SportDJ.Services.OutputService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService)
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
+            this.sessionService = sessionService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: SetOutput,
@@ -94,16 +96,13 @@ namespace SportDJ.Services.OutputService
         {
             get
             {
-                return outputOptions.Volume;
+                return outputOptions?.Volume ?? default;
             }
             set
             {
-                if (value < Constants.VolumeMin || value > Constants.VolumeMax)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(Volume));
-                }
-
-                if (value != outputOptions.Volume)
+                if (value != outputOptions?.Volume
+                    && value >= Constants.VolumeMin
+                    && value <= Constants.VolumeMax)
                 {
                     outputOptions.Volume = value;
 
@@ -240,6 +239,8 @@ namespace SportDJ.Services.OutputService
 
                     volumeService.Set(
                         deviceName: outputOptions.DeviceName);
+
+                    sessionService.Save();
                 }
 
                 eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
@@ -347,7 +348,7 @@ namespace SportDJ.Services.OutputService
 
         private Output GetOptions(OutputType type)
         {
-            if (settingsService?.Contents?.Outputs.Any(o => o.Type == type) != true)
+            if (sessionService?.Contents?.Outputs.Any(o => o.Type == type) != true)
             {
                 var outputOptions = new Output
                 {
@@ -355,10 +356,10 @@ namespace SportDJ.Services.OutputService
                     Volume = Constants.VolumeMax,
                 };
 
-                settingsService.Contents.Outputs.Add(outputOptions);
+                sessionService.Contents.Outputs.Add(outputOptions);
             }
 
-            var result = settingsService.Contents.Outputs
+            var result = sessionService.Contents.Outputs
                 .Single(s => s.Type == type);
 
             return result;

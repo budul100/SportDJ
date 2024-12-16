@@ -16,6 +16,7 @@ namespace SportDJ.Tests.OutputServiceTests
         private readonly Mock<IContainerProvider> mockContainerProvider;
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
+        private Mock<IStorageService<Session>> mockSessionService;
 
         #endregion Private Fields
 
@@ -50,6 +51,11 @@ namespace SportDJ.Tests.OutputServiceTests
             mockSettingsService
                 .Setup(m => m.Contents)
                 .Returns(new Set());
+
+            mockSessionService = new Mock<IStorageService<Session>>();
+            mockSessionService
+                .Setup(m => m.Contents)
+                .Returns(new Session());
         }
 
         #endregion Public Constructors
@@ -62,7 +68,8 @@ namespace SportDJ.Tests.OutputServiceTests
             var service = new Services.OutputService.Service(
                 containerProvider: mockContainerProvider.Object,
                 eventAggregator: mockEventAggregator.Object,
-                settingsService: mockSettingsService.Object);
+                settingsService: mockSettingsService.Object,
+                sessionService: mockSessionService.Object);
 
             var devices = service.GetDevices();
 

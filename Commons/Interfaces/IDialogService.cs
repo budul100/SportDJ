@@ -1,9 +1,9 @@
-﻿using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using MsBox.Avalonia.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia.Enums;
 
 namespace SportDJ.Commons.Interfaces
 {

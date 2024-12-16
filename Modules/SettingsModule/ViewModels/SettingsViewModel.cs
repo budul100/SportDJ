@@ -27,13 +27,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private readonly IEventAggregator eventAggregator;
         private readonly FilePickerFileType[] fileTypeFilter = [new(Constants.SettingsExtension)];
         private readonly IOutputService outputService;
+        private readonly Output outputSettings;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
         private string device;
         private bool devicesNotAvailable;
         private bool isUpdate;
-        private Output outputSettings;
         private IStorageFolder startLocation;
 
         #endregion Private Fields
@@ -61,6 +61,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
             outputService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
+
+            outputSettings = sessionService?.Contents?.Outputs?
+                .SingleOrDefault(o => o.Type == OutputType.Live);
 
             eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
                 action: SetStartLocation,
@@ -137,7 +140,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public float Volume
         {
-            get { return outputSettings?.Volume ?? 0; }
+            get { return outputSettings?.Volume ?? Constants.VolumeMax; }
             set
             {
                 if (outputSettings != default
@@ -154,7 +157,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public int VolumePercentageBackground
         {
-            get { return outputSettings?.VolumePercentageBackground ?? 0; }
+            get { return outputSettings?.VolumePercentageBackground ?? Defaults.VolumePercentageBackground; }
             set
             {
                 if (outputSettings != default
@@ -171,7 +174,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public int VolumePercentageExternals
         {
-            get { return outputSettings?.VolumePercentageExternals ?? 0; }
+            get { return outputSettings?.VolumePercentageExternals ?? Defaults.VolumePercentageExternals; }
             set
             {
                 if (outputSettings != default
@@ -192,9 +195,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void InitializeOptions()
         {
-            outputSettings = settingsService.Contents.Outputs?
-                .SingleOrDefault(o => o.Type == OutputType.Live);
-
             RaisePropertyChanged(nameof(Options));
 
             RaisePropertyChanged(nameof(Volume));

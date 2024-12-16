@@ -1,192 +1,196 @@
 <UserControl
-    x:Class="SportDJ.Modules.SettingsModule.Views.SettingsView"
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dt="using:SportDJ.Modules.SettingsModule.DesignTime"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
-    xmlns:mat="using:Material.Icons.Avalonia"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
-    xmlns:prism="http://prismlibrary.com/"
-    d:DesignHeight="500"
-    d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="d">
+	x:Class="SportDJ.Modules.SettingsModule.Views.SettingsView"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dt="using:SportDJ.Modules.SettingsModule.DesignTime"
+	xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+	xmlns:mat="using:Material.Icons.Avalonia"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
+	xmlns:prism="http://prismlibrary.com/"
+	d:DesignHeight="500"
+	d:DesignWidth="300"
+	prism:ViewModelLocator.AutoWireViewModel="True"
+	mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
 
-        <Thickness x:Key="InnerMargin">2</Thickness>
-    </UserControl.Resources>
+		<Thickness x:Key="InnerMargin">2</Thickness>
+	</UserControl.Resources>
 
-    <UserControl.Styles>
-        <mat:MaterialIconStyles />
-    </UserControl.Styles>
+	<UserControl.Styles>
+		<mat:MaterialIconStyles />
+	</UserControl.Styles>
 
-    <Design.DataContext>
-        <dt:SettingsViewModel />
-    </Design.DataContext>
+	<Design.DataContext>
+		<dt:SettingsViewModel />
+	</Design.DataContext>
 
-    <DockPanel IsEnabled="{Binding IsActive}" LastChildFill="True">
+	<DockPanel IsEnabled="{Binding IsActive}" LastChildFill="True">
 
-        <DockPanel
-            Margin="{StaticResource ContentMargin}"
-            DockPanel.Dock="Top"
-            IsEnabled="{Binding !DevicesNotAvailable}"
-            LastChildFill="True">
+		<DockPanel
+			Margin="{StaticResource ContentMargin}"
+			DockPanel.Dock="Top"
+			IsEnabled="{Binding !DevicesNotAvailable}"
+			LastChildFill="True">
 
-            <Button
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Command="{Binding UpdateDevicesCommand}"
-                DockPanel.Dock="Right"
-                Focusable="False">
-                <mat:MaterialIcon
-                    Width="{StaticResource MediumIconSize}"
-                    Height="{StaticResource MediumIconSize}"
-                    Kind="Reload" />
-            </Button>
+			<Button
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Bottom"
+				Command="{Binding UpdateDevicesCommand}"
+				DockPanel.Dock="Right"
+				Focusable="False">
+				<mat:MaterialIcon
+					Width="{StaticResource MediumIconSize}"
+					Height="{StaticResource MediumIconSize}"
+					Kind="Reload" />
+			</Button>
 
-            <StackPanel Margin="{StaticResource InnerMargin}" DockPanel.Dock="Left">
+			<StackPanel Margin="{StaticResource InnerMargin}" DockPanel.Dock="Left">
 
-                <TextBlock
-                    Margin="{StaticResource InnerMargin}"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    FontSize="{StaticResource FontSizeVolume}"
-                    Text="Output device" />
-                <ComboBox
-                    Margin="{StaticResource InnerMargin}"
-                    HorizontalAlignment="Stretch"
-                    Focusable="False"
-                    ItemsSource="{Binding Devices}"
-                    SelectedItem="{Binding Device}" />
-            </StackPanel>
-        </DockPanel>
+				<TextBlock
+					Margin="{StaticResource InnerMargin}"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Stretch"
+					FontSize="{StaticResource FontSizeVolume}"
+					Text="Output device" />
+				<ComboBox
+					Margin="{StaticResource InnerMargin}"
+					HorizontalAlignment="Stretch"
+					Focusable="False"
+					ItemsSource="{Binding Devices}"
+					SelectedItem="{Binding Device}" />
+			</StackPanel>
+		</DockPanel>
 
-        <Grid
-            Margin="{StaticResource ContentMargin}"
-            ColumnDefinitions="*,*"
-            DockPanel.Dock="Bottom">
-            <Button
-                Grid.Column="0"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Command="{Binding SettingsLoadCommand}"
-                Focusable="False">
-                <mat:MaterialIcon
-                    Width="{StaticResource MediumIconSize}"
-                    Height="{StaticResource MediumIconSize}"
-                    Kind="FolderOpenOutline" />
-            </Button>
-            <Button
-                Grid.Column="1"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Command="{Binding SettingsSaveCommand}"
-                Focusable="False">
-                <mat:MaterialIcon
-                    Width="{StaticResource MediumIconSize}"
-                    Height="{StaticResource MediumIconSize}"
-                    Kind="ContentSaveOutline" />
-            </Button>
-        </Grid>
+		<Grid
+			Margin="{StaticResource ContentMargin}"
+			ColumnDefinitions="*,*"
+			DockPanel.Dock="Bottom">
+			<Button
+				Grid.Column="0"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				Command="{Binding SettingsLoadCommand}"
+				Focusable="False">
+				<mat:MaterialIcon
+					Width="{StaticResource MediumIconSize}"
+					Height="{StaticResource MediumIconSize}"
+					Kind="FolderOpenOutline" />
+			</Button>
+			<Button
+				Grid.Column="1"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				Command="{Binding SettingsSaveCommand}"
+				Focusable="False">
+				<mat:MaterialIcon
+					Width="{StaticResource MediumIconSize}"
+					Height="{StaticResource MediumIconSize}"
+					Kind="ContentSaveOutline" />
+			</Button>
+		</Grid>
 
-        <pgc:PropertyGrid
-            Margin="{StaticResource ContentMargin}"
-            AllowFilter="False"
-            AllowQuickFilter="False"
-            AllowToggleView="False"
-            DataContext="{Binding Options}"
-            DockPanel.Dock="Bottom"
-            Focusable="False" />
+		<pgc:PropertyGrid
+			Margin="{StaticResource ContentMargin}"
+			AllowFilter="False"
+			AllowQuickFilter="False"
+			AllowToggleView="False"
+			DataContext="{Binding Options}"
+			DockPanel.Dock="Bottom"
+			Focusable="False" />
 
-        <Grid Margin="{StaticResource ContentMargin}" DockPanel.Dock="Top">
+		<Grid Margin="{StaticResource ContentMargin}" DockPanel.Dock="Top">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="30" />
+				<RowDefinition />
+			</Grid.RowDefinitions>
 
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="0"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeVolume}"
-                Text="Volume" />
+			<TextBlock
+				Grid.Row="0"
+				Grid.Column="0"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				FontSize="{StaticResource FontSizeVolume}"
+				Text="Volume" />
 
-            <Slider
-                Grid.Row="1"
-                Grid.Column="0"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                Focusable="False"
-                Maximum="1"
-                Minimum="0"
-                Orientation="Vertical"
-                Value="{Binding Volume}" />
+			<Slider
+				Grid.Row="1"
+				Grid.Column="0"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				Focusable="False"
+				IsSnapToTickEnabled="True"
+				Maximum="1"
+				Minimum="0"
+				Orientation="Vertical"
+				TickFrequency="0.05"
+				Value="{Binding Volume}" />
 
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="1"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeVolume}"
-                Text="Background" />
+			<TextBlock
+				Grid.Row="0"
+				Grid.Column="1"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				FontSize="{StaticResource FontSizeVolume}"
+				Text="Background" />
 
-            <Slider
-                Grid.Row="1"
-                Grid.Column="1"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                Focusable="False"
-                Maximum="100"
-                Minimum="0"
-                Orientation="Vertical"
-                SmallChange="1"
-                Value="{Binding VolumePercentageBackground}" />
+			<Slider
+				Grid.Row="1"
+				Grid.Column="1"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				Focusable="False"
+				IsSnapToTickEnabled="True"
+				TickFrequency="5"
+				Maximum="100"
+				Minimum="0"
+				Orientation="Vertical"
+				Value="{Binding VolumePercentageBackground}" />
 
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="2"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeVolume}"
-                Text="External apps" />
+			<TextBlock
+				Grid.Row="0"
+				Grid.Column="2"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				FontSize="{StaticResource FontSizeVolume}"
+				Text="External apps" />
 
-            <Slider
-                Grid.Row="1"
-                Grid.Column="2"
-                Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                Focusable="False"
-                Maximum="100"
-                Minimum="0"
-                Orientation="Vertical"
-                SmallChange="1"
-                Value="{Binding VolumePercentageExternals}" />
-        </Grid>
-    </DockPanel>
+			<Slider
+				Grid.Row="1"
+				Grid.Column="2"
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				Focusable="False"
+				IsSnapToTickEnabled="True"
+				Maximum="100"
+				Minimum="0"
+				Orientation="Vertical"
+				TickFrequency="5"
+				Value="{Binding VolumePercentageExternals}" />
+		</Grid>
+	</DockPanel>
 </UserControl>

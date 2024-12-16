@@ -1,5 +1,5 @@
-﻿using SportDJ.Commons.Assets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
 {
@@ -8,6 +8,8 @@ namespace SportDJ.Commons.Models.Settings
         #region Public Properties
 
         public int Height { get; set; } = Defaults.AppHeight;
+
+        public List<Output> Outputs { get; set; } = [];
 
         public List<Position> Positions { get; set; } = [];
 
