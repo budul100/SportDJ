@@ -21,8 +21,6 @@ namespace SportDJ.Modules.SearchModule.DesignTime
             Tracks.Add(track3);
 
             RaisePropertyChanged(nameof(Tracks));
-
-            Debug.WriteLine(Tracks.Count() + " Tracks");
         }
 
         #endregion Public Constructors

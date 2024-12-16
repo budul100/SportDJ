@@ -212,8 +212,6 @@ namespace SportDJ.Commons.Providers
             {
                 volumeCurrent = Volume;
 
-                Debug.WriteLine(volumeCurrent);
-
                 FadeType = FadeType.None;
             }
 
