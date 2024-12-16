@@ -1,8 +1,8 @@
-﻿using NAudio.Dsp;
+﻿using System;
+using NAudio.Dsp;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using System;
 
 namespace SportDJ.Commons.Providers
 {
@@ -17,6 +17,7 @@ namespace SportDJ.Commons.Providers
 
         private long fadeSampleCount;
         private long fadeSamplePosition;
+        private bool isFading;
         private BiQuadFilter[] lowPassFilters;
         private float volumeCurrent;
         private float volumeFadeDiff;
@@ -86,26 +87,27 @@ namespace SportDJ.Commons.Providers
                         ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
                         : default;
 
-                    if (FadeType == FadeType.Raise)
+                    if (fadeSampleCount > 0)
                     {
-                        volumeFadeStart = volumeCurrent;
-                        volumeFadeDiff = (volumeTarget - volumeCurrent) / fadeSampleCount;
-                    }
-                    else if (FadeType == FadeType.Reduce)
-                    {
-                        volumeFadeStart = volumeCurrent;
-                        volumeFadeDiff = (volumeCurrent - volumeTarget) / fadeSampleCount;
+                        if (FadeType == FadeType.Raise)
+                        {
+                            volumeFadeStart = volumeCurrent;
+                            volumeFadeDiff = (volumeTarget - volumeCurrent) / fadeSampleCount;
+                        }
+                        else if (FadeType == FadeType.Reduce)
+                        {
+                            volumeFadeStart = volumeCurrent;
+                            volumeFadeDiff = (volumeCurrent - volumeTarget) / fadeSampleCount;
+                        }
                     }
                 }
+            }
 
-                FadingStartedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+            OnFadingStarted();
 
-                if (fadeSampleCount == 0 || volumeCurrent == volumeTarget)
-                {
-                    OnFadingEnded();
-                }
+            if (fadeSampleCount == 0 || volumeCurrent == volumeTarget)
+            {
+                OnFadingEnded();
             }
         }
 
@@ -116,12 +118,15 @@ namespace SportDJ.Commons.Providers
                 offset: offset,
                 count: count);
 
-            lock (lockProvider)
+            if (isFading)
             {
-                AdjustSamples(
-                    buffer: buffer,
-                    offset: offset,
-                    count: samplesRead);
+                lock (lockProvider)
+                {
+                    AdjustSamples(
+                        buffer: buffer,
+                        offset: offset,
+                        count: samplesRead);
+                }
             }
 
             return samplesRead;
@@ -138,7 +143,8 @@ namespace SportDJ.Commons.Providers
                 var cutoffFrequency = default(float);
                 var resonance = default(float);
 
-                if (FadeType != FadeType.None)
+                if (isFading
+                    && FadeType != FadeType.None)
                 {
                     fadeSamplePosition += WaveFormat.BlockAlign;
 
@@ -155,7 +161,8 @@ namespace SportDJ.Commons.Providers
                         volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
                     }
 
-                    if (lowPassFilters != default)
+                    if (lowPassFilters != default
+                        && fadeSampleCount > 0)
                     {
                         var fadeSampleProgress = (float)fadeSamplePosition / fadeSampleCount;
                         var fadeSampleFactor = (float)Math.Pow(1 - fadeSampleProgress, 2); // Exponential fade for smoothness
@@ -205,16 +212,27 @@ namespace SportDJ.Commons.Providers
 
         private void OnFadingEnded()
         {
-            volumeCurrent = Volume;
-
-            if (FadeType != FadeType.None)
+            lock (lockProvider)
             {
-                FadeType = FadeType.None;
+                volumeCurrent = Volume;
 
-                FadingEndedEvent?.Invoke(
-                    sender: this,
-                    e: default);
+                FadeType = FadeType.None;
             }
+
+            isFading = false;
+
+            FadingEndedEvent?.Invoke(
+                sender: this,
+                e: default);
+        }
+
+        private void OnFadingStarted()
+        {
+            FadingStartedEvent?.Invoke(
+                sender: this,
+                e: default);
+
+            isFading = true;
         }
 
         #endregion Private Methods

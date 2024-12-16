@@ -1,4 +1,9 @@
-﻿using DryIoc.ImTools;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DryIoc.ImTools;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
@@ -13,11 +18,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {
