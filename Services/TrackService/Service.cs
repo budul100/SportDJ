@@ -112,6 +112,9 @@ namespace SportDJ.Services.TrackService
 
                     if (result != default)
                     {
+                        trackUpdates.Enqueue(result);
+                        trackTrims.Enqueue(result);
+
                         yield return result;
                     }
                 }

@@ -1,14 +1,14 @@
-﻿using NAudio.Wave;
-using NAudio.WaveFormRenderer;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Models.Contents;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using NAudio.Wave;
+using NAudio.WaveFormRenderer;
+using SportDJ.Commons.Assets;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.TrackService.Extensions
 {
@@ -31,14 +31,21 @@ namespace SportDJ.Services.TrackService.Extensions
 
         public static bool Contains(this Track track, string search)
         {
-            bool containsPredicate(string s) => s.Contains(
-                value: search,
-                comparisonType: StringComparison.OrdinalIgnoreCase);
+            var result = false;
 
-            var result = containsPredicate(track.File)
-                || containsPredicate(track.Title)
-                || containsPredicate(track.Artist)
-                || containsPredicate(track.Info);
+            if (track != default
+                && !string.IsNullOrWhiteSpace(search))
+            {
+                bool containsPredicate(string s) => !string.IsNullOrWhiteSpace(s)
+                    && s.Contains(
+                        value: search,
+                        comparisonType: StringComparison.OrdinalIgnoreCase);
+
+                result = containsPredicate(track.File)
+                    || containsPredicate(track.Title)
+                    || containsPredicate(track.Artist)
+                    || containsPredicate(track.Info);
+            }
 
             return result;
         }
