@@ -1,13 +1,16 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using Moq;
 using Prism.Events;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Signal;
+using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -20,7 +23,7 @@ namespace SportDJ.Tests.StackServiceTests
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Session>> mockSessionService;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
-        private readonly Services.TrackService.Service trackService;
+        private readonly Mock<TrackUpdatedEvent> trackUpdatedEvent;
 
         #endregion Private Fields
 
@@ -46,20 +49,30 @@ namespace SportDJ.Tests.StackServiceTests
 
             mockEventAggregator = new Mock<IEventAggregator>();
 
-            var mockTrackSelectedEvent = new Mock<SignalUpdatedEvent>();
-            mockEventAggregator.
-                Setup(m => m.GetEvent<SignalUpdatedEvent>()).
-                Returns(mockTrackSelectedEvent.Object);
+            var signalUpdatedEvent = new Mock<SignalUpdatedEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<SignalUpdatedEvent>())
+                .Returns(signalUpdatedEvent.Object);
 
-            var mockTrackUpdatedEvent = new Mock<EntryUpdatedEvent>();
-            mockEventAggregator.
-                Setup(m => m.GetEvent<EntryUpdatedEvent>()).
-                Returns(mockTrackUpdatedEvent.Object);
+            var entryUpdatedEvent = new Mock<EntryUpdatedEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<EntryUpdatedEvent>())
+                .Returns(entryUpdatedEvent.Object);
 
-            var trackUpdatedEvent = new Mock<TrackUpdatedEvent>();
-            mockEventAggregator.
-                Setup(m => m.GetEvent<TrackUpdatedEvent>()).
-                Returns(trackUpdatedEvent.Object);
+            var stackResetEvent = new Mock<StackResetEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<StackResetEvent>())
+                .Returns(stackResetEvent.Object);
+
+            var stackUpdatedEvent = new Mock<StackUpdatedEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<StackUpdatedEvent>())
+                .Returns(stackUpdatedEvent.Object);
+
+            trackUpdatedEvent = new Mock<TrackUpdatedEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<TrackUpdatedEvent>())
+                .Returns(trackUpdatedEvent.Object);
 
             mockDispatcherService = new Mock<IDispatcherService>();
             mockDispatcherService
@@ -70,10 +83,6 @@ namespace SportDJ.Tests.StackServiceTests
             mockSessionService
                 .Setup(m => m.Contents)
                 .Returns(new Session());
-
-            trackService = new Services.TrackService.Service(
-                eventAggregator: mockEventAggregator.Object,
-                settingsService: mockSettingsService.Object);
         }
 
         #endregion Public Constructors
@@ -83,6 +92,10 @@ namespace SportDJ.Tests.StackServiceTests
         [Fact]
         public void DecreasePlayeds()
         {
+            var trackService = new Services.TrackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                settingsService: mockSettingsService.Object);
+
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
                 sessionService: mockSessionService.Object,
@@ -138,8 +151,18 @@ namespace SportDJ.Tests.StackServiceTests
         }
 
         [Fact]
-        public async Task LoadFilesAsync()
+        public void LoadFiles()
         {
+            var tracksHandled = 0;
+
+            trackUpdatedEvent
+                .Setup(e => e.Publish(It.IsAny<Track>()))
+                .Callback(() => tracksHandled++);
+
+            var trackService = new Services.TrackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                settingsService: mockSettingsService.Object);
+
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
                 sessionService: mockSessionService.Object,
@@ -151,7 +174,12 @@ namespace SportDJ.Tests.StackServiceTests
                 resetPosition: true,
                 isLoop: false);
 
-            await Task.Delay(5000);
+            var stopwatch = Stopwatch.StartNew();
+            while (stopwatch.ElapsedMilliseconds < 5000)
+            {
+                if (tracksHandled >= 6) { break; }
+                Thread.Sleep(200);
+            }
 
             Assert.Equal(
                 expected: 3,
@@ -167,6 +195,10 @@ namespace SportDJ.Tests.StackServiceTests
         [Fact]
         public void MaintainOnReset()
         {
+            var trackService = new Services.TrackService.Service(
+                eventAggregator: mockEventAggregator.Object,
+                settingsService: mockSettingsService.Object);
+
             var stackService = new Services.StackService.Service(
                 eventAggregator: mockEventAggregator.Object,
                 sessionService: mockSessionService.Object,
@@ -214,8 +246,6 @@ namespace SportDJ.Tests.StackServiceTests
 
             Assert.True(stackService.Track == track);
         }
-
-
 
         #endregion Public Methods
     }

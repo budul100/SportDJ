@@ -69,7 +69,8 @@ namespace SportDJ.Tests.OutputServiceTests
                 containerProvider: mockContainerProvider.Object,
                 eventAggregator: mockEventAggregator.Object,
                 settingsService: mockSettingsService.Object,
-                sessionService: mockSessionService.Object);
+                sessionService: mockSessionService.Object,
+                midiService: default);
 
             var devices = service.GetDevices();
 
