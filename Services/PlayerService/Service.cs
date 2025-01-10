@@ -380,7 +380,7 @@ namespace SportDJ.Services.PlayerService
                 {
                     signalServices
                         .Where(s => s.IsSilent)
-                        .OnEach(s => s.Stop());
+                        .OnEach(s => s.End());
 
                     signalService = mixerService?.Add(
                         track: stackService.Track,
@@ -438,7 +438,7 @@ namespace SportDJ.Services.PlayerService
                 || signalService.IsOverNextThreshold
                 || IsForeground))
             {
-                signalService.Stop();
+                signalService.End();
             }
 
             UpdateContent();

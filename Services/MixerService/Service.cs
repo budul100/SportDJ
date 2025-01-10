@@ -176,6 +176,11 @@ namespace SportDJ.Services.MixerService
             GC.SuppressFinalize(this);
         }
 
+        public void End()
+        {
+            signalServices.OnEach(s => s?.End());
+        }
+
         public void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap)
         {
             Type = type;
@@ -198,11 +203,6 @@ namespace SportDJ.Services.MixerService
             signalServices.OnEach(s => s?.Pause(useFilterEffect));
         }
 
-        public void Stop()
-        {
-            signalServices.OnEach(s => s?.Stop());
-        }
-
         #endregion Public Methods
 
         #region Protected Methods
@@ -213,7 +213,7 @@ namespace SportDJ.Services.MixerService
             {
                 if (isDisposing)
                 {
-                    Stop();
+                    End();
 
                     eventAggregator.GetEvent<MixerEndedEvent>().Publish(this);
 
@@ -251,7 +251,7 @@ namespace SportDJ.Services.MixerService
                 var signalService = fadingProviders
                     .SingleOrDefault(p => p.Value == fadingProvider).Key;
 
-                signalService.Stop();
+                signalService.End();
             }
         }
 
@@ -302,7 +302,7 @@ namespace SportDJ.Services.MixerService
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeInMilliseconds);
 
-                pausingServices.OnEach(s => s.Stop());
+                pausingServices.OnEach(s => s.End());
 
                 playingServices.OnEach(s => fadingProviders[s].Fade(
                     volumeTarget: Constants.VolumeMin,

@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System;
+using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
-using System;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -40,11 +40,11 @@ namespace SportDJ.Commons.Interfaces
 
         ISignalService Add(Track track, bool isLoop);
 
+        void End();
+
         void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap);
 
         void Pause();
-
-        void Stop();
 
         #endregion Public Methods
     }

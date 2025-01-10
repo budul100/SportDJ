@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Midi;
+﻿using NAudio.Midi;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Services.MidiService.Extensions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.MidiService
 {

@@ -260,7 +260,7 @@ namespace SportDJ.Services.OutputService
             {
                 if (isDisposing)
                 {
-                    mixersAll.OnEach(p => p.Stop());
+                    mixersAll.OnEach(p => p.End());
 
                     mixersForeground.Clear();
                     mixersAll.Clear();
@@ -343,7 +343,7 @@ namespace SportDJ.Services.OutputService
 
         private void CloseOutput()
         {
-            mixersAll.OnEach(p => p.Stop());
+            mixersAll.OnEach(m => m.Pause());
             providerOutput?.Stop();
 
             providerOutput?.Dispose();

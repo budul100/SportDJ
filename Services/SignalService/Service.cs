@@ -91,6 +91,13 @@ namespace SportDJ.Services.SignalService
                 obj: this);
         }
 
+        public void End()
+        {
+            State = StateType.None;
+
+            playingProvider?.End();
+        }
+
         public void Initialize(Track track, WaveFormat waveFormat)
         {
             ArgumentNullException.ThrowIfNull(track);
@@ -190,13 +197,6 @@ namespace SportDJ.Services.SignalService
             }
         }
 
-        public void Stop()
-        {
-            State = StateType.None;
-
-            playingProvider?.End();
-        }
-
         #endregion Public Methods
 
         #region Protected Methods
@@ -281,7 +281,7 @@ namespace SportDJ.Services.SignalService
 
             if (IsOverNextThreshold)
             {
-                Stop();
+                End();
             }
             else
             {
