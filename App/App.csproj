@@ -48,6 +48,7 @@
 	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 	  <ProjectReference Include="..\Services\GridService\GridService.csproj" />
 	  <ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
+	  <ProjectReference Include="..\Services\MidiService\MidiService.csproj" />
 	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
 	  <ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
 	  <ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />

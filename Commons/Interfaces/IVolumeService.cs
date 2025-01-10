@@ -1,5 +1,5 @@
-﻿using SportDJ.Commons.Enums;
-using System;
+﻿using System;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Interfaces
 {

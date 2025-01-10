@@ -23,6 +23,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IMidiService midiService;
         private readonly IRegionNavigationService navigationService;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
@@ -38,10 +39,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IRegionNavigationService navigationService,
-            IStorageService<Set> settingsService)
+            IStorageService<Set> settingsService, IMidiService midiService)
             : base(regionManager)
         {
             this.navigationService = navigationService;
+            this.midiService = midiService;
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
@@ -132,17 +134,23 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool VolumeMonitoringActive
         {
-            get { return volumeService?.IsActive == true; }
+            get
+            {
+                return (volumeService?.IsActive == true)
+                    && (midiService?.IsActive == true);
+            }
             set
             {
                 if (volumeService != default)
                 {
                     if (value)
                     {
+                        midiService.Activate();
                         volumeService.Activate();
                     }
                     else
                     {
+                        midiService.Deactivate();
                         volumeService.Deactivate();
                     }
 

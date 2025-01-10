@@ -1,3 +1,8 @@
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -12,11 +17,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace SportDJ.App
 {
@@ -109,8 +109,9 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
-            containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
+            containerRegistry.RegisterSingleton<IMidiService, Services.MidiService.Service>();
+            containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
 
             RegisterTypes<OutputType>(
                 containerRegistry: containerRegistry,

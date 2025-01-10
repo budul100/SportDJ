@@ -29,6 +29,7 @@ namespace SportDJ.Services.OutputService
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
+        private readonly IMidiService midiService;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
         private readonly IStorageService<Session> sessionService;
@@ -48,12 +49,14 @@ namespace SportDJ.Services.OutputService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService, IStorageService<Session> sessionService)
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
+            IMidiService midiService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
+            this.midiService = midiService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: SetOutput,
@@ -271,6 +274,9 @@ namespace SportDJ.Services.OutputService
                     providerFader?.Dispose();
                     providerBackground?.Dispose();
 
+                    midiService?.Deactivate();
+                    midiService?.Dispose();
+
                     volumeService?.Deactivate();
                     volumeService?.Dispose();
                 }
@@ -403,6 +409,9 @@ namespace SportDJ.Services.OutputService
         private void MuteExternals()
         {
             var fadeMilliseconds = settingsService.Contents.Options.FadeOnPauseUnfilteredMilliseconds;
+
+            midiService.Mute(
+                milliSeconds: fadeMilliseconds);
 
             volumeService.Mute(
                 milliSeconds: fadeMilliseconds);

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Mappings\SportDJ2Mixxx.midi.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Mappings\SportDJ2Mixxx.midi.xml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+	</ItemGroup>
+
+</Project>

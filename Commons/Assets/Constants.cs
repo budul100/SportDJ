@@ -23,6 +23,18 @@ namespace SportDJ.Commons.Assets
         public const int MenuGroupBaseSize = 20;
         public const int MenuGroupTextLength = 10;
 
+        public const int MidiChannel = 1;
+        public const int MidiDelayStopDecks = 100;
+        public const int MidiMixxxDeckCount = 4;
+        public const string MidiMixxxMappingFile = "SportDJ2Mixxx.midi.xml";
+        public const string MidiMixxxMappingSource = "Mappings";
+        public const string MidiMixxxMappingTarget = "Mixxx\\controllers";
+        public const string MidiMixxxOutputDevice = "SportDJ2Mixxx";
+        public const int MidiNoteBase = 0x40;
+        public const int MidiNoteVolume = 0x07;
+        public const int MidiOutputNotFound = -1;
+        public const int MidiVolumeMax = 127;
+
         public const int MixerSourcesMax = 1024;
 
         public const int NameMaxLength = 30;
