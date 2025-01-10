@@ -77,7 +77,7 @@ namespace SportDJ.Services.MidiService
             {
                 if (disposing)
                 {
-                    cancellationTokenSource.Cancel();
+                    cancellationTokenSource?.Cancel();
                 }
 
                 isDisposed = true;
