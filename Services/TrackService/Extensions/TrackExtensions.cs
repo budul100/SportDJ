@@ -234,7 +234,7 @@ namespace SportDJ.Services.TrackService.Extensions
             track.Info = atlTrack.GetInfo();
             track.Title = atlTrack.Title;
             track.Artist = atlTrack.Artist;
-            track.Bpm = atlTrack.BPM;
+            track.BPM = atlTrack.BPM;
 
             if (track.Duration == default)
             {

@@ -12,7 +12,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public Bitmap Bitmap { get; set; }
 
-        public int? Bpm { get; set; }
+        public float? BPM { get; set; }
 
         public int Counter => Registers?.Count ?? 0;
 
