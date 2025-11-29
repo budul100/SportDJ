@@ -9,9 +9,9 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.3.9" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
-		<PackageReference Include="Avalonia.Xaml.Interactions" Version="11.3.0.6" />
-		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="11.3.0.6" />
 		<PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />
+		<PackageReference Include="Xaml.Behaviors.Interactions" Version="11.3.9" />
+		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -23,7 +23,5 @@
 	    <DependentUpon>MenuView.axaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
-
-
 
 </Project>

@@ -19,11 +19,11 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <Thickness x:Key="InnerMargin">2,0,2,0</Thickness>
         </ResourceDictionary>
-
-        <Thickness x:Key="InnerMargin">2,0,2,0</Thickness>
     </UserControl.Resources>
-
+    
     <UserControl.Styles>
         <mat:MaterialIconStyles />
     </UserControl.Styles>

@@ -2,11 +2,9 @@
     x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
     xmlns:en="using:SportDJ.Commons.Enums"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -20,9 +18,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
 
-        <Thickness x:Key="InnerMargin">1</Thickness>
+            <Thickness x:Key="InnerMargin">1</Thickness>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -32,17 +30,6 @@
     <Design.DataContext>
         <dt:ControllerViewModel />
     </Design.DataContext>
-
-    <i:Interaction.Behaviors>
-
-        <a:EventTriggerBehavior EventName="PointerPressed" SourceObject="VolumeButton">
-            <a:InvokeCommandAction Command="{Binding VolumeLowerCommand}" />
-        </a:EventTriggerBehavior>
-
-        <a:EventTriggerBehavior EventName="PointerReleased" SourceObject="VolumeButton">
-            <a:InvokeCommandAction Command="{Binding VolumeRaiseCommand}" />
-        </a:EventTriggerBehavior>
-    </i:Interaction.Behaviors>
 
     <Grid Margin="{StaticResource ContentMargin}">
 
@@ -80,6 +67,15 @@
             <!--<prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
             </prism:RegionManager.RegionName>-->
+
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="PointerPressed" SourceObject="VolumeButton">
+                    <InvokeCommandAction Command="{Binding VolumeLowerCommand}" />
+                </EventTriggerBehavior>
+                <EventTriggerBehavior EventName="PointerReleased" SourceObject="VolumeButton">
+                    <InvokeCommandAction Command="{Binding VolumeRaiseCommand}" />
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
 
             <Grid
                 HorizontalAlignment="Stretch"

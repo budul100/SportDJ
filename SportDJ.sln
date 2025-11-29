@@ -57,6 +57,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SearchModule", "Modules\Sea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiService", "Services\MidiService\MidiService.csproj", "{4994B567-3D15-43D5-839F-D2E583F9437C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveFormRenderer", "Helpers\WaveFormRenderer\WaveFormRenderer.csproj", "{069E0EB5-D993-58BB-A1F8-47473C4C230C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +163,10 @@ Global
 		{4994B567-3D15-43D5-839F-D2E583F9437C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4994B567-3D15-43D5-839F-D2E583F9437C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4994B567-3D15-43D5-839F-D2E583F9437C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -186,6 +194,7 @@ Global
 		{CD12ABCD-9986-4885-96DC-B6F5A7B05123} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 		{B8EF491A-B0C1-40AC-A76F-94F150EC2CF1} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 		{4994B567-3D15-43D5-839F-D2E583F9437C} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{069E0EB5-D993-58BB-A1F8-47473C4C230C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

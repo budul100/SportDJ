@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using SkiaSharp;
 
 namespace SportDJ.Commons.Assets
 {
@@ -61,8 +61,8 @@ namespace SportDJ.Commons.Assets
 
         public const long WidthBase = 1000;
 
-        public static readonly Color ColorPeakBottom = Color.DarkGreen;
-        public static readonly Color ColorPeakTop = Color.Green;
+        public static readonly SKColor ColorPeakBottom = SKColors.DarkGreen;
+        public static readonly SKColor ColorPeakTop = SKColors.Green;
 
         #endregion Public Fields
     }

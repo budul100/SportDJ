@@ -8,11 +8,11 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\..\Helpers\WaveFormRenderer\WaveFormRenderer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="NAudio.WaveFormRenderer" Version="2.0.0" />
 		<PackageReference Include="z440.atl.core" Version="7.9.0" />
 	</ItemGroup>
 

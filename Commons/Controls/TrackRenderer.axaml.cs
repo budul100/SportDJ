@@ -39,8 +39,11 @@ namespace SportDJ.Commons.Controls
         #region Private Fields
 
         private bool isPlaying;
+
         private double played;
+
         private double progress;
+
         private double remaining;
 
         #endregion Private Fields
@@ -65,6 +68,11 @@ namespace SportDJ.Commons.Controls
                 value: value);
         }
 
+        public bool IsPlaying
+        {
+            get => Progress > 0;
+        }
+
         public double OpacityPlayed
         {
             get => GetValue(OpacityPlayedProperty);
@@ -72,6 +80,11 @@ namespace SportDJ.Commons.Controls
             set => SetValue(
                 property: OpacityPlayedProperty,
                 value: value);
+        }
+
+        public double Played
+        {
+            get => GetPlayed(Progress);
         }
 
         public double Progress
@@ -103,6 +116,11 @@ namespace SportDJ.Commons.Controls
                         value: GetRemaining(progress));
                 }
             }
+        }
+
+        public double Remaining
+        {
+            get => GetRemaining(Progress);
         }
 
         #endregion Public Properties

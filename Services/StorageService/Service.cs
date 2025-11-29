@@ -167,7 +167,7 @@ namespace SportDJ.Services.StorageService
 
                 result = true;
             }
-            catch (Exception exception)
+            catch
             {
                 Debugger.Break();
             }
@@ -202,7 +202,7 @@ namespace SportDJ.Services.StorageService
 
                 Path = fullPath;
             }
-            catch (Exception exception)
+            catch
             {
                 Debugger.Break();
             }

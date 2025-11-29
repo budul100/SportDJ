@@ -2,10 +2,8 @@
     x:Class="SportDJ.App.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:en="using:SportDJ.Commons.Enums"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.App.ViewModels"
@@ -28,11 +26,11 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <i:Interaction.Behaviors>
-        <a:EventTriggerBehavior EventName="Closing">
-            <a:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
-        </a:EventTriggerBehavior>
-    </i:Interaction.Behaviors>
+    <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Closing">
+            <InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
+        </EventTriggerBehavior>
+    </Interaction.Behaviors>
 
     <Grid>
 

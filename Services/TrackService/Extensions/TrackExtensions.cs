@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Avalonia;
 using NAudio.Wave;
 using NAudio.WaveFormRenderer;
+using NAudio.WaveFormRenderer.RendererSettings;
+using SkiaSharp;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Models.Contents;
 
@@ -16,11 +17,12 @@ namespace SportDJ.Services.TrackService.Extensions
     {
         #region Private Fields
 
+        private const int DPIDefault = 96;
         private const string InfoDelimiter = " - ";
 
-        private static readonly Avalonia.Vector dpi = new(
-            x: 96,
-            y: 96);
+        private static readonly Vector dpi = new(
+            x: DPIDefault,
+            y: DPIDefault);
 
         private static readonly object lockRender = new();
         private static readonly object lockTrim = new();
@@ -55,57 +57,49 @@ namespace SportDJ.Services.TrackService.Extensions
             if (track != default
                 && File.Exists(track.Path))
             {
-                var settings = new StandardWaveFormRendererSettings
+                var settings = new SoundCloudBlockWaveFormSettings(
+                    topPeakColor: Constants.ColorPeakTop,
+                    topSpacerStartColor: Constants.ColorPeakTop,
+                    bottomPeakColor: Constants.ColorPeakBottom,
+                    bottomSpacerColor: Constants.ColorPeakBottom)
                 {
-                    BackgroundColor = Color.Transparent,
-                    TopPeakPen = new Pen(Constants.ColorPeakTop),
-                    BottomPeakPen = new Pen(Constants.ColorPeakBottom)
+                    BackgroundColor = SKColors.Transparent,
                 };
-
-                var image = default(Image);
 
                 lock (lockRender)
                 {
-                    using var input = new AudioFileReader(track.Path);
+                    try
+                    {
+                        using var input = new AudioFileReader(track.Path);
+                        var renderer = new WaveFormRenderer();
 
-                    var renderer = new WaveFormRenderer();
-                    var peakProvider = new MaxPeakProvider();
+                        using SKBitmap skBitmap = renderer.Render(
+                            waveStream: input,
+                            settings: settings);
 
-                    image = renderer.Render(
-                        waveStream: input,
-                        peakProvider: peakProvider,
-                        settings: settings);
-                }
+                        if (skBitmap != default)
+                        {
+                            var pixels = skBitmap.GetPixels();
 
-                if (image != default)
-                {
-                    var temporary = new Bitmap(image);
+                            var pixelSize = new PixelSize(
+                                width: skBitmap.Width,
+                                height: skBitmap.Height);
 
-                    var rectangle = new Rectangle(
-                        x: 0,
-                        y: 0,
-                        width: temporary.Width,
-                        height: temporary.Height);
+                            track.Bitmap = new Avalonia.Media.Imaging.Bitmap(
+                                format: Avalonia.Platform.PixelFormat.Bgra8888,
+                                alphaFormat: Avalonia.Platform.AlphaFormat.Premul,
+                                data: pixels,
+                                size: pixelSize,
+                                dpi: dpi,
+                                stride: skBitmap.RowBytes);
 
-                    var bitmapdata = temporary.LockBits(
-                        rect: rectangle,
-                        flags: ImageLockMode.ReadWrite,
-                        format: PixelFormat.Format32bppArgb);
-
-                    var size = new Avalonia.PixelSize(
-                        width: bitmapdata.Width,
-                        height: bitmapdata.Height);
-
-                    track.Bitmap = new Avalonia.Media.Imaging.Bitmap(
-                        format: Avalonia.Platform.PixelFormat.Bgra8888,
-                        alphaFormat: Avalonia.Platform.AlphaFormat.Premul,
-                        data: bitmapdata.Scan0,
-                        size: size,
-                        dpi: dpi,
-                        stride: bitmapdata.Stride);
-
-                    temporary.UnlockBits(bitmapdata);
-                    temporary.Dispose();
+                            track.IsRendered = true;
+                        }
+                    }
+                    catch
+                    {
+                        //System.Diagnostics.Debug.WriteLine($"Render Error: {ex.Message}");
+                    }
                 }
 
                 track.IsRendered = true;
