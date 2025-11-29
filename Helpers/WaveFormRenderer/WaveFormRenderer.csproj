@@ -12,7 +12,6 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RootNamespace>NAudio.WaveFormRenderer</RootNamespace>
 		<AssemblyName>NAudio.WaveFormRenderer</AssemblyName>
-		<GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>

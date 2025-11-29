@@ -4,14 +4,16 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<RootNamespace>SportDJ.App</RootNamespace>
-		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-		<ApplicationIcon>Assets\SportDJ.ico</ApplicationIcon>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>7</VersionMinor>
 		<VersionBuild>0</VersionBuild>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationIcon>Assets\SportDJ.ico</ApplicationIcon>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	</PropertyGroup>
 
 	<PropertyGroup>

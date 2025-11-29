@@ -142,7 +142,7 @@ namespace SportDJ.App
         private static void RegisterTypes<TEnum>(IContainerRegistry containerRegistry, Type from, Type to)
             where TEnum : struct, Enum
         {
-            var names = Enum.GetValues(typeof(TEnum))
+            var names = Enum.GetValues<TEnum>()
                 .Cast<TEnum>().Select(t => t.ToString()).ToArray();
 
             foreach (var name in names)
