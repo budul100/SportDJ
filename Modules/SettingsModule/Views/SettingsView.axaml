@@ -16,13 +16,13 @@
 	mc:Ignorable="d">
 
 	<UserControl.Resources>
-		<ResourceDictionary x:Key="Ressources">
+		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceInclude  Source="avares://Commons/Assets/Ressources.axaml" />
 			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
 
-		<Thickness x:Key="InnerMargin">2</Thickness>
+			<Thickness x:Key="InnerMargin">2</Thickness>
+		</ResourceDictionary>
 	</UserControl.Resources>
 
 	<UserControl.Styles>
