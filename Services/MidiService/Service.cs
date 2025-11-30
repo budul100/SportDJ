@@ -108,7 +108,9 @@ namespace SportDJ.Services.MidiService
                 if (Directory.Exists(targetFolder)
                     && !File.Exists(targetFile))
                 {
-                    File.Copy(sourceFile, targetFile);
+                    File.Copy(
+                        sourceFileName: sourceFile,
+                        destFileName: targetFile);
                 }
             }
             catch
