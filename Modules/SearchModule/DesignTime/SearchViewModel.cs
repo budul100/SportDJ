@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Modules.SearchModule.DesignTime
 {
@@ -9,18 +9,22 @@ namespace SportDJ.Modules.SearchModule.DesignTime
         #region Public Constructors
 
         public SearchViewModel()
-            : base(regionManager: default)
+            : base(default)
         {
-            var track1 = new TrackViewModel(); // TrackViewModel("Track 1", "Artist 1", new System.TimeSpan(0, 1, 20));
-            Tracks.Add(track1);
+            // Erstellt 10 Beispiel-Tracks
+            var duration = TimeSpan.FromSeconds(255); // 4:15
 
-            var track2 = new TrackViewModel(); // new TrackViewModel("Track 2", "Artist 2", new System.TimeSpan(0, 2, 25));
-            Tracks.Add(track2);
+            for (int i = 1; i <= 10; i++)
+            {
+                var track = new Track("test", "test")
+                {
+                    Title = $"Beispiel-Track {i}",
+                    Info = $"Künstler: The Sample Band - Album: Design Time Hits",
+                    Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
+                };
 
-            var track3 = new TrackViewModel(); // new TrackViewModel("Track 3", "Artist 3", new System.TimeSpan(0, 3, 30));
-            Tracks.Add(track3);
-
-            RaisePropertyChanged(nameof(Tracks));
+                Tracks.Add(track);
+            }
         }
 
         #endregion Public Constructors

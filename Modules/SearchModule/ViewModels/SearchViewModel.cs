@@ -1,4 +1,5 @@
 ﻿using Prism.Navigation.Regions;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Prism;
 using System.Collections.ObjectModel;
 
@@ -9,7 +10,7 @@ namespace SportDJ.Modules.SearchModule.ViewModels
     {
         #region Public Properties
 
-        public ObservableCollection<TrackViewModel> Tracks { get; } = [];
+        public ObservableCollection<Track> Tracks { get; } = [];
 
         #endregion Public Properties
     }

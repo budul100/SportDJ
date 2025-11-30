@@ -260,6 +260,8 @@
                         <ct:WaveRenderer
                             Grid.Row="2"
                             Bitmap="{Binding Bitmap}"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"
                             Focusable="False"
                             OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                             Progress="{Binding Progress}" />

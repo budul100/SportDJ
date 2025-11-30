@@ -20,7 +20,8 @@
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
             
-            <Thickness x:Key="InnerMargin">2,0,2,0</Thickness>
+            <Thickness x:Key="InnerMargin">2,1,2,1</Thickness>
+            <Thickness x:Key="RendererMargin">1</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -171,6 +172,9 @@
                         Color="{StaticResource ColorIsEnding}" />
 
                     <ct:WaveRenderer
+                        Margin="{StaticResource RendererMargin}"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
                         Bitmap="{Binding Bitmap}"
                         OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                         Progress="{Binding Progress}" />

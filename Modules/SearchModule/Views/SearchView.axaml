@@ -2,13 +2,12 @@
     x:Class="SportDJ.Modules.SearchModule.Views.SearchView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.SearchModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:v="using:SportDJ.Modules.SearchModule.Views"
-    xmlns:vm="using:SportDJ.Modules.SearchModule.ViewModels"
     d:DesignHeight="500"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
@@ -66,7 +65,7 @@
         <ListBox ItemsSource="{Binding Tracks}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <v:TrackView />
+                    <ct:TrackView Track="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

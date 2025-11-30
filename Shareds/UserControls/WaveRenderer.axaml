@@ -6,70 +6,42 @@
     xmlns:local="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:media="clr-namespace:Avalonia.Media;assembly=Avalonia.Visuals"
     d:DesignHeight="200"
     d:DesignWidth="400"
     mc:Ignorable="d"
     x:Name="Root"
     x:DataType="local:WaveRenderer">
-
-    <UserControl.Resources>
-        <co:DoubleToGridStarConverter x:Key="DoubleToGridStarConverter" />
-        <co:ImageToPositionRectConverter x:Key="ImageToPositionRectConverter" />
-        <co:ImageToRemainingRectConverter x:Key="ImageToRemainingRectConverter" />
-    </UserControl.Resources>
-
+    
     <Grid>
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding #Root.Played, Converter={StaticResource DoubleToGridStarConverter}}" />
-            <ColumnDefinition Width="{Binding #Root.Remaining, Converter={StaticResource DoubleToGridStarConverter}}" />
-        </Grid.ColumnDefinitions>
-
+        
         <Image
-            Grid.ColumnSpan="2"
-            HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            StretchDirection="Both"
             IsVisible="{Binding !#Root.IsPlaying}"
             Source="{Binding #Root.Bitmap}"
             Stretch="Fill" />
-
+    
         <Image
-            Grid.Column="0"
-            HorizontalAlignment="Left"
             VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            StretchDirection="Both"
             IsVisible="{Binding #Root.IsPlaying}"
-            Opacity="{Binding #Root.OpacityPlayed}"
-            Stretch="Fill">
-            <Image.Source>
-                <CroppedBitmap Source="{Binding #Root.Bitmap}">
-                    <CroppedBitmap.SourceRect>
-                        <MultiBinding Converter="{StaticResource ImageToPositionRectConverter}">
-                            <Binding Path="#Root.Bitmap" />
-                            <Binding Path="#Root.Played" />
-                            <Binding Path="#Root.Remaining" />
-                        </MultiBinding>
-                    </CroppedBitmap.SourceRect>
-                </CroppedBitmap>
-            </Image.Source>
-        </Image>
-
+            Source="{Binding #Root.Bitmap}"
+            Opacity="{Binding #Root.OpacityPlayed}" 
+            Stretch="Fill" 
+            Clip="{Binding #Root.PlayedClip}" />
+    
         <Image
-            Grid.Column="1"
-            HorizontalAlignment="Right"
             VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            StretchDirection="Both"
             IsVisible="{Binding #Root.IsPlaying}"
-            Stretch="Fill">
-            <Image.Source>
-                <CroppedBitmap Source="{Binding #Root.Bitmap}">
-                    <CroppedBitmap.SourceRect>
-                        <MultiBinding Converter="{StaticResource ImageToRemainingRectConverter}">
-                            <Binding Path="#Root.Bitmap" />
-                            <Binding Path="#Root.Played" />
-                            <Binding Path="#Root.Remaining" />
-                        </MultiBinding>
-                    </CroppedBitmap.SourceRect>
-                </CroppedBitmap>
-            </Image.Source>
-        </Image>
+            Source="{Binding #Root.Bitmap}"
+            Stretch="Fill" 
+            Clip="{Binding #Root.RemainingClip}" />
+
     </Grid>
+
 </UserControl>

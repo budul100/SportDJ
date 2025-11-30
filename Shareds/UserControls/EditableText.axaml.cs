@@ -13,8 +13,7 @@ namespace SportDJ.Shareds.UserControls
         #region Public Fields
 
         public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<EditableText, bool>(
-            name: nameof(IsActive),
-            defaultBindingMode: BindingMode.TwoWay);
+            name: nameof(IsActive));
 
         public static readonly StyledProperty<int> MaxLengthProperty = AvaloniaProperty.Register<EditableText, int>(
             name: nameof(MaxLength));
