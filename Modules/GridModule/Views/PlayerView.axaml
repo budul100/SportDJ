@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:ct="using:SportDJ.Commons.Controls"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -23,9 +23,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
 
-        <Thickness x:Key="InnerMargin">1</Thickness>
+            <Thickness x:Key="InnerMargin">1</Thickness>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -257,7 +257,7 @@
                                 Text="{Binding Content}" />
                         </Viewbox>
 
-                        <ct:TrackRenderer
+                        <ct:WaveRenderer
                             Grid.Row="2"
                             Bitmap="{Binding Bitmap}"
                             Focusable="False"

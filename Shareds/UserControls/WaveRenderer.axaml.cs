@@ -3,35 +3,35 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
 
-namespace SportDJ.Commons.Controls
+namespace SportDJ.Shareds.UserControls
 {
-    public partial class TrackRenderer
+    public partial class WaveRenderer
         : UserControl
     {
         #region Public Fields
 
-        public static readonly StyledProperty<Bitmap> BitmapProperty = AvaloniaProperty.Register<TrackRenderer, Bitmap>(
+        public static readonly StyledProperty<Bitmap> BitmapProperty = AvaloniaProperty.Register<WaveRenderer, Bitmap>(
             name: nameof(Bitmap));
 
-        public static readonly DirectProperty<TrackRenderer, bool> IsPlayingProperty = AvaloniaProperty.RegisterDirect<TrackRenderer, bool>(
-            name: "IsPlaying",
+        public static readonly DirectProperty<WaveRenderer, bool> IsPlayingProperty = AvaloniaProperty.RegisterDirect<WaveRenderer, bool>(
+            name: nameof(IsPlaying),
             getter: o => o.Progress > 0);
 
-        public static readonly StyledProperty<double> OpacityPlayedProperty = AvaloniaProperty.Register<TrackRenderer, double>(
+        public static readonly StyledProperty<double> OpacityPlayedProperty = AvaloniaProperty.Register<WaveRenderer, double>(
             name: nameof(Opacity),
             defaultValue: Defaults.TrackOpacityPlayed);
 
-        public static readonly DirectProperty<TrackRenderer, double> PlayedProperty = AvaloniaProperty.RegisterDirect<TrackRenderer, double>(
-            name: "Played",
+        public static readonly DirectProperty<WaveRenderer, double> PlayedProperty = AvaloniaProperty.RegisterDirect<WaveRenderer, double>(
+            name: nameof(Played),
             getter: o => GetPlayed(o.Progress));
 
-        public static readonly DirectProperty<TrackRenderer, double> ProgressProperty = AvaloniaProperty.RegisterDirect<TrackRenderer, double>(
+        public static readonly DirectProperty<WaveRenderer, double> ProgressProperty = AvaloniaProperty.RegisterDirect<WaveRenderer, double>(
             name: nameof(Progress),
             getter: o => o.Progress,
             setter: (o, v) => o.Progress = v);
 
-        public static readonly DirectProperty<TrackRenderer, double> RemainingProperty = AvaloniaProperty.RegisterDirect<TrackRenderer, double>(
-            name: "Remaining",
+        public static readonly DirectProperty<WaveRenderer, double> RemainingProperty = AvaloniaProperty.RegisterDirect<WaveRenderer, double>(
+            name: nameof(Remaining),
             getter: o => GetRemaining(o.Progress));
 
         #endregion Public Fields
@@ -39,18 +39,15 @@ namespace SportDJ.Commons.Controls
         #region Private Fields
 
         private bool isPlaying;
-
         private double played;
-
         private double progress;
-
         private double remaining;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public TrackRenderer()
+        public WaveRenderer()
         {
             InitializeComponent();
         }

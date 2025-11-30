@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Abstraction
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Windows", "Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj", "{B115CCA2-6373-3C83-4F58-19315A5D2D43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserControls", "Shareds\UserControls\UserControls.csproj", "{575E23EB-A250-4856-8001-3DA28AB9244C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -187,6 +189,10 @@ Global
 		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{575E23EB-A250-4856-8001-3DA28AB9244C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{575E23EB-A250-4856-8001-3DA28AB9244C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{575E23EB-A250-4856-8001-3DA28AB9244C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{575E23EB-A250-4856-8001-3DA28AB9244C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -219,6 +225,7 @@ Global
 		{93BBDC06-F639-4DFF-B83C-97F28C8C70B6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{838064F2-C2DF-F209-B6A1-596B31966E69} = {93BBDC06-F639-4DFF-B83C-97F28C8C70B6}
 		{B115CCA2-6373-3C83-4F58-19315A5D2D43} = {93BBDC06-F639-4DFF-B83C-97F28C8C70B6}
+		{575E23EB-A250-4856-8001-3DA28AB9244C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

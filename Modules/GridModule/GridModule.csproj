@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Commons\Commons.csproj" />
+	  <ProjectReference Include="..\..\Shareds\UserControls\UserControls.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,20 +1,19 @@
 <UserControl
-    x:Class="SportDJ.Commons.Controls.TrackRenderer"
+    x:Class="SportDJ.Shareds.UserControls.WaveRenderer"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:co="using:SportDJ.Commons.Converters"
-    xmlns:local="using:SportDJ.Commons.Controls"
+    xmlns:local="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="200"
     d:DesignWidth="400"
     mc:Ignorable="d"
     x:Name="Root"
-    x:DataType="local:TrackRenderer">
+    x:DataType="local:WaveRenderer">
 
     <UserControl.Resources>
         <co:DoubleToGridStarConverter x:Key="DoubleToGridStarConverter" />
-
         <co:ImageToPositionRectConverter x:Key="ImageToPositionRectConverter" />
         <co:ImageToRemainingRectConverter x:Key="ImageToRemainingRectConverter" />
     </UserControl.Resources>

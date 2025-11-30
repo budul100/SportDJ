@@ -13,13 +13,4 @@
 		<PackageReference Include="SkiaSharp" Version="3.119.1" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Controls\FlashingPanel.axaml.cs">
-	    <DependentUpon>FlashingPanel.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Controls\WaveRenderer.axaml.cs">
-	    <DependentUpon>WaveRenderer.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-
 </Project>

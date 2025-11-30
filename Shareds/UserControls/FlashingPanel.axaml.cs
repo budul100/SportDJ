@@ -1,10 +1,10 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using SportDJ.Commons.Assets;
-using System;
 
-namespace SportDJ.Commons.Controls
+namespace SportDJ.Shareds.UserControls
 {
     public partial class FlashingPanel
         : UserControl
@@ -20,7 +20,7 @@ namespace SportDJ.Commons.Controls
             setter: (o, v) => o.DurationMilliSecs = v);
 
         public static readonly DirectProperty<FlashingPanel, TimeSpan> DurationProperty = AvaloniaProperty.RegisterDirect<FlashingPanel, TimeSpan>(
-            name: "Duration",
+            name: nameof(Duration),
             getter: o => GetDuration(o.DurationMilliSecs));
 
         public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<FlashingPanel, bool>(
@@ -39,7 +39,6 @@ namespace SportDJ.Commons.Controls
         #region Private Fields
 
         private TimeSpan duration;
-
         private double durationMilliSecs;
 
         #endregion Private Fields
@@ -62,6 +61,11 @@ namespace SportDJ.Commons.Controls
             set => SetValue(
                 property: ColorProperty,
                 value: value);
+        }
+
+        public TimeSpan Duration
+        {
+            get => duration;
         }
 
         public double DurationMilliSecs

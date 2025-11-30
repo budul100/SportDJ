@@ -2,7 +2,7 @@
     x:Class="SportDJ.Modules.GridModule.Views.GroupView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ct="using:SportDJ.Commons.Controls"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:gbac="using:GroupBox.Avalonia.Controls"
@@ -22,9 +22,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <Thickness x:Key="InnerMargin">1</Thickness>
         </ResourceDictionary>
-
-        <Thickness x:Key="InnerMargin">1</Thickness>
     </UserControl.Resources>
 
     <Design.DataContext>

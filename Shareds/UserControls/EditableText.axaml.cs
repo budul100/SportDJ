@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 
-namespace SportDJ.Commons.Controls
+namespace SportDJ.Shareds.UserControls
 {
     public partial class EditableText
         : UserControl
@@ -30,14 +30,6 @@ namespace SportDJ.Commons.Controls
         public EditableText()
         {
             InitializeComponent();
-
-            var textBox = this
-                .FindControl<TextBox>("TextBox");
-
-            textBox?.AddHandler(
-                routedEvent: KeyDownEvent,
-                handler: OnKeyDown,
-                routes: RoutingStrategies.Tunnel);
         }
 
         #endregion Public Constructors
@@ -77,39 +69,33 @@ namespace SportDJ.Commons.Controls
 
         private void OnGotFocus(object sender, GotFocusEventArgs e)
         {
-            if (!(sender is TextBox textBox))
+            if (sender is TextBox textBox)
             {
-                return;
+                Dispatcher.UIThread.Post(textBox.SelectAll);
             }
-
-            // Defer the SelectAll() method call using the dispatcher
-
-            Dispatcher.UIThread.Post(textBox.SelectAll);
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!(sender is TextBox))
+            if (sender is TextBox)
             {
-                return;
-            }
+                if (e.Key == Key.Return
+                    || e.Key == Key.Enter
+                    || e.Key == Key.Escape)
+                {
+                    IsActive = false;
 
-            if (e.Key == Key.Return
-                || e.Key == Key.Enter
-                || e.Key == Key.Escape)
-            {
-                IsActive = false;
+                    e.Handled = true;
+                }
             }
         }
 
         private void OnLostFocus(object sender, RoutedEventArgs e)
         {
-            if (!(sender is TextBox))
+            if (sender is TextBox)
             {
-                return;
+                IsActive = false;
             }
-
-            IsActive = false;
         }
 
         #endregion Private Methods

@@ -1,31 +1,34 @@
 <UserControl
-    x:Class="SportDJ.Commons.Controls.FlashingPanel"
+    x:Class="SportDJ.Shareds.UserControls.FlashingPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:SportDJ.Shareds.UserControls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="200"
     d:DesignWidth="400"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    x:Name="Root"
+    x:DataType="local:FlashingPanel">
 
     <Panel
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Classes.IsActive="{Binding $parent[UserControl].IsActive}">
+        Classes.IsActive="{Binding #Root.IsActive}">
 
         <Panel.Styles>
             <Style Selector="Panel.IsActive">
-                <Setter Property="Background" Value="{Binding $parent[UserControl].Color}" />
+                <Setter Property="Background" Value="{Binding #Root.Color}" />
                 <Style.Animations>
-                    <Animation IterationCount="INFINITE" Duration="{Binding $parent[UserControl].Duration}">
+                    <Animation IterationCount="INFINITE" Duration="{Binding #Root.Duration}">
                         <KeyFrame Cue="0%">
-                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMin}" />
+                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMin}" />
                         </KeyFrame>
                         <KeyFrame Cue="50%">
-                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMax}" />
+                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMax}" />
                         </KeyFrame>
                         <KeyFrame Cue="100%">
-                            <Setter Property="Opacity" Value="{Binding $parent[UserControl].OpacityMin}" />
+                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMin}" />
                         </KeyFrame>
                     </Animation>
                 </Style.Animations>

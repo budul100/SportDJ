@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:ct="using:SportDJ.Commons.Controls"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.DisplayModule.DesignTime"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
@@ -170,7 +170,7 @@
                         OpacityMin="{StaticResource DisplayOpacityEndingMin}"
                         Color="{StaticResource ColorIsEnding}" />
 
-                    <ct:TrackRenderer
+                    <ct:WaveRenderer
                         Bitmap="{Binding Bitmap}"
                         OpacityPlayed="{StaticResource TrackOpacityPlayed}"
                         Progress="{Binding Progress}" />
