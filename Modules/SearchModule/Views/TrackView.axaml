@@ -24,10 +24,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <UserControl.Styles>
-        <mat:MaterialIconStyles />
-    </UserControl.Styles>
-
     <Design.DataContext>
         <dt:TrackViewModel />
     </Design.DataContext>
