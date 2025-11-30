@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
-using System;
+﻿using System;
+using NAudio.Wave;
 
-namespace SportDJ.Commons.Providers
+namespace SportDJ.Shareds.SampleProviders.Core
 {
     public abstract class BaseSampleProvider
         : ISampleProvider, IDisposable

@@ -1,19 +1,19 @@
-﻿using NAudio.Wave;
+﻿using System;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Providers.Extensions;
-using System;
+using SportDJ.Shareds.SampleProviders.Abstractions;
+using SportDJ.Shareds.SampleProviders.Core.Extensions;
 
-namespace SportDJ.Commons.Providers
+namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public class PlayingFileProvider
+    public class SourcePlayingProvider
         : BaseSampleProvider
     {
         #region Private Fields
 
         private readonly long? cue;
         private readonly object lockProvider = new();
-        private readonly AudioFileReader sourceProvider;
+        private readonly IAudioSource sourceProvider;
 
         private long end;
         private bool eventSentCue;
@@ -26,7 +26,7 @@ namespace SportDJ.Commons.Providers
 
         #region Public Constructors
 
-        public PlayingFileProvider(AudioFileReader sourceProvider, Track track, TimeSpan fadeOut)
+        public SourcePlayingProvider(IAudioSource sourceProvider, Track track, TimeSpan fadeOut)
             : base(waveFormat: sourceProvider.WaveFormat)
         {
             this.sourceProvider = sourceProvider;
@@ -161,7 +161,7 @@ namespace SportDJ.Commons.Providers
                                     count: required);
 
                                 if (readThisTime < required || sourceProvider.Position >= end
-                                    || (cue.HasValue && sourceProvider.Position >= cue))
+                                    || cue.HasValue && sourceProvider.Position >= cue)
                                 {
                                     sourceProvider.Position = Track.Start;
                                 }
@@ -274,9 +274,9 @@ namespace SportDJ.Commons.Providers
             {
                 position = Track.Start;
 
-                end = (Track.End ?? 0) > this.sourceProvider.Length
+                end = (Track.End ?? 0) > sourceProvider.Length
                     ? Track.End.Value
-                    : this.sourceProvider.Length;
+                    : sourceProvider.Length;
 
                 Duration = (end - Track.Start).ToDuration(averageBytesPerSecond);
             }

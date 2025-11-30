@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
+		<RootNamespace>SportDJ.Shareds.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<PackageReference Include="NAudio.Core" Version="2.2.1" />
 	</ItemGroup>
 
 </Project>

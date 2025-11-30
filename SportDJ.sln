@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalService", "Services\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MixerService", "Services\MixerService\MixerService.csproj", "{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService", "Services\OutputService\OutputService.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService.Windows", "Services\OutputService.Windows\OutputService.Windows.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
 EndProject
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayModule", "Modules\Di
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerModule", "Modules\ControllerModule\ControllerModule.csproj", "{EA549FCB-05EF-4802-8A1B-6C465D3417E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService", "Services\VolumeService\VolumeService.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService.Windows", "Services\VolumeService.Windows\VolumeService.Windows.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DialogService", "Services\DialogService\DialogService.csproj", "{48C41C91-3465-46EE-8632-3B506D6EF24F}"
 EndProject
@@ -57,9 +57,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SearchModule", "Modules\Sea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiService", "Services\MidiService\MidiService.csproj", "{4994B567-3D15-43D5-839F-D2E583F9437C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shareds", "Shareds", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveFormRenderer", "Helpers\WaveFormRenderer\WaveFormRenderer.csproj", "{069E0EB5-D993-58BB-A1F8-47473C4C230C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleRenderers", "Shareds\SampleRenderers\SampleRenderers.csproj", "{069E0EB5-D993-58BB-A1F8-47473C4C230C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Core", "Shareds\SampleProviders\SampleProviders.Core\SampleProviders.Core.csproj", "{A0699987-B24B-487E-A39C-90E35456FB9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleProviders", "SampleProviders", "{93BBDC06-F639-4DFF-B83C-97F28C8C70B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Abstractions", "Shareds\SampleProviders\SampleProviders.Abstractions\SampleProviders.Abstractions.csproj", "{838064F2-C2DF-F209-B6A1-596B31966E69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Windows", "Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj", "{B115CCA2-6373-3C83-4F58-19315A5D2D43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -167,6 +175,18 @@ Global
 		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{069E0EB5-D993-58BB-A1F8-47473C4C230C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0699987-B24B-487E-A39C-90E35456FB9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0699987-B24B-487E-A39C-90E35456FB9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0699987-B24B-487E-A39C-90E35456FB9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0699987-B24B-487E-A39C-90E35456FB9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{838064F2-C2DF-F209-B6A1-596B31966E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{838064F2-C2DF-F209-B6A1-596B31966E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{838064F2-C2DF-F209-B6A1-596B31966E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{838064F2-C2DF-F209-B6A1-596B31966E69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B115CCA2-6373-3C83-4F58-19315A5D2D43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -195,6 +215,10 @@ Global
 		{B8EF491A-B0C1-40AC-A76F-94F150EC2CF1} = {0EF6377D-06D6-47DD-BC22-9D864FE340D6}
 		{4994B567-3D15-43D5-839F-D2E583F9437C} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{069E0EB5-D993-58BB-A1F8-47473C4C230C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A0699987-B24B-487E-A39C-90E35456FB9E} = {93BBDC06-F639-4DFF-B83C-97F28C8C70B6}
+		{93BBDC06-F639-4DFF-B83C-97F28C8C70B6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{838064F2-C2DF-F209-B6A1-596B31966E69} = {93BBDC06-F639-4DFF-B83C-97F28C8C70B6}
+		{B115CCA2-6373-3C83-4F58-19315A5D2D43} = {93BBDC06-F639-4DFF-B83C-97F28C8C70B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

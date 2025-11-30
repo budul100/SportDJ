@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 
-namespace SportDJ.Services.VolumeService.Extensions
+namespace SportDJ.Services.VolumeService.Windows.Extensions
 {
     internal static class ProcessExtensions
     {
@@ -11,7 +10,7 @@ namespace SportDJ.Services.VolumeService.Extensions
         {
             try
             {
-                var process = Process.GetProcessById((int)processId);
+                var process = System.Diagnostics.Process.GetProcessById((int)processId);
                 return true;
             }
             catch (ArgumentException)

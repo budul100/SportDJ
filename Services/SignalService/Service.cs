@@ -11,12 +11,13 @@ using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Providers;
+using SportDJ.Shareds.SampleProviders.Abstractions;
+using SportDJ.Shareds.SampleProviders.Core;
 
 namespace SportDJ.Services.SignalService
 {
     public class Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-        ITrackService trackService)
+        ITrackService trackService, IAudioSource sourceProvider)
         : ISignalService
     {
         #region Private Fields
@@ -26,7 +27,7 @@ namespace SportDJ.Services.SignalService
         private DynamicFadingProvider fadingProvider;
         private bool isDisposed;
         private TimeSpan? nextThresholdOnPlay;
-        private PlayingFileProvider playingProvider;
+        private SourcePlayingProvider playingProvider;
 
         #endregion Private Fields
 
@@ -107,13 +108,13 @@ namespace SportDJ.Services.SignalService
             {
                 Track = track;
 
-                var sourceProvider = new AudioFileReader(Track.Path);
-
                 var fadeOut = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0
                     ? TimeSpan.FromMilliseconds(settingsService.Contents.Options.FadeOnMixOutMilliseconds)
                     : TimeSpan.Zero;
 
-                playingProvider = new PlayingFileProvider(
+                sourceProvider.Initialize(Track.Path);
+
+                playingProvider = new SourcePlayingProvider(
                     sourceProvider: sourceProvider,
                     track: Track,
                     fadeOut: fadeOut);

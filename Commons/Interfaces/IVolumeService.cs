@@ -12,7 +12,7 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsInitialized { get; }
 
-        VolumeType VolumeType { get; }
+        VolumeType Type { get; }
 
         #endregion Public Properties
 
@@ -22,15 +22,13 @@ namespace SportDJ.Commons.Interfaces
 
         void Deactivate();
 
-        void Initialize();
+        void Initialize(string deviceName);
 
         void Mute(int? milliSeconds = default);
 
         void Raise(float? volumeTarget = default, int? milliSeconds = default);
 
         void Reduce(float? volumeTarget = default, int? milliSeconds = default);
-
-        void Set(string deviceName);
 
         #endregion Public Methods
     }

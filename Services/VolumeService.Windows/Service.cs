@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DryIoc.ImTools;
 using NAudio.CoreAudioApi;
 using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Services.VolumeService.Extensions;
-using SportDJ.Services.VolumeService.Models;
+using SportDJ.Services.VolumeService.Windows.Extensions;
 
-namespace SportDJ.Services.VolumeService
+namespace SportDJ.Services.VolumeService.Windows
 {
     public class Service(IEventAggregator eventAggregator)
         : IVolumeService
@@ -21,7 +21,6 @@ namespace SportDJ.Services.VolumeService
 
         private readonly int baseProcessId = Environment.ProcessId;
 
-        private IEnumerable<AudioProcess> audioProcesses;
         private CancellationTokenSource cancellationTokenSource;
         private string deviceName;
         private bool isDisposed;
@@ -34,9 +33,11 @@ namespace SportDJ.Services.VolumeService
 
         public bool IsActive { get; private set; }
 
-        public bool IsInitialized { get; private set; }
+        public bool IsInitialized => deviceName != default;
 
-        public VolumeType VolumeType { get; private set; }
+        public IEnumerable<VolumeSession> Sessions { get; private set; }
+
+        public VolumeType Type { get; private set; }
 
         #endregion Public Properties
 
@@ -44,10 +45,9 @@ namespace SportDJ.Services.VolumeService
 
         public void Activate()
         {
-            audioProcesses = default;
+            Sessions = default;
 
-            Task.Run(() => DetermineAudioProcesses(
-                isInitialization: false));
+            Task.Run(DetermineSessions);
         }
 
         public void Deactivate()
@@ -64,10 +64,11 @@ namespace SportDJ.Services.VolumeService
                 obj: this);
         }
 
-        public void Initialize()
+        public void Initialize(string deviceName)
         {
-            Task.Run(() => DetermineAudioProcesses(
-                isInitialization: true));
+            ResetVolume();
+
+            this.deviceName = deviceName;
         }
 
         public void Mute(int? milliSeconds = default)
@@ -91,24 +92,24 @@ namespace SportDJ.Services.VolumeService
             }
 
             if (IsActive
-                && VolumeType != VolumeType.Muted
-                && VolumeType != VolumeType.None
+                && Type != VolumeType.Muted
+                && Type != VolumeType.None
                 && volume > volumeTarget)
             {
-                if (VolumeType == VolumeType.Reduce)
+                if (Type == VolumeType.Reduce)
                 {
                     cancellationTokenSource?.Cancel();
                 }
 
-                var relevantProcesses = audioProcesses?
-                    .Where(p => p.Session.SimpleAudioVolume.Volume != p.VolumeGiven).ToArray();
+                var relevants = Sessions?
+                    .Where(p => p.VolumeCurrent != p.VolumeInitial).ToArray();
 
-                if (relevantProcesses?.Length > 0)
+                if (relevants?.Length > 0)
                 {
                     volumeTarget = volume
                         ?? Constants.VolumeMax;
 
-                    VolumeType = VolumeType.Raise;
+                    Type = VolumeType.Raise;
 
                     var fadeStep = milliSeconds > 0
                         ? Constants.FadeStepInMilliSec / (float)milliSeconds
@@ -118,13 +119,13 @@ namespace SportDJ.Services.VolumeService
                     var cancellationToken = cancellationTokenSource.Token;
 
                     Task.Run(() => RaiseVolume(
-                        processes: relevantProcesses,
+                        sessions: relevants,
                         fadeStep: fadeStep,
                         cancellationToken: cancellationToken));
                 }
                 else
                 {
-                    VolumeType = VolumeType.None;
+                    Type = VolumeType.None;
                 }
             }
         }
@@ -138,10 +139,10 @@ namespace SportDJ.Services.VolumeService
             }
 
             if (IsActive
-                && VolumeType != VolumeType.Muted
-                && (VolumeType == VolumeType.None || VolumeType == VolumeType.Raise || volume < volumeTarget))
+                && Type != VolumeType.Muted
+                && (Type == VolumeType.None || Type == VolumeType.Raise || volume < volumeTarget))
             {
-                if (VolumeType == VolumeType.Raise)
+                if (Type == VolumeType.Raise)
                 {
                     cancellationTokenSource?.Cancel();
                 }
@@ -149,33 +150,26 @@ namespace SportDJ.Services.VolumeService
                 volumeTarget = volume
                     ?? Constants.VolumeMin;
 
-                VolumeType = VolumeType.Reduce;
+                Type = VolumeType.Reduce;
 
                 var fadeStep = milliSeconds > 0
                     ? Constants.FadeStepInMilliSec / (float)milliSeconds
                     : 1F;
 
-                var relevantProcesses = audioProcesses?
-                    .Where(p => p.VolumeGiven > volume).ToArray();
+                var relevants = Sessions?
+                    .Where(p => p.VolumeInitial > volume).ToArray();
 
-                if (relevantProcesses?.Length > 0)
+                if (relevants?.Length > 0)
                 {
                     cancellationTokenSource = new CancellationTokenSource();
                     var cancellationToken = cancellationTokenSource.Token;
 
                     Task.Run(() => ReduceVolume(
-                        processes: relevantProcesses,
+                        sessions: relevants,
                         fadeStep: fadeStep,
                         cancellationToken: cancellationToken));
                 }
             }
-        }
-
-        public void Set(string deviceName)
-        {
-            ResetVolume();
-
-            this.deviceName = deviceName;
         }
 
         #endregion Public Methods
@@ -199,24 +193,16 @@ namespace SportDJ.Services.VolumeService
 
         #region Private Methods
 
-        private void DetermineAudioProcesses(bool isInitialization)
+        private void DetermineSessions()
         {
-            if (isInitialization)
-            {
-                IsInitialized = true;
-            }
-            else
-            {
-                audioProcesses = GetAudioProcesses()?
-                    .Where(p => !p.IsBaseSession).ToArray();
+            Sessions = GetSessions().ToArray();
 
-                IsActive = audioProcesses?.Count() > 0;
-            }
+            IsActive = Sessions?.Count() > 0;
 
             eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
 
-        private IEnumerable<AudioProcess> GetAudioProcesses()
+        private IEnumerable<VolumeSession> GetSessions()
         {
             if (!string.IsNullOrWhiteSpace(deviceName))
             {
@@ -228,7 +214,8 @@ namespace SportDJ.Services.VolumeService
 
                 if (devices.Any(d => d.IsMatching(deviceName)))
                 {
-                    var sessions = devices.Where(d => d.IsMatching(deviceName))
+                    var sessions = devices
+                        .Where(d => d.IsMatching(deviceName))
                         .Select(d => d.AudioSessionManager.Sessions).ToArray();
 
                     foreach (var session in sessions)
@@ -237,12 +224,12 @@ namespace SportDJ.Services.VolumeService
                         {
                             var current = session[index];
 
-                            if (current.GetProcessID.ProcessExists())
+                            if (current.GetProcessID.ProcessExists()
+                                && current.GetProcessID != baseProcessId)
                             {
-                                var result = new AudioProcess(
-                                    session: current,
-                                    volumeGiven: current.SimpleAudioVolume.Volume,
-                                    isBaseSession: current.GetProcessID == baseProcessId);
+                                var result = new VolumeSession(
+                                    control: current,
+                                    volumeInitial: current.SimpleAudioVolume.Volume);
 
                                 yield return result;
                             }
@@ -252,12 +239,12 @@ namespace SportDJ.Services.VolumeService
             }
         }
 
-        private void RaiseVolume(IEnumerable<AudioProcess> processes, float fadeStep,
-            CancellationToken? cancellationToken = default)
+        private void RaiseVolume(IEnumerable<VolumeSession> sessions, float fadeStep,
+            CancellationToken? cancellationToken)
         {
-            if (processes?.Count() > 0)
+            if (sessions?.Count() > 0)
             {
-                var volumeCurrent = processes.Min(v => v.VolumeLower);
+                var volumeCurrent = sessions.Min(v => v.VolumeLower);
 
                 while (volumeCurrent < volumeTarget
                     && cancellationToken?.IsCancellationRequested != true)
@@ -269,10 +256,10 @@ namespace SportDJ.Services.VolumeService
                         volumeCurrent = volumeTarget;
                     }
 
-                    foreach (var process in processes)
+                    foreach (var process in sessions)
                     {
-                        process.Session.SimpleAudioVolume.Volume = volumeCurrent > process.VolumeGiven
-                            ? process.VolumeGiven
+                        process.VolumeCurrent = volumeCurrent > process.VolumeInitial
+                            ? process.VolumeInitial
                             : volumeCurrent;
 
                         process.VolumeLower = volumeCurrent;
@@ -283,17 +270,17 @@ namespace SportDJ.Services.VolumeService
                 }
             }
 
-            VolumeType = volumeTarget < Constants.VolumeMax
+            Type = volumeTarget < Constants.VolumeMax
                 ? VolumeType.Lowered
                 : VolumeType.None;
         }
 
-        private void ReduceVolume(IEnumerable<AudioProcess> processes, float fadeStep,
+        private void ReduceVolume(IEnumerable<VolumeSession> sessions, float fadeStep,
             CancellationToken cancellationToken)
         {
-            if (processes?.Count() > 0)
+            if (sessions?.Count() > 0)
             {
-                var volumeCurrent = processes.Max(v => v.VolumeGiven);
+                var volumeCurrent = sessions.Max(v => v.VolumeInitial);
 
                 while (volumeCurrent > volumeTarget
                     && !cancellationToken.IsCancellationRequested)
@@ -305,13 +292,12 @@ namespace SportDJ.Services.VolumeService
                         volumeCurrent = volumeTarget;
                     }
 
-                    var relevantProcesses = processes
-                        .Where(p => p.VolumeGiven > volumeCurrent).ToArray();
+                    var relevantProcesses = sessions
+                        .Where(p => p.VolumeInitial > volumeCurrent).ToArray();
 
                     foreach (var relevantProcess in relevantProcesses)
                     {
-                        relevantProcess.Session.SimpleAudioVolume.Volume = volumeCurrent;
-
+                        relevantProcess.VolumeCurrent = volumeCurrent;
                         relevantProcess.VolumeLower = volumeCurrent;
                     }
 
@@ -320,7 +306,7 @@ namespace SportDJ.Services.VolumeService
                 }
             }
 
-            VolumeType = isToMute
+            Type = isToMute
                 ? VolumeType.Muted
                 : VolumeType.Lowered;
         }
@@ -329,14 +315,17 @@ namespace SportDJ.Services.VolumeService
         {
             if (IsActive)
             {
+                cancellationTokenSource?.Cancel();
+
                 volumeTarget = Constants.VolumeMax;
                 isToMute = false;
 
-                VolumeType = VolumeType.Raise;
+                Type = VolumeType.Raise;
 
                 RaiseVolume(
-                    processes: audioProcesses,
-                    fadeStep: 1F);
+                    sessions: Sessions,
+                    fadeStep: 1F,
+                    cancellationToken: default);
 
                 IsActive = false;
 

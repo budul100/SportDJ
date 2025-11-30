@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DryIoc.ImTools;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
@@ -13,13 +12,12 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
-using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Providers;
+using SportDJ.Shareds.SampleProviders.Core;
 
-namespace SportDJ.Services.OutputService
+namespace SportDJ.Services.OutputService.Windows
 {
     public class Service
         : IOutputService
@@ -32,6 +30,7 @@ namespace SportDJ.Services.OutputService
         private readonly IMidiService midiService;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
+        private readonly OutputProvider outputProvider = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -41,7 +40,6 @@ namespace SportDJ.Services.OutputService
         private ContinuousMixingProvider providerBackground;
         private DynamicFadingProvider providerFader;
         private ContinuousMixingProvider providerForeground;
-        private WaveOutEvent providerOutput;
         private IVolumeService volumeService;
 
         #endregion Private Fields
@@ -87,9 +85,11 @@ namespace SportDJ.Services.OutputService
 
         public string DeviceName => outputOptions?.DeviceName;
 
+        public Dictionary<int, string> Devices => outputProvider?.Devices;
+
         public WaveFormat Format { get; private set; }
 
-        public bool IsActive => providerOutput != default;
+        public bool IsActive => outputProvider.IsActive;
 
         public bool IsPlaying { get; private set; }
 
@@ -109,9 +109,9 @@ namespace SportDJ.Services.OutputService
                 {
                     outputOptions.Volume = value;
 
-                    if (providerOutput != default)
+                    if (outputProvider != default)
                     {
-                        providerOutput.Volume = outputOptions.Volume;
+                        outputProvider.Volume = outputOptions.Volume;
                     }
                 }
             }
@@ -145,17 +145,6 @@ namespace SportDJ.Services.OutputService
             GC.SuppressFinalize(this);
         }
 
-        public Dictionary<int, string> GetDevices()
-        {
-            var capabilities = GetCapabilities();
-
-            var result = capabilities.ToDictionary(
-                keySelector: c => c.Key,
-                elementSelector: c => c.Value.ProductName);
-
-            return result;
-        }
-
         public void Initialize(OutputType type)
         {
             Type = type;
@@ -169,13 +158,13 @@ namespace SportDJ.Services.OutputService
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = providerOutput.Volume * outputOptions.VolumePercentageBackground / (float)Constants.OptionsPercentageMax;
+                var volumeBackground = outputProvider.Volume * outputOptions.VolumePercentageBackground / (float)Constants.OptionsPercentageMax;
 
                 providerFader.Fade(
                     volumeTarget: volumeBackground,
                     milliSeconds: fadeMilliseconds);
 
-                var volumeExternals = providerOutput.Volume * outputOptions.VolumePercentageExternals / (float)Constants.OptionsPercentageMax;
+                var volumeExternals = outputProvider.Volume * outputOptions.VolumePercentageExternals / (float)Constants.OptionsPercentageMax;
 
                 volumeService.Reduce(
                     volumeTarget: volumeExternals,
@@ -210,37 +199,26 @@ namespace SportDJ.Services.OutputService
 
         public void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false)
         {
-            if (providerOutput == default
-                || outputOptions.DeviceName != deviceName
+            if (outputProvider.IsActive != true
                 || outputOptions.SampleRate != sampleRate)
             {
-                var capabilities = GetCapabilities();
+                outputProvider.Set(
+                    deviceName: deviceName,
+                    takeDefaultIfMissing: takeDefaultIfMissing);
 
-                var deviceNumber = default(int?);
-
-                try
+                if (outputProvider.DeviceNumber.HasValue)
                 {
-                    deviceNumber = GetDeviceNumber(
-                        capabilities: capabilities,
-                        deviceName: deviceName,
-                        takeDefaultIfMissing: takeDefaultIfMissing);
-                }
-                catch (NoDeviceAvailableException)
-                { }
-
-                if (deviceNumber.HasValue)
-                {
-                    outputOptions.DeviceName = capabilities[deviceNumber.Value].ProductName;
+                    outputOptions.DeviceName = outputProvider.DeviceName;
                     outputOptions.SampleRate = sampleRate;
 
                     Format = WaveFormat.CreateIeeeFloatWaveFormat(
                         sampleRate: sampleRate,
-                        channels: capabilities[deviceNumber.Value].Channels);
+                        channels: outputProvider.Channels);
 
                     InitializeOutput(
-                        deviceNumber: deviceNumber.Value);
+                        deviceNumber: outputProvider.DeviceNumber.Value);
 
-                    volumeService.Set(
+                    volumeService.Initialize(
                         deviceName: outputOptions.DeviceName);
 
                     sessionService.Save();
@@ -248,6 +226,11 @@ namespace SportDJ.Services.OutputService
 
                 eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
             }
+        }
+
+        public void Update()
+        {
+            outputProvider.Update();
         }
 
         #endregion Public Methods
@@ -267,9 +250,8 @@ namespace SportDJ.Services.OutputService
 
                     cancellationTokenSource?.Cancel();
 
-                    providerOutput?.Stop();
+                    outputProvider?.Stop();
 
-                    providerOutput?.Dispose();
                     providerForeground?.Dispose();
                     providerFader?.Dispose();
                     providerBackground?.Dispose();
@@ -289,64 +271,11 @@ namespace SportDJ.Services.OutputService
 
         #region Private Methods
 
-        private static Dictionary<int, WaveOutCapabilities> GetCapabilities()
-        {
-            var result = new Dictionary<int, WaveOutCapabilities>();
-
-            for (var index = Constants.IndexAudioDeviceMin; index < WaveOut.DeviceCount; index++)
-            {
-                var capabilities = WaveOut.GetCapabilities(index);
-
-                if (capabilities.Channels == 1 || capabilities.Channels == 2)
-                {
-                    result.Add(
-                        key: index,
-                        value: capabilities);
-                }
-            }
-
-            return result;
-        }
-
-        private static int GetDeviceNumber(Dictionary<int, WaveOutCapabilities> capabilities, string deviceName,
-            bool takeDefaultIfMissing)
-        {
-            var result = default(int?);
-
-            if (!string.IsNullOrWhiteSpace(deviceName))
-            {
-                result = capabilities
-                    .FirstOrDefault(c => c.Value.ProductName == deviceName).Key;
-            }
-
-            if (!result.HasValue)
-            {
-                if (takeDefaultIfMissing)
-                {
-                    result = capabilities
-                        .FirstOrDefault().Key;
-                }
-                else
-                {
-                    throw new NoDeviceAvailableException(
-                        message: $"There is no device {deviceName} available.");
-                }
-            }
-
-            if (!result.HasValue)
-            {
-                throw new NoDeviceAvailableException();
-            }
-
-            return result.Value;
-        }
-
         private void CloseOutput()
         {
             mixersAll.OnEach(m => m.Pause());
-            providerOutput?.Stop();
+            outputProvider?.Stop();
 
-            providerOutput?.Dispose();
             providerForeground?.Dispose();
             providerFader?.Dispose();
             providerBackground?.Dispose();
@@ -386,23 +315,17 @@ namespace SportDJ.Services.OutputService
 
             var providerWave = new SampleToWaveProvider(providerForeground);
 
-            providerOutput = new WaveOutEvent
-            {
-                DeviceNumber = deviceNumber,
-                Volume = outputOptions.Volume,
-            };
-
-            providerOutput.PlaybackStopped += OnPlaybackStopped;
-
-            providerOutput.Init(
-                waveProvider: providerWave);
+            outputProvider.Initialize(
+                deviceNumber: deviceNumber,
+                waveProvider: providerWave,
+                volume: outputOptions.Volume);
 
             mixersAll.OnEach(m => Add(
                 mixerService: m,
                 onForeground: mixersForeground.Contains(m)));
 
             Task.Run(
-                action: providerOutput.Play,
+                action: outputProvider.Play,
                 cancellationToken: cancellationTokenSource.Token);
         }
 

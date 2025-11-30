@@ -2,16 +2,17 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SharpHook" Version="5.3.8" />
+		<PackageReference Include="NAudio" Version="2.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\..\Shareds\SampleProviders\SampleProviders.Core\SampleProviders.Core.csproj" />
 	</ItemGroup>
 
 </Project>

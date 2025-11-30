@@ -2,11 +2,13 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<TargetFrameworks>net8.0-windows</TargetFrameworks>
 		<RootNamespace>SportDJ.App</RootNamespace>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>7</VersionMinor>
 		<VersionBuild>0</VersionBuild>
+		<AssemblyName>SportDJ</AssemblyName>
+		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>Assets\SportDJ.ico</ApplicationIcon>
 		<PublishReadyToRun>true</PublishReadyToRun>
@@ -14,11 +16,8 @@
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
-		<AssemblyName>SportDJ</AssemblyName>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<IsRidAgnostic>false</IsRidAgnostic>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -34,31 +33,31 @@
 		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9" />
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="11.3.9" />
 		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9" />
-
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.9" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
-	  <ProjectReference Include="..\Commons\Commons.csproj" />
-	  <ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
-	  <ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
-	  <ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
-	  <ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
-	  <ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
-	  <ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
-	  <ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
-	  <ProjectReference Include="..\Services\GridService\GridService.csproj" />
-	  <ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
-	  <ProjectReference Include="..\Services\MidiService\MidiService.csproj" />
-	  <ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
-	  <ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
-	  <ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
-	  <ProjectReference Include="..\Services\StackService\StackService.csproj" />
-	  <ProjectReference Include="..\Services\StorageService\StorageService.csproj" />
-	  <ProjectReference Include="..\Services\SignalService\SignalService.csproj" />
-	  <ProjectReference Include="..\Services\TrackService\TrackService.csproj" />
-	  <ProjectReference Include="..\Services\VolumeService\VolumeService.csproj" />
+		<ProjectReference Include="..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
+		<ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
+		<ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
+		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
+		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
+		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
+		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
+		<ProjectReference Include="..\Services\GridService\GridService.csproj" />
+		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
+		<ProjectReference Include="..\Services\MidiService\MidiService.csproj" />
+		<ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
+		<ProjectReference Include="..\Services\OutputService.Windows\OutputService.Windows.csproj" />
+		<ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
+		<ProjectReference Include="..\Services\StackService\StackService.csproj" />
+		<ProjectReference Include="..\Services\StorageService\StorageService.csproj" />
+		<ProjectReference Include="..\Services\SignalService\SignalService.csproj" />
+		<ProjectReference Include="..\Services\TrackService\TrackService.csproj" />
+		<ProjectReference Include="..\Services\VolumeService.Windows\VolumeService.Windows.csproj" />
+		<ProjectReference Include="..\Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
-		<ProjectReference Include="..\..\Helpers\WaveFormRenderer\WaveFormRenderer.csproj" />
+		<ProjectReference Include="..\..\Shareds\SampleRenderers\SampleRenderers.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,10 +1,10 @@
-﻿using NAudio.Utils;
+﻿using System;
+using System.Collections.Generic;
+using NAudio.Utils;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
-using System;
-using System.Collections.Generic;
 
-namespace SportDJ.Commons.Providers
+namespace SportDJ.Shareds.SampleProviders.Core
 {
     public class ContinuousMixingProvider(WaveFormat waveFormat)
         : BaseSampleProvider(waveFormat: waveFormat)

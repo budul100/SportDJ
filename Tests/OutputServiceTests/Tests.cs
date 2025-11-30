@@ -15,8 +15,8 @@ namespace SportDJ.Tests.OutputServiceTests
 
         private readonly Mock<IContainerProvider> mockContainerProvider;
         private readonly Mock<IEventAggregator> mockEventAggregator;
+        private readonly Mock<IStorageService<Session>> mockSessionService;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
-        private Mock<IStorageService<Session>> mockSessionService;
 
         #endregion Private Fields
 
@@ -65,16 +65,16 @@ namespace SportDJ.Tests.OutputServiceTests
         [Fact]
         public void GetDevices()
         {
-            var service = new Services.OutputService.Service(
-                containerProvider: mockContainerProvider.Object,
-                eventAggregator: mockEventAggregator.Object,
-                settingsService: mockSettingsService.Object,
-                sessionService: mockSessionService.Object,
-                midiService: default);
+            var provider = new Services.OutputService.Windows.Service(
+                mockContainerProvider.Object,
+                mockEventAggregator.Object,
+                mockSettingsService.Object,
+                mockSessionService.Object,
+                default);
 
-            var devices = service.GetDevices();
+            provider.Update();
 
-            Assert.NotEmpty(devices);
+            Assert.True(provider.Devices.Count > 0);
         }
 
         #endregion Public Methods

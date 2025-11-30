@@ -1,5 +1,4 @@
-﻿using System;
-using Material.Icons;
+﻿using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -15,6 +14,7 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {

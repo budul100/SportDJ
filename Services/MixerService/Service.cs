@@ -12,7 +12,7 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Providers;
+using SportDJ.Shareds.SampleProviders.Core;
 
 namespace SportDJ.Services.MixerService
 {

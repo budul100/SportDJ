@@ -268,8 +268,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
                 isUpdate = true;
 
-                Devices = new ObservableCollection<string>(outputService.GetDevices()
-                    .Select(d => d.Value));
+                outputService.Update();
+                Devices = new ObservableCollection<string>(outputService.Devices.Values);
                 RaisePropertyChanged(nameof(Devices));
 
                 Device = outputService.DeviceName;

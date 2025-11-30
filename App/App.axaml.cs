@@ -17,6 +17,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.App
 {
@@ -105,6 +106,8 @@ namespace SportDJ.App
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            containerRegistry.RegisterSingleton<MainViewModel>();
+
             containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
@@ -113,26 +116,26 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IMidiService, Services.MidiService.Service>();
             containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
 
-            RegisterTypes<OutputType>(
-                containerRegistry: containerRegistry,
-                from: typeof(IOutputService),
-                to: typeof(Services.OutputService.Service));
-
-            RegisterTypes<OutputType>(
-                containerRegistry: containerRegistry,
-                from: typeof(IVolumeService),
-                to: typeof(Services.VolumeService.Service));
+            containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
+            containerRegistry.Register<ISignalService, Services.SignalService.Service>();
+            containerRegistry.Register<IStackService, Services.StackService.Service>();
 
             RegisterTypes<MixerType>(
                 containerRegistry: containerRegistry,
                 from: typeof(IMixerService),
                 to: typeof(Services.MixerService.Service));
 
-            containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
-            containerRegistry.Register<ISignalService, Services.SignalService.Service>();
-            containerRegistry.Register<IStackService, Services.StackService.Service>();
+            RegisterTypes<OutputType>(
+                containerRegistry: containerRegistry,
+                from: typeof(IOutputService),
+                to: typeof(Services.OutputService.Windows.Service));
 
-            containerRegistry.RegisterSingleton<MainViewModel>();
+            RegisterTypes<OutputType>(
+                containerRegistry: containerRegistry,
+                from: typeof(IVolumeService),
+                to: typeof(Services.VolumeService.Windows.Service));
+
+            containerRegistry.Register<IAudioSource, Shareds.SampleProviders.Windows.AudioSource>();
         }
 
         #endregion Protected Methods

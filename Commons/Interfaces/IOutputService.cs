@@ -1,8 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -12,6 +12,8 @@ namespace SportDJ.Commons.Interfaces
         #region Public Properties
 
         string DeviceName { get; }
+
+        Dictionary<int, string> Devices { get; }
 
         WaveFormat Format { get; }
 
@@ -29,7 +31,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Add(IMixerService mixerService, bool onForeground);
 
-        Dictionary<int, string> GetDevices();
+        void Update();
 
         void Initialize(OutputType type);
 

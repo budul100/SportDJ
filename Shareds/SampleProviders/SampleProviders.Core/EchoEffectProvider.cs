@@ -1,7 +1,7 @@
-﻿using NAudio.Wave;
-using System;
+﻿using System;
+using NAudio.Wave;
 
-namespace SportDJ.Commons.Providers
+namespace SportDJ.Shareds.SampleProviders.Core
 {
     public class EchoEffectProvider(ISampleProvider sourceProvider)
         : BaseSampleProvider(waveFormat: sourceProvider?.WaveFormat)
@@ -25,17 +25,23 @@ namespace SportDJ.Commons.Providers
         {
             if (wetDryMix <= 0 || wetDryMix > 1)
             {
-                throw new ArgumentException("The value must be greater than 0 and less or equal to 1.", nameof(wetDryMix));
+                throw new ArgumentException(
+                    "The value must be greater than 0 and less or equal to 1.",
+                    nameof(wetDryMix));
             }
 
             if (feedback <= 0 || feedback > 1)
             {
-                throw new ArgumentException("The value must be greater than 0 and and less or equal to 1.", nameof(feedback));
+                throw new ArgumentException(
+                    "The value must be greater than 0 and and less or equal to 1.",
+                    nameof(feedback));
             }
 
             if (delayMilliSeconds <= 0)
             {
-                throw new ArgumentException("The value must be greater than 0.", nameof(delayMilliSeconds));
+                throw new ArgumentException(
+                    "The value must be greater than 0.",
+                    nameof(delayMilliSeconds));
             }
 
             lock (lockProvider)
@@ -87,9 +93,9 @@ namespace SportDJ.Commons.Providers
                 var drySample = buffer[offset + sample];
                 var wetSample = delayBuffer[delayBufferOffset];
 
-                buffer[offset + sample] = (drySample * (1 - wetDryMix)) + (wetSample * wetDryMix);
+                buffer[offset + sample] = drySample * (1 - wetDryMix) + wetSample * wetDryMix;
 
-                delayBuffer[delayBufferOffset] = drySample + (wetSample * feedback);
+                delayBuffer[delayBufferOffset] = drySample + wetSample * feedback;
 
                 delayBufferOffset++;
 

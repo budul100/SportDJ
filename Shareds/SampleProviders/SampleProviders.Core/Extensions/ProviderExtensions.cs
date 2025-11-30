@@ -1,7 +1,7 @@
 ﻿using SportDJ.Commons.Enums;
 using System;
 
-namespace SportDJ.Commons.Providers.Extensions
+namespace SportDJ.Shareds.SampleProviders.Core.Extensions
 {
     internal static class ProviderExtensions
     {

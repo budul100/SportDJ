@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using NAudio.Dsp;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 
-namespace SportDJ.Commons.Providers
+namespace SportDJ.Shareds.SampleProviders.Core
 {
     public class DynamicFadingProvider
         : BaseSampleProvider
@@ -150,11 +149,11 @@ namespace SportDJ.Commons.Providers
                     }
                     else if (FadeType == FadeType.Raise)
                     {
-                        volumeCurrent = volumeFadeStart + (fadeSamplePosition * volumeFadeDiff);
+                        volumeCurrent = volumeFadeStart + fadeSamplePosition * volumeFadeDiff;
                     }
                     else if (FadeType == FadeType.Reduce)
                     {
-                        volumeCurrent = volumeFadeStart - (fadeSamplePosition * volumeFadeDiff);
+                        volumeCurrent = volumeFadeStart - fadeSamplePosition * volumeFadeDiff;
                     }
 
                     if (lowPassFilters != default
@@ -168,7 +167,7 @@ namespace SportDJ.Commons.Providers
                                 val1: Constants.FilterCutoffMax,
                                 val2: Constants.FilterCutoffFrequency * fadeSampleFactor);
 
-                        resonance = 1.0f + ((1 - fadeSampleFactor) * 2.0f);
+                        resonance = 1.0f + (1 - fadeSampleFactor) * 2.0f;
                     }
                 }
 
