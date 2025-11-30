@@ -69,6 +69,8 @@ namespace SportDJ.Services.VolumeService.Windows
             ResetVolume();
 
             this.deviceName = deviceName;
+
+            eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
 
         public void Mute(int? milliSeconds = default)
