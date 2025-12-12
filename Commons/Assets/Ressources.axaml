@@ -59,4 +59,6 @@
     <co:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter" />
     <co:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
     <co:BoolToColorConverter x:Key="BoolToColorConverter" />
+
+    <co:CapabilityTypeConverter x:Key="CapabilityTypeConverter" />
 </ResourceDictionary>

@@ -58,13 +58,13 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => OnMixerUpdated(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => mixerService == m);
 
             eventAggregator?.GetEvent<MixerStoppedEvent>().Subscribe(
                 action: _ => OnMixerStopped(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => mixerService == m);
 

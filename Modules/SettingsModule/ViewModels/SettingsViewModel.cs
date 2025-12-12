@@ -13,6 +13,7 @@ using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 
@@ -31,7 +32,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
-        private string device;
+        private Device device;
         private bool devicesNotAvailable;
         private bool isUpdate;
         private IStorageFolder startLocation;
@@ -100,7 +101,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Public Properties
 
-        public string Device
+        public Device Device
         {
             get { return device; }
             set
@@ -109,17 +110,17 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 {
                     SetProperty(ref device, value);
 
-                    if (!DevicesNotAvailable)
+                    if (device != default)
                     {
                         DevicesNotAvailable = true;
 
-                        outputService.Set(device);
+                        outputService.Set(device.Name);
                     }
                 }
             }
         }
 
-        public ObservableCollection<string> Devices { get; private set; }
+        public ObservableCollection<Device> Devices { get; private set; }
 
         public bool DevicesNotAvailable
         {
@@ -269,11 +270,14 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 isUpdate = true;
 
                 outputService.Update();
-                Devices = new ObservableCollection<string>(outputService.Devices.Values);
+
+                Devices = new ObservableCollection<Device>(outputService.Devices
+                    .OrderByDescending(d => d.Type == DeviceType.Asio)
+                    .ThenBy(d => d.Name));
                 RaisePropertyChanged(nameof(Devices));
 
-                Device = outputService.DeviceName;
-                RaisePropertyChanged(nameof(Device));
+                Device = Devices
+                    .SingleOrDefault(d => d.Name == outputService.Device.Name);
 
                 isUpdate = false;
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -22,7 +23,7 @@ namespace SportDJ.Commons.Interfaces
 
         void Deactivate();
 
-        void Initialize(string deviceName);
+        void Initialize(Device device);
 
         void Mute(int? milliSeconds = default);
 

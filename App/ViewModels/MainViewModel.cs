@@ -14,6 +14,7 @@ using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -61,19 +62,23 @@ namespace SportDJ.App.ViewModels
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+                action: _ => InitializeSession(),
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
                 action: UpdateLayout,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => UpdateTitle(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => backgroundMixer == m);
 
             eventAggregator?.GetEvent<MixerStoppedEvent>().Subscribe(
                 action: _ => UpdateTitle(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: m => backgroundMixer == m);
 
@@ -203,29 +208,7 @@ namespace SportDJ.App.ViewModels
             settingsService.Load(
                 filePath: settingsPath);
 
-            InitializeOutput(
-                type: OutputType.Live);
-
-            InitializeMixer(
-                outputType: OutputType.Live,
-                mixerType: MixerType.Background,
-                onForeground: false);
-
-            InitializeMixer(
-                outputType: OutputType.Live,
-                mixerType: MixerType.Foreground,
-                onForeground: true);
-
-            InitializeOutput(
-                type: OutputType.PFL);
-
-            InitializeMixer(
-                outputType: OutputType.PFL,
-                mixerType: MixerType.PFL,
-                onForeground: true);
-
-            UpdateLayout();
-            UpdateTitle();
+            InitializeSession();
         }
 
         #endregion Public Methods
@@ -241,7 +224,7 @@ namespace SportDJ.App.ViewModels
                     settingsService.Save();
                     sessionService.Save();
 
-                    outputServices.OnEach(s => s.Dispose());
+                    DisposeOutputs();
                 }
 
                 isDisposed = true;
@@ -288,6 +271,11 @@ namespace SportDJ.App.ViewModels
             }
         }
 
+        private void DisposeOutputs()
+        {
+            outputServices.OnEach(s => s.Dispose());
+        }
+
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
         {
             var outputService = containerProvider.Resolve<IOutputService>(
@@ -323,6 +311,33 @@ namespace SportDJ.App.ViewModels
             {
                 liveServices.Add(outputService);
             }
+        }
+
+        private void InitializeSession()
+        {
+            InitializeOutput(
+                type: OutputType.Live);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Background,
+                onForeground: false);
+
+            InitializeMixer(
+                outputType: OutputType.Live,
+                mixerType: MixerType.Foreground,
+                onForeground: true);
+
+            InitializeOutput(
+                type: OutputType.PFL);
+
+            InitializeMixer(
+                outputType: OutputType.PFL,
+                mixerType: MixerType.PFL,
+                onForeground: true);
+
+            UpdateLayout();
+            UpdateTitle();
         }
 
         private void LoadSessionService()

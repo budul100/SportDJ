@@ -2,7 +2,7 @@
 
 namespace SportDJ.Services.VolumeService.Windows
 {
-    public class VolumeSession(AudioSessionControl control, float volumeInitial)
+    public class Session(AudioSessionControl control, float volumeInitial)
     {
         #region Public Properties
 

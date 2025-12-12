@@ -10,6 +10,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Services.VolumeService.Windows.Extensions;
 
 namespace SportDJ.Services.VolumeService.Windows
@@ -22,7 +23,7 @@ namespace SportDJ.Services.VolumeService.Windows
         private readonly int baseProcessId = Environment.ProcessId;
 
         private CancellationTokenSource cancellationTokenSource;
-        private string deviceName;
+        private Device device;
         private bool isDisposed;
         private bool isToMute;
         private float volumeTarget;
@@ -33,9 +34,9 @@ namespace SportDJ.Services.VolumeService.Windows
 
         public bool IsActive { get; private set; }
 
-        public bool IsInitialized => deviceName != default;
+        public bool IsInitialized => device != default;
 
-        public IEnumerable<VolumeSession> Sessions { get; private set; }
+        public IEnumerable<Session> Sessions { get; private set; }
 
         public VolumeType Type { get; private set; }
 
@@ -64,11 +65,13 @@ namespace SportDJ.Services.VolumeService.Windows
                 obj: this);
         }
 
-        public void Initialize(string deviceName)
+        public void Initialize(Device device)
         {
             ResetVolume();
 
-            this.deviceName = deviceName;
+            this.device = device.Type == DeviceType.Wasapi
+                ? device
+                : default;
 
             eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
@@ -204,9 +207,9 @@ namespace SportDJ.Services.VolumeService.Windows
             eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
         }
 
-        private IEnumerable<VolumeSession> GetSessions()
+        private IEnumerable<Session> GetSessions()
         {
-            if (!string.IsNullOrWhiteSpace(deviceName))
+            if (device != default)
             {
                 var deviceEnumerator = new MMDeviceEnumerator();
 
@@ -214,10 +217,10 @@ namespace SportDJ.Services.VolumeService.Windows
                     dataFlow: DataFlow.Render,
                     dwStateMask: DeviceState.Active);
 
-                if (devices.Any(d => d.IsMatching(deviceName)))
+                if (devices.Any(d => d.IsMatching(device.Name)))
                 {
                     var sessions = devices
-                        .Where(d => d.IsMatching(deviceName))
+                        .Where(d => d.IsMatching(device.Name))
                         .Select(d => d.AudioSessionManager.Sessions).ToArray();
 
                     foreach (var session in sessions)
@@ -229,7 +232,7 @@ namespace SportDJ.Services.VolumeService.Windows
                             if (current.GetProcessID.ProcessExists()
                                 && current.GetProcessID != baseProcessId)
                             {
-                                var result = new VolumeSession(
+                                var result = new Session(
                                     control: current,
                                     volumeInitial: current.SimpleAudioVolume.Volume);
 
@@ -241,7 +244,7 @@ namespace SportDJ.Services.VolumeService.Windows
             }
         }
 
-        private void RaiseVolume(IEnumerable<VolumeSession> sessions, float fadeStep,
+        private void RaiseVolume(IEnumerable<Session> sessions, float fadeStep,
             CancellationToken? cancellationToken)
         {
             if (sessions?.Count() > 0)
@@ -277,7 +280,7 @@ namespace SportDJ.Services.VolumeService.Windows
                 : VolumeType.None;
         }
 
-        private void ReduceVolume(IEnumerable<VolumeSession> sessions, float fadeStep,
+        private void ReduceVolume(IEnumerable<Session> sessions, float fadeStep,
             CancellationToken cancellationToken)
         {
             if (sessions?.Count() > 0)

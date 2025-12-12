@@ -73,19 +73,19 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
             eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
                 action: _ => UpdateControls(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: v => volumeService == v);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateControls(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
                 action: _ => UpdateControls(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 

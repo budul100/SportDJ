@@ -51,10 +51,15 @@ namespace SportDJ.Commons.Assets
         public const int OptionsSelectionMax = 10000;
         public const int OptionsSelectionMin = 0;
 
+        public const int OutputChannelMax = 2;
+
         public const string SettingsExtension = ".xml";
 
         public const string SplitterTitle = " | ";
         public const char SplitterVersion = '.';
+
+        // Update frequency of audio signals in ms
+        public const long UpdatesInMilliSec = 50;
 
         public const float VolumeMax = 1f;
         public const float VolumeMin = 0f;

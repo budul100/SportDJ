@@ -51,31 +51,31 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
                 action: _ => Initialize(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
             eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
                 action: _ => UpdateContent(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
             eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: p => playerService == p);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateContent(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputServiceLive == o);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
                 action: _ => UpdateContent(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputServiceLive == o);
 

@@ -26,15 +26,18 @@ namespace SportDJ.Services.SignalService
 
         private DynamicFadingProvider fadingProvider;
         private bool isDisposed;
+        private long lastPosition = 0;
         private TimeSpan? nextThresholdOnPlay;
         private SourcePlayingProvider playingProvider;
+
+        private long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
         #endregion Private Fields
 
         #region Public Properties
 
         public TimeSpan? Duration => !(playingProvider?.Duration < TimeSpan.Zero)
-            ? playingProvider?.Duration
+                   ? playingProvider?.Duration
             : TimeSpan.Zero;
 
         public bool IsEnding => playingProvider?.IsRunning == true
@@ -303,17 +306,21 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalUpdated(object sender, EventArgs e)
         {
-            eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
-
-            if (!IsOverNextThreshold
-                && nextThresholdOnPlay.HasValue)
+            if (Position.HasValue
+                && (Position.Value.Ticks - lastPosition) > updatesInTicks)
             {
-                IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
-                    || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+                eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
-                if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                if (!IsOverNextThreshold
+                    && nextThresholdOnPlay.HasValue)
                 {
-                    SelectNext();
+                    IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
+                        || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+
+                    if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                    {
+                        SelectNext();
+                    }
                 }
             }
         }

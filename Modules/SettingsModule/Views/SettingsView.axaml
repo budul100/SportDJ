@@ -8,6 +8,7 @@
 	xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
 	xmlns:mat="using:Material.Icons.Avalonia"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:models="using:SportDJ.Commons.Models"
 	xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
 	xmlns:prism="http://prismlibrary.com/"
 	d:DesignHeight="500"
@@ -62,12 +63,25 @@
 					VerticalAlignment="Stretch"
 					FontSize="{StaticResource FontSizeVolume}"
 					Text="Output device" />
+
 				<ComboBox
 					Margin="{StaticResource InnerMargin}"
 					HorizontalAlignment="Stretch"
 					Focusable="False"
 					ItemsSource="{Binding Devices}"
-					SelectedItem="{Binding Device}" />
+					SelectedItem="{Binding Device}" >
+					<ComboBox.ItemTemplate>
+						<DataTemplate x:DataType="models:Contents.Device">
+							<StackPanel Orientation="Horizontal">
+								<TextBlock Text="{Binding Name}"/>
+								<TextBlock Text=" ("/>
+								<TextBlock Text="{Binding Type, Converter={StaticResource CapabilityTypeConverter}}"/>
+								<TextBlock Text=")"/>
+							</StackPanel>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+
 			</StackPanel>
 		</DockPanel>
 

@@ -14,6 +14,7 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Core;
 
@@ -30,7 +31,7 @@ namespace SportDJ.Services.OutputService.Windows
         private readonly IMidiService midiService;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
-        private readonly OutputProvider outputProvider = new();
+        private readonly Provider outputProvider = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -57,7 +58,7 @@ namespace SportDJ.Services.OutputService.Windows
             this.midiService = midiService;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: SetOutput,
+                action: ApplySettings,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
@@ -83,9 +84,9 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Public Properties
 
-        public string DeviceName => outputOptions?.DeviceName;
+        public Device Device => outputProvider?.Device;
 
-        public Dictionary<int, string> Devices => outputProvider?.Devices;
+        public IEnumerable<Device> Devices => outputProvider?.Devices.Values;
 
         public WaveFormat Format { get; private set; }
 
@@ -158,13 +159,15 @@ namespace SportDJ.Services.OutputService.Windows
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = outputProvider.Volume * outputOptions.VolumePercentageBackground / (float)Constants.OptionsPercentageMax;
+                var volumeBackground = outputProvider.Volume * outputOptions.VolumePercentageBackground
+                    / (float)Constants.OptionsPercentageMax;
 
                 providerFader.Fade(
                     volumeTarget: volumeBackground,
                     milliSeconds: fadeMilliseconds);
 
-                var volumeExternals = outputProvider.Volume * outputOptions.VolumePercentageExternals / (float)Constants.OptionsPercentageMax;
+                var volumeExternals = outputProvider.Volume * outputOptions.VolumePercentageExternals
+                    / (float)Constants.OptionsPercentageMax;
 
                 volumeService.Reduce(
                     volumeTarget: volumeExternals,
@@ -199,27 +202,25 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false)
         {
-            if (outputProvider.IsActive != true
-                || outputOptions.SampleRate != sampleRate)
+            if (!IsPlaying)
             {
                 outputProvider.Set(
                     deviceName: deviceName,
                     takeDefaultIfMissing: takeDefaultIfMissing);
 
-                if (outputProvider.DeviceNumber.HasValue)
+                if (outputProvider.Device != default)
                 {
-                    outputOptions.DeviceName = outputProvider.DeviceName;
-                    outputOptions.SampleRate = sampleRate;
-
                     Format = WaveFormat.CreateIeeeFloatWaveFormat(
                         sampleRate: sampleRate,
-                        channels: outputProvider.Channels);
+                        channels: outputProvider.Device.Channels);
 
-                    InitializeOutput(
-                        deviceNumber: outputProvider.DeviceNumber.Value);
+                    InitializeProvider();
 
                     volumeService.Initialize(
-                        deviceName: outputOptions.DeviceName);
+                        device: outputProvider.Device);
+
+                    outputOptions.DeviceName = outputProvider.Device.Name;
+                    outputOptions.SampleRate = sampleRate;
 
                     sessionService.Save();
                 }
@@ -271,6 +272,20 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Private Methods
 
+        private void ApplySettings()
+        {
+            outputOptions = GetOptions(Type);
+
+            volumeService = containerProvider.Resolve<IVolumeService>(
+                name: Type.ToString());
+
+            var takeDefaultIfMissing = Type == OutputType.Live;
+
+            Set(
+                deviceName: outputOptions.DeviceName,
+                takeDefaultIfMissing: takeDefaultIfMissing);
+        }
+
         private void CloseOutput()
         {
             mixersAll.OnEach(m => m.Pause());
@@ -300,7 +315,7 @@ namespace SportDJ.Services.OutputService.Windows
             return result;
         }
 
-        private void InitializeOutput(int deviceNumber)
+        private void InitializeProvider()
         {
             CloseOutput();
 
@@ -316,13 +331,12 @@ namespace SportDJ.Services.OutputService.Windows
             var providerWave = new SampleToWaveProvider(providerForeground);
 
             outputProvider.Initialize(
-                deviceNumber: deviceNumber,
                 waveProvider: providerWave,
                 volume: outputOptions.Volume);
 
-            mixersAll.OnEach(m => Add(
-                mixerService: m,
-                onForeground: mixersForeground.Contains(m)));
+            mixersAll.OnEach(mixer => Add(
+                mixerService: mixer,
+                onForeground: mixersForeground.Contains(mixer)));
 
             Task.Run(
                 action: outputProvider.Play,
@@ -393,20 +407,6 @@ namespace SportDJ.Services.OutputService.Windows
 
                 eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
             }
-        }
-
-        private void SetOutput()
-        {
-            outputOptions = GetOptions(Type);
-
-            volumeService = containerProvider.Resolve<IVolumeService>(
-                name: Type.ToString());
-
-            var takeDefaultIfMissing = Type == OutputType.Live;
-
-            Set(
-                deviceName: outputOptions.DeviceName,
-                takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
         #endregion Private Methods

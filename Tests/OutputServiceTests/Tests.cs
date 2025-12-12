@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System.Linq;
+using Moq;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Mixer;
@@ -66,15 +67,15 @@ namespace SportDJ.Tests.OutputServiceTests
         public void GetDevices()
         {
             var provider = new Services.OutputService.Windows.Service(
-                mockContainerProvider.Object,
-                mockEventAggregator.Object,
-                mockSettingsService.Object,
-                mockSessionService.Object,
-                default);
+                containerProvider: mockContainerProvider.Object,
+                eventAggregator: mockEventAggregator.Object,
+                settingsService: mockSettingsService.Object,
+                sessionService: mockSessionService.Object,
+                midiService: default);
 
             provider.Update();
 
-            Assert.True(provider.Devices.Count > 0);
+            Assert.True(provider.Devices.Count() > 0);
         }
 
         #endregion Public Methods

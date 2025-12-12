@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -11,9 +12,9 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
-        string DeviceName { get; }
+        Device Device { get; }
 
-        Dictionary<int, string> Devices { get; }
+        IEnumerable<Device> Devices { get; }
 
         WaveFormat Format { get; }
 
@@ -31,8 +32,6 @@ namespace SportDJ.Commons.Interfaces
 
         void Add(IMixerService mixerService, bool onForeground);
 
-        void Update();
-
         void Initialize(OutputType type);
 
         void Lower();
@@ -42,6 +41,8 @@ namespace SportDJ.Commons.Interfaces
         void Raise();
 
         void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false);
+
+        void Update();
 
         #endregion Public Methods
     }
