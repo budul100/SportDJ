@@ -277,7 +277,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 RaisePropertyChanged(nameof(Devices));
 
                 Device = Devices
-                    .SingleOrDefault(d => d.Name == outputService.Device.Name);
+                    .SingleOrDefault(d => d.Name == outputService.Device?.Name);
 
                 isUpdate = false;
             }
