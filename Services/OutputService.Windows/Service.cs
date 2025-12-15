@@ -35,12 +35,11 @@ namespace SportDJ.Services.OutputService.Windows
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
+        private DynamicFadingProvider backgroundFader;
+        private ContinuousMixingProvider backgroundMixer;
+        private ContinuousMixingProvider foregroundMixer;
         private bool isDisposed;
-        private bool isLowered;
         private Output outputOptions;
-        private ContinuousMixingProvider providerBackground;
-        private DynamicFadingProvider providerFader;
-        private ContinuousMixingProvider providerForeground;
         private IVolumeService volumeService;
 
         #endregion Private Fields
@@ -92,6 +91,8 @@ namespace SportDJ.Services.OutputService.Windows
 
         public bool IsActive => outputProvider.IsActive;
 
+        public bool IsLowered { get; private set; }
+
         public bool IsPlaying { get; private set; }
 
         public OutputType Type { get; private set; }
@@ -128,11 +129,11 @@ namespace SportDJ.Services.OutputService.Windows
             {
                 mixersForeground.Add(mixerService);
 
-                providerForeground.Add(mixerService.Output);
+                foregroundMixer.Add(mixerService.Output);
             }
             else
             {
-                providerBackground.Add(mixerService.Output);
+                backgroundMixer.Add(mixerService.Output);
             }
 
             mixersAll.Add(mixerService);
@@ -153,21 +154,21 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Lower()
         {
-            if (!isLowered)
+            if (!IsLowered)
             {
-                isLowered = true;
+                IsLowered = true;
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
                 var volumeBackground = outputProvider.Volume * outputOptions.VolumePercentageBackground
                     / (float)Constants.OptionsPercentageMax;
 
-                providerFader.Fade(
-                    volumeTarget: volumeBackground,
-                    milliSeconds: fadeMilliseconds);
-
                 var volumeExternals = outputProvider.Volume * outputOptions.VolumePercentageExternals
                     / (float)Constants.OptionsPercentageMax;
+
+                backgroundFader.Fade(
+                    volumeTarget: volumeBackground,
+                    milliSeconds: fadeMilliseconds);
 
                 volumeService.Reduce(
                     volumeTarget: volumeExternals,
@@ -184,19 +185,19 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Raise()
         {
-            if (isLowered)
+            if (IsLowered)
             {
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                isLowered = false;
-
-                providerFader.Fade(
+                backgroundFader.Fade(
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeMilliseconds);
 
                 volumeService.Raise(
                     volumeTarget: Constants.VolumeMax,
                     milliSeconds: fadeMilliseconds);
+
+                IsLowered = false;
             }
         }
 
@@ -253,9 +254,9 @@ namespace SportDJ.Services.OutputService.Windows
 
                     outputProvider?.Stop();
 
-                    providerForeground?.Dispose();
-                    providerFader?.Dispose();
-                    providerBackground?.Dispose();
+                    foregroundMixer?.Dispose();
+                    backgroundFader?.Dispose();
+                    backgroundMixer?.Dispose();
 
                     midiService?.Deactivate();
                     midiService?.Dispose();
@@ -291,9 +292,15 @@ namespace SportDJ.Services.OutputService.Windows
             mixersAll.OnEach(m => m.Pause());
             outputProvider?.Stop();
 
-            providerForeground?.Dispose();
-            providerFader?.Dispose();
-            providerBackground?.Dispose();
+            if (backgroundFader != default)
+            {
+                backgroundFader.FadingStartedEvent -= OnFadingStarted;
+                backgroundFader.FadingEndedEvent -= OnFadingEnded;
+            }
+
+            foregroundMixer?.Dispose();
+            backgroundFader?.Dispose();
+            backgroundMixer?.Dispose();
         }
 
         private Output GetOptions(OutputType type)
@@ -319,16 +326,19 @@ namespace SportDJ.Services.OutputService.Windows
         {
             CloseOutput();
 
-            providerBackground = new ContinuousMixingProvider(Format);
+            backgroundMixer = new ContinuousMixingProvider(Format);
 
-            providerFader = new DynamicFadingProvider(
-                sourceProvider: providerBackground,
+            backgroundFader = new DynamicFadingProvider(
+                sourceProvider: backgroundMixer,
                 volume: Constants.VolumeMax);
 
-            providerForeground = new ContinuousMixingProvider(Format);
-            providerForeground.Add(providerFader);
+            backgroundFader.FadingStartedEvent += OnFadingStarted;
+            backgroundFader.FadingEndedEvent += OnFadingEnded;
 
-            var providerWave = new SampleToWaveProvider(providerForeground);
+            foregroundMixer = new ContinuousMixingProvider(Format);
+            foregroundMixer.Add(backgroundFader);
+
+            var providerWave = new SampleToWaveProvider(foregroundMixer);
 
             outputProvider.Initialize(
                 waveProvider: providerWave,
@@ -352,6 +362,16 @@ namespace SportDJ.Services.OutputService.Windows
 
             volumeService.Mute(
                 milliSeconds: fadeMilliseconds);
+        }
+
+        private void OnFadingEnded(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<OutputFadedEvent>().Publish(this);
+        }
+
+        private void OnFadingStarted(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<OutputFadedEvent>().Publish(this);
         }
 
         private void OnMixerEnded(IMixerService mixerService)
@@ -382,12 +402,14 @@ namespace SportDJ.Services.OutputService.Windows
 
         private void OnMixerStopped(IMixerService mixerService)
         {
-            if (mixersForeground.Contains(mixerService))
+            var isPlaying = mixersAll.Any(p => p.IsPlaying);
+
+            if (!isPlaying || mixersForeground.Contains(mixerService))
             {
                 Raise();
             }
 
-            if (!mixersAll.Any(p => p.IsPlaying))
+            if (!isPlaying)
             {
                 IsPlaying = false;
 

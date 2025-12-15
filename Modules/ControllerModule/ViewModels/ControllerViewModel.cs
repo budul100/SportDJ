@@ -1,4 +1,5 @@
-﻿using Material.Icons;
+﻿using System;
+using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -14,7 +15,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -29,9 +29,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         private readonly IVolumeService volumeService;
 
         private bool isListening;
+        private bool isVolumeMonitoringActive;
+        private bool isVolumePressed;
         private Options options;
-        private bool othersMuted;
-        private bool volumeMonitoringActive;
 
         #endregion Private Fields
 
@@ -89,6 +89,12 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 
+            eventAggregator?.GetEvent<OutputFadedEvent>().Subscribe(
+                action: _ => UpdateControls(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: o => outputLiveService == o);
+
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
                 keepSubscriberReferenceAlive: true);
@@ -114,25 +120,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
 
-        public bool IsActive => (outputLiveService?.IsPlaying == true) || VolumeMonitoringActive;
+        public bool IsActive => (outputLiveService?.IsPlaying == true) || IsVolumeMonitoringActive;
 
-        public bool IsVolumeMonitoringAvailable => volumeService?.IsInitialized == true;
+        public bool IsVolumeLowered => outputLiveService?.IsLowered == true;
 
-        public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
-
-        public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
-
-        public bool OthersMuted
-        {
-            get { return othersMuted; }
-            set { SetProperty(ref othersMuted, value); }
-        }
-
-        public DelegateCommand PauseCommand { get; }
-
-        public DelegateCommand VolumeLowerCommand { get; }
-
-        public bool VolumeMonitoringActive
+        public bool IsVolumeMonitoringActive
         {
             get
             {
@@ -154,12 +146,28 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                         volumeService.Deactivate();
                     }
 
-                    SetProperty(ref volumeMonitoringActive, value);
+                    SetProperty(ref isVolumeMonitoringActive, value);
                 }
 
                 UpdateControls();
             }
         }
+
+        public bool IsVolumeMonitoringAvailable => volumeService?.IsInitialized == true;
+
+        public bool IsVolumePressed
+        {
+            get => isVolumePressed;
+            set => SetProperty(ref isVolumePressed, value);
+        }
+
+        public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
+
+        public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
+
+        public DelegateCommand PauseCommand { get; }
+
+        public DelegateCommand VolumeLowerCommand { get; }
 
         public DelegateCommand VolumeRaiseCommand { get; }
 
@@ -188,8 +196,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             if (!isListening)
             {
                 isListening = true;
-
-                //hookService.Listen(k => ReceiveHook(k));
             }
         }
 
@@ -252,9 +258,12 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void UpdateControls()
         {
-            RaisePropertyChanged(nameof(IsVolumeMonitoringAvailable));
-            RaisePropertyChanged(nameof(VolumeMonitoringActive));
             RaisePropertyChanged(nameof(IsActive));
+
+            RaisePropertyChanged(nameof(IsVolumeMonitoringAvailable));
+            RaisePropertyChanged(nameof(IsVolumeMonitoringActive));
+
+            RaisePropertyChanged(nameof(IsVolumeLowered));
 
             PauseCommand.RaiseCanExecuteChanged();
             VolumeLowerCommand.RaiseCanExecuteChanged();

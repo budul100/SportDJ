@@ -264,14 +264,17 @@ namespace SportDJ.Services.MixerService
 
             EndMixer();
 
+            var relevants = default(ISignalService[]);
+
             lock (lockSignalServices)
             {
-                var relevants = signalServices
+                relevants = signalServices
                     .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold)).ToArray();
 
-                relevants.OnEach(RemoveSignal);
                 signalServices.ExceptWith(relevants);
             }
+
+            relevants?.OnEach(RemoveSignal);
         }
 
         private void OnSignalStarted(ISignalService signalService)

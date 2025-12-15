@@ -20,6 +20,8 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsActive { get; }
 
+        bool IsLowered { get; }
+
         bool IsPlaying { get; }
 
         OutputType Type { get; }

@@ -248,11 +248,11 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             if (mixerService.Track != default
                 && mixerService.IsPlaying)
             {
-                Content = mixerService.Track.Info;
+                Content = mixerService.Track?.Info;
                 IsPlaying = mixerService.IsPlaying;
                 IsEnding = mixerService.IsEnding;
 
-                Bitmap = mixerService.Track.Bitmap;
+                Bitmap = mixerService.Track?.Bitmap;
                 Remaining = mixerService.Remaining?.ToString(Constants.FormatDuration);
                 Progress = mixerService.Progress;
             }

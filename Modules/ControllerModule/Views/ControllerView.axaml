@@ -1,162 +1,171 @@
-<UserControl
-    x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
-    xmlns:en="using:SportDJ.Commons.Enums"
-    xmlns:mat="using:Material.Icons.Avalonia"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
-    d:DesignHeight="50"
-    d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="d">
+<UserControl 
+	x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
+	xmlns:en="using:SportDJ.Commons.Enums"
+	xmlns:i="using:Avalonia.Xaml.Interactivity"
+	xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
+	xmlns:local="using:SportDJ.Modules.ControllerModule.Behaviors"
+	xmlns:mat="using:Material.Icons.Avalonia"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:prism="http://prismlibrary.com/"
+	xmlns:vm="using:SportDJ.Modules.ControllerModule.ViewModels"
+	d:DesignHeight="50"
+	d:DesignWidth="300"
+	prism:ViewModelLocator.AutoWireViewModel="True"
+	mc:Ignorable="d"
+	x:DataType="vm:ControllerViewModel"
+	x:CompileBindings="True">
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
-            </ResourceDictionary.MergedDictionaries>
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="avares://Commons/Assets/Ressources.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+			<Thickness x:Key="InnerMargin">1</Thickness>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	
+	<UserControl.Styles>
+		<mat:MaterialIconStyles/>
+	</UserControl.Styles>
+	
+	<Design.DataContext>
+		<dt:ControllerViewModel/>
+	</Design.DataContext>
+	
+	<Grid Margin="{StaticResource ContentMargin}">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition/>
+			<ColumnDefinition/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		
+		<ToggleButton 
+			Grid.Row="0"
+		    Grid.Column="0"
+		    Margin="{StaticResource InnerMargin}"
+		    HorizontalAlignment="Stretch"
+		    VerticalAlignment="Stretch"
+		    Focusable="False"
+		    IsChecked="{Binding IsVolumeMonitoringActive}"
+		    IsEnabled="{Binding IsVolumeMonitoringAvailable}">
 
-            <Thickness x:Key="InnerMargin">1</Thickness>
-        </ResourceDictionary>
-    </UserControl.Resources>
+			<mat:MaterialIcon 
+				Width="{StaticResource LargeIconSize}"
+			    Height="{StaticResource LargeIconSize}"
+			    Kind="VolumeMute"/>
+		</ToggleButton>
 
-    <UserControl.Styles>
-        <mat:MaterialIconStyles />
-    </UserControl.Styles>
 
-    <Design.DataContext>
-        <dt:ControllerViewModel />
-    </Design.DataContext>
+		<Button
+			Name="VolumeButton"
+			Grid.Row="0"
+			Grid.Column="1"
+			Margin="{StaticResource InnerMargin}"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			Focusable="False"
+			Background="Transparent"
+			IsEnabled="{Binding IsActive}">
 
-    <Grid Margin="{StaticResource ContentMargin}">
+			<i:Interaction.Behaviors>
+				<local:PointerCaptureBehavior 
+					local:PointerCaptureBehavior.IsPointerPressed="{Binding IsVolumePressed, Mode=TwoWay}"
+					HoldDuration="{StaticResource TogglePressDuration}"
+					HoldStartCommand="{Binding VolumeLowerCommand}"
+					HoldEndCommand="{Binding VolumeRaiseCommand}" />
+			</i:Interaction.Behaviors>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+			<Grid 
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				Classes.IsLowered="{Binding IsVolumeLowered}" >
 
-        <ToggleButton
-            Grid.Row="0"
-            Grid.Column="0"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Focusable="False"
-            IsChecked="{Binding VolumeMonitoringActive}"
-            IsEnabled="{Binding IsVolumeMonitoringAvailable}">
-            <mat:MaterialIcon
-                Width="{StaticResource LargeIconSize}"
-                Height="{StaticResource LargeIconSize}"
-                Kind="VolumeMute" />
-        </ToggleButton>
+				<Grid.Styles>
+					<Style Selector="Grid.IsLowered">
+						<Setter Property="Background" Value="{StaticResource ColorBackgroundToggle}" />
+					</Style>
+					<Style Selector="Grid">
+						<Setter Property="Background" Value="{StaticResource ColorBackground}" />
+					</Style>
+				</Grid.Styles>
 
-        <Button
-            Name="VolumeButton"
-            Grid.Row="0"
-            Grid.Column="1"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Focusable="False"
-            IsEnabled="{Binding IsActive}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="{Binding HasKeyTalkVolume, Converter={StaticResource BoolToGridSizeAutoConverter}}"/>
+				</Grid.ColumnDefinitions>
+				
+				<mat:MaterialIcon 
+					Grid.Column="0"
+					Width="{StaticResource LargeIconSize}"
+					Height="{StaticResource LargeIconSize}"
+					Kind="Microphone"/>
+				<Border 
+					Grid.Column="1"
+					Padding="{StaticResource KeyPadding}"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Center"
+					Background="{StaticResource KeyBackgroundColor}"
+					BorderBrush="{StaticResource KeyBorderColor}"
+					BorderThickness="{StaticResource KeyBorderThickness}"
+					CornerRadius="{StaticResource KeyCornerRadius}"
+					IsVisible="{Binding HasKeyTalkVolume}">
+					<TextBlock 
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						FontSize="{StaticResource FontSizeContentMain}"
+						Text="{Binding KeyTalkVolume}"/>
+				</Border>
+			</Grid>
+		</Button>
 
-            <!--<prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.MenuRegion}" />
-            </prism:RegionManager.RegionName>-->
+		<Button 
+			Grid.Row="0"
+		    Grid.Column="2"
+		    Margin="{StaticResource InnerMargin}"
+		    HorizontalAlignment="Stretch"
+		    VerticalAlignment="Stretch"
+		    Command="{Binding PauseCommand}"
+		    Focusable="False"
+		    IsEnabled="{Binding IsActive}">
 
-            <Interaction.Behaviors>
-                <EventTriggerBehavior EventName="PointerPressed" SourceObject="VolumeButton">
-                    <InvokeCommandAction Command="{Binding VolumeLowerCommand}" />
-                </EventTriggerBehavior>
-                <EventTriggerBehavior EventName="PointerReleased" SourceObject="VolumeButton">
-                    <InvokeCommandAction Command="{Binding VolumeRaiseCommand}" />
-                </EventTriggerBehavior>
-            </Interaction.Behaviors>
+			<Grid 
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				Background="{StaticResource ColorBackground}">
 
-            <Grid
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="{Binding HasKeyPauseOutput, Converter={StaticResource BoolToGridSizeAutoConverter}}"/>
+				</Grid.ColumnDefinitions>
+				
+				<mat:MaterialIcon 
+					Grid.Column="0"
+				    Width="{StaticResource LargeIconSize}"
+				    Height="{StaticResource LargeIconSize}"
+				    Kind="PauseCircle"/>
+				
+				<Border 
+					Grid.Column="1"
+				    Padding="15,0,15,0"
+				    HorizontalAlignment="Right"
+				    VerticalAlignment="Center"
+				    Background="{StaticResource KeyBackgroundColor}"
+				    BorderBrush="{StaticResource KeyBorderColor}"
+				    BorderThickness="{StaticResource KeyBorderThickness}"
+				    CornerRadius="{StaticResource KeyCornerRadius}"
+				    IsVisible="{Binding HasKeyPauseOutput}">
+					<TextBlock 
+						HorizontalAlignment="Center"
+					    VerticalAlignment="Center"
+					    FontSize="{StaticResource FontSizeContentMain}"
+					    Text="{Binding KeyPauseOutput}"/>
+				</Border>
+			</Grid>
+		</Button>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="{Binding HasKeyTalkVolume, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
-                </Grid.ColumnDefinitions>
-
-                <mat:MaterialIcon
-                    Grid.Column="0"
-                    Width="{StaticResource LargeIconSize}"
-                    Height="{StaticResource LargeIconSize}"
-                    Kind="Microphone" />
-
-                <Border
-                    Grid.Column="1"
-                    Padding="{StaticResource KeyPadding}"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Background="{StaticResource KeyBackgroundColor}"
-                    BorderBrush="{StaticResource KeyBorderColor}"
-                    BorderThickness="{StaticResource KeyBorderThickness}"
-                    CornerRadius="{StaticResource KeyCornerRadius}"
-                    IsVisible="{Binding HasKeyTalkVolume}">
-
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContentMain}"
-                        Text="{Binding KeyTalkVolume}" />
-                </Border>
-            </Grid>
-        </Button>
-
-        <Button
-            Grid.Row="0"
-            Grid.Column="2"
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Command="{Binding PauseCommand}"
-            Focusable="False"
-            IsEnabled="{Binding IsActive}">
-
-            <Grid
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="{StaticResource ColorBackground}">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="{Binding HasKeyPauseOutput, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
-                </Grid.ColumnDefinitions>
-
-                <mat:MaterialIcon
-                    Grid.Column="0"
-                    Width="{StaticResource LargeIconSize}"
-                    Height="{StaticResource LargeIconSize}"
-                    Kind="PauseCircle" />
-
-                <Border
-                    Grid.Column="1"
-                    Padding="15,0,15,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Background="{StaticResource KeyBackgroundColor}"
-                    BorderBrush="{StaticResource KeyBorderColor}"
-                    BorderThickness="{StaticResource KeyBorderThickness}"
-                    CornerRadius="{StaticResource KeyCornerRadius}"
-                    IsVisible="{Binding HasKeyPauseOutput}">
-
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContentMain}"
-                        Text="{Binding KeyPauseOutput}" />
-                </Border>
-            </Grid>
-        </Button>
-    </Grid>
+	</Grid>
 </UserControl>

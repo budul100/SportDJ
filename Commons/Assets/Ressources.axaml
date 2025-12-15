@@ -4,6 +4,7 @@
     xmlns:co="using:SportDJ.Commons.Converters">
 
     <x:Double x:Key="SplashViewSize">500</x:Double>
+    <x:TimeSpan x:Key="TogglePressDuration">0:0:0.500</x:TimeSpan>
 
     <Thickness x:Key="ContentMargin">4</Thickness>
 
@@ -12,6 +13,7 @@
     <x:Double x:Key="TextBoxHeight">20</x:Double>
 
     <Color x:Key="ColorBackground">#333333</Color>
+    <Color x:Key="ColorBackgroundToggle">DodgerBlue</Color>
     <Color x:Key="ColorIsChecked">RoyalBlue</Color>
     <Color x:Key="ColorIsForeground">DarkSlateGray</Color>
     <Color x:Key="ColorIsPlaying">Purple</Color>
