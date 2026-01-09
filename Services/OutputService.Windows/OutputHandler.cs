@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Exceptions;
@@ -10,7 +12,7 @@ using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.OutputService.Windows
 {
-    internal class Output
+    internal class OutputHandler
         : IDisposable
     {
         #region Private Fields
@@ -22,7 +24,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Public Constructors
 
-        public Output()
+        public OutputHandler()
         {
             Update();
         }
@@ -73,24 +75,47 @@ namespace SportDJ.Services.OutputService.Windows
         {
             if (Device != default)
             {
-                switch (Device.Type)
+                try
                 {
-                    case DeviceType.Wasapi:
+                    var playerProvider = waveProvider;
 
-                        player = new WaveOutEvent { DeviceNumber = Device.Number, };
-                        break;
+                    switch (Device.Type)
+                    {
+                        case DeviceType.Wasapi:
 
-                    case DeviceType.Asio:
+                            player = new WaveOutEvent { DeviceNumber = Device.Number, };
+                            break;
 
-                        player = ExecuteOnSTAThread(() => new AsioOut(Device.Name));
-                        break;
+                        case DeviceType.Asio:
+
+                            var asioOut = ExecuteOnSTAThread(() => new AsioOut(Device.Name));
+
+                            if (!asioOut.IsSampleRateSupported(waveProvider.WaveFormat.SampleRate))
+                            {
+                                var sampleProvider = waveProvider.ToSampleProvider();
+                                var resampler = new WdlResamplingSampleProvider(
+                                    source: sampleProvider,
+                                    newSampleRate: Constants.SampleRateDefaultAsio);
+
+                                playerProvider = new SampleToWaveProvider(resampler);
+                            }
+
+                            player = asioOut;
+                            break;
+                    }
+
+                    player.PlaybackStopped += OnPlaybackStopped;
+                    player.Init(playerProvider);
+
+                    Volume = volume;
+                    IsActive = true;
                 }
+                catch
+                {
+                    // TO DO: Log exception
 
-                player.PlaybackStopped += OnPlaybackStopped;
-                player.Init(waveProvider);
-
-                Volume = volume;
-                IsActive = true;
+                    Debugger.Break();
+                }
             }
         }
 

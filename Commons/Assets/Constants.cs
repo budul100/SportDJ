@@ -53,6 +53,8 @@ namespace SportDJ.Commons.Assets
 
         public const int OutputChannelMax = 2;
 
+        public const int SampleRateDefaultAsio = 48000;
+
         public const string SettingsExtension = ".xml";
 
         public const string SplitterTitle = " | ";

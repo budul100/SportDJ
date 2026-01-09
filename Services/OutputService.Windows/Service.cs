@@ -31,7 +31,7 @@ namespace SportDJ.Services.OutputService.Windows
         private readonly IMidiService midiService;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
-        private readonly Output outputProvider = new();
+        private readonly OutputHandler outputHandler = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -39,7 +39,7 @@ namespace SportDJ.Services.OutputService.Windows
         private DynamicFadingProvider fadingProvider;
         private ContinuousMixingProvider foregroundProvider;
         private bool isDisposed;
-        private Commons.Models.Settings.Output outputOptions;
+        private Output outputOptions;
         private IVolumeService volumeService;
 
         #endregion Private Fields
@@ -83,11 +83,11 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Public Properties
 
-        public Device Device => outputProvider?.Device;
+        public Device Device => outputHandler?.Device;
 
-        public IEnumerable<Device> Devices => outputProvider?.Devices;
+        public IEnumerable<Device> Devices => outputHandler?.Devices;
 
-        public bool IsActive => outputProvider.IsActive;
+        public bool IsActive => outputHandler.IsActive;
 
         public bool IsLowered { get; private set; }
 
@@ -109,9 +109,9 @@ namespace SportDJ.Services.OutputService.Windows
                 {
                     outputOptions.Volume = value;
 
-                    if (outputProvider != default)
+                    if (outputHandler != default)
                     {
-                        outputProvider.Volume = outputOptions.Volume;
+                        outputHandler.Volume = outputOptions.Volume;
                     }
                 }
             }
@@ -160,10 +160,10 @@ namespace SportDJ.Services.OutputService.Windows
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = outputProvider.Volume * outputOptions.VolumePercentageBackground
+                var volumeBackground = outputHandler.Volume * outputOptions.VolumePercentageBackground
                     / (float)Constants.OptionsPercentageMax;
 
-                var volumeExternals = outputProvider.Volume * outputOptions.VolumePercentageExternals
+                var volumeExternals = outputHandler.Volume * outputOptions.VolumePercentageExternals
                     / (float)Constants.OptionsPercentageMax;
 
                 fadingProvider.Fade(
@@ -204,22 +204,22 @@ namespace SportDJ.Services.OutputService.Windows
         {
             if (!IsPlaying)
             {
-                outputProvider.Set(
+                outputHandler.Set(
                     deviceName: deviceName,
                     takeDefaultIfMissing: takeDefaultIfMissing);
 
-                if (outputProvider.Device != default)
+                if (outputHandler.Device != default)
                 {
                     WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(
                         sampleRate: sampleRate,
-                        channels: outputProvider.Device.Channels);
+                        channels: outputHandler.Device.Channels);
 
                     InitializeProviders();
 
                     volumeService.Initialize(
-                        device: outputProvider.Device);
+                        device: outputHandler.Device);
 
-                    outputOptions.DeviceName = outputProvider.Device.Name;
+                    outputOptions.DeviceName = outputHandler.Device.Name;
                     outputOptions.SampleRate = sampleRate;
 
                     sessionService.Save();
@@ -231,7 +231,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Update()
         {
-            outputProvider.Update();
+            outputHandler.Update();
         }
 
         #endregion Public Methods
@@ -285,7 +285,7 @@ namespace SportDJ.Services.OutputService.Windows
         private void CloseOutput()
         {
             mixersAll.OnEach(m => m.Pause());
-            outputProvider?.Stop();
+            outputHandler?.Stop();
 
             if (fadingProvider != default)
             {
@@ -335,7 +335,7 @@ namespace SportDJ.Services.OutputService.Windows
 
             var waveProvider = new SampleToWaveProvider(foregroundProvider);
 
-            outputProvider.Initialize(
+            outputHandler.Initialize(
                 waveProvider: waveProvider,
                 volume: outputOptions.Volume);
 
@@ -344,7 +344,7 @@ namespace SportDJ.Services.OutputService.Windows
                 onForeground: mixersForeground.Contains(mixer)));
 
             Task.Run(
-                action: outputProvider.Play,
+                action: outputHandler.Play,
                 cancellationToken: cancellationTokenSource.Token);
         }
 

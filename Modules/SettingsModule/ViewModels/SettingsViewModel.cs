@@ -73,20 +73,17 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => DevicesNotAvailable = true,
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => o == outputService);
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
                 action: _ => DevicesNotAvailable = false,
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => o == outputService);
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
-                action: _ => UpdateDevices(),
+                action: _ => SetDevice(),
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => o == outputService);
+                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: InitializeOptions,
@@ -256,6 +253,16 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
+        private void SetDevice()
+        {
+            Device = Devices?
+                .SingleOrDefault(d => d.Name == outputService.Device?.Name);
+
+            // TODO: Show settings if Device is missing
+
+            DevicesNotAvailable = false;
+        }
+
         private void SetStartLocation()
         {
             Task.Run(async () => startLocation = await dialogService.GetFolderAsync(sessionService?.Contents?.SettingsPath));
@@ -274,15 +281,10 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                     .ThenBy(d => d.Name));
                 RaisePropertyChanged(nameof(Devices));
 
-                Device = Devices
-                    .SingleOrDefault(d => d.Name == outputService.Device?.Name);
-
-                // TODO: Show settings if Device is missing
+                SetDevice();
 
                 isUpdate = false;
             }
-
-            DevicesNotAvailable = false;
         }
 
         private void UpdateOptions()

@@ -50,7 +50,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.containerProvider = containerProvider;
 
-            this.cell = element is Grid grid
+            cell = element is Grid grid
                 ? grid?.Group
                 : element as Cell;
 
