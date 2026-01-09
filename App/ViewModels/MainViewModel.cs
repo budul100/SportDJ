@@ -15,6 +15,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -38,6 +39,7 @@ namespace SportDJ.App.ViewModels
         private readonly IStorageService<Set> settingsService;
 
         private bool isDisposed;
+        private Control panel;
         private string title;
         private bool userWantsToQuit;
 
@@ -46,8 +48,8 @@ namespace SportDJ.App.ViewModels
         #region Public Constructors
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IDispatcherService dispatcherService, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService, IDialogService dialogService)
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
+            IDispatcherService dispatcherService, IDialogService dialogService, IPanelService panelService)
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
@@ -68,6 +70,10 @@ namespace SportDJ.App.ViewModels
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
                 action: UpdateLayout,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+                action: t => Panel = panelService.View,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
@@ -110,6 +116,36 @@ namespace SportDJ.App.ViewModels
 
         public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
 
+        public Control Panel
+        {
+            get => panel;
+            private set => SetProperty(ref panel, value);
+        }
+
+        public double PanelWidth
+        {
+            get
+            {
+                return settingsService?.Contents?.Options != default && sessionService.Contents.PanelVisible
+                    ? sessionService.Contents.PanelWidth
+                    : 0;
+            }
+            set
+            {
+                if (sessionService.Contents.PanelVisible
+                    && value != PanelWidth)
+                {
+                    sessionService.Contents.PanelWidth = value > 0
+                        ? value
+                        : Defaults.WidthPanel;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(PanelWidth));
+                }
+            }
+        }
+
         public double SettingsWidth
         {
             get
@@ -125,7 +161,7 @@ namespace SportDJ.App.ViewModels
                 {
                     sessionService.Contents.SettingsWidth = value > 0
                         ? value
-                        : Defaults.SettingsWidth;
+                        : Defaults.WidthSettings;
 
                     sessionService.Save();
 
@@ -136,8 +172,8 @@ namespace SportDJ.App.ViewModels
 
         public string Title
         {
-            get { return title; }
-            set { SetProperty(ref title, value); }
+            get => title;
+            private set => SetProperty(ref title, value);
         }
 
         public int Width
@@ -376,6 +412,7 @@ namespace SportDJ.App.ViewModels
             RaisePropertyChanged(nameof(Width));
             RaisePropertyChanged(nameof(WindowState));
 
+            RaisePropertyChanged(nameof(PanelWidth));
             RaisePropertyChanged(nameof(SettingsWidth));
         }
 

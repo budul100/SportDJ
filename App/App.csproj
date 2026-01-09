@@ -45,12 +45,14 @@
 		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
 		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
+		<ProjectReference Include="..\Modules\StackModule\StackModule.csproj" />
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 		<ProjectReference Include="..\Services\GridService\GridService.csproj" />
 		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\MidiService\MidiService.csproj" />
 		<ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
 		<ProjectReference Include="..\Services\OutputService.Windows\OutputService.Windows.csproj" />
+		<ProjectReference Include="..\Services\PanelService\PanelService.csproj" />
 		<ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
 		<ProjectReference Include="..\Services\StackService\StackService.csproj" />
 		<ProjectReference Include="..\Services\StorageService\StorageService.csproj" />

@@ -5,30 +5,15 @@ using SportDJ.Commons.Enums;
 
 namespace SportDJ.Modules.SearchModule
 {
-    public class Module
+    public class Module(IRegionManager regionManager)
         : IModule
     {
-        #region Private Fields
-
-        private readonly IRegionManager regionManager;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public Module(IRegionManager regionManager)
-        {
-            this.regionManager = regionManager;
-        }
-
-        #endregion Public Constructors
-
         #region Public Methods
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
             regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.SettingsRegion),
+                regionName: nameof(RegionType.PanelRegion),
                 viewType: typeof(Views.SearchView));
         }
 

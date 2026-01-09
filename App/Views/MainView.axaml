@@ -41,6 +41,8 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding PanelWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" />
+            <ColumnDefinition Width="3" />
             <ColumnDefinition Width="10*" />
             <ColumnDefinition Width="3" />
             <ColumnDefinition Width="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" />
@@ -49,18 +51,17 @@
         <ContentControl
             Grid.Row="0"
             Grid.Column="0"
-            Grid.ColumnSpan="3">
+            Grid.ColumnSpan="5">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl Grid.Row="1" Grid.Column="0">
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
-
+        <ContentControl 
+            Grid.Row="1" 
+            Grid.Column="0" 
+            Content="{Binding Panel}" />
+        
         <GridSplitter
             Grid.Row="1"
             Grid.Column="1"
@@ -69,6 +70,18 @@
 
         <ContentControl Grid.Row="1" Grid.Column="2">
             <prism:RegionManager.RegionName>
+                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
+            </prism:RegionManager.RegionName>
+        </ContentControl>
+
+        <GridSplitter
+            Grid.Row="1"
+            Grid.Column="3"
+            HorizontalAlignment="Stretch"
+            Focusable="False" />
+
+        <ContentControl Grid.Row="1" Grid.Column="4">
+            <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.SettingsRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
@@ -76,7 +89,7 @@
         <ContentControl
             Grid.Row="2"
             Grid.Column="0"
-            Grid.ColumnSpan="3">
+            Grid.ColumnSpan="5">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
             </prism:RegionManager.RegionName>

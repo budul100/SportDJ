@@ -30,8 +30,6 @@
         public const int SelectNextOnPauseSeconds = 10;
         public const int SelectNextOnPlaySeconds = 10;
 
-        public const int SettingsWidth = 200;
-
         public const double TrackOpacityPlayed = 0.5;
 
         public const int TrimRearPercentage = 10;
@@ -39,6 +37,9 @@
 
         public const int VolumePercentageBackground = 20;
         public const int VolumePercentageExternals = 20;
+
+        public const int WidthPanel = 200;
+        public const int WidthSettings = 200;
 
         #endregion Public Fields
     }

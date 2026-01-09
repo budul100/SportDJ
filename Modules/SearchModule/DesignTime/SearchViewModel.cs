@@ -11,19 +11,24 @@ namespace SportDJ.Modules.SearchModule.DesignTime
         public SearchViewModel()
             : base(default)
         {
-            // Erstellt 10 Beispiel-Tracks
-            var duration = TimeSpan.FromSeconds(255); // 4:15
+            var random = new Random();
 
-            for (int i = 1; i <= 10; i++)
+            for (var i = 1; i <= 10; i++)
             {
+                var duration = TimeSpan.FromSeconds(random.Next(10, 480));
+
                 var track = new Track("test", "test")
                 {
-                    Title = $"Beispiel-Track {i}",
-                    Info = $"Künstler: The Sample Band - Album: Design Time Hits",
+                    Title = $"Example Track {i}",
+                    Info = $"Sample Artist - Sample Song",
                     Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
                 };
 
-                Tracks.Add(track);
+                var entry = new Entry(
+                    track: track,
+                    selector: default);
+
+                Entries.Add(entry);
             }
         }
 

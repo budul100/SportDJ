@@ -10,7 +10,7 @@
 
         SettingsRegion,
 
-        SearchRegion,
+        PanelRegion,
 
         MenuRegion,
     }

@@ -9,6 +9,7 @@ using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
@@ -23,6 +24,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly IPlayerService playerService;
 
         private bool isDisposed;
+        private bool isStackVisible;
 
         #endregion Private Fields
 
@@ -44,9 +46,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Next(),
                 canExecuteMethod: () => IsAvailableSelection);
 
-            ResetCommand = new DelegateCommand(
-                executeMethod: () => playerService?.Reset(),
-                canExecuteMethod: () => IsAvailableReset);
+            ShowStackCommand = new DelegateCommand(
+                executeMethod: ShowStack);
 
             eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
                 action: _ => Initialize(),
@@ -85,6 +86,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: k => parent.IsVisible
                     && k == player.KeyCode);
 
+            eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
+                action: s => IsStackVisible = s == playerService?.StackService,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
             playerService?.Initialize(
                 player: player);
 
@@ -114,8 +120,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public virtual bool IsActive => playerService?.IsActive == true;
 
         public bool IsAvailableExecute => playerService?.IsAvailable == true;
-
-        public bool IsAvailableReset => playerService?.HasPlayeds == true;
 
         public bool IsAvailableSelection => playerService?.HasUnplayeds == true;
 
@@ -153,11 +157,15 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
+        public bool IsStackVisible
+        {
+            get => isStackVisible;
+            set => SetProperty(ref isStackVisible, value);
+        }
+
         public double? Progress => playerService?.Progress;
 
         public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
-
-        public DelegateCommand ResetCommand { get; }
 
         public bool ResetPosition
         {
@@ -173,6 +181,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
             }
         }
+
+        public DelegateCommand ShowStackCommand { get; }
 
         public DelegateCommand TrackBackwardCommand { get; }
 
@@ -415,6 +425,16 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private void ShowStack()
+        {
+            var payload = !IsStackVisible
+                ? playerService?.StackService
+                : default;
+
+            eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
+                payload: payload);
+        }
+
         private void UpdateContent()
         {
             RaisePropertyChanged(nameof(Counter));
@@ -427,7 +447,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             RaisePropertyChanged(nameof(IsAvailableExecute));
             RaisePropertyChanged(nameof(IsAvailableSelection));
-            RaisePropertyChanged(nameof(IsAvailableReset));
 
             RaisePropertyChanged(nameof(HasKey));
             RaisePropertyChanged(nameof(HasPFL));
@@ -437,10 +456,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(Menus));
 
             ExecuteCommand.RaiseCanExecuteChanged();
-            ResetCommand.RaiseCanExecuteChanged();
 
             TrackBackwardCommand.RaiseCanExecuteChanged();
             TrackForwardCommand.RaiseCanExecuteChanged();
+            ShowStackCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateDuration()

@@ -89,6 +89,8 @@ namespace SportDJ.App
                 name: nameof(Modules.ControllerModule));
             moduleCatalog.AddModule<Modules.SettingsModule.Module>(
                 name: nameof(Modules.SettingsModule));
+            moduleCatalog.AddModule<Modules.StackModule.Module>(
+                name: nameof(Modules.StackModule));
             moduleCatalog.AddModule<Modules.SearchModule.Module>(
                 name: nameof(Modules.SearchModule));
             moduleCatalog.AddModule<Modules.MenuModule.Module>(
@@ -110,6 +112,7 @@ namespace SportDJ.App
 
             containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
             containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
+            containerRegistry.RegisterSingleton<IPanelService, Services.PanelService.Service>();
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();

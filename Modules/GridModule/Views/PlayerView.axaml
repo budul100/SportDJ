@@ -56,7 +56,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="4*" />
-                <RowDefinition Height="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
@@ -272,11 +272,11 @@
             <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                     <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="2" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 
                 <Button
@@ -297,11 +297,12 @@
                     </Viewbox>
                 </Button>
 
-                <Button
+                <ToggleButton
                     Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Command="{Binding ResetCommand}"
+                    IsChecked="{Binding IsStackVisible, Mode=OneWay}"
+                    Command="{Binding ShowStackCommand}"
                     Focusable="False">
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
@@ -311,9 +312,9 @@
                         <mat:MaterialIcon
                             Width="{StaticResource PlayerIconSize}"
                             Height="{StaticResource PlayerIconSize}"
-                            Kind="History" />
+                            Kind="ListBox" />
                     </Viewbox>
-                </Button>
+                </ToggleButton>
 
                 <Button
                     Grid.Column="4"

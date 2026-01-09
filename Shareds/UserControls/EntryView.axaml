@@ -1,5 +1,5 @@
 <UserControl
-    x:Class="SportDJ.Shareds.UserControls.TrackView"
+    x:Class="SportDJ.Shareds.UserControls.EntryView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,8 +11,7 @@
     d:DesignHeight="40"
     d:DesignWidth="300"
     mc:Ignorable="d"
-    x:Name="Root"
-    x:DataType="local:WaveRenderer">
+    x:Name="Root">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -25,14 +24,18 @@
     </UserControl.Resources>
 
     <Design.DataContext>
-        <models:Track 
-            Title="Example Song" 
-            Info="More Info" 
-            Counter="5">
-            <models:Track.Duration>
-                <sys:TimeSpan>0:04:15</sys:TimeSpan>
-            </models:Track.Duration>
-        </models:Track>
+        <models:Entry>
+            <models:Entry.Track>
+                <models:Track 
+                    Title="Example Song" 
+                    Info="More Info" 
+                    Counter="5">
+                    <models:Track.Duration>
+                        <sys:TimeSpan>0:04:15</sys:TimeSpan>
+                    </models:Track.Duration>
+                </models:Track>
+            </models:Entry.Track>
+        </models:Entry>
     </Design.DataContext>
 
     <Border

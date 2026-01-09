@@ -36,7 +36,7 @@ namespace SportDJ.Services.SignalService
         #region Public Properties
 
         public TimeSpan? Duration => !(playingProvider?.Duration < TimeSpan.Zero)
-                   ? playingProvider?.Duration
+            ? playingProvider?.Duration
             : TimeSpan.Zero;
 
         public bool IsEnding => playingProvider?.IsRunning == true

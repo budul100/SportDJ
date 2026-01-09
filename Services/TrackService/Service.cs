@@ -249,8 +249,10 @@ namespace SportDJ.Services.TrackService
             {
                 var currentDuration = track.Duration;
 
-                var trimVolume = settingsService.Contents.Options.TrimVolumePercentage / (float)Constants.OptionsPercentageMax;
-                var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage / Constants.OptionsPercentageMax;
+                var trimVolume = settingsService.Contents.Options.TrimVolumePercentage
+                    / (float)Constants.OptionsPercentageMax;
+                var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage
+                    / Constants.OptionsPercentageMax;
 
                 track.Trim(
                     cueVolume: trimVolume,

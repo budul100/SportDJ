@@ -12,6 +12,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
@@ -199,6 +200,8 @@ namespace SportDJ.Services.PlayerService
                 }
             }
         }
+
+        public IStackService StackService => stackService;
 
         public Track Track => stackService.Track;
 

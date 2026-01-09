@@ -62,10 +62,10 @@
                 Watermark="Search track" />
         </DockPanel>
 
-        <ListBox ItemsSource="{Binding Tracks}">
+        <ListBox ItemsSource="{Binding Entries}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <ct:TrackView Track="{Binding}" />
+                    <ct:EntryView Entry="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

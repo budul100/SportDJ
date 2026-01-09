@@ -1,30 +1,22 @@
-﻿using Prism.Mvvm;
+﻿using System;
+using Prism.Mvvm;
 using Prism.Navigation.Regions;
-using System;
 
 namespace SportDJ.Commons.Prism
 {
-    public class RegionViewModelBase
+    public class RegionViewModelBase(IRegionManager regionManager)
         : BindableBase, INavigationAware, IConfirmNavigationRequest
     {
-        #region Public Constructors
-
-        public RegionViewModelBase(IRegionManager regionManager)
-        {
-            RegionManager = regionManager;
-        }
-
-        #endregion Public Constructors
-
         #region Protected Properties
 
-        protected IRegionManager RegionManager { get; }
+        protected IRegionManager RegionManager { get; } = regionManager;
 
         #endregion Protected Properties
 
         #region Public Methods
 
-        public virtual void ConfirmNavigationRequest(NavigationContext navigationContext, Action<bool> continuationCallback)
+        public virtual void ConfirmNavigationRequest(NavigationContext navigationContext,
+            Action<bool> continuationCallback)
         {
             continuationCallback(true);
         }
