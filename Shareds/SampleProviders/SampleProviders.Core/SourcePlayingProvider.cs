@@ -13,7 +13,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         private readonly long? cue;
         private readonly object lockProvider = new();
-        private readonly IAudioSource sourceProvider;
+        private readonly IAudioSourceProvider sourceProvider;
 
         private long end;
         private bool eventSentCue;
@@ -26,13 +26,13 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Public Constructors
 
-        public SourcePlayingProvider(IAudioSource sourceProvider, Track track, TimeSpan fadeOut)
+        public SourcePlayingProvider(IAudioSourceProvider sourceProvider, Track track, TimeSpan fadeOut)
             : base(waveFormat: sourceProvider.WaveFormat)
         {
             this.sourceProvider = sourceProvider;
 
-            PlayType = PlayType.Waiting;
             Track = track;
+            PlayType = PlayType.Waiting;
 
             cue = Track.Cue.HasValue
                 ? track.Cue - fadeOut.ToBytes(averageBytesPerSecond)

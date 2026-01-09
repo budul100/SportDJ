@@ -135,7 +135,7 @@ namespace SportDJ.App
                 from: typeof(IVolumeService),
                 to: typeof(Services.VolumeService.Windows.Service));
 
-            containerRegistry.Register<IAudioSource, Shareds.SampleProviders.Windows.AudioSource>();
+            containerRegistry.Register<IAudioSourceProvider, Shareds.SampleProviders.Windows.AudioSourceProvider>();
         }
 
         #endregion Protected Methods

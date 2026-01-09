@@ -163,15 +163,19 @@ namespace SportDJ.Services.StorageService
             try
             {
                 Contents = serializer.Deserialize(file) as T;
-                Path = fullPath;
 
                 result = true;
             }
-            catch (Exception ex)
+            catch
             {
                 // TODO: Log exception
 
                 Debugger.Break();
+            }
+
+            if (result || string.IsNullOrWhiteSpace(Path))
+            {
+                Path = fullPath;
             }
 
             return result;
@@ -206,6 +210,8 @@ namespace SportDJ.Services.StorageService
             }
             catch
             {
+                // TODO: Log exception
+
                 Debugger.Break();
             }
         }

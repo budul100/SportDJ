@@ -3,7 +3,7 @@ using NAudio.Wave;
 
 namespace SportDJ.Shareds.SampleProviders.Abstractions
 {
-    public interface IAudioSource
+    public interface IAudioSourceProvider
         : ISampleProvider, IDisposable
     {
         #region Public Properties

@@ -18,6 +18,7 @@ namespace SportDJ.Services.StackService
         #region Private Fields
 
         private static readonly object lockPositions = new();
+
         private Position position;
 
         #endregion Private Fields

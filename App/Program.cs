@@ -1,10 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Dialogs;
-using Avalonia.ReactiveUI;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Avalonia;
+using Avalonia.Dialogs;
+using Avalonia.ReactiveUI;
 
 namespace SportDJ.App
 {

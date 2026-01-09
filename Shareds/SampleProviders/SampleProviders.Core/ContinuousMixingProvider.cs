@@ -30,25 +30,33 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     paramName: nameof(sourceProvider));
             }
 
-            if (sourceProviders.Count >= Constants.MixerSourcesMax)
-            {
-                throw new InvalidOperationException(
-                    $"There cannot be more than {Constants.MixerSourcesMax} mixer inputs.");
-            }
-
             lock (lockProvider)
             {
-                sourceProviders.Add(sourceProvider);
+                if (sourceProviders.Count >= Constants.MixerSourcesMax)
+                {
+                    throw new InvalidOperationException(
+                        $"There cannot be more than {Constants.MixerSourcesMax} mixer inputs.");
+                }
+
+                if (!sourceProviders.Contains(sourceProvider))
+                {
+                    sourceProviders.Add(sourceProvider);
+                }
             }
         }
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            var outputSamples = 0;
+            var samplesMerged = 0;
 
             sourceBuffer = BufferHelpers.Ensure(
                 buffer: sourceBuffer,
                 samplesRequired: count);
+
+            for (var i = 0; i < count; i++)
+            {
+                buffer[offset + i] = 0;
+            }
 
             lock (lockProvider)
             {
@@ -63,51 +71,32 @@ namespace SportDJ.Shareds.SampleProviders.Core
                         offset: 0,
                         count: count);
 
-                    var outIndex = offset;
-
                     for (var n = 0; n < samplesRead; n++)
                     {
-                        if (n >= outputSamples)
-                        {
-                            buffer[outIndex++] = sourceBuffer[n];
-                        }
-                        else
-                        {
-                            buffer[outIndex++] += sourceBuffer[n];
-                        }
+                        buffer[offset + n] += sourceBuffer[n];
                     }
 
-                    outputSamples = Math.Max(
+                    samplesMerged = Math.Max(
                         val1: samplesRead,
-                        val2: outputSamples);
+                        val2: samplesMerged);
 
                     index--;
                 }
             }
 
-            if (outputSamples < count)
+            if (samplesMerged < count)
             {
-                var outputIndex = offset + outputSamples;
-
-                while (outputIndex < offset + count)
-                {
-                    buffer[outputIndex++] = 0;
-                }
-
-                outputSamples = count;
+                samplesMerged = count;
             }
 
-            return outputSamples;
+            return samplesMerged;
         }
 
-        public void Remove(ISampleProvider source)
+        public void Remove(ISampleProvider sourceProvider)
         {
-            if (sourceProviders.Contains(source))
+            lock (lockProvider)
             {
-                lock (lockProvider)
-                {
-                    sourceProviders.Remove(source);
-                }
+                sourceProviders.Remove(sourceProvider);
             }
         }
 

@@ -265,8 +265,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         {
             if (!isUpdate)
             {
-                // TODO Show settings if not opened
-
                 isUpdate = true;
 
                 outputService.Update();
@@ -278,6 +276,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
                 Device = Devices
                     .SingleOrDefault(d => d.Name == outputService.Device?.Name);
+
+                // TODO: Show settings if Device is missing
 
                 isUpdate = false;
             }

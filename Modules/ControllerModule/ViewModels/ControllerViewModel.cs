@@ -29,6 +29,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         private readonly IVolumeService volumeService;
 
         private bool isListening;
+        private bool isLoweredRequested;
         private bool isVolumeMonitoringActive;
         private bool isVolumePressed;
         private Options options;
@@ -56,11 +57,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 canExecuteMethod: () => IsActive);
 
             VolumeLowerCommand = new DelegateCommand(
-                executeMethod: () => outputLiveService.Lower(),
+                executeMethod: LowerOutput,
                 canExecuteMethod: () => IsActive);
 
             VolumeRaiseCommand = new DelegateCommand(
-                executeMethod: () => outputLiveService.Raise(),
+                executeMethod: RaiseOutput,
                 canExecuteMethod: () => IsActive);
 
             eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
@@ -122,7 +123,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool IsActive => (outputLiveService?.IsPlaying == true) || IsVolumeMonitoringActive;
 
-        public bool IsVolumeLowered => outputLiveService?.IsLowered == true;
+        public bool IsVolumeLowered => isLoweredRequested
+            && outputLiveService?.IsLowered == true;
 
         public bool IsVolumeMonitoringActive
         {
@@ -199,6 +201,13 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             }
         }
 
+        private void LowerOutput()
+        {
+            isLoweredRequested = true;
+
+            outputLiveService.Lower();
+        }
+
         private void OnKeyPressed(string keyCode)
         {
             if (keyCode == options?.KeyCodeOutputPause)
@@ -207,7 +216,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             }
             else if (keyCode == options?.KeyCodeVolumeTalk)
             {
-                outputLiveService.Lower();
+                LowerOutput();
             }
         }
 
@@ -215,8 +224,15 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         {
             if (keyCode == options?.KeyCodeVolumeTalk)
             {
-                outputLiveService.Raise();
+                RaiseOutput();
             }
+        }
+
+        private void RaiseOutput()
+        {
+            isLoweredRequested = false;
+
+            outputLiveService.Raise();
         }
 
         //public bool HasKey => !string.IsNullOrWhiteSpace(Key);

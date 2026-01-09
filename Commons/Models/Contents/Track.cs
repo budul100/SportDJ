@@ -1,6 +1,6 @@
-﻿using Avalonia.Media.Imaging;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Avalonia.Media.Imaging;
 
 namespace SportDJ.Commons.Models.Contents
 {
@@ -14,7 +14,7 @@ namespace SportDJ.Commons.Models.Contents
 
         public float? BPM { get; set; }
 
-        public int Counter => Registers?.Count ?? 0;
+        public int Counter { get; set; }
 
         public long? Cue { get; set; }
 

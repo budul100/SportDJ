@@ -4,8 +4,8 @@ using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.Shareds.SampleProviders.Windows
 {
-    public class AudioSource
-        : IAudioSource
+    public class AudioSourceProvider
+        : IAudioSourceProvider
     {
         #region Private Fields
 
@@ -50,10 +50,15 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             fileReader = new(filePath);
         }
 
-        public int Read(float[] buffer, int offset, int count) => fileReader.Read(
-            buffer: buffer,
-            offset: offset,
-            count: count);
+        public int Read(float[] buffer, int offset, int count)
+        {
+            var samplesRead = fileReader.Read(
+                buffer: buffer,
+                offset: offset,
+                count: count);
+
+            return samplesRead;
+        }
 
         #endregion Public Methods
 

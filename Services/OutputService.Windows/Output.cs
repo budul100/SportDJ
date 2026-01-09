@@ -10,7 +10,7 @@ using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.OutputService.Windows
 {
-    internal class Provider
+    internal class Output
         : IDisposable
     {
         #region Private Fields
@@ -22,7 +22,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Public Constructors
 
-        public Provider()
+        public Output()
         {
             Update();
         }
@@ -39,7 +39,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         public Device Device { get; private set; }
 
-        public Dictionary<string, Device> Devices { get; } = [];
+        public IEnumerable<Device> Devices { get; private set; } = [];
 
         public bool IsActive { get; private set; }
 
@@ -102,16 +102,14 @@ namespace SportDJ.Services.OutputService.Windows
 
             if (!string.IsNullOrWhiteSpace(deviceName))
             {
-                Devices.TryGetValue(
-                    key: deviceName,
-                    value: out device);
+                device = Devices.SingleOrDefault(d => d.Name == deviceName);
             }
 
             if (device != Device)
             {
                 DisposePlayer();
 
-                SetPlayer(
+                SetDevice(
                     device: device,
                     takeDefaultIfMissing: takeDefaultIfMissing);
             }
@@ -121,10 +119,8 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Update()
         {
-            Devices.Clear();
-
-            UpdateCapabilitiesAsio();
-            UpdateCapabilitiesWaveOut();
+            Devices = GetCapabilitiesAsio()
+                .Union(GetCapabilitiesWaveOut()).ToArray();
         }
 
         #endregion Public Methods
@@ -186,6 +182,79 @@ namespace SportDJ.Services.OutputService.Windows
             }
         }
 
+        private IEnumerable<Device> GetCapabilitiesAsio()
+        {
+            var driverNames = ExecuteOnSTAThread(AsioOut.GetDriverNames);
+
+            foreach (var driverName in driverNames)
+            {
+                var result = Devices.SingleOrDefault(d => d.Type == DeviceType.Asio
+                    && d.Name == driverName);
+
+                if (result == default)
+                {
+                    try
+                    {
+                        using var capability = ExecuteOnSTAThread(() => new AsioOut(driverName));
+
+                        if (capability?.DriverOutputChannelCount > 0)
+                        {
+                            var channels = Math.Min(
+                                capability.DriverOutputChannelCount,
+                                Constants.OutputChannelMax);
+
+                            result = new Device(
+                                name: driverName,
+                                channels: channels,
+                                type: DeviceType.Asio);
+                        }
+                    }
+                    catch { }
+                }
+
+                if (result != default)
+                {
+                    yield return result;
+                }
+            }
+        }
+
+        private IEnumerable<Device> GetCapabilitiesWaveOut()
+        {
+            for (var index = Constants.IndexAudioDeviceMin; index < WaveOut.DeviceCount; index++)
+            {
+                var result = default(Device);
+
+                try
+                {
+                    var capability = WaveOut.GetCapabilities(index);
+
+                    result = Devices.SingleOrDefault(d => d.Type == DeviceType.Wasapi
+                        && d.Name == capability.ProductName);
+
+                    if (result == default
+                        && capability.Channels > 0)
+                    {
+                        var channels = Math.Min(
+                            capability.Channels,
+                            Constants.OutputChannelMax);
+
+                        result = new Device(
+                            name: capability.ProductName,
+                            channels: capability.Channels,
+                            type: DeviceType.Wasapi,
+                            number: index);
+                    }
+                }
+                catch { }
+
+                if (result != default)
+                {
+                    yield return result;
+                }
+            }
+        }
+
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
         {
             Stopped?.Invoke(
@@ -193,17 +262,17 @@ namespace SportDJ.Services.OutputService.Windows
                 e: e);
         }
 
-        private void SetPlayer(Device device, bool takeDefaultIfMissing)
+        private void SetDevice(Device device, bool takeDefaultIfMissing)
         {
             Device = device;
 
             if (device == default)
             {
-                if (Devices.Count > 0)
+                if (Devices.Any())
                 {
                     if (takeDefaultIfMissing)
                     {
-                        Device = Devices.Values.First();
+                        Device = Devices.First();
                     }
                 }
                 else
@@ -213,67 +282,6 @@ namespace SportDJ.Services.OutputService.Windows
             }
 
             IsActive = false;
-        }
-
-        private void UpdateCapabilitiesAsio()
-        {
-            var driverNames = ExecuteOnSTAThread(AsioOut.GetDriverNames);
-
-            foreach (var driverName in driverNames)
-            {
-                try
-                {
-                    using var capability = ExecuteOnSTAThread(() => new AsioOut(driverName));
-
-                    if (capability?.DriverOutputChannelCount > 0
-                        && !Devices.ContainsKey(driverName))
-                    {
-                        var channels = Math.Min(
-                            capability.DriverOutputChannelCount,
-                            Constants.OutputChannelMax);
-
-                        var result = new Device(
-                            name: driverName,
-                            channels: channels,
-                            type: DeviceType.Asio);
-
-                        Devices.Add(
-                            key: driverName,
-                            value: result);
-                    }
-                }
-                catch { }
-            }
-        }
-
-        private void UpdateCapabilitiesWaveOut()
-        {
-            for (var index = Constants.IndexAudioDeviceMin; index < WaveOut.DeviceCount; index++)
-            {
-                try
-                {
-                    var capability = WaveOut.GetCapabilities(index);
-
-                    if (capability.Channels > 0
-                        && !Devices.ContainsKey(capability.ProductName))
-                    {
-                        var channels = Math.Min(
-                            capability.Channels,
-                            Constants.OutputChannelMax);
-
-                        var result = new Device(
-                            name: capability.ProductName,
-                            channels: capability.Channels,
-                            type: DeviceType.Wasapi,
-                            number: index);
-
-                        Devices.Add(
-                            key: capability.ProductName,
-                            value: result);
-                    }
-                }
-                catch { }
-            }
         }
 
         #endregion Private Methods

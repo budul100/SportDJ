@@ -17,20 +17,19 @@ using SportDJ.Shareds.SampleProviders.Core;
 namespace SportDJ.Services.SignalService
 {
     public class Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-        ITrackService trackService, IAudioSource sourceProvider)
+        ITrackService trackService, IAudioSourceProvider sourceProvider)
         : ISignalService
     {
         #region Private Fields
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
+        private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
         private DynamicFadingProvider fadingProvider;
         private bool isDisposed;
         private long lastPosition = 0;
         private TimeSpan? nextThresholdOnPlay;
         private SourcePlayingProvider playingProvider;
-
-        private long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
         #endregion Private Fields
 
@@ -160,7 +159,8 @@ namespace SportDJ.Services.SignalService
 
                 if (settingsService.Contents.Options.SelectNextOnPlaySeconds.HasValue)
                 {
-                    var selectNextDuration = TimeSpan.FromSeconds(settingsService.Contents.Options.SelectNextOnPlaySeconds.Value);
+                    var selectNextSeconds = settingsService.Contents.Options.SelectNextOnPlaySeconds.Value;
+                    var selectNextDuration = TimeSpan.FromSeconds(selectNextSeconds);
                     nextThresholdOnPlay = playingProvider.Position.Add(selectNextDuration);
                 }
 
@@ -177,8 +177,7 @@ namespace SportDJ.Services.SignalService
                     ? settingsService.Contents.Options.FadeOnPauseFilteredMilliseconds
                     : settingsService.Contents.Options.FadeOnPauseUnfilteredMilliseconds;
 
-                fadingProvider.Fade(
-                    volumeTarget: Constants.VolumeMin,
+                fadingProvider.FadeOut(
                     milliSeconds: fadeMilliSeconds,
                     useFilterEffect: useFilterEffect);
             }
@@ -195,8 +194,7 @@ namespace SportDJ.Services.SignalService
 
                 playingProvider.Start();
 
-                fadingProvider.Fade(
-                    volumeTarget: Constants.VolumeMax,
+                fadingProvider.FadeIn(
                     milliSeconds: fadeMilliSeconds);
             }
         }
@@ -241,7 +239,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnCueExceeded(object sender, EventArgs e)
         {
-            trackService?.End(Track);
+            trackService?.Stop(Track);
 
             State = StateType.Stop;
 
@@ -264,9 +262,13 @@ namespace SportDJ.Services.SignalService
             }
             else if (State != StateType.Play)
             {
+                var isPause = State == StateType.Pause;
+
                 State = StateType.Play;
 
-                trackService.Begin(Track);
+                trackService.Play(
+                    track: Track,
+                    isPause: isPause);
 
                 eventAggregator.GetEvent<SignalStartedEvent>().Publish(this);
             }
@@ -281,7 +283,7 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalPaused(object sender, EventArgs e)
         {
-            trackService?.End(Track);
+            trackService?.Stop(Track);
 
             if (IsOverNextThreshold)
             {
@@ -306,22 +308,26 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalUpdated(object sender, EventArgs e)
         {
-            if (Position.HasValue
-                && (Position.Value.Ticks - lastPosition) > updatesInTicks)
+            if (Position.HasValue)
             {
-                eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
-
-                if (!IsOverNextThreshold
-                    && nextThresholdOnPlay.HasValue)
+                if (Position.Value.Ticks - lastPosition > updatesInTicks)
                 {
-                    IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
-                        || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+                    eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
-                    if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                    if (!IsOverNextThreshold
+                        && nextThresholdOnPlay.HasValue)
                     {
-                        SelectNext();
+                        IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
+                            || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+
+                        if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                        {
+                            SelectNext();
+                        }
                     }
                 }
+
+                lastPosition = Position.Value.Ticks;
             }
         }
 

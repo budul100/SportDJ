@@ -281,33 +281,36 @@ namespace SportDJ.App.ViewModels
             var outputService = containerProvider.Resolve<IOutputService>(
                 name: outputType.ToString());
 
-            if (outputService?.Format != default)
+            if (outputService?.WaveFormat != default)
             {
                 var mixerService = containerProvider.Resolve<IMixerService>(
                     name: mixerType.ToString());
 
-                mixerService.Initialize(
-                    type: mixerType,
-                    waveFormat: outputService.Format,
-                    signalsCanOverlap: onForeground);
+                if (mixerService?.Output?.WaveFormat != outputService.WaveFormat)
+                {
+                    mixerService.Initialize(
+                        type: mixerType,
+                        waveFormat: outputService.WaveFormat,
+                        signalsCanOverlap: onForeground);
 
-                outputService.Add(
-                    mixerService: mixerService,
-                    onForeground: onForeground);
+                    outputService.Add(
+                        mixerService: mixerService,
+                        onForeground: onForeground);
+                }
             }
         }
 
-        private void InitializeOutput(OutputType type)
+        private void InitializeOutput(OutputType outputType)
         {
             var outputService = containerProvider?.Resolve<IOutputService>(
-                name: type.ToString());
+                name: outputType.ToString());
 
             outputService?.Initialize(
-                type: type);
+                type: outputType);
 
             outputServices.Add(outputService);
 
-            if (type != OutputType.PFL)
+            if (outputType != OutputType.PFL)
             {
                 liveServices.Add(outputService);
             }
@@ -316,7 +319,7 @@ namespace SportDJ.App.ViewModels
         private void InitializeSession()
         {
             InitializeOutput(
-                type: OutputType.Live);
+                outputType: OutputType.Live);
 
             InitializeMixer(
                 outputType: OutputType.Live,
@@ -328,13 +331,13 @@ namespace SportDJ.App.ViewModels
                 mixerType: MixerType.Foreground,
                 onForeground: true);
 
-            InitializeOutput(
-                type: OutputType.PFL);
+            //InitializeOutput(
+            //    type: OutputType.PFL);
 
-            InitializeMixer(
-                outputType: OutputType.PFL,
-                mixerType: MixerType.PFL,
-                onForeground: true);
+            //InitializeMixer(
+            //    outputType: OutputType.PFL,
+            //    mixerType: MixerType.PFL,
+            //    onForeground: true);
 
             UpdateLayout();
             UpdateTitle();

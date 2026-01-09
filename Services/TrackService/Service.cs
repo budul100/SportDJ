@@ -69,9 +69,14 @@ namespace SportDJ.Services.TrackService
 
         #region Public Methods
 
-        public void Begin(Track track)
+        public void Play(Track track, bool isPause)
         {
             ArgumentNullException.ThrowIfNull(track);
+
+            if (!isPause)
+            {
+                track.Counter++;
+            }
 
             var register = new Register
             {
@@ -86,7 +91,7 @@ namespace SportDJ.Services.TrackService
             eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
         }
 
-        public void End(Track track)
+        public void Stop(Track track)
         {
             ArgumentNullException.ThrowIfNull(track);
 

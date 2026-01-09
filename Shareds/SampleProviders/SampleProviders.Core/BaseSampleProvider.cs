@@ -22,7 +22,8 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         protected BaseSampleProvider(WaveFormat waveFormat)
         {
-            WaveFormat = waveFormat ?? throw new ArgumentNullException(nameof(waveFormat));
+            WaveFormat = waveFormat
+                ?? throw new ArgumentNullException(nameof(waveFormat));
 
             if (WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
             {
@@ -49,7 +50,8 @@ namespace SportDJ.Shareds.SampleProviders.Core
             Dispose(
                 isDisposing: true);
 
-            GC.SuppressFinalize(this);
+            GC.SuppressFinalize(
+                obj: this);
         }
 
         public abstract int Read(float[] buffer, int offset, int count);

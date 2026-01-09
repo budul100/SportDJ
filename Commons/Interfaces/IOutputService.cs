@@ -16,8 +16,6 @@ namespace SportDJ.Commons.Interfaces
 
         IEnumerable<Device> Devices { get; }
 
-        WaveFormat Format { get; }
-
         bool IsActive { get; }
 
         bool IsLowered { get; }
@@ -27,6 +25,8 @@ namespace SportDJ.Commons.Interfaces
         OutputType Type { get; }
 
         float Volume { get; set; }
+
+        WaveFormat WaveFormat { get; }
 
         #endregion Public Properties
 

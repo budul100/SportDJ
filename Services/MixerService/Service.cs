@@ -187,13 +187,17 @@ namespace SportDJ.Services.MixerService
 
             this.signalsCanOverlap = signalsCanOverlap;
 
-            mixingProvider = new ContinuousMixingProvider(waveFormat);
+            if (mixingProvider?.WaveFormat != waveFormat)
+            {
+                mixingProvider = new ContinuousMixingProvider(
+                    waveFormat: waveFormat);
 
-            outputProvider = new DynamicFadingProvider(
-                sourceProvider: mixingProvider,
-                volume: Constants.VolumeMax);
+                outputProvider = new DynamicFadingProvider(
+                    sourceProvider: mixingProvider,
+                    volume: Constants.VolumeMax);
 
-            eventAggregator.GetEvent<MixerInitializedEvent>().Publish(this);
+                eventAggregator.GetEvent<MixerInitializedEvent>().Publish(this);
+            }
         }
 
         public void Pause()
@@ -234,8 +238,9 @@ namespace SportDJ.Services.MixerService
 
         private void EndMixer()
         {
-            if (IsPlaying
-                && !signalServices.Any(s => s.IsPlaying))
+            var isPlaying = signalServices.Any(s => s.IsPlaying);
+
+            if (IsPlaying && !isPlaying)
             {
                 IsPlaying = false;
 
@@ -301,14 +306,12 @@ namespace SportDJ.Services.MixerService
                     ? settingsService.Contents.Options.FadeOnMixOutMilliseconds
                     : 0;
 
-                fadingProvider.Fade(
-                    volumeTarget: Constants.VolumeMax,
+                fadingProvider.FadeIn(
                     milliSeconds: fadeInMilliseconds);
 
                 pausingServices.OnEach(s => s.End());
 
-                playingServices.OnEach(s => fadingProviders[s].Fade(
-                    volumeTarget: Constants.VolumeMin,
+                playingServices.OnEach(s => fadingProviders[s].FadeOut(
                     milliSeconds: fadeOutMilliSeconds));
             }
 

@@ -1,4 +1,5 @@
-﻿using SportDJ.Commons.Enums;
+﻿using System;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Models.Contents
 {
@@ -15,5 +16,38 @@ namespace SportDJ.Commons.Models.Contents
         public DeviceType Type { get; } = type;
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public static bool operator !=(Device left, Device right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator ==(Device left, Device right)
+        {
+            if (left is null)
+            {
+                return right is null;
+            }
+
+            return left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Device device
+                && Name == device.Name
+                && Type == device.Type;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                Name,
+                Type);
+        }
+
+        #endregion Public Methods
     }
 }

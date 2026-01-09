@@ -145,8 +145,8 @@ namespace SportDJ.Services.PlayerService
             set
             {
                 if (player != default
-                    && player.IsForeground != value
-                    && mixerType != MixerType.PFL)
+                    && player.IsForeground != value)
+                //&& mixerType != MixerType.PFL)
                 {
                     player.IsForeground = value;
 

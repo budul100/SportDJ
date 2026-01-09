@@ -7,7 +7,6 @@ using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
-using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Player;
@@ -258,10 +257,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             base.UpdateOutput();
 
-            var outputServicePFL = containerProvider?.Resolve<IOutputService>(
-                nameof(OutputType.PFL));
+            //var outputServicePFL = containerProvider?.Resolve<IOutputService>(
+            //    nameof(OutputType.PFL));
 
-            HasPFL = outputServicePFL?.IsActive == true;
+            //HasPFL = outputServicePFL?.IsActive == true;
 
             UpdateContent();
         }

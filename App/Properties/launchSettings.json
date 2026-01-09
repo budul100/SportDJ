@@ -7,9 +7,9 @@
       "commandName": "Project",
       "commandLineArgs": "\"..\\..\\..\\..\\Additionals\\Samples\\Settings.xml\""
     },
-    "App (with empty settings)": {
+    "App (with test settings)": {
       "commandName": "Project",
-      "commandLineArgs": "\"..\\..\\..\\..\\Additionals\\Samples\\Empty.xml\""
+      "commandLineArgs": "\"..\\..\\..\\..\\Additionals\\Samples\\Test.xml\""
     }
   }
 }
