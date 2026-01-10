@@ -59,7 +59,6 @@
 			    Kind="VolumeMute"/>
 		</ToggleButton>
 
-
 		<Button
 			Name="VolumeButton"
 			Grid.Row="0"

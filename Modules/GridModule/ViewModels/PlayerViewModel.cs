@@ -103,8 +103,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual Bitmap Bitmap => playerService?.Track?.Bitmap;
 
-        public virtual string Content => playerService?.Track?.Info;
-
         public virtual string Counter => playerService?.Track?.Counter > 0
             ? $"({playerService.Track.Counter})"
             : default;
@@ -116,6 +114,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public bool HasPFLOrKey => HasPFL || HasKey;
 
         public bool HasStack => playerService?.HasStack == true;
+
+        public virtual string Info => playerService?.Track?.Info;
 
         public virtual bool IsActive => playerService?.IsActive == true;
 
@@ -437,8 +437,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void UpdateContent()
         {
+            RaisePropertyChanged(nameof(Info));
             RaisePropertyChanged(nameof(Counter));
-            RaisePropertyChanged(nameof(Content));
             RaisePropertyChanged(nameof(Bitmap));
 
             RaisePropertyChanged(nameof(IsActive));

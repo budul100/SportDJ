@@ -254,7 +254,7 @@
                                 VerticalAlignment="Center"
                                 Focusable="False"
                                 FontSize="{StaticResource FontSizeContentMain}"
-                                Text="{Binding Content}" />
+                                Text="{Binding Info}" />
                         </Viewbox>
 
                         <ct:WaveRenderer

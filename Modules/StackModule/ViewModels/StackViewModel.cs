@@ -4,9 +4,7 @@ using System.Linq;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Navigation.Regions;
-using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Panel;
-using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Prism;
@@ -18,8 +16,6 @@ namespace SportDJ.Modules.StackModule.ViewModels
     {
         #region Private Fields
 
-        private bool isUpdatingEntry;
-        private bool isUpdatingTrack;
         private IStackService service;
         private HashSet<Track> tracks = [];
 
@@ -30,24 +26,14 @@ namespace SportDJ.Modules.StackModule.ViewModels
         public StackViewModel(IRegionManager regionManager, IEventAggregator eventAggregator)
             : base(regionManager)
         {
+            EventAggregator = eventAggregator;
+
             SelectCommand = new DelegateCommand<Entry>(e => service?.Select(e));
 
             eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
                 action: UpdateService,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<EntryUpdatedEvent>().Subscribe(
-                action: UpdateEntry,
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: Entries.Contains);
-
-            eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
-                action: UpdateTrack,
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: tracks.Contains);
         }
 
         #endregion Public Constructors
@@ -55,6 +41,8 @@ namespace SportDJ.Modules.StackModule.ViewModels
         #region Public Properties
 
         public ObservableCollection<Entry> Entries { get; private set; } = [];
+
+        public IEventAggregator EventAggregator { get; }
 
         public DelegateCommand<Entry> SelectCommand { get; }
 
@@ -83,30 +71,6 @@ namespace SportDJ.Modules.StackModule.ViewModels
             RaisePropertyChanged(nameof(Entries));
         }
 
-        private void UpdateEntry(Entry entry)
-        {
-            if (isUpdatingEntry)
-                return;
-
-            try
-            {
-                isUpdatingEntry = true;
-
-                var existings = Entries
-                    .Where(e => e == entry).ToList();
-
-                foreach (var existing in existings)
-                {
-                    var index = Entries.IndexOf(existing);
-                    Entries[index] = existing;
-                }
-            }
-            finally
-            {
-                isUpdatingEntry = false;
-            }
-        }
-
         private void UpdateService(IStackService service)
         {
             if (this.service != service)
@@ -114,30 +78,6 @@ namespace SportDJ.Modules.StackModule.ViewModels
                 this.service = service;
 
                 UpdateEntries();
-            }
-        }
-
-        private void UpdateTrack(Track track)
-        {
-            if (isUpdatingTrack)
-                return;
-
-            try
-            {
-                isUpdatingTrack = true;
-
-                var existings = Entries
-                    .Where(e => e.Track == track).ToList();
-
-                foreach (var existing in existings)
-                {
-                    var index = Entries.IndexOf(existing);
-                    Entries[index] = existing;
-                }
-            }
-            finally
-            {
-                isUpdatingTrack = false;
             }
         }
 

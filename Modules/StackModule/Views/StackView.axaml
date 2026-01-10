@@ -29,15 +29,24 @@
 
     <UserControl.Styles>
         <mat:MaterialIconStyles />
+        
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
     </UserControl.Styles>
 
     <Design.DataContext>
         <dt:StackViewModel />
     </Design.DataContext>
 
-    <DockPanel LastChildFill="True">
+    <DockPanel Margin="{StaticResource ContentMargin}" LastChildFill="True">
 
-        <ListBox ItemsSource="{Binding Entries}">
+        <ListBox ItemsSource="{Binding Entries}" Margin="{StaticResource InnerMargin}">
             
             <i:Interaction.Behaviors>
                 <ia:EventTriggerBehavior EventName="SelectionChanged">
@@ -49,23 +58,17 @@
             
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="5*" />
-                        </Grid.ColumnDefinitions>
-
-                        <ct:EntryView Entry="{Binding}" Grid.Column="0">
-                            <i:Interaction.Behaviors>
-                                <ia:EventTriggerBehavior EventName="DoubleTapped">
-                                    <ia:InvokeCommandAction 
-                                        Command="{Binding #StackViewControl.DataContext.SelectCommand}"
-                                        CommandParameter="{Binding}" />
-                                </ia:EventTriggerBehavior>
-                            </i:Interaction.Behaviors>
-                        </ct:EntryView>
-
-                    </Grid>
+                    <ct:EntryView 
+                        Entry="{Binding}"
+                        EventAggregator="{Binding #StackViewControl.DataContext.EventAggregator}">
+                        <i:Interaction.Behaviors>
+                            <ia:EventTriggerBehavior EventName="DoubleTapped">
+                                <ia:InvokeCommandAction 
+                                    Command="{Binding #StackViewControl.DataContext.SelectCommand}"
+                                    CommandParameter="{Binding}" />
+                            </ia:EventTriggerBehavior>
+                        </i:Interaction.Behaviors>
+                    </ct:EntryView>
 
                 </DataTemplate>
             </ListBox.ItemTemplate>

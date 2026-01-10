@@ -1,6 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
-using System;
 
 namespace SportDJ.Modules.GridModule.DesignTime
 {
@@ -28,9 +28,9 @@ namespace SportDJ.Modules.GridModule.DesignTime
 
         public override int Column => column;
 
-        public override string Content { get; } = $"{title} - {artist}";
-
         public override string Counter { get; } = "(1)";
+
+        public override string Info { get; } = $"{title} - {artist}";
 
         public override bool IsActive { get; } = name.EndsWith("11");
 
