@@ -1,4 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -7,11 +12,6 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.DialogService
 {
@@ -112,15 +112,17 @@ namespace SportDJ.Services.DialogService
 
         public void Initialize(Window window, string iconUri = default)
         {
-            if (window is null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
+            ArgumentNullException.ThrowIfNull(window);
 
             this.window = window;
-
             topLevel = Window.GetTopLevel(window);
-            windowIcon = GetWindowIcon(iconUri);
+
+            try
+            {
+                windowIcon = GetWindowIcon(iconUri);
+            }
+            catch
+            { }
         }
 
         public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
@@ -218,21 +220,26 @@ namespace SportDJ.Services.DialogService
         {
             var result = default(WindowIcon);
 
-            if (!string.IsNullOrWhiteSpace(iconUri))
+            try
             {
-                var uri = new Uri(iconUri);
-
-                if (AssetLoader.Exists(uri))
+                if (!string.IsNullOrWhiteSpace(iconUri))
                 {
-                    var stream = AssetLoader.Open(uri);
+                    var uri = new Uri(iconUri);
 
-                    if (stream != default)
+                    if (AssetLoader.Exists(uri))
                     {
-                        var bitmap = new Bitmap(stream);
-                        result = new WindowIcon(bitmap);
+                        using var stream = AssetLoader.Open(uri);
+
+                        if (stream != default)
+                        {
+                            var bitmap = new Bitmap(stream);
+                            result = new WindowIcon(bitmap);
+                        }
                     }
                 }
             }
+            catch
+            { }
 
             return result;
         }
