@@ -2,9 +2,10 @@
 setlocal
 
 :: Define variables
-set APP_PROJECT=App
+set APP_PROJECT=.\App\App.csproj
 set CONFIGURATION=Release
 set RUNTIME_ID=win-x64
+set FRAMEWORK=net8.0-windows
 set OUTPUT_DIR=_Publish
 set CLEANUP_SCRIPT_PATH=.\Additionals\Scripts\CleanContents.bat
 
@@ -39,13 +40,25 @@ echo Output Directory: %OUTPUT_DIR%\
 dotnet publish %APP_PROJECT% ^
     -p:DebugType=None ^
     -p:DebugSymbols=false ^
-    -p:IncludeNativeLibrariesForSelfExtract=true ^
     -p:PublishReadyToRun=true ^
-    -p:PublishSingleFile=true ^
+    -p:PublishSingleFile=false ^
     --self-contained ^
     --configuration %CONFIGURATION% ^
+    --framework %FRAMEWORK% ^
     --runtime %RUNTIME_ID% ^
     --output %OUTPUT_DIR%
+	
+REM dotnet publish %APP_PROJECT% ^
+    REM -p:DebugType=None ^
+    REM -p:DebugSymbols=false ^
+    REM -p:IncludeNativeLibrariesForSelfExtract=true ^
+    REM -p:PublishReadyToRun=true ^
+    REM -p:PublishSingleFile=true ^
+    REM --self-contained ^
+    REM --configuration %CONFIGURATION% ^
+	REM --framework %FRAMEWORK% ^
+    REM --runtime %RUNTIME_ID% ^
+    REM --output %OUTPUT_DIR%
 
 :: Check the exit code of the last command (dotnet publish)
 if %errorlevel% neq 0 (

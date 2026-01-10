@@ -14,6 +14,9 @@ if not exist "*.sln" if not exist "*.csproj" if not exist "*.vbproj" if not exis
     set /p continue=
     if /i not "!continue!"=="y" if /i not "!continue!"=="yes" (
         echo Cancelled.
+        :: Hier optional ein Pause, falls man die "Cancelled" Nachricht lesen will, 
+        :: bevor das Fenster zugeht. Sonst geht es sofort zu.
+        timeout /t 2 >nul
         goto :end
     )
 )
@@ -91,4 +94,12 @@ if !error_count! gtr 0 (
 echo.
 
 :end
-pause
+if !error_count! gtr 0 (
+    echo.
+    echo -------------------------------------------------------
+    echo There were !error_count! errors.
+    pause >nul
+)
+
+:: Aufräumen des pushd vom Anfang
+popd
