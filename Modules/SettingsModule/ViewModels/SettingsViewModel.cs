@@ -80,7 +80,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<DevicesUpdatedEvent>().Subscribe(
+                action: _ => SetDevices(),
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
                 action: _ => SetDevice(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
@@ -92,6 +97,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
                 action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
+
+            UpdateDevices();
         }
 
         #endregion Public Constructors
@@ -117,7 +124,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
-        public ObservableCollection<Device> Devices { get; private set; }
+        public ObservableCollection<Device> Devices { get; private set; } = [];
 
         public bool DevicesNotAvailable
         {
@@ -263,9 +270,35 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             DevicesNotAvailable = false;
         }
 
+        private void SetDevices()
+        {
+            var devicesSet = Devices.ToHashSet();
+            var updatedSet = outputService?.Devices?.ToHashSet();
+
+            if (updatedSet?.SetEquals(devicesSet) != true)
+            {
+                Devices.Clear();
+
+                if (outputService?.Devices?.Any() == true)
+                {
+                    var ordereds = outputService.Devices
+                        .OrderByDescending(d => d.Type == DeviceType.Asio)
+                        .ThenBy(d => d.Name).ToArray();
+
+                    foreach (var ordered in ordereds)
+                    {
+                        Devices.Add(ordered);
+                    }
+                }
+
+                RaisePropertyChanged(nameof(Devices));
+            }
+        }
+
         private void SetStartLocation()
         {
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(sessionService?.Contents?.SettingsPath));
+            Task.Run(async () => startLocation = await dialogService
+                .GetFolderAsync(sessionService?.Contents?.SettingsPath));
         }
 
         private void UpdateDevices()
@@ -275,13 +308,6 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 isUpdate = true;
 
                 outputService.Update();
-
-                Devices = new ObservableCollection<Device>(outputService.Devices
-                    .OrderByDescending(d => d.Type == DeviceType.Asio)
-                    .ThenBy(d => d.Name));
-                RaisePropertyChanged(nameof(Devices));
-
-                SetDevice();
 
                 isUpdate = false;
             }

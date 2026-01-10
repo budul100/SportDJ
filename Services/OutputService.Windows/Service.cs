@@ -31,7 +31,7 @@ namespace SportDJ.Services.OutputService.Windows
         private readonly IMidiService midiService;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
-        private readonly OutputHandler outputHandler = new();
+        private readonly Output outputHandler = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -39,7 +39,7 @@ namespace SportDJ.Services.OutputService.Windows
         private DynamicFadingProvider fadingProvider;
         private ContinuousMixingProvider foregroundProvider;
         private bool isDisposed;
-        private Output outputOptions;
+        private Commons.Models.Settings.Output outputOptions;
         private IVolumeService volumeService;
 
         #endregion Private Fields
@@ -55,6 +55,9 @@ namespace SportDJ.Services.OutputService.Windows
             this.settingsService = settingsService;
             this.sessionService = sessionService;
             this.midiService = midiService;
+
+            outputHandler.OutputStopped += OnPlaybackStopped;
+            outputHandler.DevicesUpdated += OnDevicesUpdated;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: ApplySettings,
@@ -77,6 +80,8 @@ namespace SportDJ.Services.OutputService.Windows
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: mixersAll.Contains);
+
+            Update();
         }
 
         #endregion Public Constructors
@@ -225,7 +230,7 @@ namespace SportDJ.Services.OutputService.Windows
                     sessionService.Save();
                 }
 
-                eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
+                eventAggregator.GetEvent<DeviceUpdatedEvent>().Publish(this);
             }
         }
 
@@ -258,6 +263,9 @@ namespace SportDJ.Services.OutputService.Windows
 
                     volumeService?.Deactivate();
                     volumeService?.Dispose();
+
+                    outputHandler.OutputStopped -= OnPlaybackStopped;
+                    outputHandler.DevicesUpdated -= OnDevicesUpdated;
                 }
 
                 isDisposed = true;
@@ -359,6 +367,11 @@ namespace SportDJ.Services.OutputService.Windows
                 milliSeconds: fadeMilliseconds);
         }
 
+        private void OnDevicesUpdated(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<DevicesUpdatedEvent>().Publish(this);
+        }
+
         private void OnFadingEnded(object sender, EventArgs e)
         {
             eventAggregator.GetEvent<OutputFadedEvent>().Publish(this);
@@ -422,7 +435,7 @@ namespace SportDJ.Services.OutputService.Windows
 
                 outputOptions.DeviceName = default;
 
-                eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
+                eventAggregator.GetEvent<DeviceUpdatedEvent>().Publish(this);
             }
         }
 

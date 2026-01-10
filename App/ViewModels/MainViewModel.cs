@@ -64,7 +64,7 @@ namespace SportDJ.App.ViewModels
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
                 action: _ => InitializeSession(),
                 keepSubscriberReferenceAlive: true);
 

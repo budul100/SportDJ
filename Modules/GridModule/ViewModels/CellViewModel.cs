@@ -62,7 +62,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             dialogService = containerProvider?.Resolve<IDialogService>();
             gridService = containerProvider?.Resolve<IGridService>();
 
-            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
                 keepSubscriberReferenceAlive: true);
         }

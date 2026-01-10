@@ -12,7 +12,7 @@ using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.OutputService.Windows
 {
-    internal class OutputHandler
+    internal class Output
         : IDisposable
     {
         #region Private Fields
@@ -22,18 +22,11 @@ namespace SportDJ.Services.OutputService.Windows
 
         #endregion Private Fields
 
-        #region Public Constructors
-
-        public OutputHandler()
-        {
-            Update();
-        }
-
-        #endregion Public Constructors
-
         #region Public Events
 
-        public event EventHandler<StoppedEventArgs> Stopped;
+        public event EventHandler<EventArgs> DevicesUpdated;
+
+        public event EventHandler<StoppedEventArgs> OutputStopped;
 
         #endregion Public Events
 
@@ -146,6 +139,10 @@ namespace SportDJ.Services.OutputService.Windows
         {
             Devices = GetCapabilitiesAsio()
                 .Union(GetCapabilitiesWaveOut()).ToArray();
+
+            DevicesUpdated?.Invoke(
+                sender: this,
+                e: EventArgs.Empty);
         }
 
         #endregion Public Methods
@@ -282,7 +279,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
         {
-            Stopped?.Invoke(
+            OutputStopped?.Invoke(
                 sender: this,
                 e: e);
         }
