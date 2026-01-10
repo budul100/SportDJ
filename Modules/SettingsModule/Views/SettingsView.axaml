@@ -5,7 +5,8 @@
 	xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:dt="using:SportDJ.Modules.SettingsModule.DesignTime"
-	xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
 	xmlns:mat="using:Material.Icons.Avalonia"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:models="using:SportDJ.Commons.Models"
@@ -69,7 +70,16 @@
 					HorizontalAlignment="Stretch"
 					Focusable="False"
 					ItemsSource="{Binding Devices}"
-					SelectedItem="{Binding Device}" >
+					SelectedItem="{Binding Device}"
+					Classes.error="{Binding Device, Converter={x:Static ObjectConverters.IsNull}}">
+
+					<ComboBox.Styles>
+						<Style Selector="ComboBox.error">
+							<Setter Property="BorderBrush" Value="Red"/>
+							<Setter Property="BorderThickness" Value="2"/>
+						</Style>
+					</ComboBox.Styles>
+
 					<ComboBox.ItemTemplate>
 						<DataTemplate x:DataType="models:Contents.Device">
 							<StackPanel Orientation="Horizontal">
@@ -80,6 +90,7 @@
 							</StackPanel>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
+
 				</ComboBox>
 
 			</StackPanel>
