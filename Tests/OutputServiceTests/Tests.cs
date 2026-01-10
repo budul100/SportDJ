@@ -3,6 +3,7 @@ using Moq;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -48,6 +49,11 @@ namespace SportDJ.Tests.OutputServiceTests
                 Setup(m => m.GetEvent<MixerEndedEvent>()).
                 Returns(mockMixerEndedEvent.Object);
 
+            var mockDevicesUpdatedEvent = new Mock<DevicesUpdatedEvent>();
+            mockEventAggregator
+                .Setup(m => m.GetEvent<DevicesUpdatedEvent>())
+                .Returns(mockDevicesUpdatedEvent.Object);
+
             mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService
                 .Setup(m => m.Contents)
@@ -75,7 +81,7 @@ namespace SportDJ.Tests.OutputServiceTests
 
             provider.Update();
 
-            Assert.True(provider.Devices.Count() > 0);
+            Assert.True(provider.Devices.Any());
         }
 
         #endregion Public Methods
