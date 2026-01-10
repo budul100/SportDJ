@@ -34,14 +34,15 @@
         public const string PlayerResetPosition = "Reset position";
         public const string PlayerSelectionFileHeader = "Select file";
         public const string PlayerSelectionFolderHeader = "Select folder";
-        public const string PlayerShuffleHeader = "Shuffle tracks";
-        public const string PlayerShuffleMessage = "Shall the player tracks be shuffled?";
 
         public const string SettingsLoadHeader = "Load settings";
         public const string SettingsSaveHeader = "Save settings";
 
         public const string SplashCancellingMessage = "Cancelling ...";
         public const string SplashLoadingMessage = "Loading ...";
+
+        public const string StackShuffleHeader = "Shuffle tracks";
+        public const string StackShuffleMessage = "Shall the player tracks be shuffled?";
 
         public const string TabEditHeader = "Edit tab";
         public const string TabRemoveHeader = "Remove tab";

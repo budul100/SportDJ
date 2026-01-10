@@ -236,7 +236,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Update()
         {
-            outputHandler.Update();
+            outputHandler?.Update();
         }
 
         #endregion Public Methods

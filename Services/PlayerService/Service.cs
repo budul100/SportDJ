@@ -12,7 +12,6 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Mixer;
-using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
@@ -271,11 +270,6 @@ namespace SportDJ.Services.PlayerService
             stackService.Previous();
         }
 
-        public void Reset()
-        {
-            stackService.Reset();
-        }
-
         public async Task SetFileAsync()
         {
             var paths = await dialogService.OpenFilePickerAsync(
@@ -313,23 +307,6 @@ namespace SportDJ.Services.PlayerService
                 settingsService.Save();
 
                 InitializePlayer();
-            }
-        }
-
-        public async Task ShuffleAsync()
-        {
-            if (HasStack)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.PlayerShuffleMessage,
-                    contentTitle: Texts.PlayerShuffleHeader,
-                    buttonDefinitions: ButtonEnum.YesNo,
-                    enterDefaultButton: ClickEnum.No);
-
-                if (result == ButtonResult.Yes)
-                {
-                    stackService.Shuffle();
-                }
             }
         }
 

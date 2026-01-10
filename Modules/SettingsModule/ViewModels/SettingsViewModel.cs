@@ -307,7 +307,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             {
                 isUpdate = true;
 
-                outputService.Update();
+                outputService?.Update();
 
                 isUpdate = false;
             }

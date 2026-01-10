@@ -389,19 +389,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
                     icon: MaterialIconKind.FileRestoreOutline);
 
                 yield return resetPositionsItem;
-
-                if (playerService.HasStack)
-                {
-                    yield return new SeparatorViewModel();
-
-                    var shuffleItem = new MenuViewModel(
-                        header: Texts.PlayerShuffleHeader,
-                        executeCallback: () => playerService.ShuffleAsync(),
-                        closeCallback: CloseMenu,
-                        icon: MaterialIconKind.ShuffleVariant);
-
-                    yield return shuffleItem;
-                }
             }
         }
 
