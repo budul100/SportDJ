@@ -59,7 +59,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
             UpdateItems();
         }
 
-        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems, Action closeCallback)
+        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems, 
+            Action closeCallback)
         {
             eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
                 action: _ => UpdateItems(),

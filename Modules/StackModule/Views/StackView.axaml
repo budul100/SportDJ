@@ -5,10 +5,13 @@
     xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.StackModule.DesignTime"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
+    x:Name="StackViewControl"
     d:DesignHeight="500"
     d:DesignWidth="300"
     mc:Ignorable="d"
@@ -35,9 +38,35 @@
     <DockPanel LastChildFill="True">
 
         <ListBox ItemsSource="{Binding Entries}">
+            
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="SelectionChanged">
+                    <ia:InvokeCommandAction 
+                        Command="{Binding SelectCommand}"
+                        CommandParameter="{Binding $parent[ListBox].SelectedItem}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+            
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <ct:EntryView Entry="{Binding}" />
+                    <Grid>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="5*" />
+                        </Grid.ColumnDefinitions>
+
+                        <ct:EntryView Entry="{Binding}" Grid.Column="0">
+                            <i:Interaction.Behaviors>
+                                <ia:EventTriggerBehavior EventName="DoubleTapped">
+                                    <ia:InvokeCommandAction 
+                                        Command="{Binding #StackViewControl.DataContext.SelectCommand}"
+                                        CommandParameter="{Binding}" />
+                                </ia:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>
+                        </ct:EntryView>
+
+                    </Grid>
+
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

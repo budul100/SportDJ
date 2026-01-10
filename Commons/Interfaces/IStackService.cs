@@ -1,5 +1,5 @@
-﻿using SportDJ.Commons.Models.Contents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Commons.Interfaces
 {
@@ -32,6 +32,10 @@ namespace SportDJ.Commons.Interfaces
         void Previous();
 
         void Reset();
+
+        void Select(Entry entry);
+
+        void Select(int index);
 
         void Shuffle();
 

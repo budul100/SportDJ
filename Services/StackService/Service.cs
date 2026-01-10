@@ -56,7 +56,7 @@ namespace SportDJ.Services.StackService
                 || Entries?.Any(e => e.Track.Path == position.Path) != true
                 || position.Index >= Entries.Count)
             {
-                SelectEntry(0);
+                Select(0);
             }
             else
             {
@@ -66,7 +66,7 @@ namespace SportDJ.Services.StackService
 
                 if (isLoop)
                 {
-                    SelectEntry(Index);
+                    Select(Index);
                 }
                 else
                 {
@@ -93,14 +93,14 @@ namespace SportDJ.Services.StackService
                     if (Entries[index].CanBePlayed()
                         && Entries[index] != Entry)
                     {
-                        SelectEntry(index);
+                        Select(index);
 
                         return;
                     }
                 }
                 while (Index != index);
 
-                SelectEntry(Index);
+                Select(Index);
             }
         }
 
@@ -142,14 +142,14 @@ namespace SportDJ.Services.StackService
                     if (!Entries[index].Track.IsSilent
                         && !Entries[index].IsPlayed)
                     {
-                        SelectEntry(index);
+                        Select(index);
 
                         return;
                     }
                 }
                 while (Index != index);
 
-                SelectEntry(Index);
+                Select(Index);
             }
         }
 
@@ -168,6 +168,40 @@ namespace SportDJ.Services.StackService
             eventAggregator.GetEvent<StackResetEvent>().Publish(this);
         }
 
+        public void Select(Entry entry)
+        {
+            var index = Entries.IndexOf(entry);
+
+            Select(index);
+        }
+
+        public void Select(int index)
+        {
+            if (Entry?.Track.IsSilent == false)
+            {
+                Entry.IsSelected = false;
+            }
+
+            eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(Entry);
+
+            if (index < Entries.Count)
+            {
+                Entry = Entries[index];
+                Entry.IsSelected = true;
+            }
+            else
+            {
+                Entry = default;
+                index = 0;
+            }
+
+            eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(Entry);
+
+            Index = index;
+
+            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(this);
+        }
+
         public void Shuffle()
         {
             if (Entries?.Count > 0)
@@ -181,7 +215,7 @@ namespace SportDJ.Services.StackService
                     (Entries[index], Entries[count]) = (Entries[count], Entries[index]);
                 }
 
-                SelectEntry(Entry);
+                Select(Entry);
             }
         }
 
@@ -197,7 +231,7 @@ namespace SportDJ.Services.StackService
                 {
                     var result = new Entry(
                         track: track,
-                        selector: SelectEntry);
+                        selector: Select);
 
                     yield return result;
                 }
@@ -232,38 +266,6 @@ namespace SportDJ.Services.StackService
             }
 
             return result;
-        }
-
-        private void SelectEntry(Entry entry)
-        {
-            var index = Entries.IndexOf(entry);
-
-            SelectEntry(index);
-        }
-
-        private void SelectEntry(int index)
-        {
-            if (Entry?.Track.IsSilent == false)
-            {
-                Entry.IsSelected = false;
-            }
-
-            if (index < Entries.Count)
-            {
-                Entry = Entries[index];
-                Entry.IsSelected = true;
-            }
-            else
-            {
-                Entry = default;
-                index = 0;
-            }
-
-            eventAggregator.GetEvent<EntryUpdatedEvent>().Publish(Entry);
-
-            Index = index;
-
-            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(this);
         }
 
         #endregion Private Methods
