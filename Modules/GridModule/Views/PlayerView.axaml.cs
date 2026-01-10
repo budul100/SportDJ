@@ -8,6 +8,14 @@ namespace SportDJ.Modules.GridModule.Views;
 public partial class PlayerView
     : UserControl
 {
+    #region Private Fields
+
+    private Control button;
+    private ContextMenu contextMenu;
+    private PlayerViewModel currentViewModel;
+
+    #endregion Private Fields
+
     #region Public Constructors
 
     public PlayerView()
@@ -20,6 +28,49 @@ public partial class PlayerView
     #endregion Public Constructors
 
     #region Private Methods
+
+    private Control FindControl(Control parent, ContextMenu targetContextMenu)
+    {
+        if (parent is Button button
+            && button.ContextMenu == targetContextMenu)
+        {
+            return button;
+        }
+
+        if (parent is Panel panel)
+        {
+            foreach (var child in panel.Children)
+            {
+                if (child is Control control)
+                {
+                    var result = FindControl(
+                        parent: control,
+                        targetContextMenu: targetContextMenu);
+
+                    if (result != default)
+                    {
+                        return result;
+                    }
+                }
+            }
+        }
+        else if (parent is ContentControl contentControl
+            && contentControl.Content is Control childControl)
+        {
+            return FindControl(
+                parent: childControl,
+                targetContextMenu: targetContextMenu);
+        }
+        else if (parent is Decorator decorator
+            && decorator.Child is Control decoratorChild)
+        {
+            return FindControl(
+                parent: decoratorChild,
+                targetContextMenu: targetContextMenu);
+        }
+
+        return default;
+    }
 
     private void OnButtonKeyDown(object sender, Avalonia.Input.KeyEventArgs e)
     {
@@ -41,8 +92,12 @@ public partial class PlayerView
 
     private void OnDataContextChanged(object sender, System.EventArgs e)
     {
-        var contextMenu = this
-            .FindControl<ContextMenu>("ContextMenu");
+        if (currentViewModel != default)
+        {
+            currentViewModel.MenuOpenEvent -= OnMenuOpen;
+        }
+
+        contextMenu = this.FindControl<ContextMenu>("ContextMenu");
 
         if (contextMenu != default)
         {
@@ -50,9 +105,23 @@ public partial class PlayerView
 
             if (viewModel != default)
             {
-                viewModel.MenuOpenEvent += (s, e) => contextMenu.Open();
+                currentViewModel = viewModel;
+
+                button = FindControl(
+                    parent: this,
+                    targetContextMenu: contextMenu);
+
+                if (button != default)
+                {
+                    viewModel.MenuOpenEvent += OnMenuOpen;
+                }
             }
         }
+    }
+
+    private void OnMenuOpen(object s, System.EventArgs args)
+    {
+        contextMenu.Open(button);
     }
 
     #endregion Private Methods

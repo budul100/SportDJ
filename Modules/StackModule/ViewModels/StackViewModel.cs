@@ -21,6 +21,7 @@ namespace SportDJ.Modules.StackModule.ViewModels
         #region Private Fields
 
         private readonly IDialogService dialogService;
+
         private Entry active;
         private IStackService service;
         private HashSet<Track> tracks = [];
@@ -39,7 +40,10 @@ namespace SportDJ.Modules.StackModule.ViewModels
 
             SelectCommand = new DelegateCommand<Entry>(e => service?.Select(e));
             ResetCommand = new DelegateCommand(() => service?.Reset());
-            ShuffleCommand = new DelegateCommand(async () => await ShuffleAsync());
+
+            ShuffleCommand = new DelegateCommand(
+                executeMethod: async () => await ShuffleAsync(),
+                canExecuteMethod: () => Entries?.Count > 1);
 
             eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
                 action: UpdateService,
@@ -119,6 +123,8 @@ namespace SportDJ.Modules.StackModule.ViewModels
             }
 
             RaisePropertyChanged(nameof(Entries));
+
+            ShuffleCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateService(IStackService service)
