@@ -23,21 +23,21 @@ namespace SportDJ.Services.TrackService
     {
         #region Private Fields
 
-        private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly AudioDataIOFactory audioDataIOFactory;
-        private readonly IEventAggregator eventAggregator;
-        private readonly IEnumerable<ATL.Format> formatsAudio;
-        private readonly IEnumerable<ATL.Format> formatsPlaylist;
-        private readonly PlaylistIOFactory playlistIOFactory;
-        private readonly IStorageService<Set> settingsService;
+        private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly ConcurrentDictionary<string, Track> tracks = [];
-        private readonly ConcurrentQueue<Track> trackUpdates = [];
-        private readonly ConcurrentQueue<Track> trackTrims = [];
-        private readonly ConcurrentQueue<Track> currentRenders = [];
-        private readonly ConcurrentQueue<Track> currentUpdates = [];
-        private readonly ConcurrentQueue<Track> currentTrims = [];
         private readonly ConcurrentQueue<Track> activeRenders = [];
         private readonly ConcurrentQueue<Track> activeUpdates = [];
+        private readonly ConcurrentQueue<Track> otherTrims = [];
+        private readonly ConcurrentQueue<Track> otherUpdates = [];
+        private readonly ConcurrentQueue<Track> loadedRenders = [];
+        private readonly ConcurrentQueue<Track> loadedTrims = [];
+        private readonly ConcurrentQueue<Track> loadedUpdates = [];
+        private readonly IEnumerable<ATL.Format> formatsAudio;
+        private readonly IEnumerable<ATL.Format> formatsPlaylist;
+        private readonly IEventAggregator eventAggregator;
+        private readonly IStorageService<Set> settingsService;
+        private readonly PlaylistIOFactory playlistIOFactory;
 
         private bool isDisposed;
 
@@ -117,8 +117,8 @@ namespace SportDJ.Services.TrackService
 
                     if (result != default)
                     {
-                        trackUpdates.Enqueue(result);
-                        trackTrims.Enqueue(result);
+                        otherUpdates.Enqueue(result);
+                        otherTrims.Enqueue(result);
 
                         yield return result;
                     }
@@ -146,9 +146,9 @@ namespace SportDJ.Services.TrackService
         {
             if (track != default)
             {
-                currentUpdates.Enqueue(track);
-                currentTrims.Enqueue(track);
-                currentRenders.Enqueue(track);
+                loadedUpdates.Enqueue(track);
+                loadedTrims.Enqueue(track);
+                loadedRenders.Enqueue(track);
             }
         }
 
@@ -269,9 +269,14 @@ namespace SportDJ.Services.TrackService
         {
             if (track?.IsUpdated == false)
             {
+                var hashCode = track.GetHashCode();
+
                 track.Update();
 
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                if (track.GetHashCode() != hashCode)
+                {
+                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+                }
             }
         }
 
@@ -289,30 +294,30 @@ namespace SportDJ.Services.TrackService
                 {
                     RenderTrack(activeRender);
                 }
-                else if (!currentUpdates.IsEmpty
-                    && currentUpdates.TryDequeue(out Track currentUpdate))
+                else if (!loadedUpdates.IsEmpty
+                    && loadedUpdates.TryDequeue(out Track loadedUpdate))
                 {
-                    UpdateTrack(currentUpdate);
+                    UpdateTrack(loadedUpdate);
                 }
-                else if (!currentTrims.IsEmpty
-                    && currentTrims.TryDequeue(out Track currentTrim))
+                else if (!loadedTrims.IsEmpty
+                    && loadedTrims.TryDequeue(out Track loadedTrim))
                 {
-                    TrimTrack(currentTrim);
+                    TrimTrack(loadedTrim);
                 }
-                else if (!currentRenders.IsEmpty
-                    && currentRenders.TryDequeue(out Track currentRender))
+                else if (!otherUpdates.IsEmpty
+                    && otherUpdates.TryDequeue(out Track otherUpdate))
                 {
-                    RenderTrack(currentRender);
+                    UpdateTrack(otherUpdate);
                 }
-                else if (!trackUpdates.IsEmpty
-                    && trackUpdates.TryDequeue(out Track trackUpdate))
+                else if (!loadedRenders.IsEmpty
+                    && loadedRenders.TryDequeue(out Track loadedRender))
                 {
-                    UpdateTrack(trackUpdate);
+                    RenderTrack(loadedRender);
                 }
-                else if (!trackTrims.IsEmpty
-                    && trackTrims.TryDequeue(out Track trackTrim))
+                else if (!otherTrims.IsEmpty
+                    && otherTrims.TryDequeue(out Track otherTrim))
                 {
-                    TrimTrack(trackTrim);
+                    TrimTrack(otherTrim);
                 }
             }
         }

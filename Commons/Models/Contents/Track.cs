@@ -43,5 +43,73 @@ namespace SportDJ.Commons.Models.Contents
         public string Title { get; set; }
 
         #endregion Public Properties
+
+        #region Public Methods
+
+        public static bool operator !=(Track left, Track right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator ==(Track left, Track right)
+        {
+            if (left is null)
+            {
+                return right is null;
+            }
+
+            return left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Track);
+        }
+
+        public bool Equals(Track other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(Path, other.Path, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(File, other.File, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(Artist, other.Artist, StringComparison.Ordinal)
+                && string.Equals(Title, other.Title, StringComparison.Ordinal)
+                && string.Equals(Info, other.Info, StringComparison.Ordinal)
+                && BPM == other.BPM
+                && Counter == other.Counter
+                && Cue == other.Cue
+                && Duration == other.Duration
+                && End == other.End
+                && Start == other.Start;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+
+            hash.Add(Path?.ToLowerInvariant());
+            hash.Add(File?.ToLowerInvariant());
+            hash.Add(Artist);
+            hash.Add(Title);
+            hash.Add(Info);
+            hash.Add(BPM);
+            hash.Add(Counter);
+            hash.Add(Cue);
+            hash.Add(Duration);
+            hash.Add(End);
+            hash.Add(Start);
+
+            return hash.ToHashCode();
+        }
+
+        #endregion Public Methods
     }
 }
