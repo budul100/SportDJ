@@ -5,6 +5,7 @@
     xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.StackModule.DesignTime"
+    xmlns:ext="using:SportDJ.Commons.Extensions"
     xmlns:i="using:Avalonia.Xaml.Interactivity"
     xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mat="using:Material.Icons.Avalonia"
@@ -79,6 +80,7 @@
         <ListBox 
             ItemsSource="{Binding Entries}" 
             SelectedItem="{Binding Active, Mode=TwoWay}"
+            ext:ListBoxExtensions.AutoScroll="True"
             Margin="{StaticResource ContentMargin}">
 
             <ListBox.ItemTemplate>
@@ -86,15 +88,7 @@
                     <ct:EntryView 
                         Entry="{Binding}"
                         EventAggregator="{Binding #StackViewControl.DataContext.EventAggregator}">
-                        <i:Interaction.Behaviors>
-                            <ia:EventTriggerBehavior EventName="DoubleTapped">
-                                <ia:InvokeCommandAction 
-                                    Command="{Binding #StackViewControl.DataContext.SelectCommand}"
-                                    CommandParameter="{Binding}" />
-                            </ia:EventTriggerBehavior>
-                        </i:Interaction.Behaviors>
                     </ct:EntryView>
-
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

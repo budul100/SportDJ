@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
@@ -23,8 +22,9 @@ namespace SportDJ.Modules.StackModule.ViewModels
         private readonly IDialogService dialogService;
 
         private Entry active;
+        private bool isSettingActive = false;
+        private bool isUpdating = false;
         private IStackService service;
-        private HashSet<Track> tracks = [];
 
         #endregion Private Fields
 
@@ -63,12 +63,24 @@ namespace SportDJ.Modules.StackModule.ViewModels
         public Entry Active
         {
             get => active;
+
             set
             {
                 if (value != default
-                    && SetProperty(ref active, value))
+                    && !isSettingActive
+                    && SetProperty(
+                        storage: ref active,
+                        value: value))
                 {
-                    service?.Select(value);
+                    try
+                    {
+                        isSettingActive = true;
+                        service?.Select(value);
+                    }
+                    finally
+                    {
+                        isSettingActive = false;
+                    }
                 }
             }
         }
@@ -106,25 +118,46 @@ namespace SportDJ.Modules.StackModule.ViewModels
 
         private void UpdateEntries()
         {
-            Entries.Clear();
+            if (isUpdating) return;
 
-            if (service?.Entries?.Count > 0)
+            try
             {
-                tracks = [.. service.Entries.Select(e => e.Track)];
+                isUpdating = true;
 
-                foreach (var entry in service.Entries)
+                var givenActive = active;
+                active = default;
+
+                RaisePropertyChanged(nameof(Active));
+
+                Entries.Clear();
+
+                if (service?.Entries?.Count > 0)
                 {
-                    Entries.Add(entry);
+                    foreach (var entry in service.Entries)
+                    {
+                        Entries.Add(entry);
+                    }
+
+                    if (givenActive != default
+                        && Entries.Contains(givenActive))
+                    {
+                        active = givenActive;
+                    }
+                    else
+                    {
+                        active = Entries.FirstOrDefault(e => e.IsSelected);
+                    }
+
+                    RaisePropertyChanged(nameof(Active));
                 }
+
+                RaisePropertyChanged(nameof(Entries));
+                ShuffleCommand.RaiseCanExecuteChanged();
             }
-            else
+            finally
             {
-                tracks.Clear();
+                isUpdating = false;
             }
-
-            RaisePropertyChanged(nameof(Entries));
-
-            ShuffleCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateService(IStackService service)
