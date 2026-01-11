@@ -1,7 +1,7 @@
 @echo off
 setlocal
+cd /d "%~dp0"
 
-:: Define variables
 set APP_PROJECT=.\App\App.csproj
 set CONFIGURATION=Release
 set RUNTIME_ID=win-x64
@@ -15,9 +15,7 @@ echo # Starting Build Process  #
 echo ###########################
 echo.
 
-:: 1. Clean up previous build artifacts
-echo [1/2] Executing cleanup script...
-echo Target: %CLEANUP_SCRIPT_PATH%
+echo [1/3] Executing cleanup script: %CLEANUP_SCRIPT_PATH%
 
 if exist %CLEANUP_SCRIPT_PATH% (
     pushd .\Additionals\Scripts
@@ -32,10 +30,18 @@ echo.
 echo --------------------------------------
 echo.
 
-:: 2. Build the self-contained application using ReadyToRun
-echo [2/2] Publishing %APP_PROJECT% for %RUNTIME_ID%...
-echo Configuration: %CONFIGURATION%
-echo Output Directory: %OUTPUT_DIR%\
+echo [2/3] Cleaning Output Directory: %OUTPUT_DIR%...
+
+if exist "%OUTPUT_DIR%" (
+    rd /s /q "%OUTPUT_DIR%"
+    echo Old output directory deleted.
+)
+
+echo.
+echo --------------------------------------
+echo.
+
+echo [3/3] Publishing %APP_PROJECT% in %CONFIGURATION% config for %RUNTIME_ID%
 
 dotnet publish %APP_PROJECT% ^
     -p:DebugType=None ^
