@@ -317,10 +317,10 @@ namespace SportDJ.Services.SignalService
                     if (!IsOverNextThreshold
                         && nextThresholdOnPlay.HasValue)
                     {
-                        IsOverNextThreshold = Position?.Ticks > nextThresholdOnPlay.Value.Ticks
-                            || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+                        IsOverNextThreshold = (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                            || (Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks);
 
-                        if (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
+                        if (IsOverNextThreshold)
                         {
                             SelectNext();
                         }
