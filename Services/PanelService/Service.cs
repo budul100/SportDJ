@@ -44,6 +44,19 @@ namespace SportDJ.Services.PanelService
             }
         }
 
+        public void Deactivate(PanelType type)
+        {
+            if (activeViews.Remove(type))
+            {
+                SetVisibility(
+                    type: type,
+                    isVisible: false);
+
+                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                    payload: type);
+            }
+        }
+
         public void Deactivate<TService>()
         {
             var serviceType = typeof(TService);
@@ -52,14 +65,7 @@ namespace SportDJ.Services.PanelService
                 key: serviceType,
                 value: out var registration))
             {
-                activeViews.Remove(registration.Type);
-
-                SetVisibility(
-                    type: registration.Type,
-                    isVisible: false);
-
-                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: registration.Type);
+                Deactivate(registration.Type);
             }
         }
 

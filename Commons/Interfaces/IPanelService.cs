@@ -11,6 +11,8 @@ namespace SportDJ.Commons.Interfaces
 
         void Deactivate<TService>();
 
+        void Deactivate(PanelType type);
+
         Control GetView(PanelType type);
 
         bool IsVisible(PanelType type);

@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:en="using:SportDJ.Commons.Enums"
+    xmlns:i="using:Avalonia.Xaml.Interactivity"
+    xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.App.ViewModels"
@@ -26,11 +28,11 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Interaction.Behaviors>
-        <EventTriggerBehavior EventName="Closing">
-            <InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
-        </EventTriggerBehavior>
-    </Interaction.Behaviors>
+    <i:Interaction.Behaviors>
+        <ia:EventTriggerBehavior EventName="Closing">
+            <ia:InvokeCommandAction Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True" />
+        </ia:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
 
     <Grid>
 
@@ -90,7 +92,13 @@
             HorizontalAlignment="Stretch"
             ResizeDirection="Rows"
             Focusable="False"
-            IsVisible="{Binding PanelTop, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            IsVisible="{Binding PanelTop, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="DoubleTapped">
+                    <ia:InvokeCommandAction Command="{Binding ClosePanelTopCommand}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </GridSplitter>
 
         <!-- Panel Left -->
         <ContentControl 
@@ -106,7 +114,13 @@
             VerticalAlignment="Stretch"
             ResizeDirection="Columns"
             Focusable="False"
-            IsVisible="{Binding PanelLeft, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            IsVisible="{Binding PanelLeft, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="DoubleTapped">
+                    <ia:InvokeCommandAction Command="{Binding ClosePanelLeftCommand}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </GridSplitter>
 
         <!-- Main Region -->
         <ContentControl 
@@ -125,7 +139,13 @@
             VerticalAlignment="Stretch"
             ResizeDirection="Columns"
             Focusable="False"
-            IsVisible="{Binding PanelRight, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            IsVisible="{Binding PanelRight, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="DoubleTapped">
+                    <ia:InvokeCommandAction Command="{Binding ClosePanelRightCommand}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </GridSplitter>
 
         <!-- Panel Right -->
         <ContentControl 
@@ -142,7 +162,13 @@
             HorizontalAlignment="Stretch"
             ResizeDirection="Rows"
             Focusable="False"
-            IsVisible="{Binding PanelBottom, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            IsVisible="{Binding PanelBottom, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="DoubleTapped">
+                    <ia:InvokeCommandAction Command="{Binding ClosePanelBottomCommand}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+        </GridSplitter>
 
         <!-- Panel Bottom -->
         <ContentControl 

@@ -66,6 +66,11 @@ namespace SportDJ.App.ViewModels
 
             OnClosingCommand = new DelegateCommand<CancelEventArgs>(OnClosing);
 
+            ClosePanelTopCommand = new DelegateCommand(() => ClosePanel(PanelType.Top));
+            ClosePanelBottomCommand = new DelegateCommand(() => ClosePanel(PanelType.Bottom));
+            ClosePanelLeftCommand = new DelegateCommand(() => ClosePanel(PanelType.Left));
+            ClosePanelRightCommand = new DelegateCommand(() => ClosePanel(PanelType.Right));
+
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
@@ -99,6 +104,14 @@ namespace SportDJ.App.ViewModels
         #endregion Public Constructors
 
         #region Public Properties
+
+        public DelegateCommand ClosePanelBottomCommand { get; }
+
+        public DelegateCommand ClosePanelLeftCommand { get; }
+
+        public DelegateCommand ClosePanelRightCommand { get; }
+
+        public DelegateCommand ClosePanelTopCommand { get; }
 
         public int Height
         {
@@ -376,6 +389,11 @@ namespace SportDJ.App.ViewModels
                 userWantsToQuit = true;
                 desktop.Shutdown();
             }
+        }
+
+        private void ClosePanel(PanelType type)
+        {
+            panelService.Deactivate(type);
         }
 
         private void DisposeOutputs()
