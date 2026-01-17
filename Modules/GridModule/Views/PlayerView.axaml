@@ -104,40 +104,33 @@
                     </Viewbox>
                 </ToggleButton>
 
-                <Panel
+                <Border
                     Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="{StaticResource ColorBackground}">
+                    Margin="{StaticResource KeyMargin}"
+                    Background="{StaticResource KeyBackgroundColor}"
+                    BorderBrush="{StaticResource KeyBorderColor}"
+                    BorderThickness="{StaticResource KeyBorderThickness}"
+                    CornerRadius="{StaticResource KeyCornerRadius}"
+                    IsVisible="{Binding HasKey}">
 
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
                         MaxHeight="{StaticResource LargeIconSize}"
-                        Margin="{StaticResource KeyMargin}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Focusable="False"
-                        IsVisible="{Binding HasKey}"
                         Stretch="Uniform"
                         StretchDirection="Both">
 
-                        <Button
+                        <TextBlock
                             Padding="{StaticResource KeyPadding}"
-                            Background="{StaticResource KeyBackgroundColor}"
-                            BorderBrush="{StaticResource KeyBorderColor}"
-                            BorderThickness="{StaticResource KeyBorderThickness}"
-                            CornerRadius="{StaticResource KeyCornerRadius}"
-                            Focusable="False">
-
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Focusable="False"
-                                FontSize="{StaticResource FontSizeContentMain}"
-                                Text="{Binding Key}" />
-                        </Button>
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeContentMain}"
+                            Text="{Binding Key}" />
                     </Viewbox>
-                </Panel>
+                </Border>
             </Grid>
 
             <Border
