@@ -10,7 +10,9 @@ using Prism.Navigation.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -29,6 +31,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private readonly FilePickerFileType[] fileTypeFilter = [new(Constants.SettingsExtension)];
         private readonly IOutputService outputService;
         private readonly Output outputSettings;
+        private readonly IPanelService panelService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -42,12 +45,13 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         #region Public Constructors
 
         public SettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IDialogService dialogService, IStorageService<Set> settingsService,
-            IStorageService<Session> sessionService)
+            IEventAggregator eventAggregator, IDialogService dialogService, IPanelService panelService,
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;
             this.dialogService = dialogService;
+            this.panelService = panelService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
 
@@ -90,8 +94,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: InitializeOptions,
+            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+                action: _ => InitializeOptions(),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
@@ -133,7 +137,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         }
 
         public bool IsActive => Options != default
-            && sessionService.Contents.SettingsVisible;
+            && panelService.IsVisible<IStorageService<Session>>();
 
         public Options Options => settingsService?.Contents?.Options;
 
@@ -200,13 +204,16 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void InitializeOptions()
         {
-            RaisePropertyChanged(nameof(Options));
+            if (panelService.IsVisible<IStorageService<Session>>())
+            {
+                RaisePropertyChanged(nameof(Options));
 
-            RaisePropertyChanged(nameof(Volume));
-            RaisePropertyChanged(nameof(VolumePercentageExternals));
-            RaisePropertyChanged(nameof(VolumePercentageBackground));
+                RaisePropertyChanged(nameof(Volume));
+                RaisePropertyChanged(nameof(VolumePercentageExternals));
+                RaisePropertyChanged(nameof(VolumePercentageBackground));
 
-            RaisePropertyChanged(nameof(IsActive));
+                RaisePropertyChanged(nameof(IsActive));
+            }
         }
 
         private async Task LoadSettingsAsync()
@@ -265,7 +272,10 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             Device = Devices?
                 .SingleOrDefault(d => d.Name == outputService.Device?.Name);
 
-            // TODO: Show settings if Device is missing
+            if (Device == default)
+            {
+                panelService.Activate<IStorageService<Session>>();
+            }
 
             DevicesNotAvailable = false;
         }

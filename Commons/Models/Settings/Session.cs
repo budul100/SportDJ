@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Xml.Serialization;
 using SportDJ.Commons.Assets;
 
 namespace SportDJ.Commons.Models.Settings
@@ -23,10 +22,6 @@ namespace SportDJ.Commons.Models.Settings
         public List<Position> Positions { get; set; } = [];
 
         public string SettingsPath { get; set; }
-
-        public bool SettingsVisible { get; set; } = true;
-
-        public double SettingsWidth { get; set; } = Defaults.PanelWidth;
 
         public int Width { get; set; } = Defaults.AppWidth;
 

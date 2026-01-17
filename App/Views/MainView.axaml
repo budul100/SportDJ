@@ -58,10 +58,6 @@
             <ColumnDefinition Width="Auto" />
             <!-- Main Content -->
             <ColumnDefinition Width="10*" />
-            <!-- Splitter Settings -->
-            <ColumnDefinition Width="Auto" />
-            <!-- Settings -->
-            <ColumnDefinition Width="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinWidth="0" />
             <!-- Splitter Right -->
             <ColumnDefinition Width="Auto" />
             <!-- Panel Right -->
@@ -121,29 +117,10 @@
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <!-- Splitter für Settings -->
-        <GridSplitter
-            Grid.Row="3"
-            Grid.Column="3"
-            Width="3"
-            VerticalAlignment="Stretch"
-            ResizeDirection="Columns"
-            Focusable="False"
-            IsVisible="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}}" />
-
-        <!-- Settings Region -->
-        <ContentControl 
-            Grid.Row="3"
-            Grid.Column="4">
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.SettingsRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
-
         <!-- Panel Right Splitter -->
         <GridSplitter
             Grid.Row="3"
-            Grid.Column="5"
+            Grid.Column="3"
             Width="3"
             VerticalAlignment="Stretch"
             ResizeDirection="Columns"
@@ -153,7 +130,7 @@
         <!-- Panel Right -->
         <ContentControl 
             Grid.Row="3"
-            Grid.Column="6"
+            Grid.Column="4"
             Content="{Binding PanelRight}" />
 
         <!-- Panel Bottom Splitter -->

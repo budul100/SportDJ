@@ -1,13 +1,12 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Navigation.Regions;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Modules.StackModule.Views;
 
 namespace SportDJ.Modules.StackModule
 {
-    public class Module(IRegionManager regionManager)
+    public class Module()
         : IModule
     {
         #region Public Methods
@@ -20,10 +19,6 @@ namespace SportDJ.Modules.StackModule
             panelService.Register<IStackService>(
                 type: PanelType.Left,
                 view: stackView);
-
-            regionManager.RegisterViewWithRegion(
-                regionName: nameof(RegionType.PanelRegion),
-                viewType: typeof(StackView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

@@ -25,18 +25,56 @@ namespace SportDJ.Services.PanelService
 
         #region Public Methods
 
-        public Control GetView(PanelType region)
+        public void Activate<TService>()
+        {
+            var serviceType = typeof(TService);
+
+            if (registrations.TryGetValue(
+                key: serviceType,
+                value: out var registration))
+            {
+                activeViews[registration.Type] = registration.View;
+
+                SetVisibility(
+                    type: registration.Type,
+                    isVisible: true);
+
+                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                    payload: registration.Type);
+            }
+        }
+
+        public void Deactivate<TService>()
+        {
+            var serviceType = typeof(TService);
+
+            if (registrations.TryGetValue(
+                key: serviceType,
+                value: out var registration))
+            {
+                activeViews.Remove(registration.Type);
+
+                SetVisibility(
+                    type: registration.Type,
+                    isVisible: false);
+
+                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                    payload: registration.Type);
+            }
+        }
+
+        public Control GetView(PanelType type)
         {
             return activeViews.TryGetValue(
-                key: region,
+                key: type,
                 value: out var view)
                 ? view
                 : default;
         }
 
-        public bool IsVisible(PanelType region)
+        public bool IsVisible(PanelType type)
         {
-            return region switch
+            return type switch
             {
                 PanelType.Top => visibleTop,
 
@@ -50,39 +88,25 @@ namespace SportDJ.Services.PanelService
             };
         }
 
-        public void Register<TService>(PanelType region, Control view)
+        public bool IsVisible<TService>()
         {
-            registrations[typeof(TService)] = (region, view);
-        }
+            var result = false;
 
-        public void Switch<TService>(TService service = default)
-        {
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
                 key: serviceType,
                 value: out var registration))
             {
-                if (service == null)
-                {
-                    activeViews.Remove(registration.Type);
-
-                    SetVisibility(
-                        type: registration.Type,
-                        isVisible: false);
-                }
-                else
-                {
-                    activeViews[registration.Type] = registration.View;
-
-                    SetVisibility(
-                        type: registration.Type,
-                        isVisible: true);
-                }
-
-                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: registration.Type);
+                result = activeViews.ContainsKey(registration.Type);
             }
+
+            return result;
+        }
+
+        public void Register<TService>(PanelType type, Control view)
+        {
+            registrations[typeof(TService)] = (type, view);
         }
 
         #endregion Public Methods

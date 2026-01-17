@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Navigation.Regions;
@@ -9,6 +10,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -24,6 +26,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private readonly DispatcherTimer clockTimer;
         private readonly IEventAggregator eventAggregator;
         private readonly IMixerService mixerService;
+        private readonly IPanelService panelService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -41,20 +44,20 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         #region Public Constructors
 
         public DisplayViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IStorageService<Set> settingsService,
+            IEventAggregator eventAggregator, IPanelService panelService, IStorageService<Set> settingsService,
             IStorageService<Session> sessionService)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;
+            this.panelService = panelService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
 
+            ShowSettingsCommand = new DelegateCommand(
+                executeMethod: ShowSettings);
+
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
-
-            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: () => RaisePropertyChanged(nameof(ShowSettings)),
-                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
                 action: _ => OnMixerUpdated(),
@@ -70,6 +73,14 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+                action: () => RaisePropertyChanged(nameof(IsSettingsVisible)),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+                action: t => RaisePropertyChanged(nameof(IsSettingsVisible)),
                 keepSubscriberReferenceAlive: true);
 
             clockTimer = GetClockTimer();
@@ -105,6 +116,9 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             get { return isPlaying; }
             set { SetProperty(ref isPlaying, value); }
         }
+
+        public bool IsSettingsVisible => panelService.IsVisible<IStorageService<Session>>()
+            && settingsService?.Contents?.Options != default;
 
         public double? Progress
         {
@@ -151,27 +165,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
             }
         }
 
-        public bool ShowSettings
-        {
-            get
-            {
-                return settingsService?.Contents?.Options != default
-                    && sessionService.Contents.SettingsVisible;
-            }
-            set
-            {
-                if (ShowSettings != value)
-                {
-                    sessionService.Contents.SettingsVisible = value;
-
-                    sessionService.Save();
-
-                    RaisePropertyChanged(nameof(ShowSettings));
-
-                    eventAggregator.GetEvent<SettingsUpdatedEvent<Session>>().Publish();
-                }
-            }
-        }
+        public DelegateCommand ShowSettingsCommand { get; }
 
         #endregion Public Properties
 
@@ -241,6 +235,18 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
         private void OnMixerUpdated()
         {
             UpdateDisplay();
+        }
+
+        private void ShowSettings()
+        {
+            if (IsSettingsVisible || settingsService?.Contents?.Options == default)
+            {
+                panelService.Deactivate<IStorageService<Session>>();
+            }
+            else
+            {
+                panelService.Activate<IStorageService<Session>>();
+            }
         }
 
         private void UpdateDisplay()

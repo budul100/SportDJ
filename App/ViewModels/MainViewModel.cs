@@ -13,8 +13,8 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
-using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
@@ -237,31 +237,6 @@ namespace SportDJ.App.ViewModels
                     sessionService.Save();
 
                     RaisePropertyChanged(nameof(PanelTopHeight));
-                }
-            }
-        }
-
-        public double SettingsWidth
-        {
-            get
-            {
-                return settingsService?.Contents?.Options != default
-                    && sessionService.Contents.SettingsVisible
-                    ? sessionService.Contents.SettingsWidth
-                    : 0;
-            }
-            set
-            {
-                if (sessionService.Contents.SettingsVisible
-                    && value != SettingsWidth)
-                {
-                    sessionService.Contents.SettingsWidth = value > 0
-                        ? value
-                        : Defaults.PanelWidth;
-
-                    sessionService.Save();
-
-                    RaisePropertyChanged(nameof(SettingsWidth));
                 }
             }
         }
@@ -512,7 +487,6 @@ namespace SportDJ.App.ViewModels
             RaisePropertyChanged(nameof(PanelBottomHeight));
             RaisePropertyChanged(nameof(PanelLeftWidth));
             RaisePropertyChanged(nameof(PanelRightWidth));
-            RaisePropertyChanged(nameof(SettingsWidth));
         }
 
         private void UpdatePanel(PanelType region)

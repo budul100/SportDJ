@@ -9,6 +9,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;

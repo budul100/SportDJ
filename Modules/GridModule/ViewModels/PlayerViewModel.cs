@@ -23,7 +23,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly IPanelService panelService;
-
         private readonly IPlayerService playerService;
 
         private bool isDisposed;
@@ -93,6 +92,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
             eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
                 action: s => IsStackVisible = s == playerService?.StackService,
                 threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+                action: t => UpdateStackButton(),
                 keepSubscriberReferenceAlive: true);
 
             playerService?.Initialize(
@@ -418,15 +421,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void ShowStack()
         {
-            var payload = !IsStackVisible
-                ? playerService?.StackService
-                : default;
+            if (IsStackVisible || playerService?.StackService == default)
+            {
+                panelService.Deactivate<IStackService>();
 
-            eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
-                payload: payload);
+                eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
+                    payload: default);
+            }
+            else
+            {
+                eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
+                    payload: playerService?.StackService);
 
-            panelService.Switch(
-                service: payload);
+                panelService.Activate<IStackService>();
+            }
         }
 
         private void UpdateContent()
@@ -460,6 +468,14 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             RaisePropertyChanged(nameof(Progress));
             RaisePropertyChanged(nameof(Remaining));
+        }
+
+        private void UpdateStackButton()
+        {
+            if (!panelService.IsVisible<IStackService>())
+            {
+                IsStackVisible = false;
+            }
         }
 
         #endregion Private Methods

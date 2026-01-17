@@ -7,13 +7,17 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Methods
 
+        void Activate<TService>();
+
+        void Deactivate<TService>();
+
         Control GetView(PanelType type);
 
         bool IsVisible(PanelType type);
 
-        void Register<TService>(PanelType type, Control view);
+        bool IsVisible<TService>();
 
-        void Switch<TService>(TService service = default);
+        void Register<TService>(PanelType type, Control view);
 
         #endregion Public Methods
     }

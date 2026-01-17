@@ -8,10 +8,6 @@
 
         ControllerRegion,
 
-        SettingsRegion,
-
-        PanelRegion,
-
         MenuRegion,
     }
 }

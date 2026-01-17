@@ -2,8 +2,8 @@
 using Moq;
 using Prism.Events;
 using Prism.Ioc;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
-using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;

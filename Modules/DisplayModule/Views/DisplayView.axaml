@@ -53,8 +53,9 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             DockPanel.Dock="Right"
-            Focusable="False"
-            IsChecked="{Binding ShowSettings}">
+            IsChecked="{Binding IsSettingsVisible, Mode=OneWay}"
+            Command="{Binding ShowSettingsCommand}"
+            Focusable="False">
             <mat:MaterialIcon
                 Width="{StaticResource DisplayIconSize}"
                 Height="{StaticResource DisplayIconSize}"
