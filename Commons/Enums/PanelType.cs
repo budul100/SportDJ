@@ -2,8 +2,12 @@
 {
     public enum PanelType
     {
-        None, 
+        Top,
 
-        Stack,
+        Bottom,
+
+        Left,
+
+        Right,
     }
 }

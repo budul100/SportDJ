@@ -25,6 +25,9 @@
         public const string KeyCodeScreenChange = "F11";
         public const string KeyCodeVolumeTalk = "Space";
 
+        public const int PanelHeight = 20;
+        public const int PanelWidth = 200;
+
         public const int SampleRate = 44100;
 
         public const int SelectNextOnPauseSeconds = 10;
@@ -37,9 +40,6 @@
 
         public const int VolumePercentageBackground = 20;
         public const int VolumePercentageExternals = 20;
-
-        public const int WidthPanel = 200;
-        public const int WidthSettings = 200;
 
         #endregion Public Fields
     }

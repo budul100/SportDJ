@@ -6,7 +6,6 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Navigation.Regions;
 using SportDJ.Commons.Assets;
-using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;

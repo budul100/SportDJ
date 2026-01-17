@@ -12,10 +12,13 @@ namespace SportDJ.Commons.Models.Settings
 
         public List<Output> Outputs { get; set; } = [];
 
-        [XmlIgnore]
-        public bool PanelVisible { get; set; }
+        public double PanelHeightBottom { get; set; } = Defaults.PanelHeight;
 
-        public double PanelWidth { get; set; } = Defaults.WidthPanel;
+        public double PanelHeightTop { get; set; } = Defaults.PanelHeight;
+
+        public double PanelWidthLeft { get; set; } = Defaults.PanelWidth;
+
+        public double PanelWidthRight { get; set; } = Defaults.PanelWidth;
 
         public List<Position> Positions { get; set; } = [];
 
@@ -23,7 +26,7 @@ namespace SportDJ.Commons.Models.Settings
 
         public bool SettingsVisible { get; set; } = true;
 
-        public double SettingsWidth { get; set; } = Defaults.WidthSettings;
+        public double SettingsWidth { get; set; } = Defaults.PanelWidth;
 
         public int Width { get; set; } = Defaults.AppWidth;
 

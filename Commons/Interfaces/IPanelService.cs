@@ -5,17 +5,15 @@ namespace SportDJ.Commons.Interfaces
 {
     public interface IPanelService
     {
-        #region Public Properties
-
-        Control View { get; }
-
-        PanelType Type { get; }
-
-        #endregion Public Properties
-
         #region Public Methods
 
-        void Register(PanelType type, Control view);
+        Control GetView(PanelType type);
+
+        bool IsVisible(PanelType type);
+
+        void Register<TService>(PanelType type, Control view);
+
+        void Switch<TService>(TService service = default);
 
         #endregion Public Methods
     }

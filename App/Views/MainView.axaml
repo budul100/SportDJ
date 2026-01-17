@@ -35,64 +35,154 @@
     <Grid>
 
         <Grid.RowDefinitions>
+            <!-- Display Region -->
             <RowDefinition Height="1*" MinHeight="60" />
+            <!-- Panel Top -->
+            <RowDefinition Height="{Binding PanelTopHeight, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinHeight="0" />
+            <!-- Splitter Top -->
+            <RowDefinition Height="Auto" />
+            <!-- Main Region -->
             <RowDefinition Height="15*" />
+            <!-- Splitter Bottom -->
+            <RowDefinition Height="Auto" />
+            <!-- Panel Bottom -->
+            <RowDefinition Height="{Binding PanelBottomHeight, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinHeight="0" />
+            <!-- Controller Region -->
             <RowDefinition Height="2*" MinHeight="120" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding PanelWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" />
-            <ColumnDefinition Width="3" />
+            <!-- Panel Left -->
+            <ColumnDefinition Width="{Binding PanelLeftWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinWidth="0" />
+            <!-- Splitter Left -->
+            <ColumnDefinition Width="Auto" />
+            <!-- Main Content -->
             <ColumnDefinition Width="10*" />
-            <ColumnDefinition Width="3" />
-            <ColumnDefinition Width="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" />
+            <!-- Splitter Settings -->
+            <ColumnDefinition Width="Auto" />
+            <!-- Settings -->
+            <ColumnDefinition Width="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinWidth="0" />
+            <!-- Splitter Right -->
+            <ColumnDefinition Width="Auto" />
+            <!-- Panel Right -->
+            <ColumnDefinition Width="{Binding PanelRightWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinWidth="0" />
         </Grid.ColumnDefinitions>
 
+        <!-- Display Region -->
         <ContentControl
             Grid.Row="0"
             Grid.Column="0"
-            Grid.ColumnSpan="5">
+            Grid.ColumnSpan="7">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
+        <!-- Panel Top -->
         <ContentControl 
             Grid.Row="1" 
-            Grid.Column="0" 
-            Content="{Binding Panel}" />
-        
-        <GridSplitter
-            Grid.Row="1"
-            Grid.Column="1"
-            HorizontalAlignment="Stretch"
-            Focusable="False" />
+            Grid.Column="0"
+            Grid.ColumnSpan="7"
+            Content="{Binding PanelTop}" />
 
-        <ContentControl Grid.Row="1" Grid.Column="2">
+        <!-- Panel Top Splitter -->
+        <GridSplitter
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="7"
+            Height="3"
+            HorizontalAlignment="Stretch"
+            ResizeDirection="Rows"
+            Focusable="False"
+            IsVisible="{Binding PanelTop, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Panel Left -->
+        <ContentControl 
+            Grid.Row="3"
+            Grid.Column="0"
+            Content="{Binding PanelLeft}" />
+
+        <!-- Panel Left Splitter -->
+        <GridSplitter
+            Grid.Row="3"
+            Grid.Column="1"
+            Width="3"
+            VerticalAlignment="Stretch"
+            ResizeDirection="Columns"
+            Focusable="False"
+            IsVisible="{Binding PanelLeft, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Main Region -->
+        <ContentControl 
+            Grid.Row="3"
+            Grid.Column="2">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
+        <!-- Splitter für Settings -->
         <GridSplitter
-            Grid.Row="1"
+            Grid.Row="3"
             Grid.Column="3"
-            HorizontalAlignment="Stretch"
-            Focusable="False" />
+            Width="3"
+            VerticalAlignment="Stretch"
+            ResizeDirection="Columns"
+            Focusable="False"
+            IsVisible="{Binding SettingsWidth, Converter={StaticResource DoubleToGridPixelConverter}}" />
 
-        <ContentControl Grid.Row="1" Grid.Column="4">
+        <!-- Settings Region -->
+        <ContentControl 
+            Grid.Row="3"
+            Grid.Column="4">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.SettingsRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
 
-        <ContentControl
-            Grid.Row="2"
+        <!-- Panel Right Splitter -->
+        <GridSplitter
+            Grid.Row="3"
+            Grid.Column="5"
+            Width="3"
+            VerticalAlignment="Stretch"
+            ResizeDirection="Columns"
+            Focusable="False"
+            IsVisible="{Binding PanelRight, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Panel Right -->
+        <ContentControl 
+            Grid.Row="3"
+            Grid.Column="6"
+            Content="{Binding PanelRight}" />
+
+        <!-- Panel Bottom Splitter -->
+        <GridSplitter
+            Grid.Row="4"
             Grid.Column="0"
-            Grid.ColumnSpan="5">
+            Grid.ColumnSpan="7"
+            Height="3"
+            HorizontalAlignment="Stretch"
+            ResizeDirection="Rows"
+            Focusable="False"
+            IsVisible="{Binding PanelBottom, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Panel Bottom -->
+        <ContentControl 
+            Grid.Row="5" 
+            Grid.Column="0"
+            Grid.ColumnSpan="7"
+            Content="{Binding PanelBottom}" />
+
+        <!-- Controller Region -->
+        <ContentControl
+            Grid.Row="6"
+            Grid.Column="0"
+            Grid.ColumnSpan="7">
             <prism:RegionManager.RegionName>
                 <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
             </prism:RegionManager.RegionName>
         </ContentControl>
+
     </Grid>
 </Window>

@@ -35,11 +35,15 @@ namespace SportDJ.App.ViewModels
         private readonly IDispatcherService dispatcherService;
         private readonly HashSet<IOutputService> liveServices = [];
         private readonly HashSet<IOutputService> outputServices = [];
+        private readonly IPanelService panelService;
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
         private bool isDisposed;
-        private Control panel;
+        private Control panelBottom;
+        private Control panelLeft;
+        private Control panelRight;
+        private Control panelTop;
         private string title;
         private bool userWantsToQuit;
 
@@ -56,6 +60,7 @@ namespace SportDJ.App.ViewModels
             this.settingsService = settingsService;
             this.sessionService = sessionService;
             this.dialogService = dialogService;
+            this.panelService = panelService;
 
             assemblyTitle = GetAssemblyTitle();
 
@@ -73,7 +78,7 @@ namespace SportDJ.App.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
-                action: t => Panel = panelService.View,
+                action: UpdatePanel,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
@@ -116,32 +121,122 @@ namespace SportDJ.App.ViewModels
 
         public DelegateCommand<CancelEventArgs> OnClosingCommand { get; }
 
-        public Control Panel
+        public Control PanelBottom
         {
-            get => panel;
-            private set => SetProperty(ref panel, value);
+            get => panelBottom;
+            private set => SetProperty(ref panelBottom, value);
         }
 
-        public double PanelWidth
+        public double PanelBottomHeight
         {
             get
             {
-                return settingsService?.Contents?.Options != default && sessionService.Contents.PanelVisible
-                    ? sessionService.Contents.PanelWidth
+                return panelService.IsVisible(PanelType.Bottom)
+                    ? sessionService.Contents.PanelHeightBottom
                     : 0;
             }
             set
             {
-                if (sessionService.Contents.PanelVisible
-                    && value != PanelWidth)
+                if (panelService.IsVisible(PanelType.Bottom)
+                    && value != PanelBottomHeight)
                 {
-                    sessionService.Contents.PanelWidth = value > 0
+                    sessionService.Contents.PanelHeightBottom = value > 0
                         ? value
-                        : Defaults.WidthPanel;
+                        : Defaults.PanelHeight;
 
                     sessionService.Save();
 
-                    RaisePropertyChanged(nameof(PanelWidth));
+                    RaisePropertyChanged(nameof(PanelBottomHeight));
+                }
+            }
+        }
+
+        public Control PanelLeft
+        {
+            get => panelLeft;
+            private set => SetProperty(ref panelLeft, value);
+        }
+
+        public double PanelLeftWidth
+        {
+            get
+            {
+                return panelService.IsVisible(PanelType.Left)
+                    ? sessionService.Contents.PanelWidthLeft
+                    : 0;
+            }
+            set
+            {
+                if (panelService.IsVisible(PanelType.Left)
+                    && value != PanelLeftWidth)
+                {
+                    sessionService.Contents.PanelWidthLeft = value > 0
+                        ? value
+                        : Defaults.PanelWidth;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(PanelLeftWidth));
+                }
+            }
+        }
+
+        public Control PanelRight
+        {
+            get => panelRight;
+            private set => SetProperty(ref panelRight, value);
+        }
+
+        public double PanelRightWidth
+        {
+            get
+            {
+                return panelService.IsVisible(PanelType.Right)
+                    ? sessionService.Contents.PanelWidthRight
+                    : 0;
+            }
+            set
+            {
+                if (panelService.IsVisible(PanelType.Right)
+                    && value != PanelRightWidth)
+                {
+                    sessionService.Contents.PanelWidthRight = value > 0
+                        ? value
+                        : Defaults.PanelWidth;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(PanelRightWidth));
+                }
+            }
+        }
+
+        public Control PanelTop
+        {
+            get => panelTop;
+            private set => SetProperty(ref panelTop, value);
+        }
+
+        public double PanelTopHeight
+        {
+            get
+            {
+                return panelService.IsVisible(PanelType.Top)
+                    ? sessionService.Contents.PanelHeightTop
+                    : 0;
+            }
+            set
+            {
+                if (panelService.IsVisible(PanelType.Top)
+                    && value != PanelTopHeight)
+                {
+                    sessionService.Contents.PanelHeightTop = value > 0
+                        ? value
+                        : Defaults.PanelHeight;
+
+                    sessionService.Save();
+
+                    RaisePropertyChanged(nameof(PanelTopHeight));
                 }
             }
         }
@@ -150,7 +245,8 @@ namespace SportDJ.App.ViewModels
         {
             get
             {
-                return settingsService?.Contents?.Options != default && sessionService.Contents.SettingsVisible
+                return settingsService?.Contents?.Options != default
+                    && sessionService.Contents.SettingsVisible
                     ? sessionService.Contents.SettingsWidth
                     : 0;
             }
@@ -161,7 +257,7 @@ namespace SportDJ.App.ViewModels
                 {
                     sessionService.Contents.SettingsWidth = value > 0
                         ? value
-                        : Defaults.WidthSettings;
+                        : Defaults.PanelWidth;
 
                     sessionService.Save();
 
@@ -412,8 +508,37 @@ namespace SportDJ.App.ViewModels
             RaisePropertyChanged(nameof(Width));
             RaisePropertyChanged(nameof(WindowState));
 
-            RaisePropertyChanged(nameof(PanelWidth));
+            RaisePropertyChanged(nameof(PanelTopHeight));
+            RaisePropertyChanged(nameof(PanelBottomHeight));
+            RaisePropertyChanged(nameof(PanelLeftWidth));
+            RaisePropertyChanged(nameof(PanelRightWidth));
             RaisePropertyChanged(nameof(SettingsWidth));
+        }
+
+        private void UpdatePanel(PanelType region)
+        {
+            switch (region)
+            {
+                case PanelType.Top:
+                    PanelTop = panelService.GetView(region);
+                    RaisePropertyChanged(nameof(PanelTopHeight));
+                    break;
+
+                case PanelType.Bottom:
+                    PanelBottom = panelService.GetView(region);
+                    RaisePropertyChanged(nameof(PanelBottomHeight));
+                    break;
+
+                case PanelType.Left:
+                    PanelLeft = panelService.GetView(region);
+                    RaisePropertyChanged(nameof(PanelLeftWidth));
+                    break;
+
+                case PanelType.Right:
+                    PanelRight = panelService.GetView(region);
+                    RaisePropertyChanged(nameof(PanelRightWidth));
+                    break;
+            }
         }
 
         private void UpdateTitle()

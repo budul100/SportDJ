@@ -1,83 +1,114 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Panel;
-using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Settings;
 
 namespace SportDJ.Services.PanelService
 {
-    public class Service
+    public class Service(IEventAggregator eventAggregator)
         : IPanelService
     {
         #region Private Fields
 
-        private readonly IEventAggregator eventAggregator;
-        private readonly IStorageService<Session> sessionService;
-        private readonly Dictionary<PanelType, Control> views = [];
+        private readonly Dictionary<PanelType, Control> activeViews = [];
+        private readonly Dictionary<Type, (PanelType Type, Control View)> registrations = [];
+
+        private bool visibleBottom;
+        private bool visibleLeft;
+        private bool visibleRight;
+        private bool visibleTop;
 
         #endregion Private Fields
 
-        #region Public Constructors
-
-        public Service(IEventAggregator eventAggregator, IStorageService<Session> sessionService)
-        {
-            this.eventAggregator = eventAggregator;
-            this.sessionService = sessionService;
-
-            eventAggregator.GetEvent<StackVisibleEvent>().Subscribe(
-                action: ShowStack,
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true);
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public PanelType Type { get; private set; }
-
-        public Control View { get; private set; }
-
-        #endregion Public Properties
-
         #region Public Methods
 
-        public void Register(PanelType panelType, Control view)
+        public Control GetView(PanelType region)
         {
-            views[panelType] = view;
+            return activeViews.TryGetValue(
+                key: region,
+                value: out var view)
+                ? view
+                : default;
+        }
+
+        public bool IsVisible(PanelType region)
+        {
+            return region switch
+            {
+                PanelType.Top => visibleTop,
+
+                PanelType.Bottom => visibleBottom,
+
+                PanelType.Left => visibleLeft,
+
+                PanelType.Right => visibleRight,
+
+                _ => false
+            };
+        }
+
+        public void Register<TService>(PanelType region, Control view)
+        {
+            registrations[typeof(TService)] = (region, view);
+        }
+
+        public void Switch<TService>(TService service = default)
+        {
+            var serviceType = typeof(TService);
+
+            if (registrations.TryGetValue(
+                key: serviceType,
+                value: out var registration))
+            {
+                if (service == null)
+                {
+                    activeViews.Remove(registration.Type);
+
+                    SetVisibility(
+                        type: registration.Type,
+                        isVisible: false);
+                }
+                else
+                {
+                    activeViews[registration.Type] = registration.View;
+
+                    SetVisibility(
+                        type: registration.Type,
+                        isVisible: true);
+                }
+
+                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                    payload: registration.Type);
+            }
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void ShowStack(IStackService service)
+        private void SetVisibility(PanelType type, bool isVisible)
         {
-            Type = service == default
-                ? PanelType.None
-                : PanelType.Stack;
+            switch (type)
+            {
+                case PanelType.Top:
+                    visibleTop = isVisible;
+                    break;
 
-            UpdateVisibility();
-        }
+                case PanelType.Bottom:
+                    visibleBottom = isVisible;
+                    break;
 
-        private void UpdateVisibility()
-        {
-            View = views.TryGetValue(
-                key: Type,
-                value: out var view)
-                ? view
-                : default;
+                case PanelType.Left:
+                    visibleLeft = isVisible;
+                    break;
 
-            eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(Type);
-
-            sessionService.Contents.PanelVisible = Type != PanelType.None;
-
-            sessionService.Save();
-
-            eventAggregator.GetEvent<SettingsUpdatedEvent<Session>>().Publish();
+                case PanelType.Right:
+                    visibleRight = isVisible;
+                    break;
+            }
         }
 
         #endregion Private Methods

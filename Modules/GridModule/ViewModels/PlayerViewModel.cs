@@ -11,6 +11,7 @@ using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 
@@ -20,6 +21,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         : CellViewModel
     {
         #region Private Fields
+
+        private readonly IPanelService panelService;
 
         private readonly IPlayerService playerService;
 
@@ -33,6 +36,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(containerProvider: containerProvider, element: player)
         {
+            panelService = containerProvider?.Resolve<IPanelService>();
             playerService = containerProvider?.Resolve<IPlayerService>();
 
             ExecuteCommand = new DelegateCommand(
@@ -420,6 +424,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
                 payload: payload);
+
+            panelService.Switch(
+                service: payload);
         }
 
         private void UpdateContent()

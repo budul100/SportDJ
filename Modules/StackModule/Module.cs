@@ -17,8 +17,8 @@ namespace SportDJ.Modules.StackModule
             var panelService = containerProvider.Resolve<IPanelService>();
             var stackView = containerProvider.Resolve<StackView>();
 
-            panelService.Register(
-                type: PanelType.Stack,
+            panelService.Register<IStackService>(
+                type: PanelType.Left,
                 view: stackView);
 
             regionManager.RegisterViewWithRegion(
