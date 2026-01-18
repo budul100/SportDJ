@@ -51,13 +51,16 @@
 		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\MidiService\MidiService.csproj" />
 		<ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
-		<ProjectReference Include="..\Services\OutputService.Windows\OutputService.Windows.csproj" />
 		<ProjectReference Include="..\Services\PanelService\PanelService.csproj" />
 		<ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
 		<ProjectReference Include="..\Services\StackService\StackService.csproj" />
 		<ProjectReference Include="..\Services\StorageService\StorageService.csproj" />
-		<ProjectReference Include="..\Services\SignalService\SignalService.csproj" />
 		<ProjectReference Include="..\Services\TrackService\TrackService.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Services\OutputService.Windows\OutputService.Windows.csproj" />
+		<ProjectReference Include="..\Services\SignalService.Windows\SignalService.Windows.csproj" />
 		<ProjectReference Include="..\Services\VolumeService.Windows\VolumeService.Windows.csproj" />
 		<ProjectReference Include="..\Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj" />
 	</ItemGroup>

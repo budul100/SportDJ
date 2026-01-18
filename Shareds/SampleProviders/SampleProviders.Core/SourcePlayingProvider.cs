@@ -6,7 +6,8 @@ using SportDJ.Shareds.SampleProviders.Core.Extensions;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public class SourcePlayingProvider : BaseSampleProvider
+    public class SourcePlayingProvider
+        : BaseSampleProvider
     {
         #region Private Fields
 
@@ -15,16 +16,12 @@ namespace SportDJ.Shareds.SampleProviders.Core
         private readonly IAudioSourceProvider sourceProvider;
 
         private long end;
-
-        // --- NEU: Variable Loop-Grenzen ---
-        private long loopStart;
-        private long loopEnd;
-        // ----------------------------------
-
         private bool eventSentCue;
         private bool eventSentEnd;
         private bool eventSentPause;
         private bool isDisposed;
+        private long loopEnd;
+        private long loopStart;
         private long position;
 
         #endregion Private Fields
@@ -51,8 +48,11 @@ namespace SportDJ.Shareds.SampleProviders.Core
         #region Public Events
 
         public event EventHandler CueExceededEvent;
+
         public event EventHandler SignalEndedEvent;
+
         public event EventHandler SignalPausedEvent;
+
         public event EventHandler SignalUpdatedEvent;
 
         #endregion Public Events
@@ -77,46 +77,6 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Public Methods
 
-        /// <summary>
-        /// Setzt Start und Ende des Loops.
-        /// Springt SOFORT an den Start, wenn Loop aktiv ist (Beat-Match).
-        /// </summary>
-        public void SetLoopPoints(long startBytes, long endBytes)
-        {
-            lock (lockProvider)
-            {
-                // 1. Validierung
-                if (startBytes < 0) startBytes = 0;
-                if (endBytes > sourceProvider.Length) endBytes = sourceProvider.Length;
-
-                // Sicherheitsabstand
-                if (startBytes >= endBytes) startBytes = Math.Max(0, endBytes - (WaveFormat.BlockAlign * 1024));
-
-                loopStart = startBytes;
-                loopEnd = endBytes;
-
-                // 2. Der "Instant Jump"
-                // Wenn wir abspielen und loopen, zwingen wir den Player sofort an den Start.
-                if (IsRunning && IsLoop)
-                {
-                    sourceProvider.Position = loopStart;
-                    position = loopStart; // Interne Variable für UI-Update sofort nachziehen
-                }
-            }
-        }
-
-        /// <summary>
-        /// Setzt den Loop zurück auf den gesamten Track (Start bis Cue/Ende).
-        /// </summary>
-        public void ResetLoopPoints()
-        {
-            lock (lockProvider)
-            {
-                loopStart = Track.Start;
-                loopEnd = cue ?? end;
-            }
-        }
-
         public void End()
         {
             if (PlayType.IsActive())
@@ -133,21 +93,24 @@ namespace SportDJ.Shareds.SampleProviders.Core
             else if (!eventSentEnd)
             {
                 eventSentEnd = true;
-                SignalEndedEvent?.Invoke(sender: this, e: default);
+
+                SignalEndedEvent?.Invoke(
+                    sender: this,
+                    e: default);
             }
         }
 
         public void Pause()
         {
             eventSentPause = false;
+
             PlayType = PlayType.Pausing;
         }
 
         public override int Read(float[] buffer, int offset, int count)
         {
             var samplesRead = 0;
-            // Hilfsgröße: Wie viele Bytes hat ein Sample (z.B. 4 bei 32-bit Float)
-            int bytesPerSample = sourceProvider.WaveFormat.BitsPerSample / 8;
+            var bytesPerSample = sourceProvider.WaveFormat.BitsPerSample / 8;
 
             try
             {
@@ -155,90 +118,151 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 {
                     if (PlayType == PlayType.Pausing)
                     {
-                        // ... (Pause-Code unverändert lassen) ...
-                        if (!eventSentPause) { /* ... */ }
+                        if (!eventSentPause)
+                        {
+                            SignalUpdatedEvent?.Invoke(
+                                sender: this,
+                                e: default);
+
+                            eventSentPause = true;
+
+                            SignalPausedEvent?.Invoke(
+                                sender: this,
+                                e: default);
+                        }
                         else
                         {
-                            samplesRead = sourceProvider.Read(buffer, offset, count);
-                            MuteBuffer(buffer, offset, count);
+                            samplesRead = sourceProvider.Read(
+                                buffer: buffer,
+                                offset: offset,
+                                count: count);
+
+                            MuteBuffer(
+                                buffer: buffer,
+                                offset: offset,
+                                count: count);
+
                             sourceProvider.Position = position;
                         }
                     }
                     else if (IsRunning)
                     {
-                        if (sourceProvider.Position < Track.Start) sourceProvider.Position = Track.Start;
+                        if (sourceProvider.Position < Track.Start)
+                        {
+                            sourceProvider.Position = Track.Start;
+                        }
 
-                        // ====================================================
-                        // FIX: NAHTLOSE LOOP LOGIK
-                        // ====================================================
                         if (IsLoop)
                         {
                             while (samplesRead < count)
                             {
-                                // 1. Wie viel Platz ist noch im Puffer?
-                                int samplesNeeded = count - samplesRead;
+                                var samplesNeeded = count - samplesRead;
 
-                                // 2. Wie viel Samples sind es noch bis zur Loop-Grenze?
-                                long bytesUntilLoopEnd = loopEnd - sourceProvider.Position;
-                                int samplesUntilLoopEnd = (int)(bytesUntilLoopEnd / bytesPerSample);
+                                var bytesUntilLoopEnd = loopEnd - sourceProvider.Position;
+                                var samplesUntilLoopEnd = (int)(bytesUntilLoopEnd / bytesPerSample);
 
-                                // Wenn wir schon drüber sind (oder exakt drauf), sofort springen!
                                 if (samplesUntilLoopEnd <= 0)
                                 {
                                     sourceProvider.Position = loopStart;
-                                    // Neuberechnung nach Sprung
                                     bytesUntilLoopEnd = loopEnd - loopStart;
+
                                     samplesUntilLoopEnd = (int)(bytesUntilLoopEnd / bytesPerSample);
                                 }
 
-                                // 3. Wir lesen nur das Minimum: Entweder was wir brauchen, ODER was noch reinpasst
-                                int toRead = Math.Min(samplesNeeded, samplesUntilLoopEnd);
-
-                                // Sicherheit: Mindestens 0, falls Berechnung schiefging
+                                var toRead = Math.Min(samplesNeeded, samplesUntilLoopEnd);
                                 if (toRead <= 0) toRead = samplesNeeded;
 
-                                // 4. Lesen
-                                int readThisTime = sourceProvider.Read(
-                                    buffer,
-                                    offset + samplesRead,
-                                    toRead);
+                                var samplesLoop = sourceProvider.Read(
+                                    buffer: buffer,
+                                    offset: offset + samplesRead,
+                                    count: toRead);
 
-                                samplesRead += readThisTime;
-
-                                // Wenn Stream zu Ende ist (EOF) oder wir nichts gelesen haben -> Break
-                                if (readThisTime == 0) break;
+                                samplesRead += samplesLoop;
                             }
                         }
-                        // ====================================================
                         else
                         {
-                            // ... (Normaler "Nicht-Loop" Code unverändert) ...
-                            var lastPos = sourceProvider.Position;
-                            samplesRead = sourceProvider.Read(buffer, offset, count);
-                            // ... Cue/End Checks ...
-                            if (sourceProvider.Position >= end || sourceProvider.Position == lastPos)
+                            var lastPosition = sourceProvider.Position;
+
+                            samplesRead = sourceProvider.Read(
+                                buffer: buffer,
+                                offset: offset,
+                                count: count);
+
+                            if (!eventSentCue
+                                && cue.HasValue
+                                && sourceProvider.Position >= cue)
+                            {
+                                PlayType = PlayType.Stopping;
+
+                                eventSentCue = true;
+
+                                CueExceededEvent?.Invoke(
+                                    sender: this,
+                                    e: default);
+                            }
+
+                            if (sourceProvider.Position >= end || sourceProvider.Position == lastPosition)
+                            {
                                 PlayType = PlayType.Ended;
+                            }
                         }
 
-                        position = (PlayType != PlayType.Ended) ? sourceProvider.Position : end;
-                        SignalUpdatedEvent?.Invoke(sender: this, e: default);
+                        position = PlayType != PlayType.Ended
+                            ? sourceProvider.Position
+                            : end;
+
+                        SignalUpdatedEvent?.Invoke(
+                            sender: this,
+                            e: default);
                     }
 
-                    if (!eventSentEnd && PlayType == PlayType.Ended)
+                    if (!eventSentEnd
+                        && PlayType == PlayType.Ended)
                     {
                         eventSentEnd = true;
-                        SignalEndedEvent?.Invoke(sender: this, e: default);
+
+                        SignalEndedEvent?.Invoke(
+                            sender: this,
+                            e: default);
                     }
                 }
             }
-            catch { }
+            catch
+            { }
 
             return samplesRead;
+        }
+
+        public void ResetLoop()
+        {
+            lock (lockProvider)
+            {
+                loopStart = Track.Start;
+                loopEnd = cue ?? end;
+            }
+        }
+
+        public void SetLoop(long startBytes, long endBytes)
+        {
+            lock (lockProvider)
+            {
+                if (startBytes < 0) startBytes = 0;
+                if (endBytes > sourceProvider.Length) endBytes = sourceProvider.Length;
+
+                if (startBytes >= endBytes) startBytes = Math.Max(
+                    val1: 0,
+                    val2: endBytes - (WaveFormat.BlockAlign * 1024));
+
+                loopStart = startBytes;
+                loopEnd = endBytes;
+            }
         }
 
         public void Start()
         {
             UpdateTime();
+
             PlayType = PlayType.Playing;
         }
 
@@ -253,10 +277,13 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 if (isDisposing)
                 {
                     End();
+
                     sourceProvider?.Dispose();
                 }
+
                 isDisposed = true;
             }
+
             base.Dispose(isDisposing);
         }
 
@@ -264,14 +291,12 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Private Methods
 
-        private void MuteBuffer(float[] buffer, int offset, int count)
+        private static void MuteBuffer(float[] buffer, int offset, int count)
         {
             var sample = 0;
+
             while (sample < count)
             {
-                // Setze alle Kanäle auf 0 (Stille)
-                // Achtung: Wenn buffer interleaved ist, ist das hier korrekt, 
-                // da wir einfach 'count' floats nullen.
                 buffer[offset + sample++] = 0;
             }
         }
@@ -285,11 +310,6 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 end = (Track.End ?? 0) > sourceProvider.Length
                     ? Track.End.Value
                     : sourceProvider.Length;
-
-                // --- Initialisierung der Loop-Werte ---
-                loopStart = Track.Start;
-                loopEnd = cue ?? end;
-                // --------------------------------------
 
                 Duration = (end - Track.Start).ToDuration(averageBytesPerSecond);
             }

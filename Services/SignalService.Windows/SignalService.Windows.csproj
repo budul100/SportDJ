@@ -2,13 +2,14 @@
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 		<ProjectReference Include="..\..\Shareds\SampleProviders\SampleProviders.Core\SampleProviders.Core.csproj" />
+		<ProjectReference Include="..\..\Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj" />
 	</ItemGroup>
 
 </Project>
