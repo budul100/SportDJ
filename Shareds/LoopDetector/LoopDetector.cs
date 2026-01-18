@@ -14,7 +14,8 @@ namespace LoopDetector
 
         #region Public Methods
 
-        public static LoopPoints FindQuantizedLoopBackwards(float[] allSamples, long currentPositionSample, double minLoopSeconds = 2.0)
+        public static LoopPoints FindQuantizedLoopBackwards(float[] allSamples, long currentPositionSample,
+            double minLoopSeconds = 2.0)
         {
             // --- SCHRITT 1: Loop-Ende finden (Dein Klick korrigieren) ---
 
@@ -114,43 +115,10 @@ namespace LoopDetector
         }
 
         /// <summary>
-        /// Berechnet die Übereinstimmung zweier Audio-Schnipsel (0.0 bis 1.0).
-        /// Enthält Bounds-Checks gegen Abstürze.
-        /// </summary>
-        private static double CalculateWindowCorrelation(float[] pattern, float[] searchArea, int offset)
-        {
-            // SAFETY CHECK: Verhindert IndexOutOfRangeException
-            if (offset < 0 || offset + pattern.Length > searchArea.Length)
-            {
-                return -1;
-            }
-
-            double errorSum = 0;
-            double signalEnergy = 0;
-
-            // Mean Squared Error (MSE) Ansatz
-            // Wir berechnen die Differenz zwischen Muster und Zielgebiet
-            for (var i = 0; i < pattern.Length; i++)
-            {
-                var diff = pattern[i] - searchArea[offset + i];
-                errorSum += diff * diff;
-                signalEnergy += pattern[i] * pattern[i];
-            }
-
-            if (signalEnergy < 0.0001) return 0; // Vermeide Division durch Null bei Stille
-
-            var mse = errorSum / pattern.Length;
-
-            // Konvertiere Fehler in Ähnlichkeit (1.0 = Perfekt, 0.0 = Schlecht)
-            // Der Divisor 0.1 steuert die "Strenge".
-            return Math.Max(0, 1.0 - mse / 0.1);
-        }
-
-        /// <summary>
         /// Sucht den "Rising Edge Zero Crossing" (Nulldurchgang von Minus nach Plus)
         /// VOR dem lautesten Peak im Fenster. Das ist der sauberste Schnittpunkt für Audio.
         /// </summary>
-        private static long FindRisingEdgeTransient(float[] samples, long start, long end)
+        public static long FindRisingEdgeTransient(float[] samples, long start, long end)
         {
             float maxVol = -1;
             long peakPos = start;
@@ -187,68 +155,6 @@ namespace LoopDetector
 
             // Fallback: Wenn kein sauberer Rising Edge gefunden wurde, nimm einfach den Peak-Start (weniger gut)
             return peakPos;
-        }
-
-        /// <summary>
-        /// Sucht den lautesten Punkt (Transient) und geht zum Nulldurchgang davor zurück.
-        /// </summary>
-        private static long FindTransientInWindow(float[] samples, long start, long end)
-        {
-            float maxVol = 0;
-            var bestPos = end;
-
-            // 1. Peak finden
-            for (var i = start; i < end; i++)
-            {
-                var vol = Math.Abs(samples[i]);
-                if (vol > maxVol)
-                {
-                    maxVol = vol;
-                    bestPos = i;
-                }
-            }
-
-            // Wenn Signal zu leise (Stille), brechen wir ab
-            if (maxVol < 0.05f) return end;
-
-            // 2. Nulldurchgang DAVOR suchen (Zero-Crossing)
-            // Das verhindert das "Knacken" beim Schnitt
-            var zeroCross = bestPos;
-            while (zeroCross > start && zeroCross > 0)
-            {
-                // Vorzeichenwechsel erkannt?
-                if (samples[zeroCross] >= 0 && samples[zeroCross - 1] < 0 ||
-                    samples[zeroCross] < 0 && samples[zeroCross - 1] >= 0)
-                {
-                    return zeroCross;
-                }
-                zeroCross--;
-            }
-
-            return bestPos;
-        }
-
-        /// <summary>
-        /// Verfeinert die Suche Sample-genau um einen Punkt herum.
-        /// </summary>
-        private static long RefineSearch(float[] allSamples, float[] pattern, long roughIndex, int range)
-        {
-            var start = Math.Max(0, roughIndex - range);
-            var end = Math.Min(allSamples.Length - pattern.Length, roughIndex + range);
-
-            double bestCorr = -1;
-            var bestIdx = roughIndex;
-
-            for (var i = start; i <= end; i++)
-            {
-                var c = CalculateWindowCorrelation(pattern, allSamples, (int)i);
-                if (c > bestCorr)
-                {
-                    bestCorr = c;
-                    bestIdx = i;
-                }
-            }
-            return bestIdx;
         }
 
         #endregion Private Methods
