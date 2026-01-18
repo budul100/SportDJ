@@ -38,6 +38,9 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
+        void ActivateSmartLoop();
+
+
         void End();
 
         void Initialize(Track track, WaveFormat waveFormat);
