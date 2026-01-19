@@ -17,6 +17,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Services.OutputService;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.App
@@ -121,8 +122,6 @@ namespace SportDJ.App
             containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
 
-            containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
-
             RegisterTypes<MixerType>(
                 containerRegistry: containerRegistry,
                 from: typeof(IMixerService),
@@ -131,14 +130,17 @@ namespace SportDJ.App
             RegisterTypes<OutputType>(
                 containerRegistry: containerRegistry,
                 from: typeof(IOutputService),
-                to: typeof(Services.OutputService.Windows.Service));
+                to: typeof(Service));
+
+            containerRegistry.Register<IDeviceService, Services.DeviceService.Windows.Service>();
+            containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
+
+            containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
 
             containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>(
                 name: typeof(Services.MonitorService.Windows.Service).FullName);
             containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>(
                 name: typeof(Services.MonitorService.Mixxx.Service).FullName);
-
-            containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
         }
 
         #endregion Protected Methods

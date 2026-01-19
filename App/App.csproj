@@ -46,10 +46,11 @@
 		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 		<ProjectReference Include="..\Modules\StackModule\StackModule.csproj" />
+		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 		<ProjectReference Include="..\Services\GridService\GridService.csproj" />
-		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\MixerService\MixerService.csproj" />
+		<ProjectReference Include="..\Services\OutputService\OutputService.csproj" />
 		<ProjectReference Include="..\Services\PanelService\PanelService.csproj" />
 		<ProjectReference Include="..\Services\PlayerService\PlayerService.csproj" />
 		<ProjectReference Include="..\Services\StackService\StackService.csproj" />
@@ -58,9 +59,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Services\OutputService.Windows\OutputService.Windows.csproj" />
-		<ProjectReference Include="..\Services\SignalService.Windows\SignalService.Windows.csproj" />
+		<ProjectReference Include="..\Services\DeviceService.Windows\DeviceService.Windows.csproj" />
 		<ProjectReference Include="..\Services\MonitorService.Windows\MonitorService.Windows.csproj" />
+		<ProjectReference Include="..\Services\SignalService.Windows\SignalService.Windows.csproj" />
 		<ProjectReference Include="..\Shareds\SampleProviders\SampleProviders.Windows\SampleProviders.Windows.csproj" />
 	</ItemGroup>
 

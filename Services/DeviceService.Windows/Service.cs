@@ -8,12 +8,13 @@ using NAudio.Wave.SampleProviders;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Exceptions;
+using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Services.OutputService.Windows
+namespace SportDJ.Services.DeviceService.Windows
 {
-    internal class Output
-        : IDisposable
+    public class Service
+        : IDeviceService
     {
         #region Private Fields
 
@@ -51,6 +52,8 @@ namespace SportDJ.Services.OutputService.Windows
             }
         }
 
+        public WaveFormat WaveFormat { get; private set; }
+
         #endregion Public Properties
 
         #region Public Methods
@@ -64,13 +67,13 @@ namespace SportDJ.Services.OutputService.Windows
                 obj: this);
         }
 
-        public void Initialize(ISampleProvider sampleProvider, float volume)
+        public void Initialize(ISampleProvider provider, float volume)
         {
             if (Device != default)
             {
                 try
                 {
-                    var outputProvider = sampleProvider;
+                    var outputProvider = provider;
 
                     switch (Device.Type)
                     {
@@ -81,7 +84,7 @@ namespace SportDJ.Services.OutputService.Windows
                             if (!asioOut.IsSampleRateSupported(outputProvider.WaveFormat.SampleRate))
                             {
                                 outputProvider = new WdlResamplingSampleProvider(
-                                    source: outputProvider,
+                                    source: provider,
                                     newSampleRate: Constants.SampleRateDefaultAsio);
                             }
 
@@ -113,7 +116,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Play() => player?.Play();
 
-        public void Set(string deviceName, bool takeDefaultIfMissing = false)
+        public void Set(string deviceName, int sampleRate, bool takeDefaultIfMissing = false)
         {
             var device = default(Device);
 
@@ -128,6 +131,7 @@ namespace SportDJ.Services.OutputService.Windows
 
                 SetDevice(
                     device: device,
+                    sampleRate: sampleRate,
                     takeDefaultIfMissing: takeDefaultIfMissing);
             }
         }
@@ -283,7 +287,7 @@ namespace SportDJ.Services.OutputService.Windows
                 e: e);
         }
 
-        private void SetDevice(Device device, bool takeDefaultIfMissing)
+        private void SetDevice(Device device, int sampleRate, bool takeDefaultIfMissing)
         {
             Device = device;
 
@@ -300,6 +304,17 @@ namespace SportDJ.Services.OutputService.Windows
                 {
                     throw new NoDeviceAvailableException();
                 }
+            }
+
+            if (Device != default)
+            {
+                WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(
+                    sampleRate: sampleRate,
+                    channels: Device.Channels);
+            }
+            else
+            {
+                WaveFormat = default;
             }
 
             IsActive = false;

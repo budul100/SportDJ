@@ -18,7 +18,7 @@ using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Core;
 
-namespace SportDJ.Services.OutputService.Windows
+namespace SportDJ.Services.OutputService
 {
     public class Service
         : IOutputService
@@ -27,10 +27,10 @@ namespace SportDJ.Services.OutputService.Windows
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly IContainerProvider containerProvider;
+        private readonly IDeviceService deviceService;
         private readonly IEventAggregator eventAggregator;
         private readonly HashSet<IMixerService> mixersAll = [];
         private readonly HashSet<IMixerService> mixersForeground = [];
-        private readonly Output outputHandler = new();
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
@@ -39,22 +39,24 @@ namespace SportDJ.Services.OutputService.Windows
         private MixingProvider foregroundProvider;
         private bool isDisposed;
         private IEnumerable<IMonitorService> monitorServices;
-        private Commons.Models.Settings.Output outputOptions;
+        private Output outputOptions;
 
         #endregion Private Fields
 
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService, IStorageService<Session> sessionService)
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
+            IDeviceService deviceService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
+            this.deviceService = deviceService;
 
-            outputHandler.OutputStopped += OnPlaybackStopped;
-            outputHandler.DevicesUpdated += OnDevicesUpdated;
+            deviceService.OutputStopped += OnPlaybackStopped;
+            deviceService.DevicesUpdated += OnDevicesUpdated;
 
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: ApplySettings,
@@ -85,11 +87,11 @@ namespace SportDJ.Services.OutputService.Windows
 
         #region Public Properties
 
-        public Device Device => outputHandler?.Device;
+        public Device Device => deviceService?.Device;
 
-        public IEnumerable<Device> Devices => outputHandler?.Devices;
+        public IEnumerable<Device> Devices => deviceService?.Devices;
 
-        public bool IsActive => outputHandler.IsActive;
+        public bool IsActive => deviceService?.IsActive == true;
 
         public bool IsLowered { get; private set; }
 
@@ -111,15 +113,15 @@ namespace SportDJ.Services.OutputService.Windows
                 {
                     outputOptions.Volume = value;
 
-                    if (outputHandler != default)
+                    if (deviceService != default)
                     {
-                        outputHandler.Volume = outputOptions.Volume;
+                        deviceService.Volume = outputOptions.Volume;
                     }
                 }
             }
         }
 
-        public WaveFormat WaveFormat { get; private set; }
+        public WaveFormat WaveFormat => deviceService?.WaveFormat;
 
         #endregion Public Properties
 
@@ -169,10 +171,10 @@ namespace SportDJ.Services.OutputService.Windows
 
                 var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-                var volumeBackground = outputHandler.Volume * outputOptions.VolumePercentageBackground
+                var volumeBackground = deviceService.Volume * outputOptions.VolumePercentageBackground
                     / (float)Constants.OptionsPercentageMax;
 
-                var volumeExternals = outputHandler.Volume * outputOptions.VolumePercentageExternals
+                var volumeExternals = deviceService.Volume * outputOptions.VolumePercentageExternals
                     / (float)Constants.OptionsPercentageMax;
 
                 fadingProvider.Fade(
@@ -213,20 +215,17 @@ namespace SportDJ.Services.OutputService.Windows
         {
             if (!IsPlaying)
             {
-                outputHandler.Set(
+                deviceService.Set(
                     deviceName: deviceName,
+                    sampleRate: sampleRate,
                     takeDefaultIfMissing: takeDefaultIfMissing);
 
-                if (outputHandler.Device != default)
+                if (deviceService.Device != default)
                 {
-                    WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(
-                        sampleRate: sampleRate,
-                        channels: outputHandler.Device.Channels);
-
                     InitializeProviders();
                     InitializeMonitors();
 
-                    outputOptions.DeviceName = outputHandler.Device.Name;
+                    outputOptions.DeviceName = deviceService.Device.Name;
                     outputOptions.SampleRate = sampleRate;
 
                     sessionService.Save();
@@ -238,7 +237,7 @@ namespace SportDJ.Services.OutputService.Windows
 
         public void Update()
         {
-            outputHandler?.Update();
+            deviceService?.Update();
         }
 
         #endregion Public Methods
@@ -263,8 +262,8 @@ namespace SportDJ.Services.OutputService.Windows
                     InvokeOnMonitors(s => s.Deactivate());
                     InvokeOnMonitors(s => s.Dispose());
 
-                    outputHandler.OutputStopped -= OnPlaybackStopped;
-                    outputHandler.DevicesUpdated -= OnDevicesUpdated;
+                    deviceService.OutputStopped -= OnPlaybackStopped;
+                    deviceService.DevicesUpdated -= OnDevicesUpdated;
                 }
 
                 isDisposed = true;
@@ -289,7 +288,7 @@ namespace SportDJ.Services.OutputService.Windows
         private void CloseOutput()
         {
             mixersAll.OnEach(m => m.Pause());
-            outputHandler?.Stop();
+            deviceService?.Stop();
 
             if (fadingProvider != default)
             {
@@ -302,11 +301,11 @@ namespace SportDJ.Services.OutputService.Windows
             backgroundProvider?.Dispose();
         }
 
-        private Commons.Models.Settings.Output GetOptions(OutputType type)
+        private Output GetOptions(OutputType type)
         {
             if (sessionService?.Contents?.Outputs.Any(o => o.Type == type) != true)
             {
-                var outputOptions = new Commons.Models.Settings.Output
+                var outputOptions = new Output
                 {
                     Type = type,
                     Volume = Constants.VolumeMax,
@@ -326,7 +325,7 @@ namespace SportDJ.Services.OutputService.Windows
             if (!IsPlaying)
             {
                 InvokeOnMonitors(s => s.Initialize(
-                    device: outputHandler.Device));
+                    device: deviceService.Device));
             }
         }
 
@@ -334,7 +333,7 @@ namespace SportDJ.Services.OutputService.Windows
         {
             CloseOutput();
 
-            backgroundProvider = new MixingProvider(WaveFormat);
+            backgroundProvider = new MixingProvider(deviceService.WaveFormat);
 
             fadingProvider = new FadingProvider(
                 sourceProvider: backgroundProvider,
@@ -343,10 +342,10 @@ namespace SportDJ.Services.OutputService.Windows
             fadingProvider.FadingStartedEvent += OnFadingStarted;
             fadingProvider.FadingEndedEvent += OnFadingEnded;
 
-            foregroundProvider = new MixingProvider(WaveFormat);
+            foregroundProvider = new MixingProvider(deviceService.WaveFormat);
             foregroundProvider.Add(fadingProvider);
 
-            outputHandler.Initialize(
+            deviceService.Initialize(
                 sampleProvider: foregroundProvider,
                 volume: outputOptions.Volume);
 
@@ -355,7 +354,7 @@ namespace SportDJ.Services.OutputService.Windows
                 onForeground: mixersForeground.Contains(mixer)));
 
             Task.Run(
-                action: outputHandler.Play,
+                action: deviceService.Play,
                 cancellationToken: cancellationTokenSource.Token);
         }
 

@@ -25,9 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StackServiceTests", "Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MixerService", "Services\MixerService\MixerService.csproj", "{A7C1AB0B-C987-470D-A457-5D9C2EED48EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService.Windows", "Services\OutputService.Windows\OutputService.Windows.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputService", "Services\OutputService\OutputService.csproj", "{06843D90-4C6E-480B-9BBE-7FCDF0C7E1FD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutputServiceTests", "Tests\OutputServiceTests\OutputServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceServiceTests", "Tests\DeviceServiceTests\DeviceServiceTests.csproj", "{A6B67930-BEA7-4E06-9783-CFE137BA5CFA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackService", "Services\TrackService\TrackService.csproj", "{19CADD1C-4331-4137-A500-7D1137389C36}"
 EndProject
@@ -76,6 +76,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModelLocator", "Shareds\ViewModelLocator\ViewModelLocator.csproj", "{B058E9A8-FF99-4792-B253-B4604725FAC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalService.Windows", "Services\SignalService.Windows\SignalService.Windows.csproj", "{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceService.Windows", "Services\DeviceService.Windows\DeviceService.Windows.csproj", "{8F77647C-14DB-4E99-A9F7-0B72495B5C06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -211,6 +213,10 @@ Global
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +253,7 @@ Global
 		{07AD55C8-C742-41F4-BA5F-6E7BF5BA1441} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{B058E9A8-FF99-4792-B253-B4604725FAC0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{8F77647C-14DB-4E99-A9F7-0B72495B5C06} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

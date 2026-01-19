@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Moq;
 using Prism.Events;
-using Prism.Ioc;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Settings;
@@ -9,13 +8,12 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using Xunit;
 
-namespace SportDJ.Tests.OutputServiceTests
+namespace SportDJ.Tests.DeviceServiceTests
 {
     public class Tests
     {
         #region Private Fields
 
-        private readonly Mock<IContainerProvider> mockContainerProvider;
         private readonly Mock<IEventAggregator> mockEventAggregator;
         private readonly Mock<IStorageService<Session>> mockSessionService;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
@@ -26,7 +24,6 @@ namespace SportDJ.Tests.OutputServiceTests
 
         public Tests()
         {
-            mockContainerProvider = new Mock<IContainerProvider>();
             mockEventAggregator = new Mock<IEventAggregator>();
 
             var settingsLoadedEvent = new Mock<SettingsLoadedEvent<Set>>();
@@ -72,15 +69,11 @@ namespace SportDJ.Tests.OutputServiceTests
         [Fact]
         public void GetDevices()
         {
-            var provider = new Services.OutputService.Windows.Service(
-                containerProvider: mockContainerProvider.Object,
-                eventAggregator: mockEventAggregator.Object,
-                settingsService: mockSettingsService.Object,
-                sessionService: mockSessionService.Object);
+            var service = new Services.DeviceService.Windows.Service();
 
-            provider.Update();
+            service.Update();
 
-            Assert.True(provider.Devices.Any());
+            Assert.True(service.Devices.Any());
         }
 
         #endregion Public Methods
