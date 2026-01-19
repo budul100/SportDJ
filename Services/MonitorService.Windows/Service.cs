@@ -10,7 +10,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Services.MonitorService.Windows.Extensions;
 using SportDJ.Services.MonitorService.Windows.Models;
 

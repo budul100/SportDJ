@@ -15,7 +15,7 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
 

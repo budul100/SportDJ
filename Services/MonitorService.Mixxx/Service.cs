@@ -7,7 +7,7 @@ using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Services.MonitorService.Mixxx.Assets;
 using SportDJ.Services.MonitorService.Mixxx.Extensions;
 

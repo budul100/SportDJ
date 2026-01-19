@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NAudio.Wave;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Commons.Interfaces
 {

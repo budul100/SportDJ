@@ -9,7 +9,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Services.DeviceService.Windows
 {
@@ -229,9 +229,9 @@ namespace SportDJ.Services.DeviceService.Windows
                                 Constants.OutputChannelMax);
 
                             result = new Device(
-                                name: driverName,
-                                channels: channels,
-                                type: DeviceType.Asio);
+                                Name: driverName,
+                                Channels: channels,
+                                Type: DeviceType.Asio);
                         }
                     }
                     catch { }
@@ -265,10 +265,10 @@ namespace SportDJ.Services.DeviceService.Windows
                             Constants.OutputChannelMax);
 
                         result = new Device(
-                            name: capability.ProductName,
-                            channels: capability.Channels,
-                            type: DeviceType.Wasapi,
-                            number: index);
+                            Name: capability.ProductName,
+                            Channels: capability.Channels,
+                            Type: DeviceType.Wasapi,
+                            Number: index);
                     }
                 }
                 catch { }

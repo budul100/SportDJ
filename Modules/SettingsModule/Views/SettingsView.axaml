@@ -81,7 +81,7 @@
 					</ComboBox.Styles>
 
 					<ComboBox.ItemTemplate>
-						<DataTemplate x:DataType="models:Contents.Device">
+						<DataTemplate x:DataType="models:Records.Device">
 							<StackPanel Orientation="Horizontal">
 								<TextBlock Text="{Binding Name}"/>
 								<TextBlock Text=" ("/>

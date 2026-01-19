@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Commons.Interfaces
 {
