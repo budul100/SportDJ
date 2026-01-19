@@ -17,21 +17,27 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
             return playType == PlayType.Playing || playType == PlayType.Stopping;
         }
 
-        public static long ToBytes(this TimeSpan duration, int averageBytesPerSecond)
+        public static TimeSpan ToDuration(this long samples, int sampleRate)
         {
-            var result = duration.Seconds * averageBytesPerSecond;
+            var seconds = (double)samples / sampleRate;
 
-            return result;
-        }
-
-        public static TimeSpan ToDuration(this long bytes, int averageBytesPerSecond)
-        {
-            var seconds = (double)bytes / averageBytesPerSecond;
             var result = seconds >= 0
                 ? TimeSpan.FromSeconds(seconds)
                 : TimeSpan.Zero;
 
             return result;
+        }
+
+        public static long ToSamples(this TimeSpan duration, int sampleRate)
+        {
+            var result = (long)(duration.TotalSeconds * sampleRate);
+
+            return result;
+        }
+
+        public static long ToSamples(this long bytes, int bytesPerSample)
+        {
+            return bytes / bytesPerSample;
         }
 
         #endregion Public Methods

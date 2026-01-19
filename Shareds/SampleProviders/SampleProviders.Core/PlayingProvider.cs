@@ -11,15 +11,17 @@ namespace SportDJ.Shareds.SampleProviders.Core
     {
         #region Private Fields
 
-        private readonly long? cue;
         private readonly object lockProvider = new();
+        private readonly long sampleFade;
         private readonly IPlayingProvider sourceProvider;
 
-        private long end;
-        private bool eventSentCue;
-        private bool eventSentEnd;
-        private bool eventSentPause;
         private bool isDisposed;
+        private bool publishedCue;
+        private bool publishedEnd;
+        private bool publishedPause;
+        private long sampleEnd;
+        private long sampleStart;
+        private long sampleStop;
 
         #endregion Private Fields
 
@@ -33,9 +35,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
             Track = track;
             PlayType = PlayType.Waiting;
 
-            cue = Track.Cue.HasValue
-                ? track.Cue - fadeOut.ToBytes(averageBytesPerSecond)
-                : default;
+            sampleFade = fadeOut.ToSamples(WaveFormat.SampleRate);
 
             UpdateTime();
         }
@@ -56,7 +56,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Public Properties
 
-        public TimeSpan Current => (Position - Track.Start).ToDuration(averageBytesPerSecond);
+        public TimeSpan Current => (Position - sampleStart).ToDuration(WaveFormat.SampleRate);
 
         public TimeSpan Duration { get; private set; }
 
@@ -66,7 +66,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         public long Position { get; private set; }
 
-        public TimeSpan Remaining => (end - Position).ToDuration(averageBytesPerSecond);
+        public TimeSpan Remaining => (sampleEnd - Position).ToDuration(WaveFormat.SampleRate);
 
         public Track Track { get; }
 
@@ -93,7 +93,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
         {
             lock (lockProvider)
             {
-                eventSentPause = false;
+                publishedPause = false;
 
                 PlayType = PlayType.Pausing;
             }
@@ -107,13 +107,13 @@ namespace SportDJ.Shareds.SampleProviders.Core
             {
                 if (PlayType == PlayType.Pausing)
                 {
-                    if (!eventSentPause)
+                    if (!publishedPause)
                     {
                         SignalUpdatedEvent?.Invoke(
                             sender: this,
                             e: default);
 
-                        eventSentPause = true;
+                        publishedPause = true;
 
                         SignalPausedEvent?.Invoke(
                             sender: this,
@@ -141,9 +141,9 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
                     lock (lockProvider)
                     {
-                        if (sourceProvider.Position < Track.Start)
+                        if (sourceProvider.Position < sampleStart)
                         {
-                            sourceProvider.Position = Track.Start;
+                            sourceProvider.Position = sampleStart;
                         }
 
                         samplesRead = sourceProvider.Read(
@@ -154,27 +154,27 @@ namespace SportDJ.Shareds.SampleProviders.Core
                         position = sourceProvider.Position;
                     }
 
-                    if (!eventSentCue
-                        && cue.HasValue
-                            && position >= cue)
+                    if (!publishedCue
+                        && position >= sampleStop)
                     {
                         PlayType = PlayType.Stopping;
 
-                        eventSentCue = true;
+                        publishedCue = true;
 
                         CueExceededEvent?.Invoke(
                             sender: this,
                             e: default);
                     }
 
-                    if (position >= end)
+                    if (position >= sampleEnd
+                        || (samplesRead == 0 && position > sampleStart))
                     {
                         PlayType = PlayType.Ended;
                     }
 
                     Position = PlayType != PlayType.Ended
                         ? position
-                        : end;
+                        : sampleEnd;
 
                     SignalUpdatedEvent?.Invoke(
                         sender: this,
@@ -212,6 +212,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 if (isDisposing)
                 {
                     End();
+
                     sourceProvider?.Dispose();
                 }
 
@@ -235,9 +236,9 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         private void SendSignalEnded()
         {
-            if (!eventSentEnd)
+            if (!publishedEnd)
             {
-                eventSentEnd = true;
+                publishedEnd = true;
 
                 SignalEndedEvent?.Invoke(
                     sender: this,
@@ -249,13 +250,25 @@ namespace SportDJ.Shareds.SampleProviders.Core
         {
             if (PlayType == PlayType.Waiting)
             {
-                Position = Track.Start;
+                sampleStart = Track.Start.ToSamples(WaveFormat.BlockAlign);
 
-                end = !Track.End.HasValue || Track.End.Value > sourceProvider.Length
+                var trackEnd = Track.End.HasValue
+                    ? Track.End.Value.ToSamples(WaveFormat.BlockAlign)
+                    : default(long?);
+
+                sampleEnd = !trackEnd.HasValue || trackEnd.Value > sourceProvider.Length
                     ? sourceProvider.Length
-                    : Track.End.Value;
+                    : trackEnd.Value;
 
-                Duration = (end - Track.Start).ToDuration(averageBytesPerSecond);
+                var trackCue = Track.Cue.HasValue
+                    ? Track.Cue.Value.ToSamples(WaveFormat.BlockAlign)
+                    : default(long?);
+
+                sampleStop = (trackCue ?? sampleEnd) - sampleFade;
+
+                Duration = (sampleEnd - sampleStart).ToDuration(WaveFormat.SampleRate);
+
+                Position = sampleStart;
             }
         }
 

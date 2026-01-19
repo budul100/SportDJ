@@ -11,12 +11,13 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Services.VolumeService.Windows.Extensions;
+using SportDJ.Services.MonitorService.Windows.Extensions;
+using SportDJ.Services.MonitorService.Windows.Models;
 
-namespace SportDJ.Services.VolumeService.Windows
+namespace SportDJ.Services.MonitorService.Windows
 {
     public class Service(IEventAggregator eventAggregator)
-        : IVolumeService
+        : IMonitorService
     {
         #region Private Fields
 
@@ -34,7 +35,7 @@ namespace SportDJ.Services.VolumeService.Windows
 
         public bool IsActive { get; private set; }
 
-        public bool IsInitialized => device != default;
+        public bool IsReady => device != default;
 
         public IEnumerable<Session> Sessions { get; private set; }
 
@@ -73,7 +74,7 @@ namespace SportDJ.Services.VolumeService.Windows
                 ? device
                 : default;
 
-            eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
+            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
         }
 
         public void Mute(int? milliSeconds = default)
@@ -204,7 +205,7 @@ namespace SportDJ.Services.VolumeService.Windows
 
             IsActive = Sessions?.Count() > 0;
 
-            eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
+            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
         }
 
         private IEnumerable<Session> GetSessions()
@@ -334,7 +335,7 @@ namespace SportDJ.Services.VolumeService.Windows
 
                 IsActive = false;
 
-                eventAggregator.GetEvent<VolumeUpdatedEvent>().Publish(this);
+                eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
             }
         }
 

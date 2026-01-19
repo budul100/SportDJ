@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayModule", "Modules\Di
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerModule", "Modules\ControllerModule\ControllerModule.csproj", "{EA549FCB-05EF-4802-8A1B-6C465D3417E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VolumeService.Windows", "Services\VolumeService.Windows\VolumeService.Windows.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonitorService.Windows", "Services\MonitorService.Windows\MonitorService.Windows.csproj", "{1ED5C243-CF16-42E1-89E4-D60AC564D6B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DialogService", "Services\DialogService\DialogService.csproj", "{48C41C91-3465-46EE-8632-3B506D6EF24F}"
 EndProject
@@ -53,7 +53,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrackServiceTests", "Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SearchModule", "Modules\SearchModule\SearchModule.csproj", "{B8EF491A-B0C1-40AC-A76F-94F150EC2CF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiService", "Services\MidiService\MidiService.csproj", "{4994B567-3D15-43D5-839F-D2E583F9437C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorService.Mixxx", "Services\MonitorService.Mixxx\MonitorService.Mixxx.csproj", "{4994B567-3D15-43D5-839F-D2E583F9437C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shareds", "Shareds", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject

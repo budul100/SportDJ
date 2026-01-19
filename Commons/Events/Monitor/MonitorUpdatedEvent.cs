@@ -3,7 +3,7 @@ using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Volume
 {
-    public class VolumeUpdatedEvent
-        : PubSubEvent<IVolumeService>
+    public class MonitorUpdatedEvent
+        : PubSubEvent<IMonitorService>
     { }
 }

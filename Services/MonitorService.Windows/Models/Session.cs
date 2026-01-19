@@ -1,6 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 
-namespace SportDJ.Services.VolumeService.Windows
+namespace SportDJ.Services.MonitorService.Windows.Models
 {
     public class Session(AudioSessionControl control, float volumeInitial)
     {

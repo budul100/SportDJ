@@ -15,16 +15,15 @@ namespace SportDJ.Shareds.SampleProviders.Windows
     {
         #region Private Fields
 
-        private readonly int averageBytesPerSecond;
         private readonly object lockAnalysis = new();
         private readonly object lockLoop = new();
         private readonly ISourceProvider sourceProvider;
         private readonly Track track;
 
         private float[] allSamples;
-        private long endBytes;
+        private long endSample;
         private bool isDisposed;
-        private long startBytes;
+        private long startSample;
 
         #endregion Private Fields
 
@@ -34,8 +33,6 @@ namespace SportDJ.Shareds.SampleProviders.Windows
         {
             this.sourceProvider = sourceProvider;
             this.track = track;
-
-            averageBytesPerSecond = WaveFormat.AverageBytesPerSecond;
 
             Task.Run(InitializeAnalysis);
         }
@@ -55,7 +52,7 @@ namespace SportDJ.Shareds.SampleProviders.Windows
         #region Public Properties
 
         public TimeSpan? End => IsLoop
-            ? endBytes.ToDuration(averageBytesPerSecond)
+            ? endSample.ToDuration(WaveFormat.SampleRate)
             : default;
 
         public bool IsLoop { get; private set; }
@@ -71,7 +68,7 @@ namespace SportDJ.Shareds.SampleProviders.Windows
         }
 
         public TimeSpan? Start => IsLoop
-            ? startBytes.ToDuration(averageBytesPerSecond)
+            ? startSample.ToDuration(WaveFormat.SampleRate)
             : default;
 
         public WaveFormat WaveFormat => sourceProvider.WaveFormat;
@@ -86,19 +83,20 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             {
                 if (IsReady && allSamples?.Length > 0)
                 {
-                    var bytesPerSample = WaveFormat.BlockAlign;
-                    var currentSample = Position / bytesPerSample;
+                    var currentSample = Position;
 
                     var (Start, End) = allSamples.DetectLoop(
                         position: currentSample,
                         sampleRate: WaveFormat.SampleRate);
 
-                    if (Start.HasValue && End.HasValue && End.Value > Start.Value)
+                    if (Start.HasValue
+                        && End.HasValue
+                        && End.Value > Start.Value)
                     {
                         lock (lockLoop)
                         {
-                            startBytes = Start.Value * bytesPerSample;
-                            endBytes = End.Value * bytesPerSample;
+                            startSample = Start.Value;
+                            endSample = End.Value;
 
                             IsLoop = true;
                         }
@@ -143,20 +141,15 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             {
                 if (IsLoop)
                 {
-                    var bytesPerSample = WaveFormat.BlockAlign;
-
                     while (samplesRead < count)
                     {
                         var samplesNeeded = count - samplesRead;
-
-                        var bytesUntilEnd = endBytes - Position;
-                        var samplesUntilEnd = (int)(bytesUntilEnd / bytesPerSample);
+                        var samplesUntilEnd = (int)(endSample - Position);
 
                         if (samplesUntilEnd <= 0)
                         {
-                            Position = startBytes;
-                            bytesUntilEnd = endBytes - startBytes;
-                            samplesUntilEnd = (int)(bytesUntilEnd / bytesPerSample);
+                            Position = startSample;
+                            samplesUntilEnd = (int)(endSample - startSample);
                         }
 
                         var toRead = Math.Min(samplesNeeded, samplesUntilEnd);
@@ -240,15 +233,15 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                 var buffer = new List<float>();
                 var readBuffer = new float[reader.WaveFormat.SampleRate];
 
-                int read;
+                var samplesRead = 0;
 
                 while (!isDisposed
-                    && (read = monoProvider.Read(
+                    && (samplesRead = monoProvider.Read(
                         buffer: readBuffer,
                         offset: 0,
                         count: readBuffer.Length)) > 0)
                 {
-                    for (var i = 0; i < read; i++)
+                    for (var i = 0; i < samplesRead; i++)
                     {
                         buffer.Add(readBuffer[i]);
                     }

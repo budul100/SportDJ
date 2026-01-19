@@ -1,6 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 
-namespace SportDJ.Services.VolumeService.Windows.Extensions
+namespace SportDJ.Services.MonitorService.Windows.Extensions
 {
     internal static class DeviceExtensions
     {

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
@@ -24,11 +26,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
     {
         #region Private Fields
 
-        private readonly IMidiService midiService;
         private readonly IMixerService mixerService;
         private readonly IRegionNavigationService navigationService;
         private readonly IOutputService outputLiveService;
-        private readonly IVolumeService volumeService;
+        private readonly IEnumerable<IMonitorService> monitorServices;
 
         private bool isListening;
         private bool isLoweredRequested;
@@ -41,17 +42,14 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IRegionNavigationService navigationService,
-            IStorageService<Set> settingsService, IMidiService midiService)
+            IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
             : base(regionManager)
         {
             this.navigationService = navigationService;
-            this.midiService = midiService;
+            this.monitorServices = monitoringServices;
 
             mixerService = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
-
-            volumeService = containerProvider?.Resolve<IVolumeService>(
-                name: nameof(OutputType.Live));
 
             outputLiveService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
@@ -82,11 +80,11 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 action: UpdateOptions,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<VolumeUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<MonitorUpdatedEvent>().Subscribe(
                 action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
+                threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: v => volumeService == v);
+                filter: v => monitoringServices?.Contains(v) == true);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateControls(),
@@ -133,6 +131,7 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             InitializeMenus();
+            UpdateControls();
         }
 
         #endregion Public Constructors
@@ -156,10 +155,9 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         public bool IsLoopEnabled => (outputLiveService?.IsPlaying == true)
             && (mixerService?.IsLoopReady == true);
 
-        public bool IsMonitoring => (volumeService?.IsActive == true)
-            && (midiService?.IsActive == true);
+        public bool IsMonitoring => monitorServices?.Any(s => s.IsActive) == true;
 
-        public bool IsMonitoringEnabled => volumeService?.IsInitialized == true;
+        public bool IsMonitoringEnabled => monitorServices?.Any(s => s.IsReady) == true;
 
         public bool IsVolumeLowered => isLoweredRequested
             && outputLiveService?.IsLowered == true;
@@ -262,15 +260,19 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         private void SwitchMonitoring()
         {
-            if (IsMonitoring)
+            if (monitorServices?.Any() == true)
             {
-                midiService?.Deactivate();
-                volumeService?.Deactivate();
-            }
-            else
-            {
-                midiService?.Activate();
-                volumeService?.Activate();
+                foreach (var volumeService in monitorServices)
+                {
+                    if (IsMonitoring)
+                    {
+                        volumeService.Deactivate();
+                    }
+                    else
+                    {
+                        volumeService.Activate();
+                    }
+                }
             }
 
             UpdateControls();

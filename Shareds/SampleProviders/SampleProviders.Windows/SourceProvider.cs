@@ -10,19 +10,21 @@ namespace SportDJ.Shareds.SampleProviders.Windows
     {
         #region Private Fields
 
+        private int blockAlign;
         private AudioFileReader fileReader;
         private bool isDisposed;
+        private long length;
 
         #endregion Private Fields
 
         #region Public Properties
 
-        public long Length => fileReader.Length;
+        public long Length => length;
 
         public long Position
         {
-            get => fileReader.Position;
-            set => fileReader.Position = value;
+            get => fileReader.Position / blockAlign;
+            set => fileReader.Position = value * blockAlign;
         }
 
         public WaveFormat WaveFormat => fileReader.WaveFormat;
@@ -50,6 +52,9 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             }
 
             fileReader = new(filePath);
+
+            blockAlign = fileReader.WaveFormat.BlockAlign;
+            length = fileReader.Length / blockAlign;
         }
 
         public int Read(float[] buffer, int offset, int count)

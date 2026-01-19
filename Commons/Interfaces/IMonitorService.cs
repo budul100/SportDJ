@@ -4,14 +4,14 @@ using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Commons.Interfaces
 {
-    public interface IVolumeService
+    public interface IMonitorService
         : IDisposable
     {
         #region Public Properties
 
         bool IsActive { get; }
 
-        bool IsInitialized { get; }
+        bool IsReady { get; }
 
         VolumeType Type { get; }
 

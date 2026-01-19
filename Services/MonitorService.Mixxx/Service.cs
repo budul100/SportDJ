@@ -1,28 +1,37 @@
-﻿using NAudio.Midi;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Interfaces;
-using SportDJ.Services.MidiService.Extensions;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using NAudio.Midi;
+using Prism.Events;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Volume;
+using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Contents;
+using SportDJ.Services.MonitorService.Mixxx.Assets;
+using SportDJ.Services.MonitorService.Mixxx.Extensions;
 
-namespace SportDJ.Services.MidiService
+namespace SportDJ.Services.MonitorService.Mixxx
 {
     public class Service
-        : IMidiService
+        : IMonitorService
     {
         #region Private Fields
 
+        private readonly IEventAggregator eventAggregator;
+
         private CancellationTokenSource cancellationTokenSource;
         private bool isDisposed;
+        private int? midiIndex;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public Service()
+        public Service(IEventAggregator eventAggregator)
         {
+            this.eventAggregator = eventAggregator;
+
             DeployMappingMixxx();
         }
 
@@ -31,6 +40,10 @@ namespace SportDJ.Services.MidiService
         #region Public Properties
 
         public bool IsActive { get; private set; }
+
+        public bool IsReady => midiIndex.HasValue;
+
+        public VolumeType Type { get; private set; }
 
         #endregion Public Properties
 
@@ -54,6 +67,13 @@ namespace SportDJ.Services.MidiService
                 obj: this);
         }
 
+        public void Initialize(Device device)
+        {
+            midiIndex = Constants.MidiMixxxOutputDevice.GetMidiOutIndex();
+
+            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+        }
+
         public void Mute(int? milliSeconds = default)
         {
             if (IsActive)
@@ -66,6 +86,14 @@ namespace SportDJ.Services.MidiService
                     cancellationToken: cancellationToken));
             }
         }
+
+        // TODO: Implement volume raise for Mixxx
+        public void Raise(float? volumeTarget = null, int? milliSeconds = null)
+        { }
+
+        // TODO: Implement volume reduction for Mixxx
+        public void Reduce(float? volumeTarget = null, int? milliSeconds = null)
+        { }
 
         #endregion Public Methods
 
@@ -117,28 +145,13 @@ namespace SportDJ.Services.MidiService
             { }
         }
 
-        private static int GetMidiOutputIndex(string productName)
+        private async void MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
         {
-            for (var index = 0; index < MidiOut.NumberOfDevices; index++)
-            {
-                if (MidiOut.DeviceInfo(index).ProductName == productName)
-                {
-                    return index;
-                }
-            }
-
-            return Constants.MidiOutputNotFound;
-        }
-
-        private static async void MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
-        {
-            var midiOutIndex = GetMidiOutputIndex(Constants.MidiMixxxOutputDevice);
-
-            if (midiOutIndex >= 0)
+            if (IsReady)
             {
                 try
                 {
-                    using var midiOut = new MidiOut(midiOutIndex);
+                    using var midiOut = new MidiOut(midiIndex.Value);
 
                     if (milliSeconds <= Constants.MidiVolumeMax)
                     {
@@ -151,12 +164,18 @@ namespace SportDJ.Services.MidiService
                             cancellationToken: cancellationToken);
                     }
 
+                    Type = VolumeType.Muted;
+
                     await midiOut.DecksStop(cancellationToken);
 
                     midiOut.VolumeSetDefault();
+
+                    Type = VolumeType.None;
                 }
-                catch
-                { }
+                finally
+                {
+                    eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+                }
             }
         }
 

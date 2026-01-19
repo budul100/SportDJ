@@ -6,12 +6,6 @@ namespace SportDJ.Shareds.SampleProviders.Core
     public abstract class BaseProvider
         : ISampleProvider, IDisposable
     {
-        #region Protected Fields
-
-        protected readonly int averageBytesPerSecond;
-
-        #endregion Protected Fields
-
         #region Private Fields
 
         private bool isDisposed;
@@ -31,8 +25,6 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     message: "Sample provider format must be a floating point format.",
                     paramName: nameof(waveFormat));
             }
-
-            averageBytesPerSecond = WaveFormat.AverageBytesPerSecond;
         }
 
         #endregion Protected Constructors

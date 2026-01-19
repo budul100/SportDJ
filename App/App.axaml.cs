@@ -17,7 +17,6 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Services.SignalService.Windows;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.App
@@ -117,12 +116,12 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
-            containerRegistry.RegisterSingleton<IMidiService, Services.MidiService.Service>();
             containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
 
             containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
-            containerRegistry.Register<ISignalService, Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
+
+            containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
 
             RegisterTypes<MixerType>(
                 containerRegistry: containerRegistry,
@@ -134,10 +133,10 @@ namespace SportDJ.App
                 from: typeof(IOutputService),
                 to: typeof(Services.OutputService.Windows.Service));
 
-            RegisterTypes<OutputType>(
-                containerRegistry: containerRegistry,
-                from: typeof(IVolumeService),
-                to: typeof(Services.VolumeService.Windows.Service));
+            containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>(
+                name: typeof(Services.MonitorService.Windows.Service).FullName);
+            containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>(
+                name: typeof(Services.MonitorService.Mixxx.Service).FullName);
 
             containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
         }

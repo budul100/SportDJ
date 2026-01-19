@@ -83,7 +83,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     fadeSamplePosition = 0;
 
                     fadeSampleCount = milliSeconds.HasValue
-                        ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * averageBytesPerSecond)
+                        ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * WaveFormat.SampleRate)
                         : default;
 
                     if (fadeSampleCount > 0)
@@ -162,7 +162,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
                 if (FadeType != FadeType.None)
                 {
-                    fadeSamplePosition += WaveFormat.BlockAlign;
+                    fadeSamplePosition++;
 
                     if (volumeCurrent == Volume || fadeSamplePosition > fadeSampleCount)
                     {

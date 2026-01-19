@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Midi;
-using SportDJ.Commons.Assets;
+using SportDJ.Services.MonitorService.Mixxx.Assets;
 
-namespace SportDJ.Services.MidiService.Extensions
+namespace SportDJ.Services.MonitorService.Mixxx.Extensions
 {
-    internal static class MidiOutExtensions
+    internal static class MidiExtensions
     {
         #region Public Methods
 
@@ -21,7 +21,7 @@ namespace SportDJ.Services.MidiService.Extensions
                 midiOut.Send(message);
 
                 await Task.Delay(
-                    millisecondsDelay: Constants.MidiDelayStopDecks,
+                    millisecondsDelay: Commons.Assets.Constants.MidiDelayStopDecks,
                     cancellationToken: cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested)
@@ -31,14 +31,28 @@ namespace SportDJ.Services.MidiService.Extensions
             }
         }
 
-        public static async Task VolumeFadeOut(this MidiOut midiOut, int? milliSeconds, CancellationToken cancellationToken)
+        public static int? GetMidiOutIndex(this string productName)
+        {
+            for (var index = 0; index < MidiOut.NumberOfDevices; index++)
+            {
+                if (MidiOut.DeviceInfo(index).ProductName == productName)
+                {
+                    return index;
+                }
+            }
+
+            return default;
+        }
+
+        public static async Task VolumeFadeOut(this MidiOut midiOut, int? milliSeconds,
+            CancellationToken cancellationToken)
         {
             var delayPerStep = (milliSeconds ?? 0) / (Constants.MidiVolumeMax + 1);
 
-            for (int volume = Constants.MidiVolumeMax; volume >= 0; volume--)
+            for (var volume = Constants.MidiVolumeMax; volume >= 0; volume--)
             {
                 var message = MidiMessage.ChangeControl(
-                    controller: 0x07,
+                    controller: Constants.MidiNoteVolume,
                     value: volume,
                     channel: Constants.MidiChannel).RawData;
 
@@ -59,7 +73,7 @@ namespace SportDJ.Services.MidiService.Extensions
         {
             var message = MidiMessage.ChangeControl(
                 controller: Constants.MidiNoteVolume,
-                value: 0,
+                value: Constants.MidiVolumeMin,
                 channel: Constants.MidiChannel).RawData;
 
             midiOut.Send(message);

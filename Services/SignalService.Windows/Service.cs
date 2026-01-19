@@ -93,6 +93,7 @@ namespace SportDJ.Services.SignalService.Windows
         public void End()
         {
             State = StateType.None;
+
             playingProvider?.End();
         }
 
@@ -175,7 +176,7 @@ namespace SportDJ.Services.SignalService.Windows
         public void Pause(bool useFilterEffect = false)
         {
             if (playingProvider != default
-                && State == StateType.Play)
+                && (State == StateType.Play || State == StateType.Stop))
             {
                 var fadeMilliSeconds = useFilterEffect
                     ? settingsService.Contents.Options.FadeOnPauseFilteredMilliseconds
@@ -258,7 +259,7 @@ namespace SportDJ.Services.SignalService.Windows
 
             State = StateType.Stop;
 
-            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+            Pause();
         }
 
         private void OnFadingEnded(object sender, EventArgs e)
@@ -273,7 +274,10 @@ namespace SportDJ.Services.SignalService.Windows
         {
             if (fadingProvider.FadeType == FadeType.Reduce)
             {
-                State = StateType.Pause;
+                if (State != StateType.Stop)
+                {
+                    State = StateType.Pause;
+                }
             }
             else if (State != StateType.Play)
             {
@@ -307,6 +311,7 @@ namespace SportDJ.Services.SignalService.Windows
         private void OnSignalEnded(object sender, EventArgs e)
         {
             State = StateType.None;
+
             eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
         }
 

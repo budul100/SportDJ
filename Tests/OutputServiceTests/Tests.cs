@@ -76,8 +76,7 @@ namespace SportDJ.Tests.OutputServiceTests
                 containerProvider: mockContainerProvider.Object,
                 eventAggregator: mockEventAggregator.Object,
                 settingsService: mockSettingsService.Object,
-                sessionService: mockSessionService.Object,
-                midiService: default);
+                sessionService: mockSessionService.Object);
 
             provider.Update();
 
