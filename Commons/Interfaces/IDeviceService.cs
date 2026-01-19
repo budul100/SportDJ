@@ -8,14 +8,6 @@ namespace SportDJ.Commons.Interfaces
     public interface IDeviceService
         : IDisposable
     {
-        #region Public Events
-
-        event EventHandler<EventArgs> DevicesUpdated;
-
-        event EventHandler<StoppedEventArgs> OutputStopped;
-
-        #endregion Public Events
-
         #region Public Properties
 
         Device Device { get; }

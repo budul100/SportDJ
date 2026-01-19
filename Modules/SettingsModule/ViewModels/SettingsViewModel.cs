@@ -85,11 +85,11 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<DevicesUpdatedEvent>().Subscribe(
-                action: _ => SetDevices(),
+                action: SetDevices,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
-            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => SetDevice(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);

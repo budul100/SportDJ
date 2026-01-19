@@ -5,15 +5,17 @@ using System.Linq;
 using System.Threading;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Services.DeviceService.Windows
 {
-    public class Service
+    public class Service(IEventAggregator eventAggregator)
         : IDeviceService
     {
         #region Private Fields
@@ -22,14 +24,6 @@ namespace SportDJ.Services.DeviceService.Windows
         private IWavePlayer player;
 
         #endregion Private Fields
-
-        #region Public Events
-
-        public event EventHandler<EventArgs> DevicesUpdated;
-
-        public event EventHandler<StoppedEventArgs> OutputStopped;
-
-        #endregion Public Events
 
         #region Public Properties
 
@@ -127,7 +121,7 @@ namespace SportDJ.Services.DeviceService.Windows
 
             if (device != Device)
             {
-                DisposePlayer();
+                CloseDevice();
 
                 SetDevice(
                     device: device,
@@ -143,9 +137,7 @@ namespace SportDJ.Services.DeviceService.Windows
             Devices = GetCapabilitiesAsio()
                 .Union(GetCapabilitiesWaveOut()).ToArray();
 
-            DevicesUpdated?.Invoke(
-                sender: this,
-                e: EventArgs.Empty);
+            eventAggregator.GetEvent<DevicesUpdatedEvent>().Publish();
         }
 
         #endregion Public Methods
@@ -158,7 +150,7 @@ namespace SportDJ.Services.DeviceService.Windows
             {
                 if (disposing)
                 {
-                    DisposePlayer();
+                    CloseDevice();
                 }
 
                 isDisposed = true;
@@ -172,7 +164,6 @@ namespace SportDJ.Services.DeviceService.Windows
         private static T ExecuteOnSTAThread<T>(Func<T> function)
         {
             T result = default;
-            Exception exception = default;
 
             var staThread = new Thread(() =>
             {
@@ -180,9 +171,9 @@ namespace SportDJ.Services.DeviceService.Windows
                 {
                     result = function();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    exception = ex;
+                    // TO DO: Log exception
                 }
             });
 
@@ -194,7 +185,7 @@ namespace SportDJ.Services.DeviceService.Windows
             return result;
         }
 
-        private void DisposePlayer()
+        private void CloseDevice()
         {
             if (player != default)
             {
@@ -205,6 +196,9 @@ namespace SportDJ.Services.DeviceService.Windows
 
                 player = null;
             }
+
+            Device = default;
+            WaveFormat = default;
         }
 
         private IEnumerable<Device> GetCapabilitiesAsio()
@@ -282,9 +276,16 @@ namespace SportDJ.Services.DeviceService.Windows
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
         {
-            OutputStopped?.Invoke(
-                sender: this,
-                e: e);
+            if (e.Exception != default)
+            {
+                Debugger.Break();
+
+                // TODO: Log exception
+
+                CloseDevice();
+            }
+
+            eventAggregator.GetEvent<DeviceStoppedEvent>().Publish();
         }
 
         private void SetDevice(Device device, int sampleRate, bool takeDefaultIfMissing)

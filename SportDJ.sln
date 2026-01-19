@@ -79,6 +79,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalService.Windows", "Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceService.Windows", "Services\DeviceService.Windows\DeviceService.Windows.csproj", "{8F77647C-14DB-4E99-A9F7-0B72495B5C06}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControllerService", "Services\ControllerService\ControllerService.csproj", "{F0663563-5E96-4130-B79E-E518E640B6A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +219,10 @@ Global
 		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F77647C-14DB-4E99-A9F7-0B72495B5C06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0663563-5E96-4130-B79E-E518E640B6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0663563-5E96-4130-B79E-E518E640B6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0663563-5E96-4130-B79E-E518E640B6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0663563-5E96-4130-B79E-E518E640B6A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -254,6 +260,7 @@ Global
 		{B058E9A8-FF99-4792-B253-B4604725FAC0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{8F77647C-14DB-4E99-A9F7-0B72495B5C06} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{F0663563-5E96-4130-B79E-E518E640B6A4} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

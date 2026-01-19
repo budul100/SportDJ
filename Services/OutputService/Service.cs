@@ -55,11 +55,12 @@ namespace SportDJ.Services.OutputService
             this.sessionService = sessionService;
             this.deviceService = deviceService;
 
-            deviceService.OutputStopped += OnPlaybackStopped;
-            deviceService.DevicesUpdated += OnDevicesUpdated;
-
             eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: ApplySettings,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<DeviceStoppedEvent>().Subscribe(
+                action: CloseDevice,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<MixerStartedEvent>().Subscribe(
@@ -215,23 +216,28 @@ namespace SportDJ.Services.OutputService
         {
             if (!IsPlaying)
             {
+                var device = Device;
+
                 deviceService.Set(
                     deviceName: deviceName,
                     sampleRate: sampleRate,
                     takeDefaultIfMissing: takeDefaultIfMissing);
 
-                if (deviceService.Device != default)
+                if (Device != device)
                 {
-                    InitializeProviders();
-                    InitializeMonitors();
+                    if (deviceService.Device != default)
+                    {
+                        InitializeProviders();
+                        InitializeMonitors();
 
-                    outputOptions.DeviceName = deviceService.Device.Name;
-                    outputOptions.SampleRate = sampleRate;
+                        outputOptions.DeviceName = deviceService.Device.Name;
+                        outputOptions.SampleRate = sampleRate;
 
-                    sessionService.Save();
+                        sessionService.Save();
+                    }
+
+                    eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
                 }
-
-                eventAggregator.GetEvent<DeviceUpdatedEvent>().Publish(this);
             }
         }
 
@@ -261,9 +267,6 @@ namespace SportDJ.Services.OutputService
 
                     InvokeOnMonitors(s => s.Deactivate());
                     InvokeOnMonitors(s => s.Dispose());
-
-                    deviceService.OutputStopped -= OnPlaybackStopped;
-                    deviceService.DevicesUpdated -= OnDevicesUpdated;
                 }
 
                 isDisposed = true;
@@ -285,6 +288,18 @@ namespace SportDJ.Services.OutputService
                 takeDefaultIfMissing: takeDefaultIfMissing);
         }
 
+        private void CloseDevice()
+        {
+            if (Device == default)
+            {
+                CloseOutput();
+
+                outputOptions.DeviceName = default;
+
+                eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
+            }
+        }
+
         private void CloseOutput()
         {
             mixersAll.OnEach(m => m.Pause());
@@ -303,7 +318,9 @@ namespace SportDJ.Services.OutputService
 
         private Output GetOptions(OutputType type)
         {
-            if (sessionService?.Contents?.Outputs.Any(o => o.Type == type) != true)
+            var outputs = sessionService?.Contents?.Outputs;
+
+            if (outputs?.Any(o => o.Type == type) != true)
             {
                 var outputOptions = new Output
                 {
@@ -311,11 +328,10 @@ namespace SportDJ.Services.OutputService
                     Volume = Constants.VolumeMax,
                 };
 
-                sessionService.Contents.Outputs.Add(outputOptions);
+                outputs.Add(outputOptions);
             }
 
-            var result = sessionService.Contents.Outputs
-                .Single(s => s.Type == type);
+            var result = outputs?.Single(s => s.Type == type);
 
             return result;
         }
@@ -377,11 +393,6 @@ namespace SportDJ.Services.OutputService
                 milliSeconds: fadeMilliseconds));
         }
 
-        private void OnDevicesUpdated(object sender, EventArgs e)
-        {
-            eventAggregator.GetEvent<DevicesUpdatedEvent>().Publish(this);
-        }
-
         private void OnFadingEnded(object sender, EventArgs e)
         {
             eventAggregator.GetEvent<OutputFadedEvent>().Publish(this);
@@ -432,20 +443,6 @@ namespace SportDJ.Services.OutputService
                 IsPlaying = false;
 
                 eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
-            }
-        }
-
-        private void OnPlaybackStopped(object sender, StoppedEventArgs e)
-        {
-            if (e.Exception != default)
-            {
-                // TODO: Log exception
-
-                CloseOutput();
-
-                outputOptions.DeviceName = default;
-
-                eventAggregator.GetEvent<DeviceUpdatedEvent>().Publish(this);
             }
         }
 

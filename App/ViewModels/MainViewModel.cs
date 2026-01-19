@@ -13,8 +13,8 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
@@ -74,7 +74,7 @@ namespace SportDJ.App.ViewModels
             backgroundMixer = containerProvider?.Resolve<IMixerService>(
                 name: nameof(MixerType.Background));
 
-            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => InitializeSession(),
                 keepSubscriberReferenceAlive: true);
 

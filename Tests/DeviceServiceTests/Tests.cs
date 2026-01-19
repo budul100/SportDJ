@@ -69,7 +69,8 @@ namespace SportDJ.Tests.DeviceServiceTests
         [Fact]
         public void GetDevices()
         {
-            var service = new Services.DeviceService.Windows.Service();
+            var service = new Services.DeviceService.Windows.Service(
+                eventAggregator: mockEventAggregator.Object);
 
             service.Update();
 

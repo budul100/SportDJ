@@ -1,9 +1,9 @@
 ﻿using Prism.Events;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Commons.Events.Device
+namespace SportDJ.Commons.Events.Output
 {
-    public class DeviceUpdatedEvent
+    public class OutputUpdatedEvent
         : PubSubEvent<IOutputService>
     { }
 }

@@ -6,7 +6,7 @@ using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Device;
+using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
@@ -62,7 +62,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             dialogService = containerProvider?.Resolve<IDialogService>();
             gridService = containerProvider?.Resolve<IGridService>();
 
-            eventAggregator?.GetEvent<DeviceUpdatedEvent>().Subscribe(
+            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
                 keepSubscriberReferenceAlive: true);
         }
