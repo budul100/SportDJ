@@ -319,13 +319,14 @@ namespace SportDJ.Services.SignalService.Windows
         {
             trackService?.Stop(Track);
 
+            eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+
             if (IsOverNextThreshold)
             {
                 End();
             }
             else
             {
-                eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
 
                 if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
                 {
