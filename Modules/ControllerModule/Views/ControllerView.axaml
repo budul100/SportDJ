@@ -41,28 +41,69 @@
 			<ColumnDefinition/>
 			<ColumnDefinition/>
 			<ColumnDefinition/>
+			<ColumnDefinition/>
 		</Grid.ColumnDefinitions>
 		
-		<ToggleButton 
+		<Button 
 			Grid.Row="0"
 		    Grid.Column="0"
 		    Margin="{StaticResource InnerMargin}"
 		    HorizontalAlignment="Stretch"
 		    VerticalAlignment="Stretch"
-		    Focusable="False"
-		    IsChecked="{Binding IsVolumeMonitoringActive}"
-		    IsEnabled="{Binding IsVolumeMonitoringAvailable}">
+			Focusable="False"
+			Command="{Binding LoopCommand}"
+			IsEnabled="{Binding IsLoopEnabled}">
 
-			<mat:MaterialIcon 
-				Width="{StaticResource LargeIconSize}"
-			    Height="{StaticResource LargeIconSize}"
-			    Kind="VolumeMute"/>
-		</ToggleButton>
+			<Grid Classes.IsActive="{Binding IsLoop}">
+				<Grid.Styles>
+					<Style Selector="Grid.IsActive">
+						<Setter Property="Background" Value="{StaticResource ColorBackgroundToggle}" />
+					</Style>
+					<Style Selector="Grid">
+						<Setter Property="Background" Value="Transparent" />
+					</Style>
+				</Grid.Styles>
+
+				<mat:MaterialIcon 
+					Width="{StaticResource LargeIconSize}"
+					Height="{StaticResource LargeIconSize}"
+					Kind="Repeat"/>
+			</Grid>
+
+		</Button>
+		
+		<Button 
+			Grid.Row="0"
+		    Grid.Column="1"
+		    Margin="{StaticResource InnerMargin}"
+		    HorizontalAlignment="Stretch"
+		    VerticalAlignment="Stretch"
+		    Focusable="False"
+			Command="{Binding MonitoringCommand}"
+			IsEnabled="{Binding IsMonitoringEnabled}">
+
+			<Grid Classes.IsActive="{Binding IsMonitoring}">
+				<Grid.Styles>
+					<Style Selector="Grid.IsActive">
+						<Setter Property="Background" Value="{StaticResource ColorBackgroundToggle}" />
+					</Style>
+					<Style Selector="Grid">
+						<Setter Property="Background" Value="Transparent" />
+					</Style>
+				</Grid.Styles>
+
+				<mat:MaterialIcon 
+					Width="{StaticResource LargeIconSize}"
+					Height="{StaticResource LargeIconSize}"
+					Kind="VolumeMute"/>
+			</Grid>
+		
+		</Button>
 
 		<Button
 			Name="VolumeButton"
 			Grid.Row="0"
-			Grid.Column="1"
+			Grid.Column="2"
 			Margin="{StaticResource InnerMargin}"
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
@@ -102,6 +143,7 @@
 					Width="{StaticResource LargeIconSize}"
 					Height="{StaticResource LargeIconSize}"
 					Kind="Microphone"/>
+
 				<Border 
 					Grid.Column="1"
 					Padding="{StaticResource KeyPadding}"
@@ -118,12 +160,13 @@
 						FontSize="{StaticResource FontSizeContentMain}"
 						Text="{Binding KeyTalkVolume}"/>
 				</Border>
+
 			</Grid>
 		</Button>
 
 		<Button 
 			Grid.Row="0"
-		    Grid.Column="2"
+		    Grid.Column="3"
 		    Margin="{StaticResource InnerMargin}"
 		    HorizontalAlignment="Stretch"
 		    VerticalAlignment="Stretch"
@@ -163,6 +206,7 @@
 					    FontSize="{StaticResource FontSizeContentMain}"
 					    Text="{Binding KeyPauseOutput}"/>
 				</Border>
+
 			</Grid>
 		</Button>
 

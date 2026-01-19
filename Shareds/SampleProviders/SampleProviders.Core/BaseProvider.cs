@@ -3,7 +3,7 @@ using NAudio.Wave;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public abstract class BaseSampleProvider
+    public abstract class BaseProvider
         : ISampleProvider, IDisposable
     {
         #region Protected Fields
@@ -20,7 +20,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Protected Constructors
 
-        protected BaseSampleProvider(WaveFormat waveFormat)
+        protected BaseProvider(WaveFormat waveFormat)
         {
             WaveFormat = waveFormat
                 ?? throw new ArgumentNullException(nameof(waveFormat));

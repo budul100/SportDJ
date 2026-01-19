@@ -10,11 +10,15 @@ namespace SportDJ.Commons.Interfaces
     {
         #region Public Properties
 
+        TimeSpan? Current { get; }
+
         TimeSpan? Duration { get; }
 
         bool IsEnding { get; }
 
-        bool IsLoop { get; set; }
+        bool IsLoop { get; }
+
+        bool IsLoopReady { get; }
 
         bool IsOverNextThreshold { get; }
 
@@ -22,9 +26,11 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsSilent { get; }
 
-        ISampleProvider Output { get; }
+        TimeSpan? LoopEnd { get; }
 
-        TimeSpan? Position { get; }
+        TimeSpan? LoopStart { get; }
+
+        ISampleProvider Output { get; }
 
         double? Progress { get; }
 
@@ -38,8 +44,9 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void ActivateSmartLoop();
+        void ActivateLoop();
 
+        void DeactivateLoop();
 
         void End();
 

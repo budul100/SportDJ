@@ -104,8 +104,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                resetPosition: true,
-                isLoop: false);
+                resetPosition: true);
 
             var track = stackService.Track;
 
@@ -171,8 +170,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                resetPosition: true,
-                isLoop: false);
+                resetPosition: true);
 
             var stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds < 5000)
@@ -207,8 +205,7 @@ namespace SportDJ.Tests.StackServiceTests
             stackService.Initialize(
                 paths: [@"..\..\..\Samples"],
                 name: default,
-                resetPosition: true,
-                isLoop: false);
+                resetPosition: true);
 
             var track = stackService.Track;
 

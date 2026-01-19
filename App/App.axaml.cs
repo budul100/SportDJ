@@ -17,6 +17,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Services.SignalService.Windows;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.App
@@ -120,7 +121,7 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
 
             containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
-            containerRegistry.Register<ISignalService, Services.SignalService.Service>();
+            containerRegistry.Register<ISignalService, Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();
 
             RegisterTypes<MixerType>(
@@ -138,7 +139,7 @@ namespace SportDJ.App
                 from: typeof(IVolumeService),
                 to: typeof(Services.VolumeService.Windows.Service));
 
-            containerRegistry.Register<IAudioSourceProvider, Shareds.SampleProviders.Windows.AudioSourceProvider>();
+            containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
         }
 
         #endregion Protected Methods

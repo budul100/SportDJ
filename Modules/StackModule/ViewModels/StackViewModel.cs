@@ -20,7 +20,8 @@ namespace SportDJ.Modules.StackModule.ViewModels
 
         private readonly IDialogService dialogService;
 
-        private Entry active;
+        private bool autoScroll;
+        private Entry entry;
         private bool isSettingActive = false;
         private bool isUpdating = false;
         private IStackService service;
@@ -59,16 +60,25 @@ namespace SportDJ.Modules.StackModule.ViewModels
 
         #region Public Properties
 
-        public Entry Active
+        public bool AutoScroll
         {
-            get => active;
+            get => autoScroll;
+            set => SetProperty(ref autoScroll, value);
+        }
+
+        public ObservableCollection<Entry> Entries { get; private set; } = [];
+
+        public Entry Entry
+        {
+            get => entry;
 
             set
             {
                 if (value != default
+                    && !isUpdating
                     && !isSettingActive
                     && SetProperty(
-                        storage: ref active,
+                        storage: ref entry,
                         value: value))
                 {
                     try
@@ -83,8 +93,6 @@ namespace SportDJ.Modules.StackModule.ViewModels
                 }
             }
         }
-
-        public ObservableCollection<Entry> Entries { get; private set; } = [];
 
         public IEventAggregator EventAggregator { get; }
 
@@ -122,40 +130,88 @@ namespace SportDJ.Modules.StackModule.ViewModels
             try
             {
                 isUpdating = true;
+                AutoScroll = false;
 
-                var givenActive = active;
-                active = default;
-
-                RaisePropertyChanged(nameof(Active));
-
-                Entries.Clear();
+                var current = entry;
 
                 if (service?.Entries?.Count > 0)
                 {
-                    foreach (var entry in service.Entries)
+                    var hasChanged = Entries.Count != service.Entries.Count
+                        || !Entries.SequenceEqual(service.Entries);
+
+                    if (hasChanged)
                     {
-                        Entries.Add(entry);
+                        entry = default;
+                        RaisePropertyChanged(nameof(Entry));
+
+                        for (var index = Entries.Count - 1; index >= 0; index--)
+                        {
+                            if (!service.Entries.Contains(Entries[index]))
+                            {
+                                Entries.RemoveAt(index);
+                            }
+                        }
+
+                        for (var index = 0; index < service.Entries.Count; index++)
+                        {
+                            var serviceEntry = service.Entries[index];
+
+                            if (index >= Entries.Count)
+                            {
+                                Entries.Add(serviceEntry);
+                            }
+                            else if (Entries[index] != serviceEntry)
+                            {
+                                var existingIndex = Entries.IndexOf(serviceEntry);
+
+                                if (existingIndex >= 0)
+                                {
+                                    Entries.Move(
+                                        oldIndex: existingIndex,
+                                        newIndex: index);
+                                }
+                                else
+                                {
+                                    Entries.Insert(
+                                        index: index,
+                                        item: serviceEntry);
+                                }
+                            }
+                        }
                     }
 
-                    if (givenActive != default
-                        && Entries.Contains(givenActive))
+                    if (current != default
+                        && Entries.Contains(current))
                     {
-                        active = givenActive;
+                        entry = current;
                     }
                     else
                     {
-                        active = Entries.FirstOrDefault(e => e.IsSelected);
+                        entry = Entries.FirstOrDefault(e => e.IsSelected);
                     }
 
-                    RaisePropertyChanged(nameof(Active));
+                    if (hasChanged)
+                    {
+                        RaisePropertyChanged(nameof(Entry));
+                    }
+                }
+                else
+                {
+                    if (Entries.Count > 0)
+                    {
+                        entry = default;
+                        RaisePropertyChanged(nameof(Entry));
+
+                        Entries.Clear();
+                    }
                 }
 
-                RaisePropertyChanged(nameof(Entries));
                 ShuffleCommand.RaiseCanExecuteChanged();
             }
             finally
             {
                 isUpdating = false;
+                AutoScroll = true;
             }
         }
 

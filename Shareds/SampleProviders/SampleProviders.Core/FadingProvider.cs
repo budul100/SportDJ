@@ -6,8 +6,8 @@ using SportDJ.Commons.Enums;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public class DynamicFadingProvider
-        : BaseSampleProvider
+    public class FadingProvider
+        : BaseProvider
     {
         #region Private Fields
 
@@ -26,7 +26,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         #region Public Constructors
 
-        public DynamicFadingProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
+        public FadingProvider(ISampleProvider sourceProvider, float volume = Constants.VolumeMin)
             : base(waveFormat: sourceProvider?.WaveFormat)
         {
             this.sourceProvider = sourceProvider;

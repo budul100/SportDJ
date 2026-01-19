@@ -13,12 +13,12 @@ using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 using SportDJ.Shareds.SampleProviders.Core;
-using SportDJ.Shareds.SampleProviders.Windows.Extensions;
+using SportDJ.Shareds.SampleProviders.Windows;
 
-namespace SportDJ.Services.SignalService
+namespace SportDJ.Services.SignalService.Windows
 {
     public class Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-        ITrackService trackService, IAudioSourceProvider sourceProvider)
+        ITrackService trackService, ISourceProvider sourceProvider)
         : ISignalService
     {
         #region Private Fields
@@ -26,45 +26,27 @@ namespace SportDJ.Services.SignalService
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
-        private float[] analisysSamples;
-        private int bytesPerFrame;
-        private DynamicFadingProvider fadingProvider;
-        private bool isAnalysisReady;
+        private FadingProvider fadingProvider;
         private bool isDisposed;
         private long lastPosition = 0;
+        private LoopingProvider loopingProvider;
         private TimeSpan? nextThresholdOnPlay;
-        private SourcePlayingProvider playingProvider;
+        private PlayingProvider playingProvider;
 
         #endregion Private Fields
 
         #region Public Properties
 
-        public TimeSpan? Duration => !(playingProvider?.Duration < TimeSpan.Zero)
-            ? playingProvider?.Duration
-            : TimeSpan.Zero;
+        public TimeSpan? Current => playingProvider?.Current;
+
+        public TimeSpan? Duration => playingProvider?.Duration;
 
         public bool IsEnding => playingProvider?.IsRunning == true
             && playingProvider.Remaining <= TimeSpan.FromSeconds(Constants.IsEndingSeconds);
 
-        // TO DO: Setter muss jetzt die Loop-Punkte im Provider aktivieren
-        public bool IsLoop
-        {
-            get => playingProvider?.IsLoop ?? default;
-            set
-            {
-                if (playingProvider != default)
-                {
-                    if (value)
-                    {
-                        ActivateSmartLoop();
-                    }
-                    else
-                    {
-                        playingProvider.IsLoop = false;
-                    }
-                }
-            }
-        }
+        public bool IsLoop => loopingProvider?.IsLoop == true;
+
+        public bool IsLoopReady => loopingProvider?.IsReady == true;
 
         public bool IsOverNextThreshold { get; private set; }
 
@@ -72,19 +54,17 @@ namespace SportDJ.Services.SignalService
 
         public bool IsSilent => fadingProvider?.IsSilent != false;
 
+        public TimeSpan? LoopEnd => loopingProvider?.End;
+
+        public TimeSpan? LoopStart => loopingProvider?.Start;
+
         public ISampleProvider Output => fadingProvider;
 
-        public TimeSpan? Position => !(playingProvider?.Position < TimeSpan.Zero)
-            ? playingProvider?.Position
-            : TimeSpan.Zero;
-
         public double? Progress => Duration?.Ticks > 0
-            ? (Position?.Ticks ?? 0) / (double)Duration.Value.Ticks
+            ? (Current?.Ticks ?? 0) / (double)Duration.Value.Ticks
             : default;
 
-        public TimeSpan? Remaining => !(playingProvider?.Remaining < TimeSpan.Zero)
-            ? playingProvider?.Remaining
-            : TimeSpan.Zero;
+        public TimeSpan? Remaining => playingProvider?.Remaining;
 
         public StateType State { get; private set; }
 
@@ -94,36 +74,14 @@ namespace SportDJ.Services.SignalService
 
         #region Public Methods
 
-        public void ActivateSmartLoop()
+        public void ActivateLoop()
         {
-            if (!isAnalysisReady || analisysSamples == default || playingProvider == default) return;
+            loopingProvider?.Activate();
+        }
 
-            var currentSeconds = playingProvider.Position.TotalSeconds;
-            var currentSamplePos = (long)(currentSeconds * playingProvider.WaveFormat.SampleRate);
-
-            var result = LoopDetector.SampleLoopDetector.(
-                allSamples: analisysSamples,
-                currentPositionSample: currentSamplePos,
-                minLoopSeconds: 2.0);
-
-            if (result.IsValid)
-            {
-                var startByte = result.StartSample * bytesPerFrame;
-                var endByte = result.EndSample * bytesPerFrame;
-
-                // BlockAlign runden (Wichtig!)
-                startByte -= startByte % bytesPerFrame;
-                endByte -= endByte % bytesPerFrame;
-
-                playingProvider.IsLoop = true;
-                playingProvider.SetLoop(
-                    startBytes: startByte,
-                    endBytes: endByte);
-            }
-            else
-            {
-                IsLoop = false;
-            }
+        public void DeactivateLoop()
+        {
+            loopingProvider?.Deactivate();
         }
 
         public void Dispose()
@@ -146,23 +104,24 @@ namespace SportDJ.Services.SignalService
             {
                 Track = track;
 
-                isAnalysisReady = false;
-                analisysSamples = default;
-
                 var fadeOut = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0
                     ? TimeSpan.FromMilliseconds(settingsService.Contents.Options.FadeOnMixOutMilliseconds)
                     : TimeSpan.Zero;
 
                 sourceProvider.Initialize(Track.Path);
 
-                playingProvider = new SourcePlayingProvider(
+                loopingProvider = new LoopingProvider(
                     sourceProvider: sourceProvider,
+                    track: Track);
+
+                loopingProvider.LoopReadyEvent += OnLoopReady;
+                loopingProvider.LoopActivateEvent += OnLoopActivated;
+                loopingProvider.LoopDeactivateEvent += OnLoopDeactivated;
+
+                playingProvider = new PlayingProvider(
+                    sourceProvider: loopingProvider,
                     track: Track,
                     fadeOut: fadeOut);
-
-                bytesPerFrame = playingProvider.WaveFormat.BlockAlign;
-
-                Task.Run(RunAnalysisAsync);
 
                 playingProvider.CueExceededEvent += OnCueExceeded;
                 playingProvider.SignalPausedEvent += OnSignalPaused;
@@ -195,16 +154,18 @@ namespace SportDJ.Services.SignalService
                         newSampleRate: waveFormat.SampleRate);
                 }
 
-                fadingProvider = new DynamicFadingProvider(resampleProvider);
+                fadingProvider = new FadingProvider(resampleProvider);
 
                 fadingProvider.FadingStartedEvent += OnFadingStarted;
                 fadingProvider.FadingEndedEvent += OnFadingEnded;
 
                 if (settingsService.Contents.Options.SelectNextOnPlaySeconds.HasValue)
                 {
-                    var selectNextSeconds = settingsService.Contents.Options.SelectNextOnPlaySeconds.Value;
+                    var selectNextSeconds = settingsService.Contents.Options
+                        .SelectNextOnPlaySeconds.Value;
                     var selectNextDuration = TimeSpan.FromSeconds(selectNextSeconds);
-                    nextThresholdOnPlay = playingProvider.Position.Add(selectNextDuration);
+
+                    nextThresholdOnPlay = playingProvider.Current.Add(selectNextDuration);
                 }
 
                 eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
@@ -254,19 +215,31 @@ namespace SportDJ.Services.SignalService
                 {
                     cancellationTokenSource?.Cancel();
 
-                    analisysSamples = null;
-
-                    if (playingProvider != default)
+                    if (fadingProvider != default)
                     {
                         fadingProvider.FadingStartedEvent -= OnFadingStarted;
                         fadingProvider.FadingEndedEvent -= OnFadingEnded;
-                        fadingProvider.Dispose();
 
+                        fadingProvider.Dispose();
+                    }
+
+                    if (playingProvider != default)
+                    {
                         playingProvider.CueExceededEvent -= OnCueExceeded;
                         playingProvider.SignalPausedEvent -= OnSignalPaused;
                         playingProvider.SignalEndedEvent -= OnSignalEnded;
                         playingProvider.SignalUpdatedEvent -= OnSignalUpdated;
+
                         playingProvider.Dispose();
+                    }
+
+                    if (loopingProvider != default)
+                    {
+                        loopingProvider.LoopReadyEvent -= OnLoopReady;
+                        loopingProvider.LoopActivateEvent -= OnLoopActivated;
+                        loopingProvider.LoopDeactivateEvent -= OnLoopDeactivated;
+
+                        loopingProvider.Dispose();
                     }
 
                     Track = default;
@@ -316,6 +289,21 @@ namespace SportDJ.Services.SignalService
             }
         }
 
+        private void OnLoopActivated(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<LoopActivatedEvent>().Publish(this);
+        }
+
+        private void OnLoopDeactivated(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<LoopDeactivatedEvent>().Publish(this);
+        }
+
+        private void OnLoopReady(object sender, EventArgs e)
+        {
+            eventAggregator.GetEvent<LoopReadyEvent>().Publish(this);
+        }
+
         private void OnSignalEnded(object sender, EventArgs e)
         {
             State = StateType.None;
@@ -349,17 +337,17 @@ namespace SportDJ.Services.SignalService
 
         private void OnSignalUpdated(object sender, EventArgs e)
         {
-            if (Position.HasValue)
+            if (Current.HasValue)
             {
-                if (Position.Value.Ticks - lastPosition > updatesInTicks)
+                if (Current.Value.Ticks - lastPosition > updatesInTicks)
                 {
                     eventAggregator.GetEvent<SignalUpdatedEvent>().Publish(this);
 
                     if (!IsOverNextThreshold
                         && nextThresholdOnPlay.HasValue)
                     {
-                        IsOverNextThreshold = (Position?.Ticks > nextThresholdOnPlay.Value.Ticks)
-                            || (Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks);
+                        IsOverNextThreshold = Current?.Ticks > nextThresholdOnPlay.Value.Ticks
+                            || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
 
                         if (IsOverNextThreshold)
                         {
@@ -368,18 +356,7 @@ namespace SportDJ.Services.SignalService
                     }
                 }
 
-                lastPosition = Position.Value.Ticks;
-            }
-        }
-
-        private async void RunAnalysisAsync()
-        {
-            if (Track?.Path != default)
-            {
-                analisysSamples = await Track.Path.ExtractAsync(
-                    cancellationToken: cancellationTokenSource.Token);
-
-                isAnalysisReady = analisysSamples.Length > 0;
+                lastPosition = Current.Value.Ticks;
             }
         }
 

@@ -23,15 +23,15 @@ namespace SportDJ.Services.MixerService
 
         private readonly IContainerProvider containerProvider;
         private readonly IEventAggregator eventAggregator;
-        private readonly Dictionary<ISignalService, DynamicFadingProvider> fadingProviders = [];
+        private readonly Dictionary<ISignalService, FadingProvider> fadingProviders = [];
         private readonly object lockFadingProviders = new();
         private readonly object lockSignalServices = new();
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = [];
 
         private bool isDisposed;
-        private ContinuousMixingProvider mixingProvider;
-        private DynamicFadingProvider outputProvider;
+        private MixingProvider mixingProvider;
+        private FadingProvider outputProvider;
         private bool signalsCanOverlap;
         private ISignalService signalService;
 
@@ -84,11 +84,13 @@ namespace SportDJ.Services.MixerService
 
         public bool IsLoop => signalService?.IsLoop == true;
 
+        public bool IsLoopReady => signalService?.IsLoopReady == true;
+
         public bool IsPlaying { get; private set; }
 
         public ISampleProvider Output => outputProvider;
 
-        public TimeSpan? Position => signalService?.Position;
+        public TimeSpan? Position => signalService?.Current;
 
         public double? Progress => signalService?.Progress;
 
@@ -118,7 +120,12 @@ namespace SportDJ.Services.MixerService
 
         #region Public Methods
 
-        public ISignalService Add(Track track, bool isLoop)
+        public void ActivateLoop()
+        {
+            signalService?.ActivateLoop();
+        }
+
+        public ISignalService Add(Track track)
         {
             var result = default(ISignalService);
 
@@ -132,8 +139,6 @@ namespace SportDJ.Services.MixerService
 
                 if (result.Output != default)
                 {
-                    result.IsLoop = isLoop;
-
                     lock (lockSignalServices)
                     {
                         signalServices.Add(result);
@@ -147,7 +152,7 @@ namespace SportDJ.Services.MixerService
                     }
                     else
                     {
-                        var fadingProvider = new DynamicFadingProvider(result.Output);
+                        var fadingProvider = new FadingProvider(result.Output);
 
                         fadingProvider.FadingEndedEvent += OnFadingEnded;
 
@@ -166,6 +171,11 @@ namespace SportDJ.Services.MixerService
             }
 
             return result;
+        }
+
+        public void DeactivateLoop()
+        {
+            signalService?.DeactivateLoop();
         }
 
         public void Dispose()
@@ -189,10 +199,10 @@ namespace SportDJ.Services.MixerService
 
             if (mixingProvider?.WaveFormat != waveFormat)
             {
-                mixingProvider = new ContinuousMixingProvider(
+                mixingProvider = new MixingProvider(
                     waveFormat: waveFormat);
 
-                outputProvider = new DynamicFadingProvider(
+                outputProvider = new FadingProvider(
                     sourceProvider: mixingProvider,
                     volume: Constants.VolumeMax);
 
@@ -250,7 +260,7 @@ namespace SportDJ.Services.MixerService
 
         private void OnFadingEnded(object sender, EventArgs e)
         {
-            if (sender is DynamicFadingProvider fadingProvider
+            if (sender is FadingProvider fadingProvider
                 && fadingProvider.IsSilent)
             {
                 var signalService = fadingProviders
@@ -274,7 +284,8 @@ namespace SportDJ.Services.MixerService
             lock (lockSignalServices)
             {
                 relevants = signalServices
-                    .Where(s => s == signalService || (s.IsSilent && s.IsOverNextThreshold)).ToArray();
+                    .Where(s => s == signalService
+                        || (s.IsSilent && s.IsOverNextThreshold)).ToArray();
 
                 signalServices.ExceptWith(relevants);
             }

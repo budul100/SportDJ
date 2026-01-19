@@ -36,9 +36,9 @@ namespace SportDJ.Services.OutputService.Windows
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
-        private ContinuousMixingProvider backgroundProvider;
-        private DynamicFadingProvider fadingProvider;
-        private ContinuousMixingProvider foregroundProvider;
+        private MixingProvider backgroundProvider;
+        private FadingProvider fadingProvider;
+        private MixingProvider foregroundProvider;
         private bool isDisposed;
         private Commons.Models.Settings.Output outputOptions;
         private IVolumeService volumeService;
@@ -330,16 +330,16 @@ namespace SportDJ.Services.OutputService.Windows
         {
             CloseOutput();
 
-            backgroundProvider = new ContinuousMixingProvider(WaveFormat);
+            backgroundProvider = new MixingProvider(WaveFormat);
 
-            fadingProvider = new DynamicFadingProvider(
+            fadingProvider = new FadingProvider(
                 sourceProvider: backgroundProvider,
                 volume: Constants.VolumeMax);
 
             fadingProvider.FadingStartedEvent += OnFadingStarted;
             fadingProvider.FadingEndedEvent += OnFadingEnded;
 
-            foregroundProvider = new ContinuousMixingProvider(WaveFormat);
+            foregroundProvider = new MixingProvider(WaveFormat);
             foregroundProvider.Add(fadingProvider);
 
             var waveProvider = new SampleToWaveProvider(foregroundProvider);

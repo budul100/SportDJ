@@ -96,8 +96,7 @@ namespace SportDJ.Services.PlayerService
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
                 filter: s => signalService == s
-                    && mixerType == MixerType.Background
-                    && !IsLoop);
+                    && mixerType == MixerType.Background);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => InitializeSignal(),
@@ -153,27 +152,6 @@ namespace SportDJ.Services.PlayerService
                     settingsService.Save();
 
                     InitializeSignal();
-                }
-            }
-        }
-
-        public bool IsLoop
-        {
-            get => player?.IsLoop == true;
-
-            set
-            {
-                if (player != default
-                    && player.IsLoop != value)
-                {
-                    player.IsLoop = value;
-
-                    settingsService.Save();
-
-                    if (signalService != default)
-                    {
-                        signalService.IsLoop = IsLoop;
-                    }
                 }
             }
         }
@@ -341,8 +319,7 @@ namespace SportDJ.Services.PlayerService
             Task.Run(() => stackService.Initialize(
                 paths: paths,
                 name: player.Name,
-                resetPosition: player.ResetPosition,
-                isLoop: IsLoop));
+                resetPosition: player.ResetPosition));
         }
 
         private void InitializeSignal()
@@ -362,9 +339,7 @@ namespace SportDJ.Services.PlayerService
                         .Where(s => s.IsSilent)
                         .OnEach(s => s.End());
 
-                    signalService = mixerService?.Add(
-                        track: stackService.Track,
-                        isLoop: IsLoop);
+                    signalService = mixerService?.Add(stackService.Track);
 
                     UpdateDuration();
 

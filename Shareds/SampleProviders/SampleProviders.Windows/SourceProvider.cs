@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NAudio.Wave;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 
 namespace SportDJ.Shareds.SampleProviders.Windows
 {
-    public class AudioSourceProvider
-        : IAudioSourceProvider
+    public class SourceProvider
+        : ISourceProvider
     {
         #region Private Fields
 
@@ -34,7 +35,8 @@ namespace SportDJ.Shareds.SampleProviders.Windows
         {
             Dispose(
                 isDisposing: true);
-            System.GC.SuppressFinalize(
+
+            GC.SuppressFinalize(
                 obj: this);
         }
 

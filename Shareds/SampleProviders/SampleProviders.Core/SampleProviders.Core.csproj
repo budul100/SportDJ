@@ -12,7 +12,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Commons\Commons.csproj" />
-		<ProjectReference Include="..\..\LoopDetector\LoopDetector.csproj" />
 		<ProjectReference Include="..\SampleProviders.Abstractions\SampleProviders.Abstractions.csproj" />
 	</ItemGroup>	  
 

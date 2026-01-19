@@ -23,7 +23,7 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Initialize(IEnumerable<string> paths, string name, bool resetPosition, bool isLoop);
+        void Initialize(IEnumerable<string> paths, string name, bool resetPosition);
 
         void Next();
 

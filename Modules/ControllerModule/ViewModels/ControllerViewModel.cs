@@ -10,6 +10,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
+using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
@@ -24,13 +25,13 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Private Fields
 
         private readonly IMidiService midiService;
+        private readonly IMixerService mixerService;
         private readonly IRegionNavigationService navigationService;
         private readonly IOutputService outputLiveService;
         private readonly IVolumeService volumeService;
 
         private bool isListening;
         private bool isLoweredRequested;
-        private bool isVolumeMonitoringActive;
         private bool isVolumePressed;
         private Options options;
 
@@ -46,15 +47,20 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             this.navigationService = navigationService;
             this.midiService = midiService;
 
-            outputLiveService = containerProvider?.Resolve<IOutputService>(
-                name: nameof(OutputType.Live));
+            mixerService = containerProvider?.Resolve<IMixerService>(
+                name: nameof(MixerType.Background));
 
             volumeService = containerProvider?.Resolve<IVolumeService>(
                 name: nameof(OutputType.Live));
 
-            PauseCommand = new DelegateCommand(
-                executeMethod: () => outputLiveService.Pause(),
-                canExecuteMethod: () => IsActive);
+            outputLiveService = containerProvider?.Resolve<IOutputService>(
+                name: nameof(OutputType.Live));
+
+            LoopCommand = new DelegateCommand(
+                executeMethod: SwitchLoop);
+
+            MonitoringCommand = new DelegateCommand(
+                executeMethod: SwitchMonitoring);
 
             VolumeLowerCommand = new DelegateCommand(
                 executeMethod: LowerOutput,
@@ -62,6 +68,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
             VolumeRaiseCommand = new DelegateCommand(
                 executeMethod: RaiseOutput,
+                canExecuteMethod: () => IsActive);
+
+            PauseCommand = new DelegateCommand(
+                executeMethod: () => outputLiveService?.Pause(),
                 canExecuteMethod: () => IsActive);
 
             eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
@@ -96,6 +106,24 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 keepSubscriberReferenceAlive: true,
                 filter: o => outputLiveService == o);
 
+            eventAggregator?.GetEvent<LoopReadyEvent>().Subscribe(
+                action: _ => UpdateControls(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => mixerService == m);
+
+            eventAggregator?.GetEvent<LoopActivatedEvent>().Subscribe(
+                action: _ => UpdateControls(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => mixerService == m);
+
+            eventAggregator?.GetEvent<LoopDeactivatedEvent>().Subscribe(
+                action: _ => UpdateControls(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: m => mixerService == m);
+
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
                 keepSubscriberReferenceAlive: true);
@@ -121,41 +149,20 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
 
         public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
 
-        public bool IsActive => (outputLiveService?.IsPlaying == true) || IsVolumeMonitoringActive;
+        public bool IsActive => (outputLiveService?.IsPlaying == true) || IsMonitoring;
+
+        public bool IsLoop => mixerService?.IsLoop == true;
+
+        public bool IsLoopEnabled => (outputLiveService?.IsPlaying == true)
+            && (mixerService?.IsLoopReady == true);
+
+        public bool IsMonitoring => (volumeService?.IsActive == true)
+            && (midiService?.IsActive == true);
+
+        public bool IsMonitoringEnabled => volumeService?.IsInitialized == true;
 
         public bool IsVolumeLowered => isLoweredRequested
             && outputLiveService?.IsLowered == true;
-
-        public bool IsVolumeMonitoringActive
-        {
-            get
-            {
-                return (volumeService?.IsActive == true)
-                    && (midiService?.IsActive == true);
-            }
-            set
-            {
-                if (volumeService != default)
-                {
-                    if (value)
-                    {
-                        midiService.Activate();
-                        volumeService.Activate();
-                    }
-                    else
-                    {
-                        midiService.Deactivate();
-                        volumeService.Deactivate();
-                    }
-
-                    SetProperty(ref isVolumeMonitoringActive, value);
-                }
-
-                UpdateControls();
-            }
-        }
-
-        public bool IsVolumeMonitoringAvailable => volumeService?.IsInitialized == true;
 
         public bool IsVolumePressed
         {
@@ -166,6 +173,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
 
         public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
+
+        public DelegateCommand LoopCommand { get; }
+
+        public DelegateCommand MonitoringCommand { get; }
 
         public DelegateCommand PauseCommand { get; }
 
@@ -235,6 +246,36 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
             outputLiveService.Raise();
         }
 
+        private void SwitchLoop()
+        {
+            if (IsLoop)
+            {
+                mixerService?.DeactivateLoop();
+            }
+            else
+            {
+                mixerService?.ActivateLoop();
+            }
+
+            UpdateControls();
+        }
+
+        private void SwitchMonitoring()
+        {
+            if (IsMonitoring)
+            {
+                midiService?.Deactivate();
+                volumeService?.Deactivate();
+            }
+            else
+            {
+                midiService?.Activate();
+                volumeService?.Activate();
+            }
+
+            UpdateControls();
+        }
+
         //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
         //public string Key => KeyCode.GetKey();
@@ -276,14 +317,18 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         {
             RaisePropertyChanged(nameof(IsActive));
 
-            RaisePropertyChanged(nameof(IsVolumeMonitoringAvailable));
-            RaisePropertyChanged(nameof(IsVolumeMonitoringActive));
+            RaisePropertyChanged(nameof(IsLoop));
+            RaisePropertyChanged(nameof(IsLoopEnabled));
+
+            RaisePropertyChanged(nameof(IsMonitoring));
+            RaisePropertyChanged(nameof(IsMonitoringEnabled));
 
             RaisePropertyChanged(nameof(IsVolumeLowered));
 
-            PauseCommand.RaiseCanExecuteChanged();
             VolumeLowerCommand.RaiseCanExecuteChanged();
             VolumeRaiseCommand.RaiseCanExecuteChanged();
+
+            PauseCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateOptions()

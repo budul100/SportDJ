@@ -41,7 +41,7 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(IEnumerable<string> paths, string name, bool resetPosition, bool isLoop)
+        public void Initialize(IEnumerable<string> paths, string name, bool resetPosition)
         {
             var tracks = trackService
                 .Get(paths).ToArray();
@@ -64,14 +64,7 @@ namespace SportDJ.Services.StackService
                     ? Entries.IndexOf(Entries.First(e => e.Track.Path == position.Path))
                     : position.Index;
 
-                if (isLoop)
-                {
-                    Select(Index);
-                }
-                else
-                {
-                    Next();
-                }
+                Next();
             }
         }
 

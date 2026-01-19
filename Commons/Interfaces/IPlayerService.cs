@@ -29,8 +29,6 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsForeground { get; set; }
 
-        bool IsLoop { get; set; }
-
         bool IsPlaying { get; }
 
         double? Progress { get; }

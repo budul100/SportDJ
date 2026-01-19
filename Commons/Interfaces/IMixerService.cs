@@ -18,6 +18,8 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsLoop { get; }
 
+        bool IsLoopReady { get; }
+
         bool IsPlaying { get; }
 
         ISampleProvider Output { get; }
@@ -38,7 +40,11 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        ISignalService Add(Track track, bool isLoop);
+        void ActivateLoop();
+
+        ISignalService Add(Track track);
+
+        void DeactivateLoop();
 
         void End();
 

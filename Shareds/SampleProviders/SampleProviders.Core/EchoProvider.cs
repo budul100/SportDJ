@@ -3,8 +3,8 @@ using NAudio.Wave;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public class EchoEffectProvider(ISampleProvider sourceProvider)
-        : BaseSampleProvider(waveFormat: sourceProvider?.WaveFormat)
+    public class EchoProvider(ISampleProvider sourceProvider)
+        : BaseProvider(waveFormat: sourceProvider?.WaveFormat)
     {
         #region Private Fields
 

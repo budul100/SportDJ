@@ -1,9 +1,9 @@
-﻿using SportDJ.Commons.Enums;
-using System;
+﻿using System;
+using SportDJ.Commons.Enums;
 
 namespace SportDJ.Shareds.SampleProviders.Core.Extensions
 {
-    internal static class ProviderExtensions
+    public static class ProviderExtensions
     {
         #region Public Methods
 
@@ -27,7 +27,9 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
         public static TimeSpan ToDuration(this long bytes, int averageBytesPerSecond)
         {
             var seconds = (double)bytes / averageBytesPerSecond;
-            var result = TimeSpan.FromSeconds(seconds);
+            var result = seconds >= 0
+                ? TimeSpan.FromSeconds(seconds)
+                : TimeSpan.Zero;
 
             return result;
         }

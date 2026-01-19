@@ -6,8 +6,8 @@ using SportDJ.Commons.Assets;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
-    public class ContinuousMixingProvider(WaveFormat waveFormat)
-        : BaseSampleProvider(waveFormat: waveFormat)
+    public class MixingProvider(WaveFormat waveFormat)
+        : BaseProvider(waveFormat: waveFormat)
     {
         #region Private Fields
 

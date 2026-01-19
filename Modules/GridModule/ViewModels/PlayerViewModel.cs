@@ -147,21 +147,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        public bool IsLoop
-        {
-            get { return playerService?.IsLoop == true; }
-            set
-            {
-                if (playerService != default
-                    && value != playerService.IsLoop)
-                {
-                    playerService.IsLoop = value;
-
-                    RaisePropertyChanged(nameof(IsLoop));
-                }
-            }
-        }
-
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
         public bool IsStackVisible

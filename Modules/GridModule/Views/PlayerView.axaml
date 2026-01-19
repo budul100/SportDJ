@@ -85,25 +85,6 @@
                     </Viewbox>
                 </ToggleButton>
 
-                <ToggleButton
-                    Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Focusable="False"
-                    IsChecked="{Binding IsLoop}"
-                    IsEnabled="{Binding IsAvailableExecute}">
-                    <Viewbox
-                        MaxWidth="{StaticResource LargeIconSize}"
-                        MaxHeight="{StaticResource LargeIconSize}"
-                        Stretch="Uniform"
-                        StretchDirection="Both">
-                        <mat:MaterialIcon
-                            Width="{StaticResource PlayerIconSize}"
-                            Height="{StaticResource PlayerIconSize}"
-                            Kind="Repeat" />
-                    </Viewbox>
-                </ToggleButton>
-
                 <Border
                     Grid.Column="4"
                     HorizontalAlignment="Stretch"
