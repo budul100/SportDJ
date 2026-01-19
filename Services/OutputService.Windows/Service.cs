@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -347,10 +346,8 @@ namespace SportDJ.Services.OutputService.Windows
             foregroundProvider = new MixingProvider(WaveFormat);
             foregroundProvider.Add(fadingProvider);
 
-            var waveProvider = new SampleToWaveProvider(foregroundProvider);
-
             outputHandler.Initialize(
-                waveProvider: waveProvider,
+                sampleProvider: foregroundProvider,
                 volume: outputOptions.Volume);
 
             mixersAll.OnEach(mixer => Add(

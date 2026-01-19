@@ -24,10 +24,17 @@ namespace SportDJ.Shareds.SampleProviders.Windows
         public long Position
         {
             get => fileReader.Position / blockAlign;
-            set => fileReader.Position = value * blockAlign;
+            set
+            {
+                if (fileReader != default)
+                {
+                    var position = Math.Clamp(value, 0, length);
+                    fileReader.Position = position * blockAlign;
+                }
+            }
         }
 
-        public WaveFormat WaveFormat => fileReader.WaveFormat;
+        public WaveFormat WaveFormat => fileReader?.WaveFormat;
 
         #endregion Public Properties
 

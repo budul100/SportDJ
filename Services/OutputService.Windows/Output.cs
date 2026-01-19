@@ -64,38 +64,37 @@ namespace SportDJ.Services.OutputService.Windows
                 obj: this);
         }
 
-        public void Initialize(IWaveProvider waveProvider, float volume)
+        public void Initialize(ISampleProvider sampleProvider, float volume)
         {
             if (Device != default)
             {
                 try
                 {
-                    var playerProvider = waveProvider;
+                    var outputProvider = sampleProvider;
 
                     switch (Device.Type)
                     {
-                        case DeviceType.Wasapi:
-
-                            player = new WaveOutEvent { DeviceNumber = Device.Number, };
-                            break;
-
                         case DeviceType.Asio:
 
                             var asioOut = ExecuteOnSTAThread(() => new AsioOut(Device.Name));
 
-                            if (!asioOut.IsSampleRateSupported(waveProvider.WaveFormat.SampleRate))
+                            if (!asioOut.IsSampleRateSupported(outputProvider.WaveFormat.SampleRate))
                             {
-                                var sampleProvider = waveProvider.ToSampleProvider();
-                                var resampler = new WdlResamplingSampleProvider(
-                                    source: sampleProvider,
+                                outputProvider = new WdlResamplingSampleProvider(
+                                    source: outputProvider,
                                     newSampleRate: Constants.SampleRateDefaultAsio);
-
-                                playerProvider = new SampleToWaveProvider(resampler);
                             }
 
                             player = asioOut;
                             break;
+
+                        case DeviceType.Wasapi:
+
+                            player = new WaveOutEvent { DeviceNumber = Device.Number };
+                            break;
                     }
+
+                    var playerProvider = new SampleToWaveProvider(outputProvider);
 
                     player.PlaybackStopped += OnPlaybackStopped;
                     player.Init(playerProvider);
