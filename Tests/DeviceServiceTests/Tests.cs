@@ -46,10 +46,10 @@ namespace SportDJ.Tests.DeviceServiceTests
                 Setup(m => m.GetEvent<MixerEndedEvent>()).
                 Returns(mockMixerEndedEvent.Object);
 
-            var mockDevicesUpdatedEvent = new Mock<DevicesUpdatedEvent>();
+            var mockUpdatedEvent = new Mock<DevicesUpdatedEvent>();
             mockEventAggregator
                 .Setup(m => m.GetEvent<DevicesUpdatedEvent>())
-                .Returns(mockDevicesUpdatedEvent.Object);
+                .Returns(mockUpdatedEvent.Object);
 
             mockSettingsService = new Mock<IStorageService<Set>>();
             mockSettingsService

@@ -7,6 +7,8 @@ namespace SportDJ.Commons.Models.Settings
     {
         #region Public Properties
 
+        public string ControllerName { get; set; }
+
         public int Height { get; set; } = Defaults.AppHeight;
 
         public List<Output> Outputs { get; set; } = [];

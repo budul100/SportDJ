@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SportDJ.Commons.Exceptions
+namespace SportDJ.Services.DeviceService.Windows.Exceptions
 {
     [Serializable]
     public class NoDeviceAvailableException

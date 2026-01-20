@@ -81,6 +81,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceService.Windows", "Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControllerService", "Services\ControllerService\ControllerService.csproj", "{F0663563-5E96-4130-B79E-E518E640B6A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControllerServiceTests", "Tests\ControllerServiceTests\ControllerServiceTests.csproj", "{22714AAD-6100-4316-943E-029A872414AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -223,6 +225,10 @@ Global
 		{F0663563-5E96-4130-B79E-E518E640B6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0663563-5E96-4130-B79E-E518E640B6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0663563-5E96-4130-B79E-E518E640B6A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22714AAD-6100-4316-943E-029A872414AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22714AAD-6100-4316-943E-029A872414AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22714AAD-6100-4316-943E-029A872414AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22714AAD-6100-4316-943E-029A872414AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -261,6 +267,7 @@ Global
 		{5519E18A-BC0B-8FB8-76B3-66DB354B6BB9} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{8F77647C-14DB-4E99-A9F7-0B72495B5C06} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 		{F0663563-5E96-4130-B79E-E518E640B6A4} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
+		{22714AAD-6100-4316-943E-029A872414AC} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

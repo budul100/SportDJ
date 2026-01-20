@@ -46,6 +46,7 @@
 		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 		<ProjectReference Include="..\Modules\StackModule\StackModule.csproj" />
+		<ProjectReference Include="..\Services\ControllerService\ControllerService.csproj" />
 		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />
 		<ProjectReference Include="..\Services\GridService\GridService.csproj" />

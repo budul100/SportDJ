@@ -1,0 +1,16 @@
+<DeviceProfile>
+  <Name>Launchpad Classic</Name>
+
+  <Match>
+    <ProductNameContains>Launchpad</ProductNameContains>
+    <ExcludeContains>DAW</ExcludeContains>
+  </Match>
+
+  <InitSysex>
+    <Message>F0 00 20 29 02 08 0E 01 F7</Message>
+  </InitSysex>
+
+  <ShutdownSysex>
+    <Message>F0 00 20 29 02 08 0E 00 F7</Message>
+  </ShutdownSysex>
+</DeviceProfile>

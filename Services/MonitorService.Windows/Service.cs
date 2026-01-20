@@ -70,7 +70,7 @@ namespace SportDJ.Services.MonitorService.Windows
         {
             ResetVolume();
 
-            this.device = device.Type == DeviceType.Wasapi
+            this.device = device?.Type == DeviceType.Wasapi
                 ? device
                 : default;
 

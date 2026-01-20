@@ -62,7 +62,7 @@
 					Margin="{StaticResource InnerMargin}"
 					HorizontalAlignment="Left"
 					VerticalAlignment="Stretch"
-					FontSize="{StaticResource FontSizeVolume}"
+					FontSize="{StaticResource FontSizeSettings}"
 					Text="Output device" />
 
 				<ComboBox
@@ -96,6 +96,54 @@
 			</StackPanel>
 		</DockPanel>
 
+		<DockPanel
+			Margin="{StaticResource ContentMargin}"
+			DockPanel.Dock="Top"
+			IsEnabled="{Binding !ControllersNotAvailable}"
+			LastChildFill="True">
+
+			<Button
+				Margin="{StaticResource InnerMargin}"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Bottom"
+				Command="{Binding UpdateControllersCommand}"
+				DockPanel.Dock="Right"
+				Focusable="False">
+				<mat:MaterialIcon
+					Width="{StaticResource MediumIconSize}"
+					Height="{StaticResource MediumIconSize}"
+					Kind="Reload" />
+			</Button>
+
+			<StackPanel Margin="{StaticResource InnerMargin}" DockPanel.Dock="Left">
+
+				<TextBlock
+					Margin="{StaticResource InnerMargin}"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Stretch"
+					FontSize="{StaticResource FontSizeSettings}"
+					Text="Midi controller" />
+
+				<ComboBox
+					Margin="{StaticResource InnerMargin}"
+					HorizontalAlignment="Stretch"
+					Focusable="False"
+					ItemsSource="{Binding Controllers}"
+					SelectedItem="{Binding Controller}">
+
+					<ComboBox.ItemTemplate>
+						<DataTemplate x:DataType="models:Records.Controller">
+							<StackPanel Orientation="Horizontal">
+								<TextBlock Text="{Binding Name}"/>
+							</StackPanel>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+
+				</ComboBox>
+
+			</StackPanel>
+		</DockPanel>
+		
 		<Grid
 			Margin="{StaticResource ContentMargin}"
 			ColumnDefinitions="*,*"
@@ -154,7 +202,7 @@
 				Margin="{StaticResource InnerMargin}"
 				HorizontalAlignment="Center"
 				VerticalAlignment="Stretch"
-				FontSize="{StaticResource FontSizeVolume}"
+				FontSize="{StaticResource FontSizeSettings}"
 				Text="Volume" />
 
 			<Slider
@@ -177,7 +225,7 @@
 				Margin="{StaticResource InnerMargin}"
 				HorizontalAlignment="Center"
 				VerticalAlignment="Stretch"
-				FontSize="{StaticResource FontSizeVolume}"
+				FontSize="{StaticResource FontSizeSettings}"
 				Text="Background" />
 
 			<Slider
@@ -200,7 +248,7 @@
 				Margin="{StaticResource InnerMargin}"
 				HorizontalAlignment="Center"
 				VerticalAlignment="Stretch"
-				FontSize="{StaticResource FontSizeVolume}"
+				FontSize="{StaticResource FontSizeSettings}"
 				Text="External apps" />
 
 			<Slider

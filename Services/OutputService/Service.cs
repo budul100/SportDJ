@@ -8,6 +8,7 @@ using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
@@ -55,8 +56,12 @@ namespace SportDJ.Services.OutputService
             this.sessionService = sessionService;
             this.deviceService = deviceService;
 
-            eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: ApplySettings,
+            eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
+                action: InitializeOutput,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator.GetEvent<SettingsLoadedEvent<Session>>().Subscribe(
+                action: InitializeOutput,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator.GetEvent<DeviceStoppedEvent>().Subscribe(
@@ -219,12 +224,14 @@ namespace SportDJ.Services.OutputService
                 var device = Device;
 
                 deviceService.Set(
-                    deviceName: deviceName,
+                    name: deviceName,
                     sampleRate: sampleRate,
                     takeDefaultIfMissing: takeDefaultIfMissing);
 
                 if (Device != device)
                 {
+                    CloseOutput();
+
                     if (deviceService.Device != default)
                     {
                         InitializeProviders();
@@ -276,17 +283,6 @@ namespace SportDJ.Services.OutputService
         #endregion Protected Methods
 
         #region Private Methods
-
-        private void ApplySettings()
-        {
-            outputOptions = GetOptions(Type);
-
-            var takeDefaultIfMissing = Type == OutputType.Live;
-
-            Set(
-                deviceName: outputOptions.DeviceName,
-                takeDefaultIfMissing: takeDefaultIfMissing);
-        }
 
         private void CloseDevice()
         {
@@ -345,10 +341,19 @@ namespace SportDJ.Services.OutputService
             }
         }
 
+        private void InitializeOutput()
+        {
+            outputOptions = GetOptions(Type);
+
+            var takeDefaultIfMissing = Type == OutputType.Live;
+
+            Set(
+                deviceName: outputOptions.DeviceName,
+                takeDefaultIfMissing: takeDefaultIfMissing);
+        }
+
         private void InitializeProviders()
         {
-            CloseOutput();
-
             backgroundProvider = new MixingProvider(deviceService.WaveFormat);
 
             fadingProvider = new FadingProvider(
@@ -362,7 +367,7 @@ namespace SportDJ.Services.OutputService
             foregroundProvider.Add(fadingProvider);
 
             deviceService.Initialize(
-                sampleProvider: foregroundProvider,
+                provider: foregroundProvider,
                 volume: outputOptions.Volume);
 
             mixersAll.OnEach(mixer => Add(

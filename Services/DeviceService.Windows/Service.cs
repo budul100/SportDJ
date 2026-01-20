@@ -9,9 +9,9 @@ using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Device;
-using SportDJ.Commons.Exceptions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
+using SportDJ.Services.DeviceService.Windows.Exceptions;
 
 namespace SportDJ.Services.DeviceService.Windows
 {
@@ -31,7 +31,7 @@ namespace SportDJ.Services.DeviceService.Windows
 
         public IEnumerable<Device> Devices { get; private set; } = [];
 
-        public bool IsActive { get; private set; }
+        public bool IsActive => player != default;
 
         public float Volume
         {
@@ -97,7 +97,6 @@ namespace SportDJ.Services.DeviceService.Windows
                     player.Init(playerProvider);
 
                     Volume = volume;
-                    IsActive = true;
                 }
                 catch
                 {
@@ -110,13 +109,20 @@ namespace SportDJ.Services.DeviceService.Windows
 
         public void Play() => player?.Play();
 
-        public void Set(string deviceName, int sampleRate, bool takeDefaultIfMissing = false)
+        public void Set(string name, int sampleRate, bool takeDefaultIfMissing = false)
         {
             var device = default(Device);
 
-            if (!string.IsNullOrWhiteSpace(deviceName))
+            if (!string.IsNullOrWhiteSpace(name))
             {
-                device = Devices.SingleOrDefault(d => d.Name == deviceName);
+                if (Devices.Any())
+                {
+                    device = Devices.SingleOrDefault(d => d.Name == name);
+                }
+                else
+                {
+                    throw new NoDeviceAvailableException();
+                }
             }
 
             if (device != Device)
@@ -294,16 +300,16 @@ namespace SportDJ.Services.DeviceService.Windows
 
             if (device == default)
             {
-                if (Devices.Any())
+                if (takeDefaultIfMissing)
                 {
-                    if (takeDefaultIfMissing)
+                    if (Devices.Any())
                     {
                         Device = Devices.First();
                     }
-                }
-                else
-                {
-                    throw new NoDeviceAvailableException();
+                    else
+                    {
+                        throw new NoDeviceAvailableException();
+                    }
                 }
             }
 
@@ -317,8 +323,6 @@ namespace SportDJ.Services.DeviceService.Windows
             {
                 WaveFormat = default;
             }
-
-            IsActive = false;
         }
 
         #endregion Private Methods

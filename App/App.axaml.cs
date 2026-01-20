@@ -118,6 +118,7 @@ namespace SportDJ.App
             containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
             containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
             containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
+            containerRegistry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
 
             containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
             containerRegistry.Register<IStackService, Services.StackService.Service>();

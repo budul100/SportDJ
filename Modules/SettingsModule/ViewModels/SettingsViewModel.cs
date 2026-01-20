@@ -26,6 +26,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
     {
         #region Private Fields
 
+        private readonly IControllerService controllerService;
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly FilePickerFileType[] fileTypeFilter = [new(Constants.SettingsExtension)];
@@ -35,9 +36,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         private readonly IStorageService<Session> sessionService;
         private readonly IStorageService<Set> settingsService;
 
+        private Controller controller;
+        private bool controllersNotAvailable;
         private Device device;
         private bool devicesNotAvailable;
-        private bool isUpdate;
+        private bool isUpdateControllers;
+        private bool isUpdateDevices;
         private IStorageFolder startLocation;
 
         #endregion Private Fields
@@ -46,7 +50,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         public SettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IDialogService dialogService, IPanelService panelService,
-            IStorageService<Set> settingsService, IStorageService<Session> sessionService)
+            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
+            IControllerService controllerService)
             : base(regionManager)
         {
             this.eventAggregator = eventAggregator;
@@ -54,6 +59,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             this.panelService = panelService;
             this.settingsService = settingsService;
             this.sessionService = sessionService;
+            this.controllerService = controllerService;
 
             SettingsLoadCommand = new DelegateCommand(
                 async () => await LoadSettingsAsync());
@@ -64,6 +70,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             UpdateDevicesCommand = new DelegateCommand(
                 executeMethod: UpdateDevices);
 
+            UpdateControllersCommand = new DelegateCommand(
+                executeMethod: UpdateControllers);
+
             outputService = containerProvider?.Resolve<IOutputService>(
                 name: nameof(OutputType.Live));
 
@@ -71,7 +80,15 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 .SingleOrDefault(o => o.Type == OutputType.Live);
 
             eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
-                action: SetStartLocation,
+                action: InitializeSettings,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+                action: _ => RefreshSettings(),
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
+                action: SaveSettings,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
@@ -84,6 +101,16 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
+            eventAggregator?.GetEvent<ControllerUpdatedEvent>().Subscribe(
+                action: SetController,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<ControllersUpdatedEvent>().Subscribe(
+                action: SetControllers,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator?.GetEvent<DevicesUpdatedEvent>().Subscribe(
                 action: SetDevices,
                 threadOption: ThreadOption.PublisherThread,
@@ -93,21 +120,38 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 action: _ => SetDevice(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
-                action: _ => InitializeOptions(),
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
-                action: UpdateOptions,
-                keepSubscriberReferenceAlive: true);
-
-            UpdateDevices();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
+
+        public Controller Controller
+        {
+            get { return controller; }
+            set
+            {
+                if (value != controller)
+                {
+                    SetProperty(ref controller, value);
+
+                    if (controller != default)
+                    {
+                        ControllersNotAvailable = true;
+
+                        controllerService.Set(controller.Name);
+                    }
+                }
+            }
+        }
+
+        public ObservableCollection<Controller> Controllers { get; private set; } = [];
+
+        public bool ControllersNotAvailable
+        {
+            get { return controllersNotAvailable; }
+            set { SetProperty(ref controllersNotAvailable, value); }
+        }
 
         public Device Device
         {
@@ -144,6 +188,8 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
         public DelegateCommand SettingsLoadCommand { get; }
 
         public DelegateCommand SettingsSaveCommand { get; }
+
+        public DelegateCommand UpdateControllersCommand { get; }
 
         public DelegateCommand UpdateDevicesCommand { get; }
 
@@ -202,18 +248,12 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Private Methods
 
-        private void InitializeOptions()
+        private void InitializeSettings()
         {
-            if (panelService.IsVisible<IStorageService<Session>>())
-            {
-                RaisePropertyChanged(nameof(Options));
+            UpdateDevices();
+            UpdateControllers();
 
-                RaisePropertyChanged(nameof(Volume));
-                RaisePropertyChanged(nameof(VolumePercentageExternals));
-                RaisePropertyChanged(nameof(VolumePercentageBackground));
-
-                RaisePropertyChanged(nameof(IsActive));
-            }
+            SetStartLocation();
         }
 
         private async Task LoadSettingsAsync()
@@ -243,6 +283,29 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
+        private void RefreshSettings()
+        {
+            if (panelService.IsVisible<IStorageService<Session>>())
+            {
+                RaisePropertyChanged(nameof(Options));
+
+                RaisePropertyChanged(nameof(Volume));
+                RaisePropertyChanged(nameof(VolumePercentageExternals));
+                RaisePropertyChanged(nameof(VolumePercentageBackground));
+
+                RaisePropertyChanged(nameof(IsActive));
+            }
+        }
+
+        private void SaveSettings()
+        {
+            settingsService.Save();
+
+            eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Publish();
+
+            RaisePropertyChanged(nameof(IsActive));
+        }
+
         private async Task SaveSettingsAsync()
         {
             var fileName = Path.GetFileNameWithoutExtension(sessionService?.Contents?.SettingsPath);
@@ -267,10 +330,42 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
+        private void SetController()
+        {
+            Controller = Controllers?
+                .SingleOrDefault(d => d.Name == controllerService?.Controller?.Name);
+
+            ControllersNotAvailable = false;
+        }
+
+        private void SetControllers()
+        {
+            var givenSet = Controllers.ToHashSet();
+            var updateSet = controllerService?.Controllers?.ToHashSet();
+
+            if (updateSet?.SetEquals(givenSet) != true)
+            {
+                Controllers.Clear();
+
+                if (updateSet?.Count > 0)
+                {
+                    var ordereds = updateSet
+                        .OrderBy(c => c.Name).ToArray();
+
+                    foreach (var ordered in ordereds)
+                    {
+                        Controllers.Add(ordered);
+                    }
+                }
+
+                RaisePropertyChanged(nameof(Controllers));
+            }
+        }
+
         private void SetDevice()
         {
             Device = Devices?
-                .SingleOrDefault(d => d.Name == outputService.Device?.Name);
+                .SingleOrDefault(d => d.Name == outputService?.Device?.Name);
 
             if (Device == default)
             {
@@ -282,16 +377,16 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         private void SetDevices()
         {
-            var devicesSet = Devices.ToHashSet();
-            var updatedSet = outputService?.Devices?.ToHashSet();
+            var givenSet = Devices.ToHashSet();
+            var updateSet = outputService?.Devices?.ToHashSet();
 
-            if (updatedSet?.SetEquals(devicesSet) != true)
+            if (updateSet?.SetEquals(givenSet) != true)
             {
                 Devices.Clear();
 
-                if (outputService?.Devices?.Any() == true)
+                if (updateSet?.Count > 0)
                 {
-                    var ordereds = outputService.Devices
+                    var ordereds = updateSet
                         .OrderByDescending(d => d.Type == DeviceType.Asio)
                         .ThenBy(d => d.Name).ToArray();
 
@@ -311,25 +406,28 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
                 .GetFolderAsync(sessionService?.Contents?.SettingsPath));
         }
 
-        private void UpdateDevices()
+        private void UpdateControllers()
         {
-            if (!isUpdate)
+            if (!isUpdateControllers)
             {
-                isUpdate = true;
+                isUpdateControllers = true;
 
-                outputService?.Update();
+                controllerService?.Update();
 
-                isUpdate = false;
+                isUpdateControllers = false;
             }
         }
 
-        private void UpdateOptions()
+        private void UpdateDevices()
         {
-            settingsService.Save();
+            if (!isUpdateDevices)
+            {
+                isUpdateDevices = true;
 
-            eventAggregator.GetEvent<SettingsUpdatedEvent<Set>>().Publish();
+                outputService?.Update();
 
-            RaisePropertyChanged(nameof(IsActive));
+                isUpdateDevices = false;
+            }
         }
 
         #endregion Private Methods

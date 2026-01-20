@@ -24,11 +24,11 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
-        void Initialize(ISampleProvider sampleProvider, float volume);
+        void Initialize(ISampleProvider provider, float volume);
 
         void Play();
 
-        void Set(string deviceName, int sampleRate, bool takeDefaultIfMissing = false);
+        void Set(string name, int sampleRate, bool takeDefaultIfMissing = false);
 
         void Stop();
 

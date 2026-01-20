@@ -17,6 +17,8 @@ namespace SportDJ.Commons.Interfaces
 
         #region Public Methods
 
+        void Set(string name);
+
         void Update();
 
         #endregion Public Methods
