@@ -8,7 +8,7 @@
         public const int MidiMixxxDeckCount = 4;
 
         public const string MidiMixxxMappingFile = "SportDJ2Mixxx.midi.xml";
-        public const string MidiMixxxMappingSource = "Mappings";
+        public const string MidiMixxxMappingSource = "Midi";
         public const string MidiMixxxMappingTarget = "Mixxx\\controllers";
         public const string MidiMixxxOutputDevice = "SportDJ2Mixxx";
 

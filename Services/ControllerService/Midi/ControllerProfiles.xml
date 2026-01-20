@@ -1,0 +1,10 @@
+<ControllerProfiles>
+	<Profile name="Launchpad Classic">
+		<Match>
+			<ProductNameIncluded>.*Launchpad.*</ProductNameIncluded>
+			<ProductNameExcluded>.*DAW.*</ProductNameExcluded>
+		</Match>
+		<InitSysEx>F0 00 20 29 02 08 0E 01 F7</InitSysEx>
+		<FinalSysEx>F0 00 20 29 02 08 0E 00 F7</FinalSysEx>
+	</Profile>
+</ControllerProfiles>

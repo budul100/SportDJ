@@ -11,7 +11,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="budul.RegexExtensions" Version="1.5.1" />
 		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Midi\ControllerProfiles.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Midi\ControllerProfiles.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>

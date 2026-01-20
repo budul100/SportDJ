@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using NAudio.Midi;
 using Prism.Events;
+using RegexExtensions;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Services.ControllerService.Assets;
 using SportDJ.Services.ControllerService.Exceptions;
+using SportDJ.Services.ControllerService.Extensions;
+using SportDJ.Services.ControllerService.Records;
 
 namespace SportDJ.Services.ControllerService
 {
@@ -24,6 +30,10 @@ namespace SportDJ.Services.ControllerService
 
         private bool isDisposed;
         private MidiIn midiIn;
+        private MidiOut midiOut;
+        private IEnumerable<Profile> profiles;
+        private byte[] sysExFinal;
+        private byte[] sysExInit;
 
         #endregion Private Fields
 
@@ -41,6 +51,8 @@ namespace SportDJ.Services.ControllerService
             eventAggregator?.GetEvent<SettingsLoadedEvent<Session>>().Subscribe(
                 action: InitializeController,
                 keepSubscriberReferenceAlive: true);
+
+            profiles = GetProfiles().ToArray();
 
             Update();
         }
@@ -128,23 +140,97 @@ namespace SportDJ.Services.ControllerService
 
         private static IEnumerable<Controller> GetControllers()
         {
-            for (var index = 0; index < MidiIn.NumberOfDevices; index++)
+            for (var indexIn = 0; indexIn < MidiIn.NumberOfDevices; indexIn++)
             {
-                var deviceInfo = MidiIn.DeviceInfo(index);
+                var deviceIn = MidiIn.DeviceInfo(indexIn);
+                var indexOut = GetIndexOut(deviceIn);
 
                 var result = new Controller(
-                    deviceInfo.ProductName,
-                    index);
+                    Name: deviceIn.ProductName,
+                    IndexIn: indexIn,
+                    IndexOut: indexOut);
 
                 yield return result;
             }
         }
 
+        private static int? GetIndexOut(MidiInCapabilities deviceIn)
+        {
+            for (var index = 0; index < MidiOut.NumberOfDevices; index++)
+            {
+                var deviceOut = MidiOut.DeviceInfo(index);
+
+                if (deviceOut.ProductName == deviceIn.ProductName)
+                {
+                    return index;
+                }
+            }
+
+            return default;
+        }
+
         private void CloseController()
         {
-            midiIn?.Dispose();
+            try
+            {
+                midiIn?.Stop();
 
-            midiIn = default;
+                if (midiOut != default)
+                {
+                    if (sysExFinal?.Length > 0)
+                    {
+                        midiOut.SendBuffer(sysExFinal);
+                    }
+
+                    midiOut?.Dispose();
+                    midiOut = default;
+                }
+
+                midiIn?.Dispose();
+                midiIn = default;
+            }
+            catch
+            {
+                // TODO: Log exception
+            }
+            finally
+            {
+                sysExInit = default;
+                sysExFinal = default;
+            }
+        }
+
+        private IEnumerable<Profile> GetProfiles()
+        {
+            var sourceFile = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                Constants.ControllerProfilesSource,
+                Constants.ControllerProfilesFile);
+
+            var serializer = new XmlSerializer(typeof(ControllerProfiles));
+
+            using var file = new StreamReader(sourceFile);
+
+            var profiles = default(ControllerProfiles);
+
+            try
+            {
+                profiles = serializer.Deserialize(file) as ControllerProfiles;
+            }
+            catch
+            {
+                // TODO: Log exception
+
+                Debugger.Break();
+            }
+
+            if (profiles?.Profiles?.Count > 0)
+            {
+                foreach (var profile in profiles.Profiles)
+                {
+                    yield return profile;
+                }
+            }
         }
 
         private void InitializeController()
@@ -160,7 +246,29 @@ namespace SportDJ.Services.ControllerService
             {
                 try
                 {
-                    midiIn = new MidiIn(controller.Number);
+                    var profile = profiles
+                        .Where(p => controller.Name.IsMatchOrEmptyPattern(p?.Match?.ProductNameIncluded)
+                            && !controller.Name.IsMatch(p?.Match?.ProductNameExcluded)).FirstOrDefault();
+
+                    if (profile != default)
+                    {
+                        sysExInit = profile.InitSysEx?.Parse();
+                        sysExFinal = profile.FinalSysEx?.Parse();
+                    }
+
+                    midiIn = new MidiIn(controller.IndexIn);
+
+                    midiIn.Start();
+
+                    if (controller.IndexOut.HasValue)
+                    {
+                        midiOut = new MidiOut(controller.IndexOut.Value);
+
+                        if (sysExInit?.Length > 0)
+                        {
+                            midiOut.SendBuffer(sysExInit);
+                        }
+                    }
 
                     Controller = controller;
                 }

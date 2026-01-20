@@ -7,21 +7,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Mappings\SportDJ2Mixxx.midi.xml" />
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="Mappings\SportDJ2Mixxx.midi.xml">
+		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Midi\SportDJ2Mixxx.midi.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Midi\SportDJ2Mixxx.midi.xml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="NAudio.Midi" Version="2.2.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -31,6 +31,7 @@ namespace SportDJ.App.ViewModels
         private readonly string assemblyTitle;
         private readonly IMixerService backgroundMixer;
         private readonly IContainerProvider containerProvider;
+        private readonly IControllerService controllerService;
         private readonly IDialogService dialogService;
         private readonly IDispatcherService dispatcherService;
         private readonly HashSet<IOutputService> liveServices = [];
@@ -53,7 +54,8 @@ namespace SportDJ.App.ViewModels
 
         public MainViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
             IStorageService<Set> settingsService, IStorageService<Session> sessionService,
-            IDispatcherService dispatcherService, IDialogService dialogService, IPanelService panelService)
+            IDispatcherService dispatcherService, IDialogService dialogService, IPanelService panelService,
+            IControllerService controllerService)
         {
             this.containerProvider = containerProvider;
             this.dispatcherService = dispatcherService;
@@ -61,6 +63,7 @@ namespace SportDJ.App.ViewModels
             this.sessionService = sessionService;
             this.dialogService = dialogService;
             this.panelService = panelService;
+            this.controllerService = controllerService;
 
             assemblyTitle = GetAssemblyTitle();
 
@@ -344,7 +347,8 @@ namespace SportDJ.App.ViewModels
                     settingsService.Save();
                     sessionService.Save();
 
-                    DisposeOutputs();
+                    outputServices.OnEach(s => s.Dispose());
+                    controllerService?.Dispose();
                 }
 
                 isDisposed = true;
@@ -394,11 +398,6 @@ namespace SportDJ.App.ViewModels
         private void ClosePanel(PanelType type)
         {
             panelService.Deactivate(type);
-        }
-
-        private void DisposeOutputs()
-        {
-            outputServices.OnEach(s => s.Dispose());
         }
 
         private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)

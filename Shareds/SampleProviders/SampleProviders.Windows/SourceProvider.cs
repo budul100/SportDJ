@@ -10,6 +10,8 @@ namespace SportDJ.Shareds.SampleProviders.Windows
     {
         #region Private Fields
 
+        private readonly object readerLock = new();
+
         private int blockAlign;
         private AudioFileReader fileReader;
         private bool isDisposed;
@@ -23,13 +25,25 @@ namespace SportDJ.Shareds.SampleProviders.Windows
 
         public long Position
         {
-            get => fileReader.Position / blockAlign;
+            get
+            {
+                lock (readerLock)
+                {
+                    return fileReader?.Position != default
+                        ? fileReader.Position / blockAlign
+                        : 0;
+                }
+            }
+
             set
             {
-                if (fileReader != default)
+                lock (readerLock)
                 {
-                    var position = Math.Clamp(value, 0, length);
-                    fileReader.Position = position * blockAlign;
+                    if (fileReader != default)
+                    {
+                        var position = Math.Clamp(value, 0, length);
+                        fileReader.Position = position * blockAlign;
+                    }
                 }
             }
         }
@@ -66,10 +80,18 @@ namespace SportDJ.Shareds.SampleProviders.Windows
 
         public int Read(float[] buffer, int offset, int count)
         {
-            var samplesRead = fileReader.Read(
-                buffer: buffer,
-                offset: offset,
-                count: count);
+            var samplesRead = 0;
+
+            lock (readerLock)
+            {
+                if (fileReader != default)
+                {
+                    samplesRead = fileReader.Read(
+                        buffer: buffer,
+                        offset: offset,
+                        count: count);
+                }
+            }
 
             return samplesRead;
         }
@@ -84,7 +106,12 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             {
                 if (isDisposing)
                 {
-                    fileReader.Dispose();
+                    lock (readerLock)
+                    {
+                        fileReader.Dispose();
+
+                        fileReader = default;
+                    }
                 }
 
                 isDisposed = true;
