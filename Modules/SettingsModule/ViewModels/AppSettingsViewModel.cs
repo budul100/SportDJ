@@ -21,7 +21,7 @@ using SportDJ.Commons.Prism;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
-    public class SettingsViewModel
+    public class AppSettingsViewModel
         : RegionViewModelBase
     {
         #region Private Fields
@@ -48,7 +48,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Public Constructors
 
-        public SettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+        public AppSettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
             IEventAggregator eventAggregator, IDialogService dialogService, IPanelService panelService,
             IStorageService<Set> settingsService, IStorageService<Session> sessionService,
             IControllerService controllerService)

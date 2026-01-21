@@ -15,7 +15,7 @@ namespace SportDJ.Modules.SettingsModule
         public void OnInitialized(IContainerProvider containerProvider)
         {
             var panelService = containerProvider.Resolve<IPanelService>();
-            var settingsView = containerProvider.Resolve<SettingsView>();
+            var settingsView = containerProvider.Resolve<AppSettingsView>();
 
             panelService.Register<IStorageService<Session>>(
                 type: PanelType.Right,
@@ -24,10 +24,10 @@ namespace SportDJ.Modules.SettingsModule
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<SettingsView>();
+            containerRegistry.Register<AppSettingsView>();
 
-            containerRegistry.RegisterForNavigation<SettingsView>(
-                name: typeof(SettingsView).FullName);
+            containerRegistry.RegisterForNavigation<AppSettingsView>(
+                name: typeof(AppSettingsView).FullName);
         }
 
         #endregion Public Methods

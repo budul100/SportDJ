@@ -1,5 +1,5 @@
 <UserControl
-	x:Class="SportDJ.Modules.SettingsModule.Views.SettingsView"
+	x:Class="SportDJ.Modules.SettingsModule.Views.AppSettingsView"
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
@@ -32,7 +32,7 @@
 	</UserControl.Styles>
 
 	<Design.DataContext>
-		<dt:SettingsViewModel />
+		<dt:AppSettingsViewModel />
 	</Design.DataContext>
 
 	<DockPanel IsEnabled="{Binding IsActive}" LastChildFill="True">

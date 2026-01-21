@@ -21,4 +21,10 @@
 		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Views\AppSettingsView.axaml.cs">
+	    <DependentUpon>AppSettingsView.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
 </Project>
