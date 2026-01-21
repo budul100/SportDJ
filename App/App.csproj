@@ -5,7 +5,7 @@
 		<TargetFrameworks>net8.0-windows</TargetFrameworks>
 		<RootNamespace>SportDJ.App</RootNamespace>
 		<VersionMajor>1</VersionMajor>
-		<VersionMinor>7</VersionMinor>
+		<VersionMinor>8</VersionMinor>
 		<VersionBuild>0</VersionBuild>
 		<AssemblyName>SportDJ</AssemblyName>
 		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
