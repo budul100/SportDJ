@@ -1,4 +1,7 @@
 ﻿namespace SportDJ.Commons.Models.Records
 {
-    public record Controller(string Name, int IndexIn, int? IndexOut);
+    public record Controller(
+        string Name,
+        int IndexIn,
+        int? IndexOut);
 }

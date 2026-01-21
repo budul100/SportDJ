@@ -87,16 +87,26 @@ namespace SportDJ.Services.DeviceService.Windows
 
                         case DeviceType.Wasapi:
 
-                            player = new WaveOutEvent { DeviceNumber = Device.Number };
+                            if (Device.Number.HasValue)
+                            {
+                                player = new WaveOutEvent
+                                {
+                                    DeviceNumber = Device.Number.Value
+                                };
+                            }
+
                             break;
                     }
 
-                    var playerProvider = new SampleToWaveProvider(outputProvider);
+                    if (player != default)
+                    {
+                        var playerProvider = new SampleToWaveProvider(outputProvider);
 
-                    player.PlaybackStopped += OnPlaybackStopped;
-                    player.Init(playerProvider);
+                        player.PlaybackStopped += OnPlaybackStopped;
+                        player.Init(playerProvider);
 
-                    Volume = volume;
+                        Volume = volume;
+                    }
                 }
                 catch
                 {

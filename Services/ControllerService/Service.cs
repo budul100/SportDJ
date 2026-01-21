@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using NAudio.Midi;
 using Prism.Events;
-using RegexExtensions;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Settings;
@@ -26,12 +28,14 @@ namespace SportDJ.Services.ControllerService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
+        private readonly Dictionary<Key, Action> keyActions = [];
+        private readonly IEnumerable<Profile> profiles;
         private readonly IStorageService<Session> sessionService;
 
         private bool isDisposed;
+        private TaskCompletionSource<Key> listenerTcs;
         private MidiIn midiIn;
         private MidiOut midiOut;
-        private IEnumerable<Profile> profiles;
         private byte[] sysExFinal;
         private byte[] sysExInit;
 
@@ -71,6 +75,41 @@ namespace SportDJ.Services.ControllerService
 
         #region Public Methods
 
+        public void Colorize(Key key, int colorValue)
+        {
+            if (midiOut != default)
+            {
+                switch (key.Type)
+                {
+                    case KeyType.Note:
+
+                        // Send Note On with velocity = colorValue (often used for LED color)
+
+                        var noteOnStatus = 0x90 | key.Channel; // Note On status byte
+                        var noteOnData1 = key.Number;          // Note number
+                        var noteOnData2 = colorValue;          // Velocity/color
+
+                        var noteOnMessage = (noteOnStatus << 16) | (noteOnData1 << 8) | noteOnData2;
+
+                        midiOut.Send(noteOnMessage);
+                        break;
+
+                    case KeyType.Control:
+
+                        // Send Control Change with value = colorValue
+
+                        var ccStatus = 0xB0 | key.Channel;     // Control Change status byte
+                        var ccData1 = key.Number;              // Controller number
+                        var ccData2 = colorValue;              // Value/color
+
+                        var ccMessage = (ccStatus << 16) | (ccData1 << 8) | ccData2;
+
+                        midiOut.Send(ccMessage);
+                        break;
+                }
+            }
+        }
+
         public void Dispose()
         {
             Dispose(
@@ -78,6 +117,31 @@ namespace SportDJ.Services.ControllerService
 
             GC.SuppressFinalize(
                 obj: this);
+        }
+
+        public async Task<Key> ListenAsync(CancellationToken cancellationToken)
+        {
+            CloseListener();
+
+            listenerTcs = new TaskCompletionSource<Key>(
+                creationOptions: TaskCreationOptions.RunContinuationsAsynchronously);
+
+            using (cancellationToken.Register(() => listenerTcs.TrySetCanceled()))
+            {
+                try
+                {
+                    return await listenerTcs.Task.ConfigureAwait(false);
+                }
+                finally
+                {
+                    listenerTcs = default;
+                }
+            }
+        }
+
+        public void Register(Key key, Action action)
+        {
+            keyActions[key] = action;
         }
 
         public void Set(string name)
@@ -127,6 +191,7 @@ namespace SportDJ.Services.ControllerService
             {
                 if (disposing)
                 {
+                    CloseListener();
                     CloseController();
                 }
 
@@ -169,38 +234,7 @@ namespace SportDJ.Services.ControllerService
             return default;
         }
 
-        private void CloseController()
-        {
-            try
-            {
-                midiIn?.Stop();
-
-                if (midiOut != default)
-                {
-                    if (sysExFinal?.Length > 0)
-                    {
-                        midiOut.SendBuffer(sysExFinal);
-                    }
-
-                    midiOut?.Dispose();
-                    midiOut = default;
-                }
-
-                midiIn?.Dispose();
-                midiIn = default;
-            }
-            catch
-            {
-                // TODO: Log exception
-            }
-            finally
-            {
-                sysExInit = default;
-                sysExFinal = default;
-            }
-        }
-
-        private IEnumerable<Profile> GetProfiles()
+        private static IEnumerable<Profile> GetProfiles()
         {
             var sourceFile = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
@@ -233,11 +267,88 @@ namespace SportDJ.Services.ControllerService
             }
         }
 
+        private void CloseController()
+        {
+            try
+            {
+                midiIn?.Stop();
+
+                if (midiOut != default)
+                {
+                    if (sysExFinal?.Length > 0)
+                    {
+                        midiOut.SendBuffer(sysExFinal);
+                    }
+
+                    midiOut.Dispose();
+                    midiOut = default;
+                }
+
+                if (midiIn != default)
+                {
+                    midiIn.MessageReceived -= OnMessageReceived;
+
+                    midiIn.Dispose();
+                    midiIn = default;
+                }
+            }
+            catch
+            {
+                // TODO: Log exception
+            }
+            finally
+            {
+                sysExInit = default;
+                sysExFinal = default;
+            }
+        }
+
+        private void CloseListener()
+        {
+            listenerTcs?.TrySetCanceled();
+            listenerTcs = default;
+        }
+
         private void InitializeController()
         {
             var name = sessionService?.Contents?.ControllerName;
 
             Set(name);
+        }
+
+        private void OnKeyPressed(Key key)
+        {
+            if (listenerTcs != default)
+            {
+                listenerTcs.TrySetResult(key);
+            }
+            else
+            {
+                // Normale Verarbeitung (Delegates etc.)
+            }
+        }
+
+        private void OnMessageReceived(object sender, MidiInMessageEventArgs e)
+        {
+            if (e.MidiEvent is NoteOnEvent noteOn
+                && noteOn.Velocity > 0)
+            {
+                var key = new Key(
+                    Channel: noteOn.Channel,
+                    Type: KeyType.Note,
+                    Number: noteOn.NoteNumber);
+
+                OnKeyPressed(key);
+            }
+            else if (e.MidiEvent is ControlChangeEvent controlChange)
+            {
+                var key = new Key(
+                    Channel: controlChange.Channel,
+                    Type: KeyType.Control,
+                    Number: (int)controlChange.Controller);
+
+                OnKeyPressed(key);
+            }
         }
 
         private void SetController(Controller controller)
@@ -246,9 +357,7 @@ namespace SportDJ.Services.ControllerService
             {
                 try
                 {
-                    var profile = profiles
-                        .Where(p => controller.Name.IsMatchOrEmptyPattern(p?.Match?.ProductNameIncluded)
-                            && !controller.Name.IsMatch(p?.Match?.ProductNameExcluded)).FirstOrDefault();
+                    var profile = profiles.GetProfile(controller);
 
                     if (profile != default)
                     {
@@ -257,6 +366,8 @@ namespace SportDJ.Services.ControllerService
                     }
 
                     midiIn = new MidiIn(controller.IndexIn);
+
+                    midiIn.MessageReceived += OnMessageReceived;
 
                     midiIn.Start();
 
