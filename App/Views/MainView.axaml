@@ -77,8 +77,8 @@
         </ContentControl>
 
         <!-- Panel Top -->
-        <ContentControl 
-            Grid.Row="1" 
+        <ContentControl
+            Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="7"
             Content="{Binding PanelTop}" />
@@ -101,7 +101,7 @@
         </GridSplitter>
 
         <!-- Panel Left -->
-        <ContentControl 
+        <ContentControl
             Grid.Row="3"
             Grid.Column="0"
             Content="{Binding PanelLeft}" />
@@ -123,7 +123,7 @@
         </GridSplitter>
 
         <!-- Main Region -->
-        <ContentControl 
+        <ContentControl
             Grid.Row="3"
             Grid.Column="2">
             <prism:RegionManager.RegionName>
@@ -148,7 +148,7 @@
         </GridSplitter>
 
         <!-- Panel Right -->
-        <ContentControl 
+        <ContentControl
             Grid.Row="3"
             Grid.Column="4"
             Content="{Binding PanelRight}" />
@@ -171,8 +171,8 @@
         </GridSplitter>
 
         <!-- Panel Bottom -->
-        <ContentControl 
-            Grid.Row="5" 
+        <ContentControl
+            Grid.Row="5"
             Grid.Column="0"
             Grid.ColumnSpan="7"
             Content="{Binding PanelBottom}" />

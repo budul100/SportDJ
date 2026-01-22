@@ -2,12 +2,12 @@ using Avalonia.Controls;
 
 namespace SportDJ.Modules.SettingsModule.Views;
 
-public partial class AppSettingsView
+public partial class SettingsView
     : UserControl
 {
     #region Public Constructors
 
-    public AppSettingsView()
+    public SettingsView()
     {
         InitializeComponent();
     }

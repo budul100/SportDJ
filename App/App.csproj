@@ -25,27 +25,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.10" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.10" />
-		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.10" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
+		<PackageReference Include="Avalonia" Version="11.3.11" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
+		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.11" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
 		<PackageReference Include="Prism.DryIoc.Avalonia" Version="9.0.537.11130" />
-		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9" />
-		<PackageReference Include="Xaml.Behaviors.Interactions" Version="11.3.9" />
-		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9" />
+		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.3" />
+		<PackageReference Include="Xaml.Behaviors.Interactions" Version="11.3.9.3" />
+		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9.3" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.10" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<ProjectReference Include="..\Commons\Commons.csproj" />
-		<ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
 		<ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
+		<ProjectReference Include="..\Modules\DefinitionsModule\DefinitionsModule.csproj" />
 		<ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
+		<ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
 		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
 		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
-		<ProjectReference Include="..\Modules\StackModule\StackModule.csproj" />
 		<ProjectReference Include="..\Services\ControllerService\ControllerService.csproj" />
 		<ProjectReference Include="..\Services\DialogService\DialogService.csproj" />
 		<ProjectReference Include="..\Services\DispatcherService\DispatcherService.csproj" />

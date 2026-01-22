@@ -9,7 +9,7 @@ using SportDJ.Commons.Interfaces;
 namespace SportDJ.Services.PanelService
 {
     public class Service(IEventAggregator eventAggregator)
-        : IPanelService
+    : IPanelService
     {
         #region Private Fields
 
@@ -30,14 +30,14 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
+            key: serviceType,
+            value: out var registration))
             {
                 activeViews[registration.Type] = registration.View;
 
                 SetVisibility(
-                    type: registration.Type,
-                    isVisible: true);
+                type: registration.Type,
+                isVisible: true);
 
                 eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
                     payload: registration.Type);
@@ -49,8 +49,8 @@ namespace SportDJ.Services.PanelService
             if (activeViews.Remove(type))
             {
                 SetVisibility(
-                    type: type,
-                    isVisible: false);
+                type: type,
+                isVisible: false);
 
                 eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
                     payload: type);
@@ -62,8 +62,8 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
+            key: serviceType,
+            value: out var registration))
             {
                 Deactivate(registration.Type);
             }
@@ -72,10 +72,10 @@ namespace SportDJ.Services.PanelService
         public Control GetView(PanelType type)
         {
             return activeViews.TryGetValue(
-                key: type,
-                value: out var view)
-                ? view
-                : default;
+            key: type,
+            value: out var view)
+            ? view
+            : default;
         }
 
         public bool IsVisible(PanelType type)
@@ -101,8 +101,8 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
+            key: serviceType,
+            value: out var registration))
             {
                 result = activeViews.ContainsKey(registration.Type);
             }

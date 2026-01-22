@@ -11,7 +11,7 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Prism;
 
-namespace SportDJ.Modules.StackModule.ViewModels
+namespace SportDJ.Modules.DefinitionsModule.ViewModels
 {
     public class StackViewModel
         : RegionViewModelBase

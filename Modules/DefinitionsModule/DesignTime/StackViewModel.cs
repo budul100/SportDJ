@@ -1,7 +1,7 @@
 ﻿using System;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Modules.StackModule.DesignTime
+namespace SportDJ.Modules.DefinitionsModule.DesignTime
 {
     public class StackViewModel
         : ViewModels.StackViewModel

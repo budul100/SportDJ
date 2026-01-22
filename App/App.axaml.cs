@@ -88,10 +88,10 @@ namespace SportDJ.App
                 name: nameof(Modules.DisplayModule));
             moduleCatalog.AddModule<Modules.ControllerModule.Module>(
                 name: nameof(Modules.ControllerModule));
+            moduleCatalog.AddModule<Modules.DefinitionsModule.Module>(
+                name: nameof(Modules.DefinitionsModule));
             moduleCatalog.AddModule<Modules.SettingsModule.Module>(
                 name: nameof(Modules.SettingsModule));
-            moduleCatalog.AddModule<Modules.StackModule.Module>(
-                name: nameof(Modules.StackModule));
             moduleCatalog.AddModule<Modules.SearchModule.Module>(
                 name: nameof(Modules.SearchModule));
             moduleCatalog.AddModule<Modules.MenuModule.Module>(

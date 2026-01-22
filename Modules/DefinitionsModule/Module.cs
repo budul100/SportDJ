@@ -2,9 +2,9 @@
 using Prism.Modularity;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Modules.StackModule.Views;
+using SportDJ.Modules.DefinitionsModule.Views;
 
-namespace SportDJ.Modules.StackModule
+namespace SportDJ.Modules.DefinitionsModule
 {
     public class Module()
         : IModule

@@ -69,7 +69,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProviders.Windows", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserControls", "Shareds\UserControls\UserControls.csproj", "{575E23EB-A250-4856-8001-3DA28AB9244C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackModule", "Modules\StackModule\StackModule.csproj", "{47699C3A-40C4-6F46-F045-CBD8A0EE5A79}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefinitionsModule", "Modules\DefinitionsModule\DefinitionsModule.csproj", "{47699C3A-40C4-6F46-F045-CBD8A0EE5A79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelService", "Services\PanelService\PanelService.csproj", "{07AD55C8-C742-41F4-BA5F-6E7BF5BA1441}"
 EndProject

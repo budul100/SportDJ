@@ -169,9 +169,9 @@ namespace SportDJ.Services.ControllerService
                 sessionService.Contents.ControllerName = controller.Name;
 
                 sessionService.Save();
-
-                eventAggregator.GetEvent<ControllerUpdatedEvent>().Publish();
             }
+
+            eventAggregator.GetEvent<ControllerUpdatedEvent>().Publish();
         }
 
         public void Update()

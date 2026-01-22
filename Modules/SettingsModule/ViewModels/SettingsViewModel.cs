@@ -6,7 +6,7 @@ using Avalonia.Platform.Storage;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Navigation.Regions;
+using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
@@ -17,12 +17,11 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Prism;
 
 namespace SportDJ.Modules.SettingsModule.ViewModels
 {
-    public class AppSettingsViewModel
-        : RegionViewModelBase
+    public class SettingsViewModel
+        : BindableBase
     {
         #region Private Fields
 
@@ -48,11 +47,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
         #region Public Constructors
 
-        public AppSettingsViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IDialogService dialogService, IPanelService panelService,
-            IStorageService<Set> settingsService, IStorageService<Session> sessionService,
-            IControllerService controllerService)
-            : base(regionManager)
+        public SettingsViewModel(IContainerProvider containerProvider, IEventAggregator eventAggregator,
+            IDialogService dialogService, IPanelService panelService, IStorageService<Set> settingsService,
+            IStorageService<Session> sessionService, IControllerService controllerService)
         {
             this.eventAggregator = eventAggregator;
             this.dialogService = dialogService;
