@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,7 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Services.PanelService;
 
 namespace SportDJ.App.ViewModels
 {
@@ -86,7 +88,7 @@ namespace SportDJ.App.ViewModels
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
-                action: UpdatePanel,
+                action: p => UpdatePanel(p.PanelType),
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(

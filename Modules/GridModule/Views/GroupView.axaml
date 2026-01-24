@@ -22,7 +22,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-            
+
             <Thickness x:Key="InnerMargin">1</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -34,6 +34,7 @@
     <TabControl
         Margin="{StaticResource ContentMargin}"
         Focusable="False"
+
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Selected}">
 
@@ -44,6 +45,7 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Background="{StaticResource ColorBackground}"
+                    IsTabStop="False"
                     Focusable="False">
 
                     <Grid.ColumnDefinitions>

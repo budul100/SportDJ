@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media.Imaging;
 using Material.Icons;
@@ -23,9 +24,11 @@ namespace SportDJ.Modules.GridModule.ViewModels
         #region Private Fields
 
         private readonly IPanelService panelService;
+        private readonly Player player;
         private readonly IPlayerService playerService;
 
         private bool isDisposed;
+        private bool isSettingsVisible;
         private bool isStackVisible;
 
         #endregion Private Fields
@@ -35,6 +38,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public PlayerViewModel(IContainerProvider containerProvider, Player player, GridViewModel parent)
             : base(containerProvider: containerProvider, element: player)
         {
+            this.player = player;
+
             panelService = containerProvider?.Resolve<IPanelService>();
             playerService = containerProvider?.Resolve<IPlayerService>();
 
@@ -49,6 +54,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 executeMethod: () => playerService?.Next(),
                 canExecuteMethod: () => IsAvailableSelection);
 
+            ShowSettingsCommand = new DelegateCommand(
+                executeMethod: ShowSettings);
+
             ShowStackCommand = new DelegateCommand(
                 executeMethod: ShowStack);
 
@@ -56,19 +64,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 action: _ => Initialize(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
+                filter: p => player == p);
 
             eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
+                filter: p => player == p);
 
             eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => playerService == p);
+                filter: p => player == p);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateContent(),
@@ -89,13 +97,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 filter: k => parent.IsVisible
                     && k == player.KeyCode);
 
+            eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+                action: p => { IsSettingsVisible = p == player; IsStackVisible = false; },
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
             eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
-                action: s => IsStackVisible = s == playerService?.StackService,
+                action: p => { IsSettingsVisible = false; IsStackVisible = p == player; },
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
-                action: t => UpdateStackButton(),
+                action: t => UpdatePanelButtons(),
+                threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true);
 
             playerService?.Initialize(
@@ -132,6 +146,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsEnding => playerService?.IsEnding == true;
 
+        [Obsolete]
         public bool IsForeground
         {
             get { return playerService?.IsForeground == true; }
@@ -149,6 +164,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
+        public bool IsSettingsVisible
+        {
+            get => isSettingsVisible;
+            set => SetProperty(ref isSettingsVisible, value);
+        }
+
         public bool IsStackVisible
         {
             get => isStackVisible;
@@ -159,6 +180,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
+        [Obsolete]
         public bool ResetPosition
         {
             get { return playerService?.ResetPosition == true; }
@@ -173,6 +195,8 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 }
             }
         }
+
+        public DelegateCommand ShowSettingsCommand { get; }
 
         public DelegateCommand ShowStackCommand { get; }
 
@@ -404,9 +428,27 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
+        private void ShowSettings()
+        {
+            if (IsSettingsVisible || player.PlayerService == default)
+            {
+                panelService.Deactivate<IPlayerService>();
+
+                eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(
+                    payload: default);
+            }
+            else
+            {
+                eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(
+                    payload: player);
+
+                panelService.Activate<IPlayerService>();
+            }
+        }
+
         private void ShowStack()
         {
-            if (IsStackVisible || playerService?.StackService == default)
+            if (IsStackVisible || player.StackService == default)
             {
                 panelService.Deactivate<IStackService>();
 
@@ -416,7 +458,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             else
             {
                 eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
-                    payload: playerService?.StackService);
+                    payload: player);
 
                 panelService.Activate<IStackService>();
             }
@@ -441,6 +483,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(HasStack));
 
             RaisePropertyChanged(nameof(Menus));
+            RaisePropertyChanged(nameof(Name));
+            RaisePropertyChanged(nameof(IsForeground));
+            RaisePropertyChanged(nameof(ResetPosition));
 
             ExecuteCommand.RaiseCanExecuteChanged();
 
@@ -455,8 +500,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(Remaining));
         }
 
-        private void UpdateStackButton()
+        private void UpdatePanelButtons()
         {
+            if (!panelService.IsVisible<IPlayerService>())
+            {
+                IsSettingsVisible = false;
+            }
+
             if (!panelService.IsVisible<IStackService>())
             {
                 IsStackVisible = false;

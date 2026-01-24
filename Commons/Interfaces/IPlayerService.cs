@@ -37,8 +37,6 @@ namespace SportDJ.Commons.Interfaces
 
         bool ResetPosition { get; set; }
 
-        IStackService StackService { get; }
-
         Track Track { get; }
 
         #endregion Public Properties

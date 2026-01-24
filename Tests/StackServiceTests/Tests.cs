@@ -11,6 +11,7 @@ using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Commons.Models.Structure;
 using Xunit;
 
 namespace SportDJ.Tests.StackServiceTests
@@ -21,8 +22,10 @@ namespace SportDJ.Tests.StackServiceTests
 
         private readonly Mock<IDispatcherService> mockDispatcherService;
         private readonly Mock<IEventAggregator> mockEventAggregator;
+        private readonly Mock<IPlayerService> mockPlayerService;
         private readonly Mock<IStorageService<Session>> mockSessionService;
         private readonly Mock<IStorageService<Set>> mockSettingsService;
+        private readonly Player player;
         private readonly Mock<TrackUpdatedEvent> trackUpdatedEvent;
 
         #endregion Private Fields
@@ -83,6 +86,28 @@ namespace SportDJ.Tests.StackServiceTests
             mockSessionService
                 .Setup(m => m.Contents)
                 .Returns(new Session());
+
+            mockPlayerService = new Mock<IPlayerService>();
+            mockPlayerService
+                .SetupGet(m => m.IsAvailable)
+                .Returns(true);
+            mockPlayerService
+                .SetupGet(m => m.IsActive)
+                .Returns(false);
+            mockPlayerService
+                .SetupGet(m => m.IsPlaying)
+                .Returns(false);
+            mockPlayerService
+                .SetupGet(m => m.HasStack)
+                .Returns(true);
+
+            player = new Player
+            {
+                Name = "TestPlayer",
+                IsForeground = false,
+                ResetPosition = true,
+                Paths = [@"..\..\..\Samples"]
+            };
         }
 
         #endregion Public Constructors
@@ -102,9 +127,8 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: [@"..\..\..\Samples"],
-                name: default,
-                resetPosition: true);
+                player: player,
+                paths: [@"..\..\..\Samples"]);
 
             var track = stackService.Track;
 
@@ -168,9 +192,8 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: [@"..\..\..\Samples"],
-                name: default,
-                resetPosition: true);
+                player: player,
+                paths: [@"..\..\..\Samples"]);
 
             var stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds < 5000)
@@ -203,9 +226,8 @@ namespace SportDJ.Tests.StackServiceTests
                 trackService: trackService);
 
             stackService.Initialize(
-                paths: [@"..\..\..\Samples"],
-                name: default,
-                resetPosition: true);
+                player: player,
+                paths: [@"..\..\..\Samples"]);
 
             var track = stackService.Track;
 

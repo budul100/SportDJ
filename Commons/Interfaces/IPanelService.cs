@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using SportDJ.Commons.Enums;
 
 namespace SportDJ.Commons.Interfaces
@@ -19,7 +20,7 @@ namespace SportDJ.Commons.Interfaces
 
         bool IsVisible<TService>();
 
-        void Register<TService>(PanelType type, Control view);
+        void Register<TService>(PanelType type, Control view, Action action = default);
 
         #endregion Public Methods
     }

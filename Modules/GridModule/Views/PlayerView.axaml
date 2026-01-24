@@ -63,9 +63,9 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                     <ColumnDefinition Width="2" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <ToggleButton
@@ -73,6 +73,7 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False">
+
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
                         MaxHeight="{StaticResource LargeIconSize}"
@@ -83,10 +84,11 @@
                             Height="{StaticResource PlayerIconSize}"
                             Kind="Headphones" />
                     </Viewbox>
+
                 </ToggleButton>
 
                 <Border
-                    Grid.Column="4"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Margin="{StaticResource KeyMargin}"
@@ -111,8 +113,31 @@
                             FontSize="{StaticResource FontSizeContentMain}"
                             Text="{Binding Key}" />
                     </Viewbox>
+
                 </Border>
+
+                <ToggleButton
+                    Grid.Column="4"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Focusable="False"
+                    IsChecked="{Binding IsSettingsVisible, Mode=OneWay}"
+                    Command="{Binding ShowSettingsCommand}">
+
+                    <Viewbox
+                        MaxWidth="{StaticResource LargeIconSize}"
+                        MaxHeight="{StaticResource LargeIconSize}"
+                        Stretch="Uniform"
+                        StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
+                            Kind="Build" />
+                    </Viewbox>
+
+                </ToggleButton>
             </Grid>
+
 
             <Border
                 Grid.Row="1"
@@ -259,6 +284,7 @@
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackBackwardCommand}"
                     Focusable="False">
+
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
                         MaxHeight="{StaticResource LargeIconSize}"
@@ -269,6 +295,7 @@
                             Height="{StaticResource PlayerIconSize}"
                             Kind="SkipBackward" />
                     </Viewbox>
+
                 </Button>
 
                 <ToggleButton
@@ -278,6 +305,7 @@
                     IsChecked="{Binding IsStackVisible, Mode=OneWay}"
                     Command="{Binding ShowStackCommand}"
                     Focusable="False">
+
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
                         MaxHeight="{StaticResource LargeIconSize}"
@@ -288,6 +316,7 @@
                             Height="{StaticResource PlayerIconSize}"
                             Kind="ListBox" />
                     </Viewbox>
+
                 </ToggleButton>
 
                 <Button
@@ -296,6 +325,7 @@
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackForwardCommand}"
                     Focusable="False">
+
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
                         MaxHeight="{StaticResource LargeIconSize}"
@@ -306,7 +336,9 @@
                             Height="{StaticResource PlayerIconSize}"
                             Kind="SkipForward" />
                     </Viewbox>
+
                 </Button>
+
             </Grid>
         </Grid>
     </Border>

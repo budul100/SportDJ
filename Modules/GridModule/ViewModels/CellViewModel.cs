@@ -79,6 +79,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
+        [Obsolete]
         public static int MaxLengthName => Constants.NameMaxLength;
 
         public virtual int Column => cell.Column;

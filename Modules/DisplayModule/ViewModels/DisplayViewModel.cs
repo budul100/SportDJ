@@ -81,7 +81,9 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
                 action: t => RaisePropertyChanged(nameof(IsSettingsVisible)),
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true,
+                threadOption: ThreadOption.PublisherThread,
+                filter: p => p.Type == typeof(IStorageService<Session>));
 
             clockTimer = GetClockTimer();
             clockTimer.Start();

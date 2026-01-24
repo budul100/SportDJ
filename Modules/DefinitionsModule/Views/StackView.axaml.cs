@@ -1,16 +1,17 @@
 using Avalonia.Controls;
 
-namespace SportDJ.Modules.DefinitionsModule.Views;
-
-public partial class StackView
-    : UserControl
+namespace SportDJ.Modules.DefinitionsModule.Views
 {
-    #region Public Constructors
-
-    public StackView()
+    public partial class StackView
+        : UserControl
     {
-        InitializeComponent();
-    }
+        #region Public Constructors
 
-    #endregion Public Constructors
+        public StackView()
+        {
+            InitializeComponent();
+        }
+
+        #endregion Public Constructors
+    }
 }

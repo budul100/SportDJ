@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Prism.DryIoc;
@@ -47,8 +46,7 @@ namespace SportDJ.Shareds.ViewModelLocator
             if (e.NewValue is bool autoWire
                 && autoWire)
             {
-                // Do not wire at design time
-                if (Design.IsDesignMode)
+                if (Design.IsDesignMode || control.DataContext != default)
                 {
                     return;
                 }
@@ -61,7 +59,7 @@ namespace SportDJ.Shareds.ViewModelLocator
                     .GetTypes()
                     .FirstOrDefault(t => t.FullName == viewModelTypeName);
 
-                if (viewModelType != null
+                if (viewModelType != default
                     && Application.Current is PrismApplication prismApp)
                 {
                     var viewModel = prismApp.Container.Resolve(viewModelType);

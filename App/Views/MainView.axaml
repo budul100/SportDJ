@@ -100,6 +100,31 @@
             </i:Interaction.Behaviors>
         </GridSplitter>
 
+        <!--
+        <Panel Grid.Row="3" Grid.Column="0">
+
+        <ContentControl Content="{Binding CurrentSingleView}"
+        IsVisible="{Binding ShowSingleView}" />
+
+        <TabControl ItemsSource="{Binding LeftPanelTabs}"
+        IsVisible="{Binding ShowTabs}">
+
+        <TabControl.ItemTemplate>
+        <DataTemplate>
+        <TextBlock Text="{Binding Header}" />
+        </DataTemplate>
+        </TabControl.ItemTemplate>
+
+        <TabControl.ContentTemplate>
+        <DataTemplate>
+        <ContentControl Content="{Binding View}" />
+        </DataTemplate>
+        </TabControl.ContentTemplate>
+        </TabControl>
+
+        </Panel>
+        -->
+
         <!-- Panel Left -->
         <ContentControl
             Grid.Row="3"

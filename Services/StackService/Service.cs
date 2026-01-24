@@ -7,6 +7,7 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.StackService.Extensions;
 
 namespace SportDJ.Services.StackService
@@ -18,6 +19,8 @@ namespace SportDJ.Services.StackService
         #region Private Fields
 
         private static readonly object lockPositions = new();
+
+        private Player player;
         private Position position;
 
         #endregion Private Fields
@@ -41,18 +44,21 @@ namespace SportDJ.Services.StackService
 
         #region Public Methods
 
-        public void Initialize(IEnumerable<string> paths, string name, bool resetPosition)
+        public void Initialize(Player player, IEnumerable<string> paths)
         {
+            this.player = player;
+            player.StackService = this;
+
             var tracks = trackService
                 .Get(paths).ToArray();
 
             Entries = GetEntries(tracks).ToList();
 
             position = GetPosition(
-                playerName: name,
-                resetPosition: resetPosition);
+                playerName: player.Name,
+                resetPosition: player.ResetPosition);
 
-            if (resetPosition
+            if (player.ResetPosition
                 || Entries?.Any(e => e.Track.Path == position.Path) != true
                 || position.Index >= Entries.Count)
             {
@@ -158,7 +164,7 @@ namespace SportDJ.Services.StackService
                 }
             }
 
-            eventAggregator.GetEvent<StackResetEvent>().Publish(this);
+            eventAggregator.GetEvent<StackResetEvent>().Publish(player);
         }
 
         public void Select(Entry entry)
@@ -192,7 +198,7 @@ namespace SportDJ.Services.StackService
 
             Index = index;
 
-            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(this);
+            eventAggregator.GetEvent<StackUpdatedEvent>().Publish(player);
         }
 
         public void Shuffle()

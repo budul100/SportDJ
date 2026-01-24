@@ -1,9 +1,8 @@
 ﻿using Prism.Events;
-using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Commons.Events.Player
 {
     public class PlayerShiftedEvent
-        : PubSubEvent<IPlayerService>
+        : PubSubEvent<Models.Structure.Player>
     { }
 }

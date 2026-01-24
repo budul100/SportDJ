@@ -102,13 +102,13 @@ namespace SportDJ.Services.PlayerService
                 action: _ => InitializeSignal(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => this.stackService == s);
+                filter: p => player == p);
 
             eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: s => this.stackService == s);
+                filter: p => player == p);
 
             eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
                 action: _ => UpdateTrack(),
@@ -137,6 +137,7 @@ namespace SportDJ.Services.PlayerService
 
         public bool IsEnding => signalService?.IsEnding == true;
 
+        [Obsolete]
         public bool IsForeground
         {
             get => player?.IsForeground == true;
@@ -144,8 +145,7 @@ namespace SportDJ.Services.PlayerService
             set
             {
                 if (player != default
-                    && player.IsForeground != value)
-                //&& mixerType != MixerType.PFL)
+                    && player.IsForeground != value) //&& mixerType != MixerType.PFL)
                 {
                     player.IsForeground = value;
 
@@ -162,6 +162,7 @@ namespace SportDJ.Services.PlayerService
 
         public TimeSpan? Remaining { get; private set; }
 
+        [Obsolete]
         public bool ResetPosition
         {
             get => player?.ResetPosition == true;
@@ -177,8 +178,6 @@ namespace SportDJ.Services.PlayerService
                 }
             }
         }
-
-        public IStackService StackService => stackService;
 
         public Track Track => stackService.Track;
 
@@ -234,6 +233,7 @@ namespace SportDJ.Services.PlayerService
         public void Initialize(Player player)
         {
             this.player = player;
+            player.PlayerService = this;
 
             InitializePlayer();
         }
@@ -317,9 +317,8 @@ namespace SportDJ.Services.PlayerService
                 .Select(settingsService.GetPathFull).ToArray();
 
             Task.Run(() => stackService.Initialize(
-                paths: paths,
-                name: player.Name,
-                resetPosition: player.ResetPosition));
+                player: player,
+                paths: paths));
         }
 
         private void InitializeSignal()
@@ -343,7 +342,7 @@ namespace SportDJ.Services.PlayerService
 
                     UpdateDuration();
 
-                    eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(this);
+                    eventAggregator.GetEvent<PlayerInitializedEvent>().Publish(player);
                 }
             }
 
@@ -412,7 +411,7 @@ namespace SportDJ.Services.PlayerService
 
         private void UpdateContent()
         {
-            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(this);
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
         }
 
         private void UpdateDuration()
@@ -434,7 +433,7 @@ namespace SportDJ.Services.PlayerService
                 Progress = default;
             }
 
-            eventAggregator.GetEvent<PlayerShiftedEvent>().Publish(this);
+            eventAggregator.GetEvent<PlayerShiftedEvent>().Publish(player);
         }
 
         private void UpdateTrack()

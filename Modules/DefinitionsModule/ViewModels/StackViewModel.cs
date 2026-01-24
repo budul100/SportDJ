@@ -4,19 +4,21 @@ using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
-using Prism.Navigation.Regions;
+using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Prism;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels
 {
     public class StackViewModel
-        : RegionViewModelBase
+        : BindableBase
     {
         #region Private Fields
+
+        private const string Titel = "Content";
 
         private readonly IDialogService dialogService;
 
@@ -24,31 +26,24 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
         private Entry entry;
         private bool isSettingActive = false;
         private bool isUpdating = false;
-        private IStackService service;
+        private Player player;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public StackViewModel(IRegionManager regionManager, IEventAggregator eventAggregator,
-            IDialogService dialogService)
-            : base(regionManager)
+        public StackViewModel(IEventAggregator eventAggregator, IDialogService dialogService)
         {
             EventAggregator = eventAggregator;
 
             this.dialogService = dialogService;
 
-            SelectCommand = new DelegateCommand<Entry>(e => service?.Select(e));
-            ResetCommand = new DelegateCommand(() => service?.Reset());
+            SelectCommand = new DelegateCommand<Entry>(e => player?.StackService?.Select(e));
+            ResetCommand = new DelegateCommand(() => player?.StackService?.Reset());
 
             ShuffleCommand = new DelegateCommand(
                 executeMethod: async () => await ShuffleAsync(),
                 canExecuteMethod: () => Entries?.Count > 1);
-
-            eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
-                action: UpdateService,
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => UpdateEntries(),
@@ -59,6 +54,8 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
         #endregion Public Constructors
 
         #region Public Properties
+
+        public static string Title => Titel;
 
         public bool AutoScroll
         {
@@ -84,7 +81,7 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
                     try
                     {
                         isSettingActive = true;
-                        service?.Select(value);
+                        player?.StackService?.Select(value);
                     }
                     finally
                     {
@@ -104,11 +101,26 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
         #endregion Public Properties
 
+        #region Public Methods
+
+        public void Set(Player player)
+        {
+            if (player != default
+                && this.player != player)
+            {
+                this.player = player;
+
+                UpdateEntries();
+            }
+        }
+
+        #endregion Public Methods
+
         #region Private Methods
 
         private async Task ShuffleAsync()
         {
-            if (service != default)
+            if (player?.StackService != default)
             {
                 var result = await dialogService.GetMessageBoxResultAsync(
                     contentMessage: Texts.StackShuffleMessage,
@@ -118,7 +130,7 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
                 if (result == ButtonResult.Yes)
                 {
-                    service.Shuffle();
+                    player.StackService.Shuffle();
                 }
             }
         }
@@ -133,11 +145,12 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
                 AutoScroll = false;
 
                 var current = entry;
+                var entries = player?.StackService?.Entries;
 
-                if (service?.Entries?.Count > 0)
+                if (entries?.Count > 0)
                 {
-                    var hasChanged = Entries.Count != service.Entries.Count
-                        || !Entries.SequenceEqual(service.Entries);
+                    var hasChanged = Entries.Count != entries.Count
+                        || !Entries.SequenceEqual(entries);
 
                     if (hasChanged)
                     {
@@ -146,15 +159,15 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
                         for (var index = Entries.Count - 1; index >= 0; index--)
                         {
-                            if (!service.Entries.Contains(Entries[index]))
+                            if (!entries.Contains(Entries[index]))
                             {
                                 Entries.RemoveAt(index);
                             }
                         }
 
-                        for (var index = 0; index < service.Entries.Count; index++)
+                        for (var index = 0; index < entries.Count; index++)
                         {
-                            var serviceEntry = service.Entries[index];
+                            var serviceEntry = entries[index];
 
                             if (index >= Entries.Count)
                             {
@@ -212,16 +225,6 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
             {
                 isUpdating = false;
                 AutoScroll = true;
-            }
-        }
-
-        private void UpdateService(IStackService service)
-        {
-            if (this.service != service)
-            {
-                this.service = service;
-
-                UpdateEntries();
             }
         }
 

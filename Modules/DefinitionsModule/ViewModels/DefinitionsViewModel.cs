@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Prism.Events;
+using Prism.Mvvm;
+using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Events.Stack;
+using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Structure;
+
+namespace SportDJ.Modules.DefinitionsModule.ViewModels
+{
+    public class DefinitionsViewModel
+        : BindableBase
+    {
+        #region Private Fields
+
+        private readonly Dictionary<Type, BindableBase> registrations = [];
+        private readonly SettingsViewModel settingsViewModel;
+        private readonly StackViewModel stackViewModel;
+
+        private BindableBase active;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        public DefinitionsViewModel(IEventAggregator eventAggregator,
+            SettingsViewModel settingsViewModel, StackViewModel stackViewModel)
+        {
+            this.settingsViewModel = settingsViewModel;
+            this.stackViewModel = stackViewModel;
+
+            eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+                action: SetPlayer,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
+            eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
+                action: SetPlayer,
+                threadOption: ThreadOption.PublisherThread,
+                keepSubscriberReferenceAlive: true);
+
+            registrations = new Dictionary<Type, BindableBase>
+            {
+                { typeof(IPlayerService), settingsViewModel },
+                { typeof(IStackService), stackViewModel }
+            };
+
+            Tabs = new ObservableCollection<BindableBase>(registrations.Values);
+
+            if (Tabs.Count > 0)
+            {
+                Active = Tabs[0];
+            }
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public BindableBase Active
+        {
+            get => active;
+            set => SetProperty(ref active, value);
+        }
+
+        public ObservableCollection<BindableBase> Tabs { get; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void Activate<TService>()
+        {
+            var serviceType = typeof(TService);
+
+            if (registrations.TryGetValue(
+                key: serviceType,
+                value: out var registration))
+            {
+                Active = registration;
+            }
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private void SetPlayer(Player player)
+        {
+            settingsViewModel.Set(player);
+            stackViewModel.Set(player);
+        }
+
+        #endregion Private Methods
+    }
+}

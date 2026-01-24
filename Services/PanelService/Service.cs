@@ -9,12 +9,14 @@ using SportDJ.Commons.Interfaces;
 namespace SportDJ.Services.PanelService
 {
     public class Service(IEventAggregator eventAggregator)
-    : IPanelService
+        : IPanelService
     {
+        private record Registration(PanelType Type, Control View, Action Action);
+
         #region Private Fields
 
         private readonly Dictionary<PanelType, Control> activeViews = [];
-        private readonly Dictionary<Type, (PanelType Type, Control View)> registrations = [];
+        private readonly Dictionary<Type, Registration> registrations = [];
 
         private bool visibleBottom;
         private bool visibleLeft;
@@ -30,17 +32,21 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-            key: serviceType,
-            value: out var registration))
+                key: serviceType,
+                value: out var registration))
             {
                 activeViews[registration.Type] = registration.View;
 
                 SetVisibility(
-                type: registration.Type,
-                isVisible: true);
+                    type: registration.Type,
+                    isVisible: true);
+
+                var payload = (registration.Type, serviceType);
+
+                registration.Action?.Invoke();
 
                 eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: registration.Type);
+                    payload: payload);
             }
         }
 
@@ -49,11 +55,13 @@ namespace SportDJ.Services.PanelService
             if (activeViews.Remove(type))
             {
                 SetVisibility(
-                type: type,
-                isVisible: false);
+                    type: type,
+                    isVisible: false);
+
+                var payload = (type, default(Type));
 
                 eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: type);
+                    payload: payload);
             }
         }
 
@@ -62,8 +70,8 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-            key: serviceType,
-            value: out var registration))
+                key: serviceType,
+                value: out var registration))
             {
                 Deactivate(registration.Type);
             }
@@ -72,10 +80,10 @@ namespace SportDJ.Services.PanelService
         public Control GetView(PanelType type)
         {
             return activeViews.TryGetValue(
-            key: type,
-            value: out var view)
-            ? view
-            : default;
+                key: type,
+                value: out var view)
+                ? view
+                : default;
         }
 
         public bool IsVisible(PanelType type)
@@ -101,8 +109,8 @@ namespace SportDJ.Services.PanelService
             var serviceType = typeof(TService);
 
             if (registrations.TryGetValue(
-            key: serviceType,
-            value: out var registration))
+                key: serviceType,
+                value: out var registration))
             {
                 result = activeViews.ContainsKey(registration.Type);
             }
@@ -110,9 +118,12 @@ namespace SportDJ.Services.PanelService
             return result;
         }
 
-        public void Register<TService>(PanelType type, Control view)
+        public void Register<TService>(PanelType type, Control view, Action action = default)
         {
-            registrations[typeof(TService)] = (type, view);
+            registrations[typeof(TService)] = new Registration(
+                Type: type,
+                View: view,
+                Action: action);
         }
 
         #endregion Public Methods

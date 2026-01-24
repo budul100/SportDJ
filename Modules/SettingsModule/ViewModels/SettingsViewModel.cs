@@ -82,7 +82,9 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
                 action: _ => RefreshSettings(),
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true,
+                threadOption: ThreadOption.PublisherThread,
+                filter: p => p.Type == typeof(IStorageService<Session>));
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
                 action: SaveSettings,

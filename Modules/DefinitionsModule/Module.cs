@@ -2,6 +2,7 @@
 using Prism.Modularity;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Modules.DefinitionsModule.ViewModels;
 using SportDJ.Modules.DefinitionsModule.Views;
 
 namespace SportDJ.Modules.DefinitionsModule
@@ -13,20 +14,34 @@ namespace SportDJ.Modules.DefinitionsModule
 
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            var panelService = containerProvider.Resolve<IPanelService>();
-            var stackView = containerProvider.Resolve<StackView>();
+            var definitionsViewModel = containerProvider.Resolve<DefinitionsViewModel>();
 
-            panelService.Register<IStackService>(
+            var panelService = containerProvider.Resolve<IPanelService>();
+            var definitionsView = containerProvider.Resolve<DefinitionsView>();
+
+            panelService?.Register<IPlayerService>(
                 type: PanelType.Left,
-                view: stackView);
+                view: definitionsView,
+                action: definitionsViewModel.Activate<IPlayerService>);
+
+            panelService?.Register<IStackService>(
+                type: PanelType.Left,
+                view: definitionsView,
+                action: definitionsViewModel.Activate<IStackService>);
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<StackView>();
+            containerRegistry.RegisterSingleton<DefinitionsView>();
+            containerRegistry.RegisterSingleton<DefinitionsViewModel>();
 
-            containerRegistry.RegisterForNavigation<StackView>(
-                name: typeof(StackView).FullName);
+            containerRegistry.RegisterSingleton<SettingsView>();
+            containerRegistry.RegisterSingleton<SettingsViewModel>();
+            containerRegistry.RegisterSingleton<StackView>();
+            containerRegistry.RegisterSingleton<StackViewModel>();
+
+            containerRegistry.RegisterForNavigation<DefinitionsView>(
+                name: typeof(DefinitionsView).FullName);
         }
 
         #endregion Public Methods

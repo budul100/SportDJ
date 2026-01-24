@@ -9,7 +9,7 @@ namespace SportDJ.Modules.DefinitionsModule.DesignTime
         #region Public Constructors
 
         public StackViewModel()
-            : base(regionManager: default, eventAggregator: default, dialogService: default)
+            : base(eventAggregator: default, dialogService: default)
         {
             var random = new Random();
 
