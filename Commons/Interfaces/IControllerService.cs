@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Commons.Interfaces
@@ -23,9 +24,11 @@ namespace SportDJ.Commons.Interfaces
 
         Task<Key> ListenAsync(CancellationToken cancellationToken);
 
-        void Register(Key key, Action action);
+        void Register(Key key, StrokeType strokeType, Action action);
 
         void Set(string name);
+
+        void Unregister(Key key);
 
         void Update();
 

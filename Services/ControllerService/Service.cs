@@ -28,7 +28,7 @@ namespace SportDJ.Services.ControllerService
         #region Private Fields
 
         private readonly IEventAggregator eventAggregator;
-        private readonly Dictionary<Key, Action> keyActions = [];
+        private readonly Dictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
         private readonly IEnumerable<Profile> profiles;
         private readonly IStorageService<Session> sessionService;
 
@@ -139,9 +139,9 @@ namespace SportDJ.Services.ControllerService
             }
         }
 
-        public void Register(Key key, Action action)
+        public void Register(Key key, StrokeType strokeType, Action action)
         {
-            keyActions[key] = action;
+            keyStrokes[key] = (Type: strokeType, Action: action);
         }
 
         public void Set(string name)
@@ -172,6 +172,11 @@ namespace SportDJ.Services.ControllerService
             }
 
             eventAggregator.GetEvent<ControllerUpdatedEvent>().Publish();
+        }
+
+        public void Unregister(Key key)
+        {
+            keyStrokes.Remove(key);
         }
 
         public void Update()
@@ -316,38 +321,63 @@ namespace SportDJ.Services.ControllerService
             Set(name);
         }
 
-        private void OnKeyPressed(Key key)
+        private void OnKeyPressed(Key key, StrokeType type)
         {
             if (listenerTcs != default)
             {
                 listenerTcs.TrySetResult(key);
             }
-            else
+            else if (keyStrokes.TryGetValue(
+                key: key,
+                value: out var registered)
+                && registered.Type == type)
             {
-                // Normale Verarbeitung (Delegates etc.)
+                registered.Action?.Invoke();
             }
         }
 
         private void OnMessageReceived(object sender, MidiInMessageEventArgs e)
         {
-            if (e.MidiEvent is NoteOnEvent noteOn
-                && noteOn.Velocity > 0)
+            if (e.MidiEvent is MidiEvent midiOnEvent
+                && midiOnEvent.CommandCode == MidiCommandCode.NoteOn
+                && midiOnEvent is NoteOnEvent noteOnEvent)
             {
                 var key = new Key(
-                    Channel: noteOn.Channel,
                     Type: KeyType.Note,
-                    Number: noteOn.NoteNumber);
+                    Channel: noteOnEvent.Channel,
+                    Number: noteOnEvent.NoteNumber);
 
-                OnKeyPressed(key);
+                OnKeyPressed(
+                    key: key,
+                    type: StrokeType.Down);
             }
-            else if (e.MidiEvent is ControlChangeEvent controlChange)
+            else if (e.MidiEvent is MidiEvent midiOffEvent
+                && midiOffEvent.CommandCode == MidiCommandCode.NoteOff
+                && midiOffEvent is NoteEvent noteOffEvent)
             {
                 var key = new Key(
-                    Channel: controlChange.Channel,
-                    Type: KeyType.Control,
-                    Number: (int)controlChange.Controller);
+                    Type: KeyType.Note,
+                    Channel: noteOffEvent.Channel,
+                    Number: noteOffEvent.NoteNumber);
 
-                OnKeyPressed(key);
+                OnKeyPressed(
+                    key: key,
+                    type: StrokeType.Up);
+            }
+            else if (e.MidiEvent is ControlChangeEvent controlEvent)
+            {
+                var key = new Key(
+                    Type: KeyType.Control,
+                    Channel: controlEvent.Channel,
+                    Number: (int)controlEvent.Controller);
+
+                var type = controlEvent.ControllerValue > 0
+                    ? StrokeType.Down
+                    : StrokeType.Up;
+
+                OnKeyPressed(
+                    key: key,
+                    type: type);
             }
         }
 

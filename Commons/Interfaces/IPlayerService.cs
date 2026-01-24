@@ -53,9 +53,13 @@ namespace SportDJ.Commons.Interfaces
 
         void Previous();
 
+        Task RegisterAsync();
+
         Task SetFileAsync();
 
         Task SetFolderAsync();
+
+        void Unregister();
 
         #endregion Public Methods
     }

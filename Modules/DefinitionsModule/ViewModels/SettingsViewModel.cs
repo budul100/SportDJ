@@ -1,4 +1,5 @@
-﻿using Prism.Events;
+﻿using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Player;
@@ -8,15 +9,31 @@ using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels
 {
-    public class SettingsViewModel(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
-        : BindableBase
+    public class SettingsViewModel : BindableBase
     {
         #region Private Fields
 
         private const string Titel = "Settings";
+
+        private readonly IEventAggregator eventAggregator;
+        private readonly IStorageService<Set> settingsService;
+
         private Player player;
 
         #endregion Private Fields
+
+        #region Public Constructors
+
+        public SettingsViewModel(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+        {
+            this.eventAggregator = eventAggregator;
+            this.settingsService = settingsService;
+
+            RegisterCommand = new DelegateCommand(RegisterPlayer);
+            UnregisterCommand = new DelegateCommand(UnegisterPlayer);
+        }
+
+        #endregion Public Constructors
 
         #region Public Properties
 
@@ -83,6 +100,10 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
             }
         }
 
+        public DelegateCommand RegisterCommand { get; private set; }
+
+        public DelegateCommand UnregisterCommand { get; private set; }
+
         #endregion Public Properties
 
         #region Public Methods
@@ -97,5 +118,22 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
         }
 
         #endregion Public Methods
+
+        #region Private Methods
+
+        private void RegisterPlayer()
+        {
+            if (player?.PlayerService != default)
+            {
+                _ = player.PlayerService.RegisterAsync();
+            }
+        }
+
+        private void UnegisterPlayer()
+        {
+            player?.PlayerService?.Unregister();
+        }
+
+        #endregion Private Methods
     }
 }

@@ -2,6 +2,7 @@
 using System.Xml.Serialization;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
+using SportDJ.Commons.Models.Records;
 
 namespace SportDJ.Commons.Models.Structure
 {
@@ -19,12 +20,16 @@ namespace SportDJ.Commons.Models.Structure
         [XmlAttribute]
         public bool IsLoop { get; set; }
 
+        [XmlElement(Order = 0)]
+        public Key? Key { get; set; }
+
         [XmlAttribute]
         public string KeyCode { get; set; }
 
         [XmlAttribute]
         public string Name { get; set; }
 
+        [XmlArray(Order = 1)]
         [XmlArrayItem(ElementName = "Path")]
         public List<string> Paths { get; set; } = [];
 

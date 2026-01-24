@@ -62,6 +62,18 @@
             Content="Reset player at start"
             IsChecked="{Binding IsReset}" />
 
+        <StackPanel
+            Orientation="Horizontal"
+            Margin="{StaticResource InnerMargin}"
+            HorizontalAlignment="Left"
+            Spacing="8">
+
+            <Button Content="Register" Command="{Binding RegisterCommand}" />
+            <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
+
+        </StackPanel>
+
+
     </StackPanel>
 
 </UserControl>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using DryIoc.ImTools;
@@ -30,11 +31,13 @@ namespace SportDJ.Services.PlayerService
         #region Private Fields
 
         private readonly IContainerProvider containerProvider;
+        private readonly IControllerService controllerService;
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
         private readonly IStorageService<Set> settingsService;
         private readonly HashSet<ISignalService> signalServices = [];
         private readonly IStackService stackService;
+        private readonly CancellationTokenSource tokenSource = new();
         private readonly ITrackService trackService;
 
         private bool isDisposed;
@@ -48,12 +51,13 @@ namespace SportDJ.Services.PlayerService
         #region Public Constructors
 
         public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
-            IStackService stackService, ITrackService trackService, IDialogService dialogService,
-            IStorageService<Set> settingsService)
+            IStackService stackService, ITrackService trackService, IControllerService controllerService,
+            IDialogService dialogService, IStorageService<Set> settingsService)
         {
             this.containerProvider = containerProvider;
             this.eventAggregator = eventAggregator;
             this.trackService = trackService;
+            this.controllerService = controllerService;
             this.dialogService = dialogService;
             this.settingsService = settingsService;
             this.stackService = stackService;
@@ -248,6 +252,16 @@ namespace SportDJ.Services.PlayerService
             stackService.Previous();
         }
 
+        public async Task RegisterAsync()
+        {
+            player.Key = await controllerService.ListenAsync(
+                cancellationToken: tokenSource.Token);
+
+            settingsService.Save();
+
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+        }
+
         public async Task SetFileAsync()
         {
             var paths = await dialogService.OpenFilePickerAsync(
@@ -288,6 +302,20 @@ namespace SportDJ.Services.PlayerService
             }
         }
 
+        public void Unregister()
+        {
+            if (player.Key.HasValue)
+            {
+                controllerService.Unregister(player.Key.Value);
+
+                player.Key = default;
+
+                settingsService.Save();
+
+                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+            }
+        }
+
         #endregion Public Methods
 
         #region Protected Methods
@@ -298,6 +326,9 @@ namespace SportDJ.Services.PlayerService
             {
                 if (isDisposing)
                 {
+                    tokenSource?.Cancel();
+                    tokenSource?.Dispose();
+
                     signalService?.Dispose();
                 }
 
@@ -311,7 +342,10 @@ namespace SportDJ.Services.PlayerService
 
         private void InitializePlayer()
         {
-            SetStartLocation();
+            if (player.Key.HasValue)
+            {
+                RegisterKey();
+            }
 
             var paths = player.Paths
                 .Select(settingsService.GetPathFull).ToArray();
@@ -319,6 +353,10 @@ namespace SportDJ.Services.PlayerService
             Task.Run(() => stackService.Initialize(
                 player: player,
                 paths: paths));
+
+            // TO DO: Push into DefinitionsModule/SettingsView
+            // should be called after AppInitializedEvent
+            SetStartLocation();
         }
 
         private void InitializeSignal()
@@ -396,6 +434,14 @@ namespace SportDJ.Services.PlayerService
             }
 
             UpdateContent();
+        }
+
+        private void RegisterKey()
+        {
+            controllerService.Register(
+                key: player.Key.Value,
+                strokeType: StrokeType.Down,
+                action: Execute);
         }
 
         private void SetStartLocation()

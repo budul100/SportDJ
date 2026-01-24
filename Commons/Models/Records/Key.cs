@@ -3,7 +3,7 @@
 namespace SportDJ.Commons.Models.Records
 {
     public readonly record struct Key(
-        int Channel,
         KeyType Type,
+        int Channel,
         int Number);
 }
