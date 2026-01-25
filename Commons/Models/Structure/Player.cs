@@ -21,7 +21,7 @@ namespace SportDJ.Commons.Models.Structure
         public bool IsLoop { get; set; }
 
         [XmlElement(Order = 0)]
-        public Key? Key { get; set; }
+        public Key Key { get; set; }
 
         [XmlAttribute]
         public string KeyCode { get; set; }

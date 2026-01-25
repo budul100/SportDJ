@@ -304,16 +304,13 @@ namespace SportDJ.Services.PlayerService
 
         public void Unregister()
         {
-            if (player.Key.HasValue)
-            {
-                controllerService.Unregister(player.Key.Value);
+            controllerService.Unregister(player.Key);
 
-                player.Key = default;
+            player.Key = default;
 
-                settingsService.Save();
+            settingsService.Save();
 
-                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
-            }
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
         }
 
         #endregion Public Methods
@@ -342,10 +339,7 @@ namespace SportDJ.Services.PlayerService
 
         private void InitializePlayer()
         {
-            if (player.Key.HasValue)
-            {
-                RegisterKey();
-            }
+            RegisterKey();
 
             var paths = player.Paths
                 .Select(settingsService.GetPathFull).ToArray();
@@ -439,7 +433,7 @@ namespace SportDJ.Services.PlayerService
         private void RegisterKey()
         {
             controllerService.Register(
-                key: player.Key.Value,
+                key: player.Key,
                 strokeType: StrokeType.Down,
                 action: Execute);
         }
