@@ -11,6 +11,9 @@ namespace SportDJ.Shareds.SampleProviders.Core
     {
         #region Private Fields
 
+        // Threshold for detecting silence (after applying volume)
+        private const float SilenceThreshold = 1e-4f;
+
         private readonly object lockProvider = new();
         private readonly Random random;
         private readonly ISampleProvider sourceProvider;
@@ -194,6 +197,8 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     }
                 }
 
+                var frameOverThreshold = false;
+
                 for (var channel = 0; channel < WaveFormat.Channels; channel++)
                 {
                     var sample = offset + channel + index;
@@ -210,6 +215,18 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     }
 
                     buffer[sample] *= volumeCurrent;
+
+                    if (Math.Abs(buffer[sample]) > SilenceThreshold)
+                    {
+                        frameOverThreshold = true;
+                    }
+                }
+
+                if (!frameOverThreshold
+                    && FadeType == FadeType.Reduce
+                    && Volume == Constants.VolumeMin)
+                {
+                    OnFadingEnded();
                 }
             }
         }
