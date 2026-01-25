@@ -23,14 +23,20 @@ namespace SportDJ.Tests.SampleProvidersTests
             // Act: start a fade-out (target = VolumeMin) with duration > 0 so fade logic runs
             fadingProvider.FadeOut(milliSeconds: 5000, useFilterEffect: false);
 
+            // We require silence for a certain duration (100 ms) before the fade ends.
+            // Calculate how many frames correspond to 100 ms and request that many samples.
+            var sampleRate = source.WaveFormat.SampleRate;
+            var channels = source.WaveFormat.Channels;
+            var framesRequired = (int)System.Math.Ceiling(sampleRate * (100.0 / 1000.0)); // 100 ms
+            var buffer = new float[framesRequired * channels];
+
             // Read once from the provider — the source provides complete silence,
-            // after applying volume all samples should be below the threshold
-            var buffer = new float[1024];
+            // after applying volume the consecutive silent frames should reach the required duration.
             var read = fadingProvider.Read(buffer, 0, buffer.Length);
 
             // Assert
             Assert.Equal(buffer.Length, read); // Read returned samples
-            Assert.True(endedEventRaised, "FadingEndedEvent must be raised when the source frame is silent during a fade-out.");
+            Assert.True(endedEventRaised, "FadingEndedEvent must be raised when the source is silent for the configured silence duration during a fade-out.");
             Assert.Equal(FadeType.None, fadingProvider.FadeType); // Fade was ended
             Assert.True(fadingProvider.IsSilent, "Provider must be silent after fade ended.");
         }

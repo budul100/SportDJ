@@ -11,13 +11,18 @@ namespace SportDJ.Shareds.SampleProviders.Core
     {
         #region Private Fields
 
+        // Continuous silence duration required to consider stream silent and end the fade.
+        private const int SilenceDurationMilliseconds = 100;
+
         // Threshold for detecting silence (after applying volume)
         private const float SilenceThreshold = 1e-4f;
 
         private readonly object lockProvider = new();
         private readonly Random random;
+        private readonly int silenceFramesRequired;
         private readonly ISampleProvider sourceProvider;
 
+        private int consecutiveSilentFrames;
         private long fadeSampleCount;
         private long fadeSamplePosition;
         private BiQuadFilter[] lowPassFilters;
@@ -38,6 +43,10 @@ namespace SportDJ.Shareds.SampleProviders.Core
             Volume = volumeCurrent;
 
             random = new Random();
+
+            silenceFramesRequired = (int)Math.Ceiling(WaveFormat.SampleRate *
+                (SilenceDurationMilliseconds / 1000.0));
+            consecutiveSilentFrames = 0;
         }
 
         #endregion Public Constructors
@@ -84,6 +93,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
                         : default;
 
                     fadeSamplePosition = 0;
+                    consecutiveSilentFrames = 0;
 
                     fadeSampleCount = milliSeconds.HasValue
                         ? (long)(TimeSpan.FromMilliseconds(milliSeconds.Value).TotalSeconds * WaveFormat.SampleRate)
@@ -226,7 +236,16 @@ namespace SportDJ.Shareds.SampleProviders.Core
                     && FadeType == FadeType.Reduce
                     && Volume == Constants.VolumeMin)
                 {
-                    OnFadingEnded();
+                    consecutiveSilentFrames++;
+
+                    if (consecutiveSilentFrames >= silenceFramesRequired)
+                    {
+                        OnFadingEnded();
+                    }
+                }
+                else
+                {
+                    consecutiveSilentFrames = 0;
                 }
             }
         }
