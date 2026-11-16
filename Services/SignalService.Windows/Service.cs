@@ -39,6 +39,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
     private LoopingProvider loopingProvider;
     private TimeSpan? nextThresholdOnPlay;
     private PlayingProvider playingProvider;
+    private TimeSpan? selectNextOnPlayDuration;
 
     #endregion Private Fields
 
@@ -175,6 +176,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                     .SelectNextOnPlaySeconds.Value;
                 var selectNextDuration = TimeSpan.FromSeconds(selectNextSeconds);
 
+                selectNextOnPlayDuration = selectNextDuration;
                 nextThresholdOnPlay = playingProvider.Current.Add(selectNextDuration);
             }
 
@@ -382,7 +384,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                     && nextThresholdOnPlay.HasValue)
                 {
                     IsOverNextThreshold = Current?.Ticks > nextThresholdOnPlay.Value.Ticks
-                        || Remaining?.Ticks < nextThresholdOnPlay.Value.Ticks;
+                        || Remaining?.Ticks < selectNextOnPlayDuration.Value.Ticks;
 
                     if (IsOverNextThreshold)
                     {
