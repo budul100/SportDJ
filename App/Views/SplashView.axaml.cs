@@ -1,17 +1,16 @@
 using Avalonia.Controls;
 
-namespace SportDJ.App.Views
+namespace SportDJ.App.Views;
+
+public partial class SplashView
+    : Window
 {
-    public partial class SplashView
-        : Window
+    #region Public Constructors
+
+    public SplashView()
     {
-        #region Public Constructors
-
-        public SplashView()
-        {
-            InitializeComponent();
-        }
-
-        #endregion Public Constructors
+        InitializeComponent();
     }
+
+    #endregion Public Constructors
 }

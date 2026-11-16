@@ -3,59 +3,58 @@ using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface ISignalService
+    : IDisposable
 {
-    public interface ISignalService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        TimeSpan? Current { get; }
+    TimeSpan? Current { get; }
 
-        TimeSpan? Duration { get; }
+    TimeSpan? Duration { get; }
 
-        bool IsEnding { get; }
+    bool IsEnding { get; }
 
-        bool IsLoop { get; }
+    bool IsLoop { get; }
 
-        bool IsLoopReady { get; }
+    bool IsLoopReady { get; }
 
-        bool IsOverNextThreshold { get; }
+    bool IsOverNextThreshold { get; }
 
-        bool IsPlaying { get; }
+    bool IsPlaying { get; }
 
-        bool IsSilent { get; }
+    bool IsSilent { get; }
 
-        TimeSpan? LoopEnd { get; }
+    TimeSpan? LoopEnd { get; }
 
-        TimeSpan? LoopStart { get; }
+    TimeSpan? LoopStart { get; }
 
-        ISampleProvider Output { get; }
+    ISampleProvider Output { get; }
 
-        double? Progress { get; }
+    double? Progress { get; }
 
-        TimeSpan? Remaining { get; }
+    TimeSpan? Remaining { get; }
 
-        StateType State { get; }
+    StateType State { get; }
 
-        Track Track { get; }
+    Track Track { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void ActivateLoop();
+    void ActivateLoop();
 
-        void DeactivateLoop();
+    void DeactivateLoop();
 
-        void End();
+    void End();
 
-        void Initialize(Track track, WaveFormat waveFormat);
+    void Initialize(Track track, WaveFormat waveFormat);
 
-        void Pause(bool useFilterEffect = false);
+    void Pause(bool useFilterEffect = false);
 
-        void Start();
+    void Start();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

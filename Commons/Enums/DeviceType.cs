@@ -1,9 +1,8 @@
-﻿namespace SportDJ.Commons.Enums
-{
-    public enum DeviceType
-    {
-        Asio,
+﻿namespace SportDJ.Commons.Enums;
 
-        Wasapi,
-    }
+public enum DeviceType
+{
+    Asio,
+
+    Wasapi,
 }

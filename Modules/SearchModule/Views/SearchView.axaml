@@ -62,7 +62,7 @@
                 DockPanel.Dock="Left"
                 Focusable="False"
                 Text="{Binding Search, Mode=TwoWay}"
-                Watermark="Search track" />
+                PlaceholderText="Search track" />
         </DockPanel>
 
         <ListBox ItemsSource="{Binding Entries}">

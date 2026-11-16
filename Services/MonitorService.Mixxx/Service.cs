@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Midi;
+﻿using NAudio.Midi;
 using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
@@ -10,175 +6,178 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Services.MonitorService.Mixxx.Assets;
 using SportDJ.Services.MonitorService.Mixxx.Extensions;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace SportDJ.Services.MonitorService.Mixxx
+namespace SportDJ.Services.MonitorService.Mixxx;
+
+public class Service
+    : IMonitorService
 {
-    public class Service
-        : IMonitorService
+    #region Private Fields
+
+    private readonly IEventAggregator eventAggregator;
+
+    private CancellationTokenSource cancellationTokenSource;
+    private bool isDisposed;
+    private int? midiIndex;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public Service(IEventAggregator eventAggregator)
     {
-        #region Private Fields
+        this.eventAggregator = eventAggregator;
 
-        private readonly IEventAggregator eventAggregator;
+        DeployMappingMixxx();
+    }
 
-        private CancellationTokenSource cancellationTokenSource;
-        private bool isDisposed;
-        private int? midiIndex;
+    #endregion Public Constructors
 
-        #endregion Private Fields
+    #region Public Properties
 
-        #region Public Constructors
+    public bool IsActive { get; private set; }
 
-        public Service(IEventAggregator eventAggregator)
+    public bool IsReady => midiIndex.HasValue;
+
+    public VolumeType Type { get; private set; }
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    public void Dispose()
+    {
+        Dispose(
+            disposing: true);
+        GC.SuppressFinalize(
+            obj: this);
+    }
+
+    public void Initialize(Device device)
+    {
+        midiIndex = Constants.MidiMixxxOutputDevice.GetMidiOutIndex();
+
+        eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+    }
+
+    public void Mute(int? milliSeconds = default)
+    {
+        if (IsActive)
         {
-            this.eventAggregator = eventAggregator;
+            cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
 
-            DeployMappingMixxx();
+            Task.Run(() => MuteMixxx(
+                milliSeconds: milliSeconds,
+                cancellationToken: cancellationToken));
         }
+    }
 
-        #endregion Public Constructors
+    // TODO: Implement volume raise for Mixxx
+    public void Raise(float? volumeTarget = null, int? milliSeconds = null)
+    { }
 
-        #region Public Properties
+    // TODO: Implement volume reduction for Mixxx
+    public void Reduce(float? volumeTarget = null, int? milliSeconds = null)
+    { }
 
-        public bool IsActive { get; private set; }
+    #endregion Public Methods
 
-        public bool IsReady => midiIndex.HasValue;
+    #region Protected Methods
 
-        public VolumeType Type { get; private set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void Activate()
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!isDisposed)
         {
-            IsActive = true;
-        }
-
-        public void Deactivate()
-        {
-            IsActive = false;
-        }
-
-        public void Dispose()
-        {
-            Dispose(
-                disposing: true);
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        public void Initialize(Device device)
-        {
-            midiIndex = Constants.MidiMixxxOutputDevice.GetMidiOutIndex();
-
-            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
-        }
-
-        public void Mute(int? milliSeconds = default)
-        {
-            if (IsActive)
+            if (disposing)
             {
-                cancellationTokenSource = new CancellationTokenSource();
-                var cancellationToken = cancellationTokenSource.Token;
+                cancellationTokenSource?.Cancel();
+            }
 
-                Task.Run(() => MuteMixxx(
-                    milliSeconds: milliSeconds,
-                    cancellationToken: cancellationToken));
+            isDisposed = true;
+        }
+    }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private static void DeployMappingMixxx()
+    {
+        var sourceFile = Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            Constants.MidiMixxxMappingSource,
+            Constants.MidiMixxxMappingFile);
+
+        var targetFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Constants.MidiMixxxMappingTarget);
+
+        var targetFile = Path.Combine(
+            targetFolder,
+            Constants.MidiMixxxMappingFile);
+
+        try
+        {
+            if (Directory.Exists(targetFolder)
+                && !File.Exists(targetFile))
+            {
+                File.Copy(
+                    sourceFileName: sourceFile,
+                    destFileName: targetFile);
             }
         }
-
-        // TODO: Implement volume raise for Mixxx
-        public void Raise(float? volumeTarget = null, int? milliSeconds = null)
+        catch
         { }
+    }
 
-        // TODO: Implement volume reduction for Mixxx
-        public void Reduce(float? volumeTarget = null, int? milliSeconds = null)
-        { }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
+    private async void MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
+    {
+        if (IsReady)
         {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    cancellationTokenSource?.Cancel();
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private static void DeployMappingMixxx()
-        {
-            var sourceFile = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                Constants.MidiMixxxMappingSource,
-                Constants.MidiMixxxMappingFile);
-
-            var targetFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                Constants.MidiMixxxMappingTarget);
-
-            var targetFile = Path.Combine(
-                targetFolder,
-                Constants.MidiMixxxMappingFile);
-
             try
             {
-                if (Directory.Exists(targetFolder)
-                    && !File.Exists(targetFile))
-                {
-                    File.Copy(
-                        sourceFileName: sourceFile,
-                        destFileName: targetFile);
-                }
-            }
-            catch
-            { }
-        }
+                using var midiOut = new MidiOut(midiIndex.Value);
 
-        private async void MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
-        {
-            if (IsReady)
+                if (milliSeconds <= Constants.MidiVolumeMax)
+                {
+                    midiOut.VolumeMute();
+                }
+                else
+                {
+                    await midiOut.VolumeFadeOut(
+                        milliSeconds: milliSeconds,
+                        cancellationToken: cancellationToken);
+                }
+
+                Type = VolumeType.Muted;
+
+                await midiOut.DecksStop(cancellationToken);
+
+                midiOut.VolumeSetDefault();
+
+                Type = VolumeType.None;
+            }
+            finally
             {
-                try
-                {
-                    using var midiOut = new MidiOut(midiIndex.Value);
-
-                    if (milliSeconds <= Constants.MidiVolumeMax)
-                    {
-                        midiOut.VolumeMute();
-                    }
-                    else
-                    {
-                        await midiOut.VolumeFadeOut(
-                            milliSeconds: milliSeconds,
-                            cancellationToken: cancellationToken);
-                    }
-
-                    Type = VolumeType.Muted;
-
-                    await midiOut.DecksStop(cancellationToken);
-
-                    midiOut.VolumeSetDefault();
-
-                    Type = VolumeType.None;
-                }
-                finally
-                {
-                    eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
-                }
+                eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
             }
         }
-
-        #endregion Private Methods
     }
+
+    #endregion Private Methods
 }

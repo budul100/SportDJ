@@ -13,237 +13,236 @@ using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Services.DialogService
+namespace SportDJ.Services.DialogService;
+
+public class Service
+    : IDialogService
 {
-    public class Service
-        : IDialogService
+    #region Private Fields
+
+    private TopLevel topLevel;
+    private Window window;
+    private WindowIcon windowIcon;
+
+    #endregion Private Fields
+
+    #region Public Methods
+
+    public async Task<IStorageFolder> GetFolderAsync(IEnumerable<string> paths = default,
+        Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
     {
-        #region Private Fields
+        var result = default(IStorageFolder);
 
-        private TopLevel topLevel;
-        private Window window;
-        private WindowIcon windowIcon;
-
-        #endregion Private Fields
-
-        #region Public Methods
-
-        public async Task<IStorageFolder> GetFolderAsync(IEnumerable<string> paths = default,
-            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
+        if (topLevel != default)
         {
-            var result = default(IStorageFolder);
+            var path = default(string);
 
-            if (topLevel != default)
+            if (paths?.Any() == true)
             {
-                var path = default(string);
+                path = paths?.FirstOrDefault(Directory.Exists);
 
-                if (paths?.Any() == true)
+                if (string.IsNullOrEmpty(path))
                 {
-                    path = paths?.FirstOrDefault(Directory.Exists);
-
-                    if (string.IsNullOrEmpty(path))
-                    {
-                        path = paths?
-                            .Select(Path.GetDirectoryName)
-                            .FirstOrDefault(Directory.Exists);
-                    }
-                }
-
-                result = await GetFolderAsync(
-                    path: path,
-                    alternative: alternative);
-            }
-
-            return result;
-        }
-
-        public async Task<IStorageFolder> GetFolderAsync(string path = default,
-            Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
-        {
-            var result = default(IStorageFolder);
-
-            if (topLevel != default)
-            {
-                if (!Directory.Exists(path)
-                    && File.Exists(path))
-                {
-                    path = Path.GetDirectoryName(path);
-                }
-
-                if (!Directory.Exists(path)
-                    && alternative != default)
-                {
-                    path = Environment.GetFolderPath(alternative.Value);
-                }
-
-                if (Directory.Exists(path))
-                {
-                    result = await topLevel.StorageProvider.TryGetFolderFromPathAsync(path);
+                    path = paths?
+                        .Select(Path.GetDirectoryName)
+                        .FirstOrDefault(Directory.Exists);
                 }
             }
 
-            return result;
+            result = await GetFolderAsync(
+                path: path,
+                alternative: alternative);
         }
 
-        public async Task<ButtonResult> GetMessageBoxResultAsync(string contentMessage, string contentTitle,
-            ButtonEnum buttonDefinitions = ButtonEnum.YesNo, ClickEnum enterDefaultButton = ClickEnum.Yes,
-            ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool showInCenter = true,
-            WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner)
-        {
-            var messageBoxParams = new MessageBoxStandardParams
-            {
-                ButtonDefinitions = buttonDefinitions,
-                ContentMessage = contentMessage,
-                ContentTitle = contentTitle,
-                EnterDefaultButton = enterDefaultButton,
-                EscDefaultButton = escDefaultButton,
-                Icon = icon,
-                ShowInCenter = showInCenter,
-                WindowStartupLocation = windowStartupLocation,
-                WindowIcon = windowIcon,
-            };
-
-            var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
-
-            var result = await dialog.ShowWindowDialogAsync(window);
-
-            return result;
-        }
-
-        public void Initialize(Window window, string iconUri = default)
-        {
-            ArgumentNullException.ThrowIfNull(window);
-
-            this.window = window;
-            topLevel = Window.GetTopLevel(window);
-
-            try
-            {
-                windowIcon = GetWindowIcon(iconUri);
-            }
-            catch
-            { }
-        }
-
-        public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
-            IReadOnlyList<FilePickerFileType> fileTypeFilter = default, bool allowMultiple = false,
-            IStorageFolder suggestedStartLocation = default)
-        {
-            var result = default(IEnumerable<IStorageFile>);
-
-            if (topLevel != default)
-            {
-                var options = new FilePickerOpenOptions
-                {
-                    AllowMultiple = allowMultiple,
-                    FileTypeFilter = fileTypeFilter,
-                    SuggestedStartLocation = suggestedStartLocation,
-                    Title = title,
-                };
-
-                result = await topLevel?.StorageProvider.OpenFilePickerAsync(options);
-            }
-
-            return result;
-        }
-
-        public async Task<IEnumerable<IStorageFolder>> OpenFolderPickerAsync(string title, bool allowMultiple = false,
-            IStorageFolder suggestedStartLocation = default)
-        {
-            var result = default(IEnumerable<IStorageFolder>);
-
-            if (topLevel != default)
-            {
-                var options = new FolderPickerOpenOptions
-                {
-                    AllowMultiple = allowMultiple,
-                    SuggestedStartLocation = suggestedStartLocation,
-                    Title = title,
-                };
-
-                result = await topLevel?.StorageProvider.OpenFolderPickerAsync(options);
-            }
-
-            return result;
-        }
-
-        public async Task<IStorageFile> SaveFilePickerAsync(string title, string defaultExtension = default,
-            IReadOnlyList<FilePickerFileType> fileTypeChoices = default, bool showOverwritePrompt = default,
-            string suggestedFileName = default, IStorageFolder suggestedStartLocation = default)
-        {
-            var result = default(IStorageFile);
-
-            if (topLevel != default)
-            {
-                var options = new FilePickerSaveOptions
-                {
-                    DefaultExtension = defaultExtension,
-                    FileTypeChoices = fileTypeChoices,
-                    ShowOverwritePrompt = showOverwritePrompt,
-                    SuggestedFileName = suggestedFileName,
-                    SuggestedStartLocation = suggestedStartLocation,
-                    Title = title,
-                };
-
-                result = await topLevel?.StorageProvider.SaveFilePickerAsync(options);
-            }
-
-            return result;
-        }
-
-        public async Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,
-            bool showInCenter = true, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner)
-        {
-            var messageBoxParams = new MessageBoxStandardParams
-            {
-                ButtonDefinitions = ButtonEnum.Ok,
-                ContentMessage = contentMessage,
-                ContentTitle = contentTitle,
-                EnterDefaultButton = ClickEnum.Ok,
-                EscDefaultButton = ClickEnum.Ok,
-                Icon = icon,
-                ShowInCenter = showInCenter,
-                WindowStartupLocation = windowStartupLocation,
-                WindowIcon = windowIcon,
-            };
-
-            var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
-
-            await dialog.ShowWindowDialogAsync(window);
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private static WindowIcon GetWindowIcon(string iconUri)
-        {
-            var result = default(WindowIcon);
-
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(iconUri))
-                {
-                    var uri = new Uri(iconUri);
-
-                    if (AssetLoader.Exists(uri))
-                    {
-                        using var stream = AssetLoader.Open(uri);
-
-                        if (stream != default)
-                        {
-                            var bitmap = new Bitmap(stream);
-                            result = new WindowIcon(bitmap);
-                        }
-                    }
-                }
-            }
-            catch
-            { }
-
-            return result;
-        }
-
-        #endregion Private Methods
+        return result;
     }
+
+    public async Task<IStorageFolder> GetFolderAsync(string path = default,
+        Environment.SpecialFolder? alternative = Environment.SpecialFolder.UserProfile)
+    {
+        var result = default(IStorageFolder);
+
+        if (topLevel != default)
+        {
+            if (!Directory.Exists(path)
+                && File.Exists(path))
+            {
+                path = Path.GetDirectoryName(path);
+            }
+
+            if (!Directory.Exists(path)
+                && alternative != default)
+            {
+                path = Environment.GetFolderPath(alternative.Value);
+            }
+
+            if (Directory.Exists(path))
+            {
+                result = await topLevel.StorageProvider.TryGetFolderFromPathAsync(path);
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<ButtonResult> GetMessageBoxResultAsync(string contentMessage, string contentTitle,
+        ButtonEnum buttonDefinitions = ButtonEnum.YesNo, ClickEnum enterDefaultButton = ClickEnum.Yes,
+        ClickEnum escDefaultButton = ClickEnum.No, Icon icon = Icon.Question, bool showInCenter = true,
+        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner)
+    {
+        var messageBoxParams = new MessageBoxStandardParams
+        {
+            ButtonDefinitions = buttonDefinitions,
+            ContentMessage = contentMessage,
+            ContentTitle = contentTitle,
+            EnterDefaultButton = enterDefaultButton,
+            EscDefaultButton = escDefaultButton,
+            Icon = icon,
+            ShowInCenter = showInCenter,
+            WindowStartupLocation = windowStartupLocation,
+            WindowIcon = windowIcon,
+        };
+
+        var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
+
+        var result = await dialog.ShowWindowDialogAsync(window);
+
+        return result;
+    }
+
+    public void Initialize(Window window, string iconUri = default)
+    {
+        ArgumentNullException.ThrowIfNull(window);
+
+        this.window = window;
+        topLevel = Window.GetTopLevel(window);
+
+        try
+        {
+            windowIcon = GetWindowIcon(iconUri);
+        }
+        catch
+        { }
+    }
+
+    public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
+        IReadOnlyList<FilePickerFileType> fileTypeFilter = default, bool allowMultiple = false,
+        IStorageFolder suggestedStartLocation = default)
+    {
+        var result = default(IEnumerable<IStorageFile>);
+
+        if (topLevel != default)
+        {
+            var options = new FilePickerOpenOptions
+            {
+                AllowMultiple = allowMultiple,
+                FileTypeFilter = fileTypeFilter,
+                SuggestedStartLocation = suggestedStartLocation,
+                Title = title,
+            };
+
+            result = await topLevel?.StorageProvider.OpenFilePickerAsync(options);
+        }
+
+        return result;
+    }
+
+    public async Task<IEnumerable<IStorageFolder>> OpenFolderPickerAsync(string title, bool allowMultiple = false,
+        IStorageFolder suggestedStartLocation = default)
+    {
+        var result = default(IEnumerable<IStorageFolder>);
+
+        if (topLevel != default)
+        {
+            var options = new FolderPickerOpenOptions
+            {
+                AllowMultiple = allowMultiple,
+                SuggestedStartLocation = suggestedStartLocation,
+                Title = title,
+            };
+
+            result = await topLevel?.StorageProvider.OpenFolderPickerAsync(options);
+        }
+
+        return result;
+    }
+
+    public async Task<IStorageFile> SaveFilePickerAsync(string title, string defaultExtension = default,
+        IReadOnlyList<FilePickerFileType> fileTypeChoices = default, bool showOverwritePrompt = default,
+        string suggestedFileName = default, IStorageFolder suggestedStartLocation = default)
+    {
+        var result = default(IStorageFile);
+
+        if (topLevel != default)
+        {
+            var options = new FilePickerSaveOptions
+            {
+                DefaultExtension = defaultExtension,
+                FileTypeChoices = fileTypeChoices,
+                ShowOverwritePrompt = showOverwritePrompt,
+                SuggestedFileName = suggestedFileName,
+                SuggestedStartLocation = suggestedStartLocation,
+                Title = title,
+            };
+
+            result = await topLevel?.StorageProvider.SaveFilePickerAsync(options);
+        }
+
+        return result;
+    }
+
+    public async Task ShowMessageBoxAsync(string contentMessage, string contentTitle, Icon icon = Icon.Question,
+        bool showInCenter = true, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterOwner)
+    {
+        var messageBoxParams = new MessageBoxStandardParams
+        {
+            ButtonDefinitions = ButtonEnum.Ok,
+            ContentMessage = contentMessage,
+            ContentTitle = contentTitle,
+            EnterDefaultButton = ClickEnum.Ok,
+            EscDefaultButton = ClickEnum.Ok,
+            Icon = icon,
+            ShowInCenter = showInCenter,
+            WindowStartupLocation = windowStartupLocation,
+            WindowIcon = windowIcon,
+        };
+
+        var dialog = MessageBoxManager.GetMessageBoxStandard(messageBoxParams);
+
+        await dialog.ShowWindowDialogAsync(window);
+    }
+
+    #endregion Public Methods
+
+    #region Private Methods
+
+    private static WindowIcon GetWindowIcon(string iconUri)
+    {
+        var result = default(WindowIcon);
+
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(iconUri))
+            {
+                var uri = new Uri(iconUri);
+
+                if (AssetLoader.Exists(uri))
+                {
+                    using var stream = AssetLoader.Open(uri);
+
+                    if (stream != default)
+                    {
+                        var bitmap = new Bitmap(stream);
+                        result = new WindowIcon(bitmap);
+                    }
+                }
+            }
+        }
+        catch
+        { }
+
+        return result;
+    }
+
+    #endregion Private Methods
 }

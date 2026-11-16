@@ -1,34 +1,33 @@
-﻿namespace SportDJ.Commons.Extensions
+﻿namespace SportDJ.Commons.Extensions;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
+    #region Private Fields
+
+    private const string PrefixNumpad = "NumPad";
+
+    #endregion Private Fields
+
+    #region Public Methods
+
+    public static string GetKey(this string keyCode)
     {
-        #region Private Fields
+        var result = default(string);
 
-        private const string PrefixNumpad = "NumPad";
-
-        #endregion Private Fields
-
-        #region Public Methods
-
-        public static string GetKey(this string keyCode)
+        if (!string.IsNullOrWhiteSpace(keyCode))
         {
-            var result = default(string);
-
-            if (!string.IsNullOrWhiteSpace(keyCode))
+            if (keyCode.StartsWith(PrefixNumpad))
             {
-                if (keyCode.StartsWith(PrefixNumpad))
-                {
-                    result = $"[{keyCode[6..]}]";
-                }
-                else
-                {
-                    result = keyCode;
-                }
+                result = $"[{keyCode[6..]}]";
             }
-
-            return result;
+            else
+            {
+                result = keyCode;
+            }
         }
 
-        #endregion Public Methods
+        return result;
     }
+
+    #endregion Public Methods
 }

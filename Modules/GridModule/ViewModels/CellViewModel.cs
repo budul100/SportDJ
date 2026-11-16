@@ -15,340 +15,339 @@ using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.GridModule.ViewModels
+namespace SportDJ.Modules.GridModule.ViewModels;
+
+public abstract class CellViewModel
+    : BindableBase, IDisposable
 {
-    public abstract class CellViewModel
-        : BindableBase, IDisposable
+    #region Protected Fields
+
+    protected readonly IContainerProvider containerProvider;
+    protected readonly IDialogService dialogService;
+    protected readonly IEventAggregator eventAggregator;
+    protected readonly IGridService gridService;
+
+    protected Action listenChecker;
+    protected IOutputService outputServiceLive;
+
+    #endregion Protected Fields
+
+    #region Private Fields
+
+    // All cells which currently wait for a key to be assigned. Shared, so that
+    // other cells do not react on the key which is meant to be assigned.
+    private static readonly HashSet<CellViewModel> listeningCells = [];
+    private static readonly Lock listeningLock = new();
+
+    private readonly IKeyable keyable;
+    private readonly INameable nameable;
+    private readonly IStorageService<Set> settingsService;
+    private readonly List<SubscriptionToken> subscriptions = [];
+
+    private Cell cell;
+    private bool isDisposed;
+    private bool isRenaming;
+
+    #endregion Private Fields
+
+    #region Protected Constructors
+
+    protected CellViewModel(IContainerProvider containerProvider, object element)
     {
-        #region Protected Fields
+        this.containerProvider = containerProvider;
 
-        protected readonly IContainerProvider containerProvider;
-        protected readonly IDialogService dialogService;
-        protected readonly IEventAggregator eventAggregator;
-        protected readonly IGridService gridService;
+        cell = element is Grid grid
+            ? grid.Group
+            : element as Cell;
 
-        protected Action listenChecker;
-        protected IOutputService outputServiceLive;
+        nameable = element as INameable;
+        keyable = element as IKeyable;
 
-        #endregion Protected Fields
+        eventAggregator = containerProvider?.Resolve<IEventAggregator>();
+        settingsService = containerProvider?.Resolve<IStorageService<Set>>();
+        dialogService = containerProvider?.Resolve<IDialogService>();
+        gridService = containerProvider?.Resolve<IGridService>();
 
-        #region Private Fields
+        AddSubscription(eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+            action: _ => UpdateOutput(),
+            keepSubscriberReferenceAlive: true));
+    }
 
-        // All cells which currently wait for a key to be assigned. Shared, so that
-        // other cells do not react on the key which is meant to be assigned.
-        private static readonly HashSet<CellViewModel> listeningCells = [];
-        private static readonly Lock listeningLock = new();
+    #endregion Protected Constructors
 
-        private readonly IKeyable keyable;
-        private readonly INameable nameable;
-        private readonly IStorageService<Set> settingsService;
-        private readonly List<SubscriptionToken> subscriptions = [];
+    #region Public Events
 
-        private Cell cell;
-        private bool isDisposed;
-        private bool isRenaming;
+    public event EventHandler MenuCloseEvent;
 
-        #endregion Private Fields
+    public event EventHandler MenuOpenEvent;
 
-        #region Protected Constructors
+    #endregion Public Events
 
-        protected CellViewModel(IContainerProvider containerProvider, object element)
+    #region Public Properties
+
+    public virtual int Column => cell.Column;
+
+    public int ColumnSpan { get; protected set; } = 1;
+
+    public bool HasKey => !string.IsNullOrWhiteSpace(Key);
+
+    public bool IsListening
+    {
+        get
         {
-            this.containerProvider = containerProvider;
-
-            cell = element is Grid grid
-                ? grid.Group
-                : element as Cell;
-
-            nameable = element as INameable;
-            keyable = element as IKeyable;
-
-            eventAggregator = containerProvider?.Resolve<IEventAggregator>();
-            settingsService = containerProvider?.Resolve<IStorageService<Set>>();
-            dialogService = containerProvider?.Resolve<IDialogService>();
-            gridService = containerProvider?.Resolve<IGridService>();
-
-            AddSubscription(eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
-                action: _ => UpdateOutput(),
-                keepSubscriberReferenceAlive: true));
-        }
-
-        #endregion Protected Constructors
-
-        #region Public Events
-
-        public event EventHandler MenuCloseEvent;
-
-        public event EventHandler MenuOpenEvent;
-
-        #endregion Public Events
-
-        #region Public Properties
-
-        public virtual int Column => cell.Column;
-
-        public int ColumnSpan { get; protected set; } = 1;
-
-        public bool HasKey => !string.IsNullOrWhiteSpace(Key);
-
-        public bool IsListening
-        {
-            get
+            lock (listeningLock)
             {
-                lock (listeningLock)
-                {
-                    return listeningCells.Contains(this);
-                }
+                return listeningCells.Contains(this);
             }
         }
+    }
 
-        public bool IsRenaming
+    public bool IsRenaming
+    {
+        get { return isRenaming; }
+        set { SetProperty(ref isRenaming, value); }
+    }
+
+    public string Key => KeyCode?.GetKey();
+
+    public string KeyCode
+    {
+        get
         {
-            get { return isRenaming; }
-            set { SetProperty(ref isRenaming, value); }
+            return keyable?.KeyCode;
         }
 
-        public string Key => KeyCode?.GetKey();
-
-        public string KeyCode
+        set
         {
-            get
+            if (keyable != default
+                && value != keyable.KeyCode)
             {
-                return keyable?.KeyCode;
-            }
+                keyable.KeyCode = value;
 
-            set
+                settingsService?.Save();
+
+                RaisePropertyChanged(nameof(KeyCode));
+                RaisePropertyChanged(nameof(HasKey));
+                RaisePropertyChanged(nameof(Key));
+            }
+        }
+    }
+
+    public ObservableCollection<BindableBase> Menus { get; private set; }
+
+    public virtual string Name
+    {
+        get { return nameable?.Name; }
+
+        set
+        {
+            if (nameable != default)
             {
-                if (keyable != default
-                    && value != keyable.KeyCode)
+                var trimmed = value?.Trim();
+
+                if (!string.IsNullOrWhiteSpace(trimmed)
+                    && trimmed != nameable.Name)
                 {
-                    keyable.KeyCode = value;
+                    nameable.Name = trimmed;
 
                     settingsService?.Save();
-
-                    RaisePropertyChanged(nameof(KeyCode));
-                    RaisePropertyChanged(nameof(HasKey));
-                    RaisePropertyChanged(nameof(Key));
                 }
+
+                // Always notify, so the UI falls back to the stored name after an invalid input
+                RaisePropertyChanged(nameof(Name));
             }
         }
+    }
 
-        public ObservableCollection<BindableBase> Menus { get; private set; }
+    public virtual int Row => cell.Row;
 
-        public virtual string Name
+    public int RowSpan { get; protected set; } = 1;
+
+    #endregion Public Properties
+
+    #region Protected Properties
+
+    protected static bool IsAnyListening
+    {
+        get
         {
-            get { return nameable?.Name; }
-
-            set
+            lock (listeningLock)
             {
-                if (nameable != default)
-                {
-                    var trimmed = value?.Trim();
-
-                    if (!string.IsNullOrWhiteSpace(trimmed)
-                        && trimmed != nameable.Name)
-                    {
-                        nameable.Name = trimmed;
-
-                        settingsService?.Save();
-                    }
-
-                    // Always notify, so the UI falls back to the stored name after an invalid input
-                    RaisePropertyChanged(nameof(Name));
-                }
+                return listeningCells.Count > 0;
             }
         }
+    }
 
-        public virtual int Row => cell.Row;
+    #endregion Protected Properties
 
-        public int RowSpan { get; protected set; } = 1;
+    #region Public Methods
 
-        #endregion Public Properties
-
-        #region Protected Properties
-
-        protected static bool IsAnyListening
+    public void Dispose()
+    {
+        if (!isDisposed)
         {
-            get
-            {
-                lock (listeningLock)
-                {
-                    return listeningCells.Count > 0;
-                }
-            }
+            isDisposed = true;
+
+            Dispose(
+                isDisposing: true);
+
+            GC.SuppressFinalize(
+                obj: this);
         }
+    }
 
-        #endregion Protected Properties
+    #endregion Public Methods
 
-        #region Public Methods
+    #region Internal Methods
 
-        public void Dispose()
+    protected internal void ReceiveKey(string keyCode)
+    {
+        lock (listeningLock)
         {
-            if (!isDisposed)
-            {
-                isDisposed = true;
-
-                Dispose(
-                    isDisposing: true);
-
-                GC.SuppressFinalize(
-                    obj: this);
-            }
+            listeningCells.Remove(this);
         }
 
-        #endregion Public Methods
+        KeyCode = keyCode;
 
-        #region Internal Methods
+        listenChecker?.Invoke();
 
-        protected internal void ReceiveKey(string keyCode)
+        CloseMenu();
+    }
+
+    #endregion Internal Methods
+
+    #region Protected Methods
+
+    protected void CloseMenu()
+    {
+        MenuCloseEvent?.Invoke(
+            sender: this,
+            e: default);
+
+        RaisePropertyChanged(nameof(Menus));
+    }
+
+    protected virtual void Dispose(bool isDisposing)
+    {
+        if (isDisposing)
         {
             lock (listeningLock)
             {
                 listeningCells.Remove(this);
             }
 
-            KeyCode = keyCode;
-
-            listenChecker?.Invoke();
-
-            CloseMenu();
-        }
-
-        #endregion Internal Methods
-
-        #region Protected Methods
-
-        protected void CloseMenu()
-        {
-            MenuCloseEvent?.Invoke(
-                sender: this,
-                e: default);
-
-            RaisePropertyChanged(nameof(Menus));
-        }
-
-        protected virtual void Dispose(bool isDisposing)
-        {
-            if (isDisposing)
+            foreach (var subscription in subscriptions)
             {
-                lock (listeningLock)
-                {
-                    listeningCells.Remove(this);
-                }
-
-                foreach (var subscription in subscriptions)
-                {
-                    subscription.Dispose();
-                }
-
-                subscriptions.Clear();
-
-                DisposeMenus();
-
-                cell = default;
-            }
-        }
-
-        protected virtual IEnumerable<BindableBase> GetElementMenus()
-        {
-            yield break;
-        }
-
-        protected virtual IEnumerable<BindableBase> GetGridMenus()
-        {
-            var orientations = Enum.GetValues<OrientationType>();
-
-            foreach (var orientation in orientations)
-            {
-                yield return new MenuViewModel(
-                    header: $"{Texts.GridAddHeader} {orientation}",
-                    executeCallback: () => gridService.AddPlayer(
-                        cell: cell,
-                        orientation: orientation),
-                    closeCallback: CloseMenu);
+                subscription.Dispose();
             }
 
-            yield return new SeparatorViewModel();
+            subscriptions.Clear();
 
-            foreach (var orientation in orientations)
-            {
-                yield return new MenuViewModel(
-                    header: $"{Texts.GridMoveHeader} {orientation}",
-                    executeCallback: () => gridService.MoveCell(
-                        cell: cell,
-                        orientation: orientation),
-                    closeCallback: CloseMenu);
-            }
-
-            yield return new SeparatorViewModel();
-
-            yield return new MenuViewModel(
-                header: $"{Texts.CellSwapHeader}...",
-                executeCallback: () => gridService.SwapAsync(cell),
-                closeCallback: CloseMenu);
-
-            yield return new MenuViewModel(
-                header: $"{Texts.CellRemoveHeader}...",
-                executeCallback: () => gridService.RemoveCellAsync(cell),
-                closeCallback: CloseMenu);
-        }
-
-        protected virtual void Initialize()
-        {
-            UpdateOutput();
-
-            // The old menu items hold event subscriptions, which have to be released
             DisposeMenus();
 
-            Menus = new ObservableCollection<BindableBase>(GetElementMenus());
-
-            RaisePropertyChanged(nameof(Menus));
+            cell = default;
         }
-
-        protected void ListenHook()
-        {
-            lock (listeningLock)
-            {
-                listeningCells.Add(this);
-            }
-        }
-
-        protected void OpenMenu()
-        {
-            MenuOpenEvent?.Invoke(
-                sender: this,
-                e: default);
-        }
-
-        protected void AddSubscription(SubscriptionToken subscription)
-        {
-            if (subscription != default)
-            {
-                subscriptions.Add(subscription);
-            }
-        }
-
-        protected virtual void UpdateOutput()
-        {
-            outputServiceLive = containerProvider?.Resolve<IOutputService>(
-                name: nameof(OutputType.Live));
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private void DisposeMenus()
-        {
-            if (Menus != default)
-            {
-                foreach (var menu in Menus.OfType<IDisposable>().ToArray())
-                {
-                    menu.Dispose();
-                }
-            }
-        }
-
-        #endregion Private Methods
     }
+
+    protected virtual IEnumerable<BindableBase> GetElementMenus()
+    {
+        yield break;
+    }
+
+    protected virtual IEnumerable<BindableBase> GetGridMenus()
+    {
+        var orientations = Enum.GetValues<OrientationType>();
+
+        foreach (var orientation in orientations)
+        {
+            yield return new MenuViewModel(
+                header: $"{Texts.GridAddHeader} {orientation}",
+                executeCallback: () => gridService.AddPlayer(
+                    cell: cell,
+                    orientation: orientation),
+                closeCallback: CloseMenu);
+        }
+
+        yield return new SeparatorViewModel();
+
+        foreach (var orientation in orientations)
+        {
+            yield return new MenuViewModel(
+                header: $"{Texts.GridMoveHeader} {orientation}",
+                executeCallback: () => gridService.MoveCell(
+                    cell: cell,
+                    orientation: orientation),
+                closeCallback: CloseMenu);
+        }
+
+        yield return new SeparatorViewModel();
+
+        yield return new MenuViewModel(
+            header: $"{Texts.CellSwapHeader}...",
+            executeCallback: () => gridService.SwapAsync(cell),
+            closeCallback: CloseMenu);
+
+        yield return new MenuViewModel(
+            header: $"{Texts.CellRemoveHeader}...",
+            executeCallback: () => gridService.RemoveCellAsync(cell),
+            closeCallback: CloseMenu);
+    }
+
+    protected virtual void Initialize()
+    {
+        UpdateOutput();
+
+        // The old menu items hold event subscriptions, which have to be released
+        DisposeMenus();
+
+        Menus = new ObservableCollection<BindableBase>(GetElementMenus());
+
+        RaisePropertyChanged(nameof(Menus));
+    }
+
+    protected void ListenHook()
+    {
+        lock (listeningLock)
+        {
+            listeningCells.Add(this);
+        }
+    }
+
+    protected void OpenMenu()
+    {
+        MenuOpenEvent?.Invoke(
+            sender: this,
+            e: default);
+    }
+
+    protected void AddSubscription(SubscriptionToken subscription)
+    {
+        if (subscription != default)
+        {
+            subscriptions.Add(subscription);
+        }
+    }
+
+    protected virtual void UpdateOutput()
+    {
+        outputServiceLive = containerProvider?.Resolve<IOutputService>(
+            name: nameof(OutputType.Live));
+    }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private void DisposeMenus()
+    {
+        if (Menus != default)
+        {
+            foreach (var menu in Menus.OfType<IDisposable>().ToArray())
+            {
+                menu.Dispose();
+            }
+        }
+    }
+
+    #endregion Private Methods
 }

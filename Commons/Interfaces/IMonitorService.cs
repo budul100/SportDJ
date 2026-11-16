@@ -2,35 +2,34 @@
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Records;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IMonitorService
+    : IDisposable
 {
-    public interface IMonitorService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        bool IsActive { get; }
+    bool IsActive { get; }
 
-        bool IsReady { get; }
+    bool IsReady { get; }
 
-        VolumeType Type { get; }
+    VolumeType Type { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void Activate();
+    void Activate();
 
-        void Deactivate();
+    void Deactivate();
 
-        void Initialize(Device device);
+    void Initialize(Device device);
 
-        void Mute(int? milliSeconds = default);
+    void Mute(int? milliSeconds = default);
 
-        void Raise(float? volumeTarget = default, int? milliSeconds = default);
+    void Raise(float? volumeTarget = default, int? milliSeconds = default);
 
-        void Reduce(float? volumeTarget = default, int? milliSeconds = default);
+    void Reduce(float? volumeTarget = default, int? milliSeconds = default);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

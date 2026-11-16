@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using Prism.Mvvm;
 
-namespace SportDJ.Modules.DefinitionsModule.ViewModels
+namespace SportDJ.Modules.DefinitionsModule.ViewModels;
+
+public abstract class TabViewModel
+    : BindableBase
 {
-    public abstract class TabViewModel
-        : BindableBase
-    {
-        #region Public Properties
+    #region Public Properties
 
-        public abstract string Title { get; }
+    public abstract string Title { get; }
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

@@ -1,17 +1,16 @@
 ﻿using System;
 using NAudio.Wave;
 
-namespace SportDJ.Shareds.SampleProviders.Abstractions
+namespace SportDJ.Shareds.SampleProviders.Abstractions;
+
+public interface IPlayingProvider
+    : ISampleProvider, IDisposable
 {
-    public interface IPlayingProvider
-        : ISampleProvider, IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        long Length { get; }
+    long Length { get; }
 
-        long Position { get; set; }
+    long Position { get; set; }
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

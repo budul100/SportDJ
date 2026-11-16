@@ -1,9 +1,8 @@
 ﻿using Prism.Events;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Commons.Events.Output
-{
-    public class OutputStartedEvent
-        : PubSubEvent<IOutputService>
-    { }
-}
+namespace SportDJ.Commons.Events.Output;
+
+public class OutputStartedEvent
+    : PubSubEvent<IOutputService>
+{ }

@@ -1,8 +1,7 @@
 ﻿using Prism.Events;
 
-namespace SportDJ.Commons.Events.App
-{
-    public class AppInitializedEvent
-        : PubSubEvent
-    { }
-}
+namespace SportDJ.Commons.Events.App;
+
+public class AppInitializedEvent
+    : PubSubEvent
+{ }

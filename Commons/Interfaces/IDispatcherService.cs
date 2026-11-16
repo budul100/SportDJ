@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IDispatcherService
 {
-    public interface IDispatcherService
-    {
-        #region Public Methods
+    #region Public Methods
 
-        Task InvokeAsync(Action action);
+    Task InvokeAsync(Action action);
 
-        Task<T> InvokeAsync<T>(Func<T> function);
+    Task<T> InvokeAsync<T>(Func<T> function);
 
-        void Post(Action action);
+    void Post(Action action);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

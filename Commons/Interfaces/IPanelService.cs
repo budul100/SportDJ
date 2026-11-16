@@ -2,26 +2,25 @@
 using Avalonia.Controls;
 using SportDJ.Commons.Enums;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IPanelService
 {
-    public interface IPanelService
-    {
-        #region Public Methods
+    #region Public Methods
 
-        void Activate<TService>();
+    void Activate<TService>();
 
-        void Deactivate<TService>();
+    void Deactivate<TService>();
 
-        void Deactivate(PanelType type);
+    void Deactivate(PanelType type);
 
-        Control GetView(PanelType type);
+    Control GetView(PanelType type);
 
-        bool IsVisible(PanelType type);
+    bool IsVisible(PanelType type);
 
-        bool IsVisible<TService>();
+    bool IsVisible<TService>();
 
-        void Register<TService>(PanelType type, Control view, Action action = default);
+    void Register<TService>(PanelType type, Control view, Action action = default);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

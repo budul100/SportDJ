@@ -1,9 +1,8 @@
-﻿namespace SportDJ.Commons.Enums
-{
-    public enum KeyType
-    {
-        Note,
+﻿namespace SportDJ.Commons.Enums;
 
-        Control,
-    }
+public enum KeyType
+{
+    Note,
+
+    Control,
 }

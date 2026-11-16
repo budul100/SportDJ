@@ -1,15 +1,14 @@
 ﻿using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Settings;
+
+public class Set
 {
-    public class Set
-    {
-        #region Public Properties
+    #region Public Properties
 
-        public Grid Grid { get; set; } = new Grid();
+    public Grid Grid { get; set; } = new Grid();
 
-        public Options Options { get; set; } = new Options();
+    public Options Options { get; set; } = new Options();
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

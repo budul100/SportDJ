@@ -3,55 +3,54 @@ using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IMixerService
+    : IDisposable
 {
-    public interface IMixerService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        TimeSpan? Duration { get; }
+    TimeSpan? Duration { get; }
 
-        bool IsEnding { get; }
+    bool IsEnding { get; }
 
-        bool IsInitialized { get; }
+    bool IsInitialized { get; }
 
-        bool IsLoop { get; }
+    bool IsLoop { get; }
 
-        bool IsLoopReady { get; }
+    bool IsLoopReady { get; }
 
-        bool IsPlaying { get; }
+    bool IsPlaying { get; }
 
-        ISampleProvider Output { get; }
+    ISampleProvider Output { get; }
 
-        TimeSpan? Position { get; }
+    TimeSpan? Position { get; }
 
-        double? Progress { get; }
+    double? Progress { get; }
 
-        TimeSpan? Remaining { get; }
+    TimeSpan? Remaining { get; }
 
-        Track Track { get; }
+    Track Track { get; }
 
-        MixerType Type { get; }
+    MixerType Type { get; }
 
-        float Volume { get; set; }
+    float Volume { get; set; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void ActivateLoop();
+    void ActivateLoop();
 
-        ISignalService Add(Track track);
+    ISignalService Add(Track track);
 
-        void DeactivateLoop();
+    void DeactivateLoop();
 
-        void End();
+    void End();
 
-        void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap);
+    void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap);
 
-        void Pause();
+    void Pause();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

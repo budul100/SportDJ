@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net$(NetVersion)-windows</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
 		<PackageReference Include="budul.RegexExtensions" Version="1.5.1" />
 		<PackageReference Include="NAudio.Midi" Version="3.3.0" />
 		<PackageReference Include="NAudio.WinMM" Version="3.3.0" />

@@ -2,27 +2,26 @@
 using System;
 using System.Globalization;
 
-namespace SportDJ.Commons.Converters
+namespace SportDJ.Commons.Converters;
+
+public class BoolToColorConverter
+    : OneWayValueConverter
 {
-    public class BoolToColorConverter
-        : OneWayValueConverter
+    #region Public Methods
+
+    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        #region Public Methods
+        var result = Colors.Transparent;
 
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        if (value is bool boolean
+            && boolean
+            && parameter is Color color)
         {
-            var result = Colors.Transparent;
-
-            if (value is bool boolean
-                && boolean
-                && parameter is Color color)
-            {
-                result = color;
-            }
-
-            return result;
+            result = color;
         }
 
-        #endregion Public Methods
+        return result;
     }
+
+    #endregion Public Methods
 }

@@ -1,9 +1,8 @@
-﻿namespace SportDJ.Commons.Enums
-{
-    public enum OutputType
-    {
-        Live,
+﻿namespace SportDJ.Commons.Enums;
 
-        PFL,
-    }
+public enum OutputType
+{
+    Live,
+
+    PFL,
 }

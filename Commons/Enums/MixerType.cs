@@ -1,11 +1,10 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum MixerType
 {
-    public enum MixerType
-    {
-        Background,
+    Background,
 
-        Foreground,
+    Foreground,
 
-        //PFL,
-    }
+    //PFL,
 }

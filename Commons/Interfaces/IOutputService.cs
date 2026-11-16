@@ -5,47 +5,46 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Records;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IOutputService
+    : IDisposable
 {
-    public interface IOutputService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        Device Device { get; }
+    Device Device { get; }
 
-        IEnumerable<Device> Devices { get; }
+    IEnumerable<Device> Devices { get; }
 
-        bool IsActive { get; }
+    bool IsActive { get; }
 
-        bool IsLowered { get; }
+    bool IsLowered { get; }
 
-        bool IsPlaying { get; }
+    bool IsPlaying { get; }
 
-        OutputType Type { get; }
+    OutputType Type { get; }
 
-        float Volume { get; set; }
+    float Volume { get; set; }
 
-        WaveFormat WaveFormat { get; }
+    WaveFormat WaveFormat { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void Add(IMixerService mixerService, bool onForeground);
+    void Add(IMixerService mixerService, bool onForeground);
 
-        void Initialize(OutputType type);
+    void Initialize(OutputType type);
 
-        void Lower();
+    void Lower();
 
-        void Pause();
+    void Pause();
 
-        void Raise();
+    void Raise();
 
-        void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false);
+    void Set(string deviceName, int sampleRate = Defaults.SampleRate, bool takeDefaultIfMissing = false);
 
-        void Update();
+    void Update();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

@@ -20,191 +20,190 @@ using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.OutputService;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 
-namespace SportDJ.App
+namespace SportDJ.App;
+
+public class App
+    : PrismApplication
 {
-    public class App
-        : PrismApplication
+    #region Private Fields
+
+    private IClassicDesktopStyleApplicationLifetime desktop;
+    private MainView mainWindow;
+    private SplashView splashWindow;
+
+    #endregion Private Fields
+
+    #region Public Properties
+
+    public static bool IsSingleViewLifetime => Environment.GetCommandLineArgs()
+        .Any(a => a == "--fbdev" || a == "--drm");
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder
+        .Configure<App>()
+        .UsePlatformDetect();
+
+    public override void Initialize()
     {
-        #region Private Fields
+        AvaloniaXamlLoader.Load(this);
 
-        private IClassicDesktopStyleApplicationLifetime desktop;
-        private MainView mainWindow;
-        private SplashView splashWindow;
+        base.Initialize();
+    }
 
-        #endregion Private Fields
+    public override void OnFrameworkInitializationCompleted()
+    {
+        desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
 
-        #region Public Properties
-
-        public static bool IsSingleViewLifetime => Environment.GetCommandLineArgs()
-            .Any(a => a == "--fbdev" || a == "--drm");
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public static AppBuilder BuildAvaloniaApp() => AppBuilder
-            .Configure<App>()
-            .UsePlatformDetect();
-
-        public override void Initialize()
+        if (desktop != default)
         {
-            AvaloniaXamlLoader.Load(this);
+            desktop.Startup += OnStartup;
 
-            base.Initialize();
-        }
-
-        public override void OnFrameworkInitializationCompleted()
-        {
-            desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-
-            if (desktop != default)
+            if (!Debugger.IsAttached)
             {
-                desktop.Startup += OnStartup;
+                splashWindow = Container.Resolve<SplashView>();
 
-                if (!Debugger.IsAttached)
-                {
-                    splashWindow = Container.Resolve<SplashView>();
-
-                    desktop.MainWindow = splashWindow;
-                    splashWindow.Show();
-                }
-
-                var dispatcherService = Container.Resolve<IDispatcherService>();
-                Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
+                desktop.MainWindow = splashWindow;
+                splashWindow.Show();
             }
 
-            base.OnFrameworkInitializationCompleted();
+            var dispatcherService = Container.Resolve<IDispatcherService>();
+            Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
         }
 
-        #endregion Public Methods
+        base.OnFrameworkInitializationCompleted();
+    }
 
-        #region Protected Methods
+    #endregion Public Methods
 
-        protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
+    #region Protected Methods
+
+    protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
+    {
+        moduleCatalog.AddModule<Modules.GridModule.Module>(
+            name: nameof(Modules.GridModule));
+        moduleCatalog.AddModule<Modules.DisplayModule.Module>(
+            name: nameof(Modules.DisplayModule));
+        moduleCatalog.AddModule<Modules.ControllerModule.Module>(
+            name: nameof(Modules.ControllerModule));
+        moduleCatalog.AddModule<Modules.DefinitionsModule.Module>(
+            name: nameof(Modules.DefinitionsModule));
+        moduleCatalog.AddModule<Modules.SettingsModule.Module>(
+            name: nameof(Modules.SettingsModule));
+        moduleCatalog.AddModule<Modules.SearchModule.Module>(
+            name: nameof(Modules.SearchModule));
+    }
+
+    protected override AvaloniaObject CreateShell()
+    {
+        mainWindow = !IsSingleViewLifetime
+            ? Container.Resolve<MainView>()
+            : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
+
+        return mainWindow;
+    }
+
+    protected override void RegisterTypes(IContainerRegistry containerRegistry)
+    {
+        containerRegistry.RegisterSingleton<MainViewModel>();
+
+        containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
+        containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
+        containerRegistry.RegisterSingleton<IPanelService, Services.PanelService.Service>();
+        containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
+        containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
+        containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
+        containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
+        containerRegistry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
+
+        containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
+        containerRegistry.Register<IStackService, Services.StackService.Service>();
+
+        RegisterTypes<MixerType>(
+            containerRegistry: containerRegistry,
+            from: typeof(IMixerService),
+            to: typeof(Services.MixerService.Service));
+
+        RegisterTypes<OutputType>(
+            containerRegistry: containerRegistry,
+            from: typeof(IOutputService),
+            to: typeof(Service));
+
+        containerRegistry.Register<IDeviceService, Services.DeviceService.Windows.Service>();
+        containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
+
+        containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
+
+        containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>(
+            name: typeof(Services.MonitorService.Windows.Service).FullName);
+        containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>(
+            name: typeof(Services.MonitorService.Mixxx.Service).FullName);
+    }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private static void RegisterTypes<TEnum>(IContainerRegistry containerRegistry, Type from, Type to)
+        where TEnum : struct, Enum
+    {
+        var names = Enum.GetValues<TEnum>()
+            .Cast<TEnum>().Select(t => t.ToString()).ToArray();
+
+        foreach (var name in names)
         {
-            moduleCatalog.AddModule<Modules.GridModule.Module>(
-                name: nameof(Modules.GridModule));
-            moduleCatalog.AddModule<Modules.DisplayModule.Module>(
-                name: nameof(Modules.DisplayModule));
-            moduleCatalog.AddModule<Modules.ControllerModule.Module>(
-                name: nameof(Modules.ControllerModule));
-            moduleCatalog.AddModule<Modules.DefinitionsModule.Module>(
-                name: nameof(Modules.DefinitionsModule));
-            moduleCatalog.AddModule<Modules.SettingsModule.Module>(
-                name: nameof(Modules.SettingsModule));
-            moduleCatalog.AddModule<Modules.SearchModule.Module>(
-                name: nameof(Modules.SearchModule));
+            containerRegistry.RegisterSingleton(
+                from: from,
+                to: to,
+                name: name);
         }
+    }
 
-        protected override AvaloniaObject CreateShell()
+    private void InitializeApp()
+    {
+        try
         {
-            mainWindow = !IsSingleViewLifetime
-                ? Container.Resolve<MainView>()
-                : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
+            var commandLinePath = Environment.GetCommandLineArgs().Length > 1
+            ? Environment.GetCommandLineArgs()[1]
+            : default;
 
-            return mainWindow;
-        }
-
-        protected override void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterSingleton<MainViewModel>();
-
-            containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
-            containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
-            containerRegistry.RegisterSingleton<IPanelService, Services.PanelService.Service>();
-            containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
-            containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
-            containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
-            containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
-            containerRegistry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
-
-            containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
-            containerRegistry.Register<IStackService, Services.StackService.Service>();
-
-            RegisterTypes<MixerType>(
-                containerRegistry: containerRegistry,
-                from: typeof(IMixerService),
-                to: typeof(Services.MixerService.Service));
-
-            RegisterTypes<OutputType>(
-                containerRegistry: containerRegistry,
-                from: typeof(IOutputService),
-                to: typeof(Service));
-
-            containerRegistry.Register<IDeviceService, Services.DeviceService.Windows.Service>();
-            containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
-
-            containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
-
-            containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>(
-                name: typeof(Services.MonitorService.Windows.Service).FullName);
-            containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>(
-                name: typeof(Services.MonitorService.Mixxx.Service).FullName);
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private static void RegisterTypes<TEnum>(IContainerRegistry containerRegistry, Type from, Type to)
-            where TEnum : struct, Enum
-        {
-            var names = Enum.GetValues<TEnum>()
-                .Cast<TEnum>().Select(t => t.ToString()).ToArray();
-
-            foreach (var name in names)
-            {
-                containerRegistry.RegisterSingleton(
-                    from: from,
-                    to: to,
-                    name: name);
-            }
-        }
-
-        private void InitializeApp()
-        {
-            try
-            {
-                var commandLinePath = Environment.GetCommandLineArgs().Length > 1
-                ? Environment.GetCommandLineArgs()[1]
+            var settingsPath = commandLinePath?.StartsWith("--") == false
+                ? commandLinePath
                 : default;
 
-                var settingsPath = commandLinePath?.StartsWith("--") == false
-                    ? commandLinePath
-                    : default;
+            var mainViewModel = Container.Resolve<MainViewModel>();
+            mainViewModel.Initialize(settingsPath);
 
-                var mainViewModel = Container.Resolve<MainViewModel>();
-                mainViewModel.Initialize(settingsPath);
+            desktop.MainWindow = mainWindow;
 
-                desktop.MainWindow = mainWindow;
+            var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+            var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
 
-                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-                var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
+            var dialogService = Container.Resolve<IDialogService>();
+            dialogService.Initialize(
+                window: mainWindow,
+                iconUri: iconUri);
 
-                var dialogService = Container.Resolve<IDialogService>();
-                dialogService.Initialize(
-                    window: mainWindow,
-                    iconUri: iconUri);
+            splashWindow?.Close();
 
-                splashWindow?.Close();
-
-                var eventAggregator = Container.Resolve<IEventAggregator>();
-                eventAggregator.GetEvent<AppInitializedEvent>().Publish();
-            }
-            catch (TaskCanceledException)
-            {
-                desktop.MainWindow = default;
-
-                splashWindow?.Close();
-            }
+            var eventAggregator = Container.Resolve<IEventAggregator>();
+            eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
-
-        private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
+        catch (TaskCanceledException)
         {
-            Control.GotFocusEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
-            Control.DoubleTappedEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
-        }
+            desktop.MainWindow = default;
 
-        #endregion Private Methods
+            splashWindow?.Close();
+        }
     }
+
+    private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
+    {
+        Control.GotFocusEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
+        Control.DoubleTappedEvent.AddClassHandler<TextBox>((s, _) => s.SelectAll());
+    }
+
+    #endregion Private Methods
 }

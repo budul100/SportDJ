@@ -2,41 +2,40 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SportDJ.Services.StackService.Extensions
+namespace SportDJ.Services.StackService.Extensions;
+
+internal static class EntryExtensions
 {
-    internal static class EntryExtensions
+    #region Public Methods
+
+    public static bool AllPlayed(this IEnumerable<Entry> entries, Entry current)
     {
-        #region Public Methods
+        var result = entries?.All(e => !e.CanBePlayed()) == true
+            || !entries.HasUnplayeds(current);
 
-        public static bool AllPlayed(this IEnumerable<Entry> entries, Entry current)
-        {
-            var result = entries?.All(e => !e.CanBePlayed()) == true
-                || !entries.HasUnplayeds(current);
-
-            return result;
-        }
-
-        public static bool CanBePlayed(this Entry entry)
-        {
-            return !entry.IsPlayed
-                && !entry.Track.IsSilent;
-        }
-
-        public static bool HasPlayeds(this IEnumerable<Entry> entries)
-        {
-            var result = entries?.Any(e => !e.IsPlayed) == true;
-
-            return result;
-        }
-
-        public static bool HasUnplayeds(this IEnumerable<Entry> entries, Entry current)
-        {
-            var result = entries?.Count(e => e.CanBePlayed()) > 1
-                || (current != default && entries?.SingleOrDefault(e => e.CanBePlayed()) != current);
-
-            return result;
-        }
-
-        #endregion Public Methods
+        return result;
     }
+
+    public static bool CanBePlayed(this Entry entry)
+    {
+        return !entry.IsPlayed
+            && !entry.Track.IsSilent;
+    }
+
+    public static bool HasPlayeds(this IEnumerable<Entry> entries)
+    {
+        var result = entries?.Any(e => !e.IsPlayed) == true;
+
+        return result;
+    }
+
+    public static bool HasUnplayeds(this IEnumerable<Entry> entries, Entry current)
+    {
+        var result = entries?.Count(e => e.CanBePlayed()) > 1
+            || (current != default && entries?.SingleOrDefault(e => e.CanBePlayed()) != current);
+
+        return result;
+    }
+
+    #endregion Public Methods
 }

@@ -1,12 +1,11 @@
-﻿namespace SportDJ.Shareds.SampleProviders.Abstractions
+﻿namespace SportDJ.Shareds.SampleProviders.Abstractions;
+
+public interface ISourceProvider
+    : IPlayingProvider
 {
-    public interface ISourceProvider
-        : IPlayingProvider
-    {
-        #region Public Methods
+    #region Public Methods
 
-        void Initialize(string filePath);
+    void Initialize(string filePath);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

@@ -1,12 +1,11 @@
-﻿namespace SportDJ.Services.ControllerService.Assets
+﻿namespace SportDJ.Services.ControllerService.Assets;
+
+public static class Constants
 {
-    public static class Constants
-    {
-        #region Public Fields
+    #region Public Fields
 
-        public const string ControllerProfilesFile = "ControllerProfiles.xml";
-        public const string ControllerProfilesSource = "Midi";
+    public const string ControllerProfilesFile = "ControllerProfiles.xml";
+    public const string ControllerProfilesSource = "Midi";
 
-        #endregion Public Fields
-    }
+    #endregion Public Fields
 }

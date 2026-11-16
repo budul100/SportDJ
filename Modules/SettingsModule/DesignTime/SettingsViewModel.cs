@@ -1,15 +1,14 @@
-﻿namespace SportDJ.Modules.SettingsModule.DesignTime
+﻿namespace SportDJ.Modules.SettingsModule.DesignTime;
+
+public class SettingsViewModel
+    : ViewModels.SettingsViewModel
 {
-    public class SettingsViewModel
-        : ViewModels.SettingsViewModel
-    {
-        #region Public Constructors
+    #region Public Constructors
 
-        public SettingsViewModel()
-            : base(containerProvider: default, eventAggregator: default, dialogService: default, panelService: default,
-                   settingsService: default, sessionService: default, controllerService: default)
-        { }
+    public SettingsViewModel()
+        : base(containerProvider: default, eventAggregator: default, dialogService: default, panelService: default,
+               settingsService: default, sessionService: default, controllerService: default)
+    { }
 
-        #endregion Public Constructors
-    }
+    #endregion Public Constructors
 }

@@ -8,91 +8,90 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.DefinitionsModule.ViewModels
+namespace SportDJ.Modules.DefinitionsModule.ViewModels;
+
+public class DefinitionsViewModel
+    : BindableBase
 {
-    public class DefinitionsViewModel
-        : BindableBase
+    #region Private Fields
+
+    private readonly Dictionary<Type, TabViewModel> registrations = [];
+    private readonly SettingsViewModel settingsViewModel;
+    private readonly StackViewModel stackViewModel;
+
+    private TabViewModel active;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public DefinitionsViewModel(IEventAggregator eventAggregator,
+        SettingsViewModel settingsViewModel, StackViewModel stackViewModel)
     {
-        #region Private Fields
+        this.settingsViewModel = settingsViewModel;
+        this.stackViewModel = stackViewModel;
 
-        private readonly Dictionary<Type, TabViewModel> registrations = [];
-        private readonly SettingsViewModel settingsViewModel;
-        private readonly StackViewModel stackViewModel;
+        eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+            action: SetPlayer,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
 
-        private TabViewModel active;
+        eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
+            action: SetPlayer,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
 
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public DefinitionsViewModel(IEventAggregator eventAggregator,
-            SettingsViewModel settingsViewModel, StackViewModel stackViewModel)
+        registrations = new Dictionary<Type, TabViewModel>
         {
-            this.settingsViewModel = settingsViewModel;
-            this.stackViewModel = stackViewModel;
+            { typeof(IPlayerService), settingsViewModel },
+            { typeof(IStackService), stackViewModel }
+        };
 
-            eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
-                action: SetPlayer,
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true);
+        Tabs = new ObservableCollection<TabViewModel>(registrations.Values);
 
-            eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
-                action: SetPlayer,
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true);
-
-            registrations = new Dictionary<Type, TabViewModel>
-            {
-                { typeof(IPlayerService), settingsViewModel },
-                { typeof(IStackService), stackViewModel }
-            };
-
-            Tabs = new ObservableCollection<TabViewModel>(registrations.Values);
-
-            if (Tabs.Count > 0)
-            {
-                Active = Tabs[0];
-            }
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public TabViewModel Active
+        if (Tabs.Count > 0)
         {
-            get => active;
-            set => SetProperty(ref active, value);
+            Active = Tabs[0];
         }
-
-        public ObservableCollection<TabViewModel> Tabs { get; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void Activate<TService>()
-        {
-            var serviceType = typeof(TService);
-
-            if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
-            {
-                Active = registration;
-            }
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void SetPlayer(Player player)
-        {
-            settingsViewModel.Set(player);
-            stackViewModel.Set(player);
-        }
-
-        #endregion Private Methods
     }
+
+    #endregion Public Constructors
+
+    #region Public Properties
+
+    public TabViewModel Active
+    {
+        get => active;
+        set => SetProperty(ref active, value);
+    }
+
+    public ObservableCollection<TabViewModel> Tabs { get; }
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public void Activate<TService>()
+    {
+        var serviceType = typeof(TService);
+
+        if (registrations.TryGetValue(
+            key: serviceType,
+            value: out var registration))
+        {
+            Active = registration;
+        }
+    }
+
+    #endregion Public Methods
+
+    #region Private Methods
+
+    private void SetPlayer(Player player)
+    {
+        settingsViewModel.Set(player);
+        stackViewModel.Set(player);
+    }
+
+    #endregion Private Methods
 }

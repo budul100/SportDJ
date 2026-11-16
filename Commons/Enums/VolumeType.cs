@@ -1,15 +1,14 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum VolumeType
 {
-    public enum VolumeType
-    {
-        None,
+    None,
 
-        Reduce,
+    Reduce,
 
-        Raise,
+    Raise,
 
-        Lowered,
+    Lowered,
 
-        Muted,
-    }
+    Muted,
 }

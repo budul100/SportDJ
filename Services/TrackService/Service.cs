@@ -16,332 +16,331 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SportDJ.Services.TrackService
+namespace SportDJ.Services.TrackService;
+
+public class Service
+    : ITrackService, IDisposable
 {
-    public class Service
-        : ITrackService, IDisposable
+    #region Private Fields
+
+    private readonly AudioDataIOFactory audioDataIOFactory;
+    private readonly CancellationTokenSource cancellationTokenSource = new();
+    private readonly ConcurrentDictionary<string, Track> tracks = [];
+    private readonly ConcurrentQueue<Track> activeRenders = [];
+    private readonly ConcurrentQueue<Track> activeUpdates = [];
+    private readonly ConcurrentQueue<Track> otherTrims = [];
+    private readonly ConcurrentQueue<Track> otherUpdates = [];
+    private readonly ConcurrentQueue<Track> loadedRenders = [];
+    private readonly ConcurrentQueue<Track> loadedTrims = [];
+    private readonly ConcurrentQueue<Track> loadedUpdates = [];
+    private readonly IEnumerable<ATL.Format> formatsAudio;
+    private readonly IEnumerable<ATL.Format> formatsPlaylist;
+    private readonly IEventAggregator eventAggregator;
+    private readonly IStorageService<Set> settingsService;
+    private readonly PlaylistIOFactory playlistIOFactory;
+
+    private bool isDisposed;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
     {
-        #region Private Fields
+        this.eventAggregator = eventAggregator;
+        this.settingsService = settingsService;
 
-        private readonly AudioDataIOFactory audioDataIOFactory;
-        private readonly CancellationTokenSource cancellationTokenSource = new();
-        private readonly ConcurrentDictionary<string, Track> tracks = [];
-        private readonly ConcurrentQueue<Track> activeRenders = [];
-        private readonly ConcurrentQueue<Track> activeUpdates = [];
-        private readonly ConcurrentQueue<Track> otherTrims = [];
-        private readonly ConcurrentQueue<Track> otherUpdates = [];
-        private readonly ConcurrentQueue<Track> loadedRenders = [];
-        private readonly ConcurrentQueue<Track> loadedTrims = [];
-        private readonly ConcurrentQueue<Track> loadedUpdates = [];
-        private readonly IEnumerable<ATL.Format> formatsAudio;
-        private readonly IEnumerable<ATL.Format> formatsPlaylist;
-        private readonly IEventAggregator eventAggregator;
-        private readonly IStorageService<Set> settingsService;
-        private readonly PlaylistIOFactory playlistIOFactory;
+        playlistIOFactory = PlaylistIOFactory.GetInstance();
+        audioDataIOFactory = AudioDataIOFactory.GetInstance();
 
-        private bool isDisposed;
+        formatsAudio = audioDataIOFactory.getFormats()
+            .Where(f => f.Readable).ToArray();
+        formatsPlaylist = playlistIOFactory.getFormats()
+            .Where(f => f.Readable).ToArray();
 
-        #endregion Private Fields
+        var cancellationToken = cancellationTokenSource.Token;
 
-        #region Public Constructors
+        Task.Run(
+            action: () => ShapeTracks(cancellationToken),
+            cancellationToken: cancellationToken);
+    }
 
-        public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+    #endregion Public Constructors
+
+    #region Public Methods
+
+    public void Play(Track track, bool isPause)
+    {
+        ArgumentNullException.ThrowIfNull(track);
+
+        if (!isPause)
         {
-            this.eventAggregator = eventAggregator;
-            this.settingsService = settingsService;
-
-            playlistIOFactory = PlaylistIOFactory.GetInstance();
-            audioDataIOFactory = AudioDataIOFactory.GetInstance();
-
-            formatsAudio = audioDataIOFactory.getFormats()
-                .Where(f => f.Readable).ToArray();
-            formatsPlaylist = playlistIOFactory.getFormats()
-                .Where(f => f.Readable).ToArray();
-
-            var cancellationToken = cancellationTokenSource.Token;
-
-            Task.Run(
-                action: () => ShapeTracks(cancellationToken),
-                cancellationToken: cancellationToken);
+            track.Counter++;
         }
 
-        #endregion Public Constructors
-
-        #region Public Methods
-
-        public void Play(Track track, bool isPause)
+        var register = new Register
         {
-            ArgumentNullException.ThrowIfNull(track);
+            Start = DateTime.Now
+        };
 
-            if (!isPause)
-            {
-                track.Counter++;
-            }
+        track.Registers.Add(register);
 
-            var register = new Register
-            {
-                Start = DateTime.Now
-            };
+        activeUpdates.Enqueue(track);
+        activeRenders.Enqueue(track);
 
-            track.Registers.Add(register);
+        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+    }
 
-            activeUpdates.Enqueue(track);
-            activeRenders.Enqueue(track);
+    public void Stop(Track track)
+    {
+        ArgumentNullException.ThrowIfNull(track);
 
-            eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-        }
+        var register = track.Registers.LastOrDefault();
 
-        public void Stop(Track track)
+        if (register.Start != default
+            && register.End == default)
         {
-            ArgumentNullException.ThrowIfNull(track);
-
-            var register = track.Registers.LastOrDefault();
-
-            if (register.Start != default
-                && register.End == default)
-            {
-                register.End = DateTime.Now;
-            }
-        }
-
-        public IEnumerable<Track> Get(IEnumerable<string> paths)
-        {
-            var filePaths = GetFiles(paths)
-                .Select(Path.GetFullPath).ToArray();
-
-            if (filePaths?.Length > 0)
-            {
-                foreach (var filePath in filePaths)
-                {
-                    var result = GetTrack(filePath);
-
-                    if (result != default)
-                    {
-                        otherUpdates.Enqueue(result);
-                        otherTrims.Enqueue(result);
-
-                        yield return result;
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<Track> Search(string search)
-        {
-            var result = default(IEnumerable<Track>);
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                search = search.Trim();
-
-                result = tracks
-                    .Where(p => p.Value.Contains(search))
-                    .Select(p => p.Value).ToArray();
-            }
-
-            return result;
-        }
-
-        public void Update(Track track)
-        {
-            if (track != default)
-            {
-                loadedUpdates.Enqueue(track);
-                loadedTrims.Enqueue(track);
-                loadedRenders.Enqueue(track);
-            }
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private IEnumerable<string> GetFiles(IEnumerable<string> paths)
-        {
-            if (paths?.Any() == true)
-            {
-                var relevants = paths?
-                    .Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
-
-                foreach (var relevant in relevants)
-                {
-                    if (File.Exists(relevant)
-                        && formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
-                    {
-                        yield return relevant;
-                    }
-
-                    var filePaths = default(IEnumerable<string>);
-
-                    if (File.Exists(relevant)
-                        && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
-                    {
-                        filePaths = playlistIOFactory.GetPlaylistIO(relevant).FilePaths;
-                    }
-                    else if (Directory.Exists(relevant))
-                    {
-                        filePaths = Directory.GetFiles(
-                            path: relevant,
-                            searchPattern: "*.*",
-                            searchOption: SearchOption.TopDirectoryOnly)
-                            .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
-                                || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
-                    }
-
-                    var files = GetFiles(filePaths).ToArray();
-
-                    foreach (var file in files)
-                    {
-                        yield return file;
-                    }
-                }
-            }
-        }
-
-        private Track GetTrack(string path)
-        {
-            var result = default(Track);
-
-            if (File.Exists(path))
-            {
-                result = tracks.TryGetValue(
-                    key: path,
-                    value: out var value)
-                    ? value
-                    : default;
-
-                if (result == default)
-                {
-                    var file = Path.GetFileNameWithoutExtension(path);
-
-                    result = new Track(
-                        path: path,
-                        file: file)
-                    {
-                        Info = file
-                    };
-
-                    tracks.TryAdd(
-                        key: path,
-                        value: result);
-                }
-            }
-
-            return result;
-        }
-
-        private void RenderTrack(Track track)
-        {
-            if (track?.IsRendered == false)
-            {
-                track.Render();
-
-                if (track.Bitmap != default)
-                {
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-                }
-            }
-        }
-
-        private void TrimTrack(Track track)
-        {
-            if (track?.IsTrimmed == false)
-            {
-                var currentDuration = track.Duration;
-
-                var trimVolume = settingsService.Contents.Options.TrimVolumePercentage
-                    / (float)Constants.OptionsPercentageMax;
-                var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage
-                    / Constants.OptionsPercentageMax;
-
-                track.Trim(
-                    cueVolume: trimVolume,
-                    trimRearPortion: trimRearPortion);
-
-                if (track.Duration != currentDuration)
-                {
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-                }
-            }
-        }
-
-        private void UpdateTrack(Track track)
-        {
-            if (track?.IsUpdated == false)
-            {
-                var hashCode = track.GetHashCode();
-
-                track.Update();
-
-                if (track.GetHashCode() != hashCode)
-                {
-                    eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-                }
-            }
-        }
-
-        private void ShapeTracks(CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                if (!activeUpdates.IsEmpty
-                    && activeUpdates.TryDequeue(out Track activeUpdate))
-                {
-                    UpdateTrack(activeUpdate);
-                }
-                else if (!activeRenders.IsEmpty
-                    && activeRenders.TryDequeue(out Track activeRender))
-                {
-                    RenderTrack(activeRender);
-                }
-                else if (!loadedUpdates.IsEmpty
-                    && loadedUpdates.TryDequeue(out Track loadedUpdate))
-                {
-                    UpdateTrack(loadedUpdate);
-                }
-                else if (!loadedTrims.IsEmpty
-                    && loadedTrims.TryDequeue(out Track loadedTrim))
-                {
-                    TrimTrack(loadedTrim);
-                }
-                else if (!otherUpdates.IsEmpty
-                    && otherUpdates.TryDequeue(out Track otherUpdate))
-                {
-                    UpdateTrack(otherUpdate);
-                }
-                else if (!loadedRenders.IsEmpty
-                    && loadedRenders.TryDequeue(out Track loadedRender))
-                {
-                    RenderTrack(loadedRender);
-                }
-                else if (!otherTrims.IsEmpty
-                    && otherTrims.TryDequeue(out Track otherTrim))
-                {
-                    TrimTrack(otherTrim);
-                }
-            }
-        }
-
-        protected virtual void Dispose(bool isDisposing)
-        {
-            if (!isDisposed)
-            {
-                if (isDisposing)
-                {
-                    cancellationTokenSource.Cancel();
-                }
-
-                isDisposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-
-            GC.SuppressFinalize(this);
+            register.End = DateTime.Now;
         }
     }
 
-    #endregion Private Methods
+    public IEnumerable<Track> Get(IEnumerable<string> paths)
+    {
+        var filePaths = GetFiles(paths)
+            .Select(Path.GetFullPath).ToArray();
+
+        if (filePaths?.Length > 0)
+        {
+            foreach (var filePath in filePaths)
+            {
+                var result = GetTrack(filePath);
+
+                if (result != default)
+                {
+                    otherUpdates.Enqueue(result);
+                    otherTrims.Enqueue(result);
+
+                    yield return result;
+                }
+            }
+        }
+    }
+
+    public IEnumerable<Track> Search(string search)
+    {
+        var result = default(IEnumerable<Track>);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            result = tracks
+                .Where(p => p.Value.Contains(search))
+                .Select(p => p.Value).ToArray();
+        }
+
+        return result;
+    }
+
+    public void Update(Track track)
+    {
+        if (track != default)
+        {
+            loadedUpdates.Enqueue(track);
+            loadedTrims.Enqueue(track);
+            loadedRenders.Enqueue(track);
+        }
+    }
+
+    #endregion Public Methods
+
+    #region Private Methods
+
+    private IEnumerable<string> GetFiles(IEnumerable<string> paths)
+    {
+        if (paths?.Any() == true)
+        {
+            var relevants = paths?
+                .Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+
+            foreach (var relevant in relevants)
+            {
+                if (File.Exists(relevant)
+                    && formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
+                {
+                    yield return relevant;
+                }
+
+                var filePaths = default(IEnumerable<string>);
+
+                if (File.Exists(relevant)
+                    && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
+                {
+                    filePaths = playlistIOFactory.GetPlaylistIO(relevant).FilePaths;
+                }
+                else if (Directory.Exists(relevant))
+                {
+                    filePaths = Directory.GetFiles(
+                        path: relevant,
+                        searchPattern: "*.*",
+                        searchOption: SearchOption.TopDirectoryOnly)
+                        .Where(p => formatsAudio.Any(f => f.IsValidExtension(Path.GetExtension(p)))
+                            || formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(p)))).ToArray();
+                }
+
+                var files = GetFiles(filePaths).ToArray();
+
+                foreach (var file in files)
+                {
+                    yield return file;
+                }
+            }
+        }
+    }
+
+    private Track GetTrack(string path)
+    {
+        var result = default(Track);
+
+        if (File.Exists(path))
+        {
+            result = tracks.TryGetValue(
+                key: path,
+                value: out var value)
+                ? value
+                : default;
+
+            if (result == default)
+            {
+                var file = Path.GetFileNameWithoutExtension(path);
+
+                result = new Track(
+                    path: path,
+                    file: file)
+                {
+                    Info = file
+                };
+
+                tracks.TryAdd(
+                    key: path,
+                    value: result);
+            }
+        }
+
+        return result;
+    }
+
+    private void RenderTrack(Track track)
+    {
+        if (track?.IsRendered == false)
+        {
+            track.Render();
+
+            if (track.Bitmap != default)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
+        }
+    }
+
+    private void TrimTrack(Track track)
+    {
+        if (track?.IsTrimmed == false)
+        {
+            var currentDuration = track.Duration;
+
+            var trimVolume = settingsService.Contents.Options.TrimVolumePercentage
+                / (float)Constants.OptionsPercentageMax;
+            var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage
+                / Constants.OptionsPercentageMax;
+
+            track.Trim(
+                cueVolume: trimVolume,
+                trimRearPortion: trimRearPortion);
+
+            if (track.Duration != currentDuration)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
+        }
+    }
+
+    private void UpdateTrack(Track track)
+    {
+        if (track?.IsUpdated == false)
+        {
+            var hashCode = track.GetHashCode();
+
+            track.Update();
+
+            if (track.GetHashCode() != hashCode)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
+        }
+    }
+
+    private void ShapeTracks(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            if (!activeUpdates.IsEmpty
+                && activeUpdates.TryDequeue(out Track activeUpdate))
+            {
+                UpdateTrack(activeUpdate);
+            }
+            else if (!activeRenders.IsEmpty
+                && activeRenders.TryDequeue(out Track activeRender))
+            {
+                RenderTrack(activeRender);
+            }
+            else if (!loadedUpdates.IsEmpty
+                && loadedUpdates.TryDequeue(out Track loadedUpdate))
+            {
+                UpdateTrack(loadedUpdate);
+            }
+            else if (!loadedTrims.IsEmpty
+                && loadedTrims.TryDequeue(out Track loadedTrim))
+            {
+                TrimTrack(loadedTrim);
+            }
+            else if (!otherUpdates.IsEmpty
+                && otherUpdates.TryDequeue(out Track otherUpdate))
+            {
+                UpdateTrack(otherUpdate);
+            }
+            else if (!loadedRenders.IsEmpty
+                && loadedRenders.TryDequeue(out Track loadedRender))
+            {
+                RenderTrack(loadedRender);
+            }
+            else if (!otherTrims.IsEmpty
+                && otherTrims.TryDequeue(out Track otherTrim))
+            {
+                TrimTrack(otherTrim);
+            }
+        }
+    }
+
+    protected virtual void Dispose(bool isDisposing)
+    {
+        if (!isDisposed)
+        {
+            if (isDisposing)
+            {
+                cancellationTokenSource.Cancel();
+            }
+
+            isDisposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+
+        GC.SuppressFinalize(this);
+    }
 }
+
+#endregion Private Methods

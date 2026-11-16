@@ -1,15 +1,14 @@
 ﻿using NAudio.Wave;
 
-namespace NAudio.WaveFormRenderer
+namespace NAudio.WaveFormRenderer;
+
+public interface IPeakProvider
 {
-    public interface IPeakProvider
-    {
-        #region Public Methods
+    #region Public Methods
 
-        PeakInfo GetNextPeak();
+    PeakInfo GetNextPeak();
 
-        void Init(ISampleProvider reader, int samplesPerPixel);
+    void Init(ISampleProvider reader, int samplesPerPixel);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

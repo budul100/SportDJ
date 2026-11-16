@@ -1,13 +1,12 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum StateType
 {
-    public enum StateType
-    {
-        None,
+    None,
 
-        Play,
+    Play,
 
-        Stop,
+    Stop,
 
-        Pause,
-    }
+    Pause,
 }

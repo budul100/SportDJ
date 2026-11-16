@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net$(NetVersion)-windows</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
 		<ProjectReference Include="..\..\Services\ControllerService\ControllerService.csproj" />
 	</ItemGroup>
 

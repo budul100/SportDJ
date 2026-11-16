@@ -8,244 +8,243 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using SportDJ.Commons.Assets;
 
-namespace SportDJ.Shareds.UserControls
+namespace SportDJ.Shareds.UserControls;
+
+public partial class FlashingPanel
+    : UserControl
 {
-    public partial class FlashingPanel
-        : UserControl
+    #region Public Fields
+
+    public static readonly StyledProperty<IBrush> ColorProperty = AvaloniaProperty.Register<FlashingPanel, IBrush>(
+        name: nameof(Color));
+
+    public static readonly StyledProperty<double> DurationMilliSecsProperty = AvaloniaProperty.Register<FlashingPanel, double>(
+        name: nameof(DurationMilliSecs),
+        defaultValue: DefaultDurationMilliSecs);
+
+    public static readonly DirectProperty<FlashingPanel, TimeSpan> DurationProperty = AvaloniaProperty.RegisterDirect<FlashingPanel, TimeSpan>(
+        name: nameof(Duration),
+        getter: o => o.duration);
+
+    public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<FlashingPanel, bool>(
+        name: nameof(IsActive));
+
+    public static readonly StyledProperty<double> OpacityMaxProperty = AvaloniaProperty.Register<FlashingPanel, double>(
+        name: nameof(OpacityMax),
+        defaultValue: Defaults.FlashingOpacityMax);
+
+    public static readonly StyledProperty<double> OpacityMinProperty = AvaloniaProperty.Register<FlashingPanel, double>(
+        name: nameof(OpacityMin),
+        defaultValue: Defaults.FlashingOpacityMin);
+
+    #endregion Public Fields
+
+    #region Private Fields
+
+    // Used when no valid duration is set, an endless animation with zero duration must be avoided
+    private const double DefaultDurationMilliSecs = 1000;
+
+    private CancellationTokenSource animationCancellation;
+    private TimeSpan duration = TimeSpan.FromMilliseconds(DefaultDurationMilliSecs);
+    private bool isAttached;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public FlashingPanel()
     {
-        #region Public Fields
+        InitializeComponent();
+    }
 
-        public static readonly StyledProperty<IBrush> ColorProperty = AvaloniaProperty.Register<FlashingPanel, IBrush>(
-            name: nameof(Color));
+    #endregion Public Constructors
 
-        public static readonly StyledProperty<double> DurationMilliSecsProperty = AvaloniaProperty.Register<FlashingPanel, double>(
-            name: nameof(DurationMilliSecs),
-            defaultValue: DefaultDurationMilliSecs);
+    #region Public Properties
 
-        public static readonly DirectProperty<FlashingPanel, TimeSpan> DurationProperty = AvaloniaProperty.RegisterDirect<FlashingPanel, TimeSpan>(
-            name: nameof(Duration),
-            getter: o => o.duration);
+    public IBrush Color
+    {
+        get => GetValue(ColorProperty);
 
-        public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<FlashingPanel, bool>(
-            name: nameof(IsActive));
+        set => SetValue(
+            property: ColorProperty,
+            value: value);
+    }
 
-        public static readonly StyledProperty<double> OpacityMaxProperty = AvaloniaProperty.Register<FlashingPanel, double>(
-            name: nameof(OpacityMax),
-            defaultValue: Defaults.FlashingOpacityMax);
+    public TimeSpan Duration => duration;
 
-        public static readonly StyledProperty<double> OpacityMinProperty = AvaloniaProperty.Register<FlashingPanel, double>(
-            name: nameof(OpacityMin),
-            defaultValue: Defaults.FlashingOpacityMin);
+    public double DurationMilliSecs
+    {
+        get => GetValue(DurationMilliSecsProperty);
 
-        #endregion Public Fields
+        set => SetValue(
+            property: DurationMilliSecsProperty,
+            value: value);
+    }
 
-        #region Private Fields
+    public bool IsActive
+    {
+        get => GetValue(IsActiveProperty);
 
-        // Used when no valid duration is set, an endless animation with zero duration must be avoided
-        private const double DefaultDurationMilliSecs = 1000;
+        set => SetValue(
+            property: IsActiveProperty,
+            value: value);
+    }
 
-        private CancellationTokenSource animationCancellation;
-        private TimeSpan duration = TimeSpan.FromMilliseconds(DefaultDurationMilliSecs);
-        private bool isAttached;
+    public double OpacityMax
+    {
+        get => GetValue(OpacityMaxProperty);
 
-        #endregion Private Fields
+        set => SetValue(
+            property: OpacityMaxProperty,
+            value: value);
+    }
 
-        #region Public Constructors
+    public double OpacityMin
+    {
+        get => GetValue(OpacityMinProperty);
 
-        public FlashingPanel()
+        set => SetValue(
+            property: OpacityMinProperty,
+            value: value);
+    }
+
+    #endregion Public Properties
+
+    #region Protected Methods
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        isAttached = true;
+
+        RestartAnimation();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        isAttached = false;
+
+        StopAnimation();
+
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == DurationMilliSecsProperty)
         {
-            InitializeComponent();
+            SetAndRaise(
+                property: DurationProperty,
+                field: ref duration,
+                value: GetDuration(change.GetNewValue<double>()));
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public IBrush Color
+        if (change.Property == DurationMilliSecsProperty
+            || change.Property == IsActiveProperty
+            || change.Property == OpacityMaxProperty
+            || change.Property == OpacityMinProperty)
         {
-            get => GetValue(ColorProperty);
-
-            set => SetValue(
-                property: ColorProperty,
-                value: value);
-        }
-
-        public TimeSpan Duration => duration;
-
-        public double DurationMilliSecs
-        {
-            get => GetValue(DurationMilliSecsProperty);
-
-            set => SetValue(
-                property: DurationMilliSecsProperty,
-                value: value);
-        }
-
-        public bool IsActive
-        {
-            get => GetValue(IsActiveProperty);
-
-            set => SetValue(
-                property: IsActiveProperty,
-                value: value);
-        }
-
-        public double OpacityMax
-        {
-            get => GetValue(OpacityMaxProperty);
-
-            set => SetValue(
-                property: OpacityMaxProperty,
-                value: value);
-        }
-
-        public double OpacityMin
-        {
-            get => GetValue(OpacityMinProperty);
-
-            set => SetValue(
-                property: OpacityMinProperty,
-                value: value);
-        }
-
-        #endregion Public Properties
-
-        #region Protected Methods
-
-        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-        {
-            base.OnAttachedToVisualTree(e);
-
-            isAttached = true;
-
             RestartAnimation();
         }
-
-        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-        {
-            isAttached = false;
-
-            StopAnimation();
-
-            base.OnDetachedFromVisualTree(e);
-        }
-
-        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-        {
-            base.OnPropertyChanged(change);
-
-            if (change.Property == DurationMilliSecsProperty)
-            {
-                SetAndRaise(
-                    property: DurationProperty,
-                    field: ref duration,
-                    value: GetDuration(change.GetNewValue<double>()));
-            }
-
-            if (change.Property == DurationMilliSecsProperty
-                || change.Property == IsActiveProperty
-                || change.Property == OpacityMaxProperty
-                || change.Property == OpacityMinProperty)
-            {
-                RestartAnimation();
-            }
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private static Animation CreateAnimation(TimeSpan duration, double opacityMin, double opacityMax)
-        {
-            var animation = new Animation
-            {
-                Duration = duration,
-                IterationCount = IterationCount.Infinite,
-            };
-
-            animation.Children.Add(CreateKeyFrame(
-                cue: 0.0,
-                opacity: opacityMin));
-
-            animation.Children.Add(CreateKeyFrame(
-                cue: 0.5,
-                opacity: opacityMax));
-
-            animation.Children.Add(CreateKeyFrame(
-                cue: 1.0,
-                opacity: opacityMin));
-
-            return animation;
-        }
-
-        private static TimeSpan GetDuration(double durationMilliSecs)
-        {
-            return TimeSpan.FromMilliseconds(durationMilliSecs > 0
-                ? durationMilliSecs
-                : DefaultDurationMilliSecs);
-        }
-
-        private static KeyFrame CreateKeyFrame(double cue, double opacity)
-        {
-            var keyFrame = new KeyFrame
-            {
-                Cue = new Cue(cue),
-            };
-
-            keyFrame.Setters.Add(new Setter(
-                property: OpacityProperty,
-                value: opacity));
-
-            return keyFrame;
-        }
-
-        private static async Task RunAnimationAsync(Animation animation, Animatable target, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await animation.RunAsync(target, cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected when the animation is stopped
-            }
-        }
-
-        private void RestartAnimation()
-        {
-            StopAnimation();
-
-            if (!isAttached || !IsActive)
-            {
-                return;
-            }
-
-            var animation = CreateAnimation(
-                duration: duration,
-                opacityMin: OpacityMin,
-                opacityMax: OpacityMax);
-
-            animationCancellation = new CancellationTokenSource();
-
-            _ = RunAnimationAsync(
-                animation: animation,
-                target: FlashPanel,
-                cancellationToken: animationCancellation.Token);
-        }
-
-        private void StopAnimation()
-        {
-            if (animationCancellation == default)
-            {
-                return;
-            }
-
-            animationCancellation.Cancel();
-            animationCancellation.Dispose();
-
-            animationCancellation = default;
-        }
-
-        #endregion Private Methods
     }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private static Animation CreateAnimation(TimeSpan duration, double opacityMin, double opacityMax)
+    {
+        var animation = new Animation
+        {
+            Duration = duration,
+            IterationCount = IterationCount.Infinite,
+        };
+
+        animation.Children.Add(CreateKeyFrame(
+            cue: 0.0,
+            opacity: opacityMin));
+
+        animation.Children.Add(CreateKeyFrame(
+            cue: 0.5,
+            opacity: opacityMax));
+
+        animation.Children.Add(CreateKeyFrame(
+            cue: 1.0,
+            opacity: opacityMin));
+
+        return animation;
+    }
+
+    private static TimeSpan GetDuration(double durationMilliSecs)
+    {
+        return TimeSpan.FromMilliseconds(durationMilliSecs > 0
+            ? durationMilliSecs
+            : DefaultDurationMilliSecs);
+    }
+
+    private static KeyFrame CreateKeyFrame(double cue, double opacity)
+    {
+        var keyFrame = new KeyFrame
+        {
+            Cue = new Cue(cue),
+        };
+
+        keyFrame.Setters.Add(new Setter(
+            property: OpacityProperty,
+            value: opacity));
+
+        return keyFrame;
+    }
+
+    private static async Task RunAnimationAsync(Animation animation, Animatable target, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await animation.RunAsync(target, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when the animation is stopped
+        }
+    }
+
+    private void RestartAnimation()
+    {
+        StopAnimation();
+
+        if (!isAttached || !IsActive)
+        {
+            return;
+        }
+
+        var animation = CreateAnimation(
+            duration: duration,
+            opacityMin: OpacityMin,
+            opacityMax: OpacityMax);
+
+        animationCancellation = new CancellationTokenSource();
+
+        _ = RunAnimationAsync(
+            animation: animation,
+            target: FlashPanel,
+            cancellationToken: animationCancellation.Token);
+    }
+
+    private void StopAnimation()
+    {
+        if (animationCancellation == default)
+        {
+            return;
+        }
+
+        animationCancellation.Cancel();
+        animationCancellation.Dispose();
+
+        animationCancellation = default;
+    }
+
+    #endregion Private Methods
 }

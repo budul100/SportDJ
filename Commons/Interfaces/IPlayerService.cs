@@ -4,63 +4,62 @@ using System.Threading.Tasks;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IPlayerService
+    : IDisposable
 {
-    public interface IPlayerService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        IEnumerable<Entry> Entries { get; }
+    IEnumerable<Entry> Entries { get; }
 
-        bool HasPaths { get; }
+    bool HasPaths { get; }
 
-        bool HasPlayeds { get; }
+    bool HasPlayeds { get; }
 
-        bool HasStack { get; }
+    bool HasStack { get; }
 
-        bool HasUnplayeds { get; }
+    bool HasUnplayeds { get; }
 
-        bool IsActive { get; }
+    bool IsActive { get; }
 
-        bool IsAvailable { get; }
+    bool IsAvailable { get; }
 
-        bool IsEnding { get; }
+    bool IsEnding { get; }
 
-        bool IsForeground { get; set; }
+    bool IsForeground { get; set; }
 
-        bool IsPlaying { get; }
+    bool IsPlaying { get; }
 
-        double? Progress { get; }
+    double? Progress { get; }
 
-        TimeSpan? Remaining { get; }
+    TimeSpan? Remaining { get; }
 
-        bool ResetPosition { get; set; }
+    bool ResetPosition { get; set; }
 
-        Track Track { get; }
+    Track Track { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        Task ClearAsync();
+    Task ClearAsync();
 
-        void Execute();
+    void Execute();
 
-        void Initialize(Player player);
+    void Initialize(Player player);
 
-        void Next();
+    void Next();
 
-        void Previous();
+    void Previous();
 
-        Task RegisterAsync();
+    Task RegisterAsync();
 
-        Task SetFileAsync();
+    Task SetFileAsync();
 
-        Task SetFolderAsync();
+    Task SetFolderAsync();
 
-        void Unregister();
+    void Unregister();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

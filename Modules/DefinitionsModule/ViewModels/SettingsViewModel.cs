@@ -7,142 +7,141 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Modules.DefinitionsModule.ViewModels
+namespace SportDJ.Modules.DefinitionsModule.ViewModels;
+
+public class SettingsViewModel
+    : TabViewModel
 {
-    public class SettingsViewModel
-        : TabViewModel
+    #region Private Fields
+
+    private const string Titel = "Settings";
+
+    private readonly IEventAggregator eventAggregator;
+    private readonly IStorageService<Set> settingsService;
+
+    private Player player;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public SettingsViewModel(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
     {
-        #region Private Fields
+        this.eventAggregator = eventAggregator;
+        this.settingsService = settingsService;
 
-        private const string Titel = "Settings";
+        RegisterCommand = new DelegateCommand(RegisterPlayer);
+        UnregisterCommand = new DelegateCommand(UnegisterPlayer);
+    }
 
-        private readonly IEventAggregator eventAggregator;
-        private readonly IStorageService<Set> settingsService;
+    #endregion Public Constructors
 
-        private Player player;
+    #region Public Properties
 
-        #endregion Private Fields
+    public bool IsActive => player != default;
 
-        #region Public Constructors
+    public bool IsForeground
+    {
+        get => player?.IsForeground == true;
 
-        public SettingsViewModel(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+        set
         {
-            this.eventAggregator = eventAggregator;
-            this.settingsService = settingsService;
-
-            RegisterCommand = new DelegateCommand(RegisterPlayer);
-            UnregisterCommand = new DelegateCommand(UnegisterPlayer);
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public bool IsActive => player != default;
-
-        public bool IsForeground
-        {
-            get => player?.IsForeground == true;
-
-            set
+            if (player?.PlayerService != default
+                && value != player.PlayerService.IsForeground)
             {
-                if (player?.PlayerService != default
-                    && value != player.PlayerService.IsForeground)
-                {
-                    player.PlayerService.IsForeground = value;
+                player.PlayerService.IsForeground = value;
 
-                    settingsService.Save();
+                settingsService.Save();
 
-                    eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
 
-                    RaisePropertyChanged(nameof(IsForeground));
-                }
+                RaisePropertyChanged(nameof(IsForeground));
             }
         }
+    }
 
-        public bool IsReset
+    public bool IsReset
+    {
+        get => player?.ResetPosition == true;
+
+        set
         {
-            get => player?.ResetPosition == true;
-
-            set
+            if (player?.PlayerService != default
+                && value != player.PlayerService.ResetPosition)
             {
-                if (player?.PlayerService != default
-                    && value != player.PlayerService.ResetPosition)
-                {
-                    player.PlayerService.ResetPosition = value;
+                player.PlayerService.ResetPosition = value;
 
-                    settingsService.Save();
+                settingsService.Save();
 
-                    eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
 
-                    RaisePropertyChanged(nameof(IsReset));
-                }
+                RaisePropertyChanged(nameof(IsReset));
             }
         }
+    }
 
-        public int MaxLengthName => Constants.NameMaxLength;
+    public static int MaxLengthName => Constants.NameMaxLength;
 
-        public string Name
-        {
-            get => player?.Name;
-            set
-            {
-                if (player != default
-                    && value != player.Name)
-                {
-                    player.Name = value;
-
-                    settingsService.Save();
-
-                    eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
-
-                    RaisePropertyChanged(nameof(Name));
-                }
-            }
-        }
-
-        public DelegateCommand RegisterCommand { get; private set; }
-
-        public override string Title => Titel;
-
-        public DelegateCommand UnregisterCommand { get; private set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void Set(Player player)
+    public string Name
+    {
+        get => player?.Name;
+        set
         {
             if (player != default
-                && this.player != player)
+                && value != player.Name)
             {
-                this.player = player;
+                player.Name = value;
 
-                // The bindings still show the values of the previous player otherwise
-                RaisePropertyChanged(nameof(IsActive));
-                RaisePropertyChanged(nameof(IsForeground));
-                RaisePropertyChanged(nameof(IsReset));
+                settingsService.Save();
+
+                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+
                 RaisePropertyChanged(nameof(Name));
             }
         }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void RegisterPlayer()
-        {
-            if (player?.PlayerService != default)
-            {
-                _ = player.PlayerService.RegisterAsync();
-            }
-        }
-
-        private void UnegisterPlayer()
-        {
-            player?.PlayerService?.Unregister();
-        }
-
-        #endregion Private Methods
     }
+
+    public DelegateCommand RegisterCommand { get; private set; }
+
+    public override string Title => Titel;
+
+    public DelegateCommand UnregisterCommand { get; private set; }
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public void Set(Player player)
+    {
+        if (player != default
+            && this.player != player)
+        {
+            this.player = player;
+
+            // The bindings still show the values of the previous player otherwise
+            RaisePropertyChanged(nameof(IsActive));
+            RaisePropertyChanged(nameof(IsForeground));
+            RaisePropertyChanged(nameof(IsReset));
+            RaisePropertyChanged(nameof(Name));
+        }
+    }
+
+    #endregion Public Methods
+
+    #region Private Methods
+
+    private void RegisterPlayer()
+    {
+        if (player?.PlayerService != default)
+        {
+            _ = player.PlayerService.RegisterAsync();
+        }
+    }
+
+    private void UnegisterPlayer()
+    {
+        player?.PlayerService?.Unregister();
+    }
+
+    #endregion Private Methods
 }

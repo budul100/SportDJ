@@ -1,25 +1,24 @@
 ﻿using System.Diagnostics;
 
-namespace SportDJ.Services.MonitorService.Windows.Extensions
+namespace SportDJ.Services.MonitorService.Windows.Extensions;
+
+internal static class ProcessExtensions
 {
-    internal static class ProcessExtensions
+    #region Public Methods
+
+    public static bool ProcessExists(this uint processId)
     {
-        #region Public Methods
+        var process = default(Process);
 
-        public static bool ProcessExists(this uint processId)
+        try
         {
-            var process = default(Process);
-
-            try
-            {
-                process = Process.GetProcessById((int)processId);
-            }
-            catch
-            { }
-
-            return process != default;
+            process = Process.GetProcessById((int)processId);
         }
+        catch
+        { }
 
-        #endregion Public Methods
+        return process != default;
     }
+
+    #endregion Public Methods
 }

@@ -14,331 +14,330 @@ using SportDJ.Commons.Models.Records;
 using SportDJ.Services.MonitorService.Windows.Extensions;
 using SportDJ.Services.MonitorService.Windows.Models;
 
-namespace SportDJ.Services.MonitorService.Windows
+namespace SportDJ.Services.MonitorService.Windows;
+
+public class Service(IEventAggregator eventAggregator)
+    : IMonitorService
 {
-    public class Service(IEventAggregator eventAggregator)
-        : IMonitorService
+    #region Private Fields
+
+    private readonly int baseProcessId = Environment.ProcessId;
+
+    private CancellationTokenSource cancellationTokenSource;
+    private Device device;
+    private bool isDisposed;
+    private bool isToMute;
+    private float volumeTarget;
+
+    #endregion Private Fields
+
+    #region Public Properties
+
+    public bool IsActive { get; private set; }
+
+    public bool IsReady => device != default;
+
+    public IEnumerable<Session> Sessions { get; private set; }
+
+    public VolumeType Type { get; private set; }
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public void Activate()
     {
-        #region Private Fields
+        Sessions = default;
 
-        private readonly int baseProcessId = Environment.ProcessId;
+        Task.Run(DetermineSessions);
+    }
 
-        private CancellationTokenSource cancellationTokenSource;
-        private Device device;
-        private bool isDisposed;
-        private bool isToMute;
-        private float volumeTarget;
+    public void Deactivate()
+    {
+        ResetVolume();
+    }
 
-        #endregion Private Fields
+    public void Dispose()
+    {
+        Dispose(
+            disposing: true);
 
-        #region Public Properties
+        GC.SuppressFinalize(
+            obj: this);
+    }
 
-        public bool IsActive { get; private set; }
+    public void Initialize(Device device)
+    {
+        ResetVolume();
 
-        public bool IsReady => device != default;
+        this.device = device?.Type == DeviceType.Wasapi
+            ? device
+            : default;
 
-        public IEnumerable<Session> Sessions { get; private set; }
+        eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+    }
 
-        public VolumeType Type { get; private set; }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void Activate()
+    public void Mute(int? milliSeconds = default)
+    {
+        if (IsActive)
         {
-            Sessions = default;
+            isToMute = true;
 
-            Task.Run(DetermineSessions);
+            Reduce(
+                volume: Constants.VolumeMin,
+                milliSeconds: milliSeconds);
+        }
+    }
+
+    public void Raise(float? volume = default, int? milliSeconds = default)
+    {
+        if (volume.HasValue
+            && (volume < Constants.VolumeMin || volume > Constants.VolumeMax))
+        {
+            throw new ArgumentOutOfRangeException(nameof(volume));
         }
 
-        public void Deactivate()
+        if (IsActive
+            && Type != VolumeType.Muted
+            && Type != VolumeType.None
+            && volume > volumeTarget)
         {
-            ResetVolume();
-        }
-
-        public void Dispose()
-        {
-            Dispose(
-                disposing: true);
-
-            GC.SuppressFinalize(
-                obj: this);
-        }
-
-        public void Initialize(Device device)
-        {
-            ResetVolume();
-
-            this.device = device?.Type == DeviceType.Wasapi
-                ? device
-                : default;
-
-            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
-        }
-
-        public void Mute(int? milliSeconds = default)
-        {
-            if (IsActive)
+            if (Type == VolumeType.Reduce)
             {
-                isToMute = true;
-
-                Reduce(
-                    volume: Constants.VolumeMin,
-                    milliSeconds: milliSeconds);
-            }
-        }
-
-        public void Raise(float? volume = default, int? milliSeconds = default)
-        {
-            if (volume.HasValue
-                && (volume < Constants.VolumeMin || volume > Constants.VolumeMax))
-            {
-                throw new ArgumentOutOfRangeException(nameof(volume));
+                cancellationTokenSource?.Cancel();
             }
 
-            if (IsActive
-                && Type != VolumeType.Muted
-                && Type != VolumeType.None
-                && volume > volumeTarget)
+            var relevants = Sessions?
+                .Where(p => p.VolumeCurrent != p.VolumeInitial).ToArray();
+
+            if (relevants?.Length > 0)
             {
-                if (Type == VolumeType.Reduce)
-                {
-                    cancellationTokenSource?.Cancel();
-                }
-
-                var relevants = Sessions?
-                    .Where(p => p.VolumeCurrent != p.VolumeInitial).ToArray();
-
-                if (relevants?.Length > 0)
-                {
-                    volumeTarget = volume
-                        ?? Constants.VolumeMax;
-
-                    Type = VolumeType.Raise;
-
-                    var fadeStep = milliSeconds > 0
-                        ? Constants.FadeStepInMilliSec / (float)milliSeconds
-                        : 1F;
-
-                    cancellationTokenSource = new CancellationTokenSource();
-                    var cancellationToken = cancellationTokenSource.Token;
-
-                    Task.Run(() => RaiseVolume(
-                        sessions: relevants,
-                        fadeStep: fadeStep,
-                        cancellationToken: cancellationToken));
-                }
-                else
-                {
-                    Type = VolumeType.None;
-                }
-            }
-        }
-
-        public void Reduce(float? volume = default, int? milliSeconds = default)
-        {
-            if (volume.HasValue
-                && (volume < Constants.VolumeMin || volume > Constants.VolumeMax))
-            {
-                throw new ArgumentOutOfRangeException(nameof(volume));
-            }
-
-            if (IsActive
-                && Type != VolumeType.Muted
-                && (Type == VolumeType.None || Type == VolumeType.Raise || volume < volumeTarget))
-            {
-                if (Type == VolumeType.Raise)
-                {
-                    cancellationTokenSource?.Cancel();
-                }
-
                 volumeTarget = volume
-                    ?? Constants.VolumeMin;
+                    ?? Constants.VolumeMax;
 
-                Type = VolumeType.Reduce;
+                Type = VolumeType.Raise;
 
                 var fadeStep = milliSeconds > 0
                     ? Constants.FadeStepInMilliSec / (float)milliSeconds
                     : 1F;
 
-                var relevants = Sessions?
-                    .Where(p => p.VolumeInitial > volume).ToArray();
+                cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = cancellationTokenSource.Token;
 
-                if (relevants?.Length > 0)
-                {
-                    cancellationTokenSource = new CancellationTokenSource();
-                    var cancellationToken = cancellationTokenSource.Token;
-
-                    Task.Run(() => ReduceVolume(
-                        sessions: relevants,
-                        fadeStep: fadeStep,
-                        cancellationToken: cancellationToken));
-                }
+                Task.Run(() => RaiseVolume(
+                    sessions: relevants,
+                    fadeStep: fadeStep,
+                    cancellationToken: cancellationToken));
+            }
+            else
+            {
+                Type = VolumeType.None;
             }
         }
+    }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected virtual void Dispose(bool disposing)
+    public void Reduce(float? volume = default, int? milliSeconds = default)
+    {
+        if (volume.HasValue
+            && (volume < Constants.VolumeMin || volume > Constants.VolumeMax))
         {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    ResetVolume();
-                }
+            throw new ArgumentOutOfRangeException(nameof(volume));
+        }
 
-                isDisposed = true;
+        if (IsActive
+            && Type != VolumeType.Muted
+            && (Type == VolumeType.None || Type == VolumeType.Raise || volume < volumeTarget))
+        {
+            if (Type == VolumeType.Raise)
+            {
+                cancellationTokenSource?.Cancel();
+            }
+
+            volumeTarget = volume
+                ?? Constants.VolumeMin;
+
+            Type = VolumeType.Reduce;
+
+            var fadeStep = milliSeconds > 0
+                ? Constants.FadeStepInMilliSec / (float)milliSeconds
+                : 1F;
+
+            var relevants = Sessions?
+                .Where(p => p.VolumeInitial > volume).ToArray();
+
+            if (relevants?.Length > 0)
+            {
+                cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = cancellationTokenSource.Token;
+
+                Task.Run(() => ReduceVolume(
+                    sessions: relevants,
+                    fadeStep: fadeStep,
+                    cancellationToken: cancellationToken));
             }
         }
+    }
 
-        #endregion Protected Methods
+    #endregion Public Methods
 
-        #region Private Methods
+    #region Protected Methods
 
-        private void DetermineSessions()
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!isDisposed)
         {
-            Sessions = GetSessions().ToArray();
-
-            IsActive = Sessions?.Count() > 0;
-
-            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
-        }
-
-        private IEnumerable<Session> GetSessions()
-        {
-            if (device != default)
+            if (disposing)
             {
-                var deviceEnumerator = new MMDeviceEnumerator();
+                ResetVolume();
+            }
 
-                var devices = deviceEnumerator.EnumerateAudioEndPoints(
-                    dataFlow: DataFlow.Render,
-                    dwStateMask: DeviceState.Active);
+            isDisposed = true;
+        }
+    }
 
-                if (devices.Any(d => d.IsMatching(device.Name)))
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private void DetermineSessions()
+    {
+        Sessions = GetSessions().ToArray();
+
+        IsActive = Sessions?.Count() > 0;
+
+        eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+    }
+
+    private IEnumerable<Session> GetSessions()
+    {
+        if (device != default)
+        {
+            var deviceEnumerator = new MMDeviceEnumerator();
+
+            var devices = deviceEnumerator.EnumerateAudioEndPoints(
+                dataFlow: DataFlow.Render,
+                dwStateMask: DeviceState.Active);
+
+            if (devices.Any(d => d.IsMatching(device.Name)))
+            {
+                var sessions = devices
+                    .Where(d => d.IsMatching(device.Name))
+                    .Select(d => d.AudioSessionManager.Sessions).ToArray();
+
+                foreach (var session in sessions)
                 {
-                    var sessions = devices
-                        .Where(d => d.IsMatching(device.Name))
-                        .Select(d => d.AudioSessionManager.Sessions).ToArray();
-
-                    foreach (var session in sessions)
+                    for (var index = Constants.IndexAudioSessionMin; index < session.Count; index++)
                     {
-                        for (var index = Constants.IndexAudioSessionMin; index < session.Count; index++)
+                        var current = session[index];
+
+                        if (current.GetProcessID.ProcessExists()
+                            && current.GetProcessID != baseProcessId)
                         {
-                            var current = session[index];
+                            var result = new Session(
+                                control: current,
+                                volumeInitial: current.SimpleAudioVolume.Volume);
 
-                            if (current.GetProcessID.ProcessExists()
-                                && current.GetProcessID != baseProcessId)
-                            {
-                                var result = new Session(
-                                    control: current,
-                                    volumeInitial: current.SimpleAudioVolume.Volume);
-
-                                yield return result;
-                            }
+                            yield return result;
                         }
                     }
                 }
             }
         }
-
-        private void RaiseVolume(IEnumerable<Session> sessions, float fadeStep,
-            CancellationToken? cancellationToken)
-        {
-            if (sessions?.Count() > 0)
-            {
-                var volumeCurrent = sessions.Min(v => v.VolumeLower);
-
-                while (volumeCurrent < volumeTarget
-                    && cancellationToken?.IsCancellationRequested != true)
-                {
-                    volumeCurrent += fadeStep;
-
-                    if (volumeCurrent > volumeTarget)
-                    {
-                        volumeCurrent = volumeTarget;
-                    }
-
-                    foreach (var process in sessions)
-                    {
-                        process.VolumeCurrent = volumeCurrent > process.VolumeInitial
-                            ? process.VolumeInitial
-                            : volumeCurrent;
-
-                        process.VolumeLower = volumeCurrent;
-                    }
-
-                    cancellationToken?.WaitHandle.WaitOne(
-                        millisecondsTimeout: Constants.FadeStepInMilliSec);
-                }
-            }
-
-            Type = volumeTarget < Constants.VolumeMax
-                ? VolumeType.Lowered
-                : VolumeType.None;
-        }
-
-        private void ReduceVolume(IEnumerable<Session> sessions, float fadeStep,
-            CancellationToken cancellationToken)
-        {
-            if (sessions?.Count() > 0)
-            {
-                var volumeCurrent = sessions.Max(v => v.VolumeInitial);
-
-                while (volumeCurrent > volumeTarget
-                    && !cancellationToken.IsCancellationRequested)
-                {
-                    volumeCurrent -= fadeStep;
-
-                    if (volumeCurrent < volumeTarget)
-                    {
-                        volumeCurrent = volumeTarget;
-                    }
-
-                    var relevantProcesses = sessions
-                        .Where(p => p.VolumeInitial > volumeCurrent).ToArray();
-
-                    foreach (var relevantProcess in relevantProcesses)
-                    {
-                        relevantProcess.VolumeCurrent = volumeCurrent;
-                        relevantProcess.VolumeLower = volumeCurrent;
-                    }
-
-                    cancellationToken.WaitHandle.WaitOne(
-                        millisecondsTimeout: Constants.FadeStepInMilliSec);
-                }
-            }
-
-            Type = isToMute
-                ? VolumeType.Muted
-                : VolumeType.Lowered;
-        }
-
-        private void ResetVolume()
-        {
-            if (IsActive)
-            {
-                cancellationTokenSource?.Cancel();
-
-                volumeTarget = Constants.VolumeMax;
-                isToMute = false;
-
-                Type = VolumeType.Raise;
-
-                RaiseVolume(
-                    sessions: Sessions,
-                    fadeStep: 1F,
-                    cancellationToken: default);
-
-                IsActive = false;
-
-                eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
-            }
-        }
-
-        #endregion Private Methods
     }
+
+    private void RaiseVolume(IEnumerable<Session> sessions, float fadeStep,
+        CancellationToken? cancellationToken)
+    {
+        if (sessions?.Count() > 0)
+        {
+            var volumeCurrent = sessions.Min(v => v.VolumeLower);
+
+            while (volumeCurrent < volumeTarget
+                && cancellationToken?.IsCancellationRequested != true)
+            {
+                volumeCurrent += fadeStep;
+
+                if (volumeCurrent > volumeTarget)
+                {
+                    volumeCurrent = volumeTarget;
+                }
+
+                foreach (var process in sessions)
+                {
+                    process.VolumeCurrent = volumeCurrent > process.VolumeInitial
+                        ? process.VolumeInitial
+                        : volumeCurrent;
+
+                    process.VolumeLower = volumeCurrent;
+                }
+
+                cancellationToken?.WaitHandle.WaitOne(
+                    millisecondsTimeout: Constants.FadeStepInMilliSec);
+            }
+        }
+
+        Type = volumeTarget < Constants.VolumeMax
+            ? VolumeType.Lowered
+            : VolumeType.None;
+    }
+
+    private void ReduceVolume(IEnumerable<Session> sessions, float fadeStep,
+        CancellationToken cancellationToken)
+    {
+        if (sessions?.Count() > 0)
+        {
+            var volumeCurrent = sessions.Max(v => v.VolumeInitial);
+
+            while (volumeCurrent > volumeTarget
+                && !cancellationToken.IsCancellationRequested)
+            {
+                volumeCurrent -= fadeStep;
+
+                if (volumeCurrent < volumeTarget)
+                {
+                    volumeCurrent = volumeTarget;
+                }
+
+                var relevantProcesses = sessions
+                    .Where(p => p.VolumeInitial > volumeCurrent).ToArray();
+
+                foreach (var relevantProcess in relevantProcesses)
+                {
+                    relevantProcess.VolumeCurrent = volumeCurrent;
+                    relevantProcess.VolumeLower = volumeCurrent;
+                }
+
+                cancellationToken.WaitHandle.WaitOne(
+                    millisecondsTimeout: Constants.FadeStepInMilliSec);
+            }
+        }
+
+        Type = isToMute
+            ? VolumeType.Muted
+            : VolumeType.Lowered;
+    }
+
+    private void ResetVolume()
+    {
+        if (IsActive)
+        {
+            cancellationTokenSource?.Cancel();
+
+            volumeTarget = Constants.VolumeMax;
+            isToMute = false;
+
+            Type = VolumeType.Raise;
+
+            RaiseVolume(
+                sessions: Sessions,
+                fadeStep: 1F,
+                cancellationToken: default);
+
+            IsActive = false;
+
+            eventAggregator.GetEvent<MonitorUpdatedEvent>().Publish(this);
+        }
+    }
+
+    #endregion Private Methods
 }

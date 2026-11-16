@@ -1,15 +1,14 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum PlayType
 {
-    public enum PlayType
-    {
-        Waiting,
+    Waiting,
 
-        Playing,
+    Playing,
 
-        Pausing,
+    Pausing,
 
-        Stopping,
+    Stopping,
 
-        Ended,
-    }
+    Ended,
 }

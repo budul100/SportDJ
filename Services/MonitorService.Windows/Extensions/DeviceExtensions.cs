@@ -1,17 +1,16 @@
 ﻿using NAudio.CoreAudioApi;
 
-namespace SportDJ.Services.MonitorService.Windows.Extensions
+namespace SportDJ.Services.MonitorService.Windows.Extensions;
+
+internal static class DeviceExtensions
 {
-    internal static class DeviceExtensions
+    #region Public Methods
+
+    public static bool IsMatching(this MMDevice device, string deviceName)
     {
-        #region Public Methods
-
-        public static bool IsMatching(this MMDevice device, string deviceName)
-        {
-            return device.FriendlyName.StartsWith(deviceName)
-                || deviceName.StartsWith(device.FriendlyName);
-        }
-
-        #endregion Public Methods
+        return device.FriendlyName.StartsWith(deviceName)
+            || deviceName.StartsWith(device.FriendlyName);
     }
+
+    #endregion Public Methods
 }

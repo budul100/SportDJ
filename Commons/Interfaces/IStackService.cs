@@ -2,44 +2,43 @@
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Structure;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IStackService
 {
-    public interface IStackService
-    {
-        #region Public Properties
+    #region Public Properties
 
-        List<Entry> Entries { get; }
+    List<Entry> Entries { get; }
 
-        Entry Entry { get; }
+    Entry Entry { get; }
 
-        bool HasPlayeds { get; }
+    bool HasPlayeds { get; }
 
-        bool HasUnplayeds { get; }
+    bool HasUnplayeds { get; }
 
-        int Index { get; }
+    int Index { get; }
 
-        Track Track { get; }
+    Track Track { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void Initialize(Player player, IEnumerable<string> paths);
+    void Initialize(Player player, IEnumerable<string> paths);
 
-        void Next();
+    void Next();
 
-        void Play();
+    void Play();
 
-        void Previous();
+    void Previous();
 
-        void Reset();
+    void Reset();
 
-        void Select(Entry entry);
+    void Select(Entry entry);
 
-        void Select(int index);
+    void Select(int index);
 
-        void Shuffle();
+    void Shuffle();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

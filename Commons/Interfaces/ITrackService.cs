@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface ITrackService
 {
-    public interface ITrackService
-    {
-        #region Public Methods
+    #region Public Methods
 
-        IEnumerable<Track> Get(IEnumerable<string> paths);
+    IEnumerable<Track> Get(IEnumerable<string> paths);
 
-        void Play(Track track, bool isPause);
+    void Play(Track track, bool isPause);
 
-        IEnumerable<Track> Search(string search);
+    IEnumerable<Track> Search(string search);
 
-        void Stop(Track track);
+    void Stop(Track track);
 
-        void Update(Track track);
+    void Update(Track track);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

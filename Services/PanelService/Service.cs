@@ -6,152 +6,151 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Services.PanelService
+namespace SportDJ.Services.PanelService;
+
+public class Service(IEventAggregator eventAggregator)
+    : IPanelService
 {
-    public class Service(IEventAggregator eventAggregator)
-        : IPanelService
+    private sealed record Registration(PanelType Type, Control View, Action Action);
+
+    #region Private Fields
+
+    private readonly Dictionary<PanelType, Control> activeViews = [];
+    private readonly Dictionary<Type, Registration> registrations = [];
+
+    private bool visibleBottom;
+    private bool visibleLeft;
+    private bool visibleRight;
+    private bool visibleTop;
+
+    #endregion Private Fields
+
+    #region Public Methods
+
+    public void Activate<TService>()
     {
-        private record Registration(PanelType Type, Control View, Action Action);
+        var serviceType = typeof(TService);
 
-        #region Private Fields
-
-        private readonly Dictionary<PanelType, Control> activeViews = [];
-        private readonly Dictionary<Type, Registration> registrations = [];
-
-        private bool visibleBottom;
-        private bool visibleLeft;
-        private bool visibleRight;
-        private bool visibleTop;
-
-        #endregion Private Fields
-
-        #region Public Methods
-
-        public void Activate<TService>()
+        if (registrations.TryGetValue(
+            key: serviceType,
+            value: out var registration))
         {
-            var serviceType = typeof(TService);
+            activeViews[registration.Type] = registration.View;
 
-            if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
-            {
-                activeViews[registration.Type] = registration.View;
+            SetVisibility(
+                type: registration.Type,
+                isVisible: true);
 
-                SetVisibility(
-                    type: registration.Type,
-                    isVisible: true);
+            var payload = (registration.Type, serviceType);
 
-                var payload = (registration.Type, serviceType);
+            registration.Action?.Invoke();
 
-                registration.Action?.Invoke();
-
-                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: payload);
-            }
+            eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                payload: payload);
         }
-
-        public void Deactivate(PanelType type)
-        {
-            if (activeViews.Remove(type))
-            {
-                SetVisibility(
-                    type: type,
-                    isVisible: false);
-
-                var payload = (type, default(Type));
-
-                eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
-                    payload: payload);
-            }
-        }
-
-        public void Deactivate<TService>()
-        {
-            var serviceType = typeof(TService);
-
-            if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
-            {
-                Deactivate(registration.Type);
-            }
-        }
-
-        public Control GetView(PanelType type)
-        {
-            return activeViews.TryGetValue(
-                key: type,
-                value: out var view)
-                ? view
-                : default;
-        }
-
-        public bool IsVisible(PanelType type)
-        {
-            return type switch
-            {
-                PanelType.Top => visibleTop,
-
-                PanelType.Bottom => visibleBottom,
-
-                PanelType.Left => visibleLeft,
-
-                PanelType.Right => visibleRight,
-
-                _ => false
-            };
-        }
-
-        public bool IsVisible<TService>()
-        {
-            var result = false;
-
-            var serviceType = typeof(TService);
-
-            if (registrations.TryGetValue(
-                key: serviceType,
-                value: out var registration))
-            {
-                result = activeViews.ContainsKey(registration.Type);
-            }
-
-            return result;
-        }
-
-        public void Register<TService>(PanelType type, Control view, Action action = default)
-        {
-            registrations[typeof(TService)] = new Registration(
-                Type: type,
-                View: view,
-                Action: action);
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private void SetVisibility(PanelType type, bool isVisible)
-        {
-            switch (type)
-            {
-                case PanelType.Top:
-                    visibleTop = isVisible;
-                    break;
-
-                case PanelType.Bottom:
-                    visibleBottom = isVisible;
-                    break;
-
-                case PanelType.Left:
-                    visibleLeft = isVisible;
-                    break;
-
-                case PanelType.Right:
-                    visibleRight = isVisible;
-                    break;
-            }
-        }
-
-        #endregion Private Methods
     }
+
+    public void Deactivate(PanelType type)
+    {
+        if (activeViews.Remove(type))
+        {
+            SetVisibility(
+                type: type,
+                isVisible: false);
+
+            var payload = (type, default(Type));
+
+            eventAggregator.GetEvent<PanelUpdatedEvent>().Publish(
+                payload: payload);
+        }
+    }
+
+    public void Deactivate<TService>()
+    {
+        var serviceType = typeof(TService);
+
+        if (registrations.TryGetValue(
+            key: serviceType,
+            value: out var registration))
+        {
+            Deactivate(registration.Type);
+        }
+    }
+
+    public Control GetView(PanelType type)
+    {
+        return activeViews.TryGetValue(
+            key: type,
+            value: out var view)
+            ? view
+            : default;
+    }
+
+    public bool IsVisible(PanelType type)
+    {
+        return type switch
+        {
+            PanelType.Top => visibleTop,
+
+            PanelType.Bottom => visibleBottom,
+
+            PanelType.Left => visibleLeft,
+
+            PanelType.Right => visibleRight,
+
+            _ => false
+        };
+    }
+
+    public bool IsVisible<TService>()
+    {
+        var result = false;
+
+        var serviceType = typeof(TService);
+
+        if (registrations.TryGetValue(
+            key: serviceType,
+            value: out var registration))
+        {
+            result = activeViews.ContainsKey(registration.Type);
+        }
+
+        return result;
+    }
+
+    public void Register<TService>(PanelType type, Control view, Action action = default)
+    {
+        registrations[typeof(TService)] = new Registration(
+            Type: type,
+            View: view,
+            Action: action);
+    }
+
+    #endregion Public Methods
+
+    #region Private Methods
+
+    private void SetVisibility(PanelType type, bool isVisible)
+    {
+        switch (type)
+        {
+            case PanelType.Top:
+                visibleTop = isVisible;
+                break;
+
+            case PanelType.Bottom:
+                visibleBottom = isVisible;
+                break;
+
+            case PanelType.Left:
+                visibleLeft = isVisible;
+                break;
+
+            case PanelType.Right:
+                visibleRight = isVisible;
+                break;
+        }
+    }
+
+    #endregion Private Methods
 }

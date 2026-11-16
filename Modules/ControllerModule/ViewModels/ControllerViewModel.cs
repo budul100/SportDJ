@@ -16,302 +16,301 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SportDJ.Modules.ControllerModule.ViewModels
+namespace SportDJ.Modules.ControllerModule.ViewModels;
+
+public class ControllerViewModel
+    : RegionViewModelBase
 {
-    public class ControllerViewModel
-        : RegionViewModelBase
+    #region Private Fields
+
+    private readonly IMixerService mixerService;
+    private readonly IEnumerable<IMonitorService> monitorServices;
+    private readonly IOutputService outputLiveService;
+    private bool isLoweredRequested;
+    private bool isVolumePressed;
+    private Options options;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+        IEventAggregator eventAggregator,
+        IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
+        : base(regionManager)
     {
-        #region Private Fields
+        this.monitorServices = monitoringServices;
 
-        private readonly IMixerService mixerService;
-        private readonly IEnumerable<IMonitorService> monitorServices;
-        private readonly IOutputService outputLiveService;
-        private bool isLoweredRequested;
-        private bool isVolumePressed;
-        private Options options;
+        mixerService = containerProvider?.Resolve<IMixerService>(
+            name: nameof(MixerType.Background));
 
-        #endregion Private Fields
+        outputLiveService = containerProvider?.Resolve<IOutputService>(
+            name: nameof(OutputType.Live));
 
-        #region Public Constructors
+        LoopCommand = new DelegateCommand(
+            executeMethod: SwitchLoop);
 
-        public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator,
-            IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
-            : base(regionManager)
+        MonitoringCommand = new DelegateCommand(
+            executeMethod: SwitchMonitoring);
+
+        VolumeLowerCommand = new DelegateCommand(
+            executeMethod: LowerOutput,
+            canExecuteMethod: () => IsActive);
+
+        VolumeRaiseCommand = new DelegateCommand(
+            executeMethod: RaiseOutput,
+            canExecuteMethod: () => IsActive);
+
+        PauseCommand = new DelegateCommand(
+            executeMethod: () => outputLiveService?.Pause(),
+            canExecuteMethod: () => IsActive);
+
+        eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
+            action: () =>
+            {
+                options = settingsService?.Contents?.Options;
+
+                // Without this the key badges stay empty after loading
+                UpdateOptions();
+            },
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
+            action: UpdateOptions,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<MonitorUpdatedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: v => monitoringServices?.Contains(v) == true);
+
+        eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: o => outputLiveService == o);
+
+        eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: o => outputLiveService == o);
+
+        eventAggregator?.GetEvent<OutputFadedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: o => outputLiveService == o);
+
+        eventAggregator?.GetEvent<LoopReadyEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: m => mixerService == m);
+
+        eventAggregator?.GetEvent<LoopActivatedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: m => mixerService == m);
+
+        eventAggregator?.GetEvent<LoopDeactivatedEvent>().Subscribe(
+            action: _ => UpdateControls(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: m => mixerService == m);
+
+        eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+            action: OnKeyPressed,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
+            action: OnKeyReleased,
+            keepSubscriberReferenceAlive: true);
+
+        UpdateControls();
+    }
+
+    #endregion Public Constructors
+
+    #region Public Properties
+
+    public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options?.KeyCodeOutputPause);
+
+    public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
+
+    public bool IsActive => (outputLiveService?.IsPlaying == true) || IsMonitoring;
+
+    public bool IsLoop => mixerService?.IsLoop == true;
+
+    public bool IsLoopEnabled => (outputLiveService?.IsPlaying == true)
+        && (mixerService?.IsLoopReady == true);
+
+    public bool IsMonitoring => monitorServices?.Any(s => s.IsActive) == true;
+
+    public bool IsMonitoringEnabled => monitorServices?.Any(s => s.IsReady) == true;
+
+    public bool IsVolumeLowered => isLoweredRequested
+        && outputLiveService?.IsLowered == true;
+
+    public bool IsVolumePressed
+    {
+        get => isVolumePressed;
+        set => SetProperty(ref isVolumePressed, value);
+    }
+
+    public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
+
+    public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
+
+    public DelegateCommand LoopCommand { get; }
+
+    public DelegateCommand MonitoringCommand { get; }
+
+    public DelegateCommand PauseCommand { get; }
+
+    public DelegateCommand VolumeLowerCommand { get; }
+
+    public DelegateCommand VolumeRaiseCommand { get; }
+
+    #endregion Public Properties
+
+    #region Private Methods
+
+    private void LowerOutput()
+    {
+        isLoweredRequested = true;
+
+        outputLiveService.Lower();
+    }
+
+    private void OnKeyPressed(string keyCode)
+    {
+        if (keyCode == options?.KeyCodeOutputPause)
         {
-            this.monitorServices = monitoringServices;
+            outputLiveService.Pause();
+        }
+        else if (keyCode == options?.KeyCodeVolumeTalk)
+        {
+            LowerOutput();
+        }
+    }
 
-            mixerService = containerProvider?.Resolve<IMixerService>(
-                name: nameof(MixerType.Background));
+    private void OnKeyReleased(string keyCode)
+    {
+        if (keyCode == options?.KeyCodeVolumeTalk)
+        {
+            RaiseOutput();
+        }
+    }
 
-            outputLiveService = containerProvider?.Resolve<IOutputService>(
-                name: nameof(OutputType.Live));
+    private void RaiseOutput()
+    {
+        isLoweredRequested = false;
 
-            LoopCommand = new DelegateCommand(
-                executeMethod: SwitchLoop);
+        outputLiveService.Raise();
+    }
 
-            MonitoringCommand = new DelegateCommand(
-                executeMethod: SwitchMonitoring);
+    private void SwitchLoop()
+    {
+        if (IsLoop)
+        {
+            mixerService?.DeactivateLoop();
+        }
+        else
+        {
+            mixerService?.ActivateLoop();
+        }
 
-            VolumeLowerCommand = new DelegateCommand(
-                executeMethod: LowerOutput,
-                canExecuteMethod: () => IsActive);
+        UpdateControls();
+    }
 
-            VolumeRaiseCommand = new DelegateCommand(
-                executeMethod: RaiseOutput,
-                canExecuteMethod: () => IsActive);
-
-            PauseCommand = new DelegateCommand(
-                executeMethod: () => outputLiveService?.Pause(),
-                canExecuteMethod: () => IsActive);
-
-            eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: () =>
+    private void SwitchMonitoring()
+    {
+        if (monitorServices?.Any() == true)
+        {
+            foreach (var volumeService in monitorServices)
+            {
+                if (IsMonitoring)
                 {
-                    options = settingsService?.Contents?.Options;
-
-                    // Without this the key badges stay empty after loading
-                    UpdateOptions();
-                },
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
-                action: UpdateOptions,
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<MonitorUpdatedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: v => monitoringServices?.Contains(v) == true);
-
-            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => outputLiveService == o);
-
-            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => outputLiveService == o);
-
-            eventAggregator?.GetEvent<OutputFadedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: o => outputLiveService == o);
-
-            eventAggregator?.GetEvent<LoopReadyEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: m => mixerService == m);
-
-            eventAggregator?.GetEvent<LoopActivatedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: m => mixerService == m);
-
-            eventAggregator?.GetEvent<LoopDeactivatedEvent>().Subscribe(
-                action: _ => UpdateControls(),
-                threadOption: ThreadOption.UIThread,
-                keepSubscriberReferenceAlive: true,
-                filter: m => mixerService == m);
-
-            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-                action: OnKeyPressed,
-                keepSubscriberReferenceAlive: true);
-
-            eventAggregator?.GetEvent<KeyReleasedEvent>().Subscribe(
-                action: OnKeyReleased,
-                keepSubscriberReferenceAlive: true);
-
-            UpdateControls();
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public bool HasKeyPauseOutput => !string.IsNullOrWhiteSpace(options?.KeyCodeOutputPause);
-
-        public bool HasKeyTalkVolume => !string.IsNullOrWhiteSpace(options?.KeyCodeVolumeTalk);
-
-        public bool IsActive => (outputLiveService?.IsPlaying == true) || IsMonitoring;
-
-        public bool IsLoop => mixerService?.IsLoop == true;
-
-        public bool IsLoopEnabled => (outputLiveService?.IsPlaying == true)
-            && (mixerService?.IsLoopReady == true);
-
-        public bool IsMonitoring => monitorServices?.Any(s => s.IsActive) == true;
-
-        public bool IsMonitoringEnabled => monitorServices?.Any(s => s.IsReady) == true;
-
-        public bool IsVolumeLowered => isLoweredRequested
-            && outputLiveService?.IsLowered == true;
-
-        public bool IsVolumePressed
-        {
-            get => isVolumePressed;
-            set => SetProperty(ref isVolumePressed, value);
-        }
-
-        public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
-
-        public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
-
-        public DelegateCommand LoopCommand { get; }
-
-        public DelegateCommand MonitoringCommand { get; }
-
-        public DelegateCommand PauseCommand { get; }
-
-        public DelegateCommand VolumeLowerCommand { get; }
-
-        public DelegateCommand VolumeRaiseCommand { get; }
-
-        #endregion Public Properties
-
-        #region Private Methods
-
-        private void LowerOutput()
-        {
-            isLoweredRequested = true;
-
-            outputLiveService.Lower();
-        }
-
-        private void OnKeyPressed(string keyCode)
-        {
-            if (keyCode == options?.KeyCodeOutputPause)
-            {
-                outputLiveService.Pause();
-            }
-            else if (keyCode == options?.KeyCodeVolumeTalk)
-            {
-                LowerOutput();
-            }
-        }
-
-        private void OnKeyReleased(string keyCode)
-        {
-            if (keyCode == options?.KeyCodeVolumeTalk)
-            {
-                RaiseOutput();
-            }
-        }
-
-        private void RaiseOutput()
-        {
-            isLoweredRequested = false;
-
-            outputLiveService.Raise();
-        }
-
-        private void SwitchLoop()
-        {
-            if (IsLoop)
-            {
-                mixerService?.DeactivateLoop();
-            }
-            else
-            {
-                mixerService?.ActivateLoop();
-            }
-
-            UpdateControls();
-        }
-
-        private void SwitchMonitoring()
-        {
-            if (monitorServices?.Any() == true)
-            {
-                foreach (var volumeService in monitorServices)
+                    volumeService.Deactivate();
+                }
+                else
                 {
-                    if (IsMonitoring)
-                    {
-                        volumeService.Deactivate();
-                    }
-                    else
-                    {
-                        volumeService.Activate();
-                    }
+                    volumeService.Activate();
                 }
             }
-
-            UpdateControls();
         }
 
-        //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
-
-        //public string Key => KeyCode.GetKey();
-
-        //public string KeyCode
-        //{
-        //    get { return keyable?.KeyCode; }
-
-        //    set
-        //    {
-        //        if (keyable != default
-        //            && value != keyable.KeyCode)
-        //        {
-        //            keyable.KeyCode = value;
-
-        //            settingsService.Save();
-
-        //            RaisePropertyChanged(nameof(KeyCode));
-        //            RaisePropertyChanged(nameof(HasKey));
-        //            RaisePropertyChanged(nameof(Key));
-        //        }
-        //    }
-        //}
-
-        //private void ReceiveHook(string keyCode)
-        //{
-        //    if (isListening)
-        //    {
-        //        KeyCode = keyCode;
-        //        isListening = false;
-
-        //        listenChecker.Invoke();
-
-        //        CloseMenu();
-        //    }
-        //}
-
-        private void UpdateControls()
-        {
-            RaisePropertyChanged(nameof(IsActive));
-
-            RaisePropertyChanged(nameof(IsLoop));
-            RaisePropertyChanged(nameof(IsLoopEnabled));
-
-            RaisePropertyChanged(nameof(IsMonitoring));
-            RaisePropertyChanged(nameof(IsMonitoringEnabled));
-
-            RaisePropertyChanged(nameof(IsVolumeLowered));
-
-            VolumeLowerCommand.RaiseCanExecuteChanged();
-            VolumeRaiseCommand.RaiseCanExecuteChanged();
-
-            PauseCommand.RaiseCanExecuteChanged();
-        }
-
-        private void UpdateOptions()
-        {
-            RaisePropertyChanged(nameof(KeyPauseOutput));
-            RaisePropertyChanged(nameof(HasKeyPauseOutput));
-
-            RaisePropertyChanged(nameof(KeyTalkVolume));
-            RaisePropertyChanged(nameof(HasKeyTalkVolume));
-        }
-
-        #endregion Private Methods
+        UpdateControls();
     }
+
+    //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
+
+    //public string Key => KeyCode.GetKey();
+
+    //public string KeyCode
+    //{
+    //    get { return keyable?.KeyCode; }
+
+    //    set
+    //    {
+    //        if (keyable != default
+    //            && value != keyable.KeyCode)
+    //        {
+    //            keyable.KeyCode = value;
+
+    //            settingsService.Save();
+
+    //            RaisePropertyChanged(nameof(KeyCode));
+    //            RaisePropertyChanged(nameof(HasKey));
+    //            RaisePropertyChanged(nameof(Key));
+    //        }
+    //    }
+    //}
+
+    //private void ReceiveHook(string keyCode)
+    //{
+    //    if (isListening)
+    //    {
+    //        KeyCode = keyCode;
+    //        isListening = false;
+
+    //        listenChecker.Invoke();
+
+    //        CloseMenu();
+    //    }
+    //}
+
+    private void UpdateControls()
+    {
+        RaisePropertyChanged(nameof(IsActive));
+
+        RaisePropertyChanged(nameof(IsLoop));
+        RaisePropertyChanged(nameof(IsLoopEnabled));
+
+        RaisePropertyChanged(nameof(IsMonitoring));
+        RaisePropertyChanged(nameof(IsMonitoringEnabled));
+
+        RaisePropertyChanged(nameof(IsVolumeLowered));
+
+        VolumeLowerCommand.RaiseCanExecuteChanged();
+        VolumeRaiseCommand.RaiseCanExecuteChanged();
+
+        PauseCommand.RaiseCanExecuteChanged();
+    }
+
+    private void UpdateOptions()
+    {
+        RaisePropertyChanged(nameof(KeyPauseOutput));
+        RaisePropertyChanged(nameof(HasKeyPauseOutput));
+
+        RaisePropertyChanged(nameof(KeyTalkVolume));
+        RaisePropertyChanged(nameof(HasKeyTalkVolume));
+    }
+
+    #endregion Private Methods
 }

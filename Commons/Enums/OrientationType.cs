@@ -1,13 +1,12 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum OrientationType
 {
-    public enum OrientationType
-    {
-        Right,
+    Right,
 
-        Bottom,
+    Bottom,
 
-        Left,
+    Left,
 
-        Top,
-    }
+    Top,
 }

@@ -1,11 +1,10 @@
-﻿namespace SportDJ.Commons.Models.Interfaces
+﻿namespace SportDJ.Commons.Models.Interfaces;
+
+public interface INameable
 {
-    public interface INameable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        string Name { get; set; }
+    string Name { get; set; }
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

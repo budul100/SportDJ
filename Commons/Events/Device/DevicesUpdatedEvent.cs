@@ -1,8 +1,7 @@
 ﻿using Prism.Events;
 
-namespace SportDJ.Commons.Events.Device
-{
-    public class DevicesUpdatedEvent
-        : PubSubEvent
-    { }
-}
+namespace SportDJ.Commons.Events.Device;
+
+public class DevicesUpdatedEvent
+    : PubSubEvent
+{ }

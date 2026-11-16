@@ -1,23 +1,12 @@
-﻿namespace NAudio.WaveFormRenderer
+﻿namespace NAudio.WaveFormRenderer;
+
+public class PeakInfo(float min, float max)
 {
-    public class PeakInfo
-    {
-        #region Public Constructors
+    #region Public Properties
 
-        public PeakInfo(float min, float max)
-        {
-            Max = max;
-            Min = min;
-        }
+    public float Max { get; private set; } = max;
 
-        #endregion Public Constructors
+    public float Min { get; private set; } = min;
 
-        #region Public Properties
-
-        public float Max { get; private set; }
-
-        public float Min { get; private set; }
-
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

@@ -1,222 +1,218 @@
-﻿using System;
-using System.Windows.Input;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.Xaml.Interactivity;
+using System;
+using System.Windows.Input;
 
-namespace SportDJ.Modules.ControllerModule.Behaviors
+namespace SportDJ.Modules.ControllerModule.Behaviors;
+
+public class PointerCaptureBehavior
+    : Behavior<InputElement>
 {
-    public class PointerCaptureBehavior 
-        : Behavior<InputElement>
+    #region Public Fields
+
+    public static readonly StyledProperty<TimeSpan> HoldDurationProperty =
+        AvaloniaProperty.Register<PointerCaptureBehavior, TimeSpan>(
+            name: nameof(HoldDuration),
+            defaultValue: TimeSpan.FromMilliseconds(HoldDurationDefault));
+
+    public static readonly StyledProperty<ICommand> HoldEndCommandProperty =
+        AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
+            name: nameof(HoldEndCommand));
+
+    public static readonly StyledProperty<ICommand> HoldStartCommandProperty =
+        AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
+            name: nameof(HoldStartCommand));
+
+    public static readonly AttachedProperty<bool> IsPointerPressedProperty =
+        AvaloniaProperty.RegisterAttached<PointerCaptureBehavior, InputElement, bool>(
+            name: "IsPointerPressed",
+            defaultValue: false,
+            defaultBindingMode: BindingMode.TwoWay);
+
+    public static readonly StyledProperty<ICommand> TapCommandProperty =
+        AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
+            name: nameof(TapCommand));
+
+    #endregion Public Fields
+
+    #region Private Fields
+
+    private const int HoldDurationDefault = 400;
+    private DispatcherTimer holdTimer;
+    private bool isHolding;
+    private bool wasPressed;
+
+    #endregion Private Fields
+
+    #region Public Properties
+
+    public TimeSpan HoldDuration
     {
-        #region Public Fields
+        get => GetValue(HoldDurationProperty);
+        set => SetValue(HoldDurationProperty, value);
+    }
 
-        public static readonly StyledProperty<TimeSpan> HoldDurationProperty =
-            AvaloniaProperty.Register<PointerCaptureBehavior, TimeSpan>(
-                name: nameof(HoldDuration),
-                defaultValue: TimeSpan.FromMilliseconds(HoldDurationDefault));
+    public ICommand HoldEndCommand
+    {
+        get => GetValue(HoldEndCommandProperty);
+        set => SetValue(HoldEndCommandProperty, value);
+    }
 
-        public static readonly StyledProperty<ICommand> HoldEndCommandProperty =
-            AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
-                name: nameof(HoldEndCommand));
+    public ICommand HoldStartCommand
+    {
+        get => GetValue(HoldStartCommandProperty);
+        set => SetValue(HoldStartCommandProperty, value);
+    }
 
-        public static readonly StyledProperty<ICommand> HoldStartCommandProperty =
-            AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
-                name: nameof(HoldStartCommand));
+    public ICommand TapCommand
+    {
+        get => GetValue(TapCommandProperty);
+        set => SetValue(TapCommandProperty, value);
+    }
 
-        public static readonly AttachedProperty<bool> IsPointerPressedProperty =
-            AvaloniaProperty.RegisterAttached<PointerCaptureBehavior, InputElement, bool>(
-                name: "IsPointerPressed",
-                defaultValue: false,
-                defaultBindingMode: BindingMode.TwoWay);
+    #endregion Public Properties
 
-        public static readonly StyledProperty<ICommand> TapCommandProperty =
-            AvaloniaProperty.Register<PointerCaptureBehavior, ICommand>(
-                name: nameof(TapCommand));
+    #region Public Methods
 
-        #endregion Public Fields
+    public static bool GetIsPointerPressed(AvaloniaObject obj) => obj.GetValue(IsPointerPressedProperty);
 
-        #region Private Fields
+    public static void SetIsPointerPressed(AvaloniaObject obj, bool value) => obj.SetValue(IsPointerPressedProperty, value);
 
-        private const int HoldDurationDefault = 400;
-        private DispatcherTimer holdTimer;
-        private bool isHolding;
-        private bool wasPressed;
+    #endregion Public Methods
 
-        #endregion Private Fields
+    #region Protected Methods
 
-        #region Public Properties
+    protected override void OnAttached()
+    {
+        base.OnAttached();
 
-        public TimeSpan HoldDuration
+        if (AssociatedObject != null)
         {
-            get => GetValue(HoldDurationProperty);
-            set => SetValue(HoldDurationProperty, value);
+            AssociatedObject.AddHandler(
+                routedEvent: InputElement.PointerPressedEvent,
+                handler: OnPointerPressed,
+                routes: RoutingStrategies.Bubble,
+                handledEventsToo: true);
+
+            AssociatedObject.AddHandler(
+                routedEvent: InputElement.PointerReleasedEvent,
+                handler: OnPointerReleased,
+                routes: RoutingStrategies.Bubble,
+                handledEventsToo: true);
+        }
+    }
+
+    protected override void OnDetaching()
+    {
+        StopHoldTimer();
+
+        if (AssociatedObject != null)
+        {
+            AssociatedObject.RemoveHandler(
+                routedEvent: InputElement.PointerPressedEvent,
+                handler: OnPointerPressed);
+
+            AssociatedObject.RemoveHandler(
+                routedEvent: InputElement.PointerReleasedEvent,
+                handler: OnPointerReleased);
         }
 
-        public ICommand HoldEndCommand
+        base.OnDetaching();
+    }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private void OnHoldTimerElapsed(object sender, EventArgs e)
+    {
+        StopHoldTimer();
+
+        isHolding = true;
+    }
+
+    private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+    {
+        if (AssociatedObject == null) return;
+
+        wasPressed = GetIsPointerPressed(this);
+
+        SetIsPointerPressed(
+            obj: this,
+            value: true);
+
+        if (!wasPressed)
         {
-            get => GetValue(HoldEndCommandProperty);
-            set => SetValue(HoldEndCommandProperty, value);
-        }
-
-        public ICommand HoldStartCommand
-        {
-            get => GetValue(HoldStartCommandProperty);
-            set => SetValue(HoldStartCommandProperty, value);
-        }
-
-        public ICommand TapCommand
-        {
-            get => GetValue(TapCommandProperty);
-            set => SetValue(TapCommandProperty, value);
-        }
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public static bool GetIsPointerPressed(AvaloniaObject obj) => obj.GetValue(IsPointerPressedProperty);
-
-        public static void SetIsPointerPressed(AvaloniaObject obj, bool value) => obj.SetValue(IsPointerPressedProperty, value);
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected override void OnAttached()
-        {
-            base.OnAttached();
-
-            if (AssociatedObject != null)
+            if (HoldStartCommand?.CanExecute(null) == true)
             {
-                AssociatedObject.AddHandler(
-                    routedEvent: InputElement.PointerPressedEvent,
-                    handler: OnPointerPressed,
-                    routes: RoutingStrategies.Bubble,
-                    handledEventsToo: true);
-
-                AssociatedObject.AddHandler(
-                    routedEvent: InputElement.PointerReleasedEvent,
-                    handler: OnPointerReleased,
-                    routes: RoutingStrategies.Bubble,
-                    handledEventsToo: true);
+                HoldStartCommand.Execute(null);
             }
         }
 
-        protected override void OnDetaching()
+        e.Pointer.Capture(AssociatedObject);
+
+        StartHoldTimer();
+
+        e.Handled = true;
+    }
+
+    private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
+    {
+        if (AssociatedObject == null || e.Pointer.Captured != AssociatedObject) return;
+
+        StopHoldTimer();
+
+        if (isHolding || wasPressed)
         {
-            StopHoldTimer();
-
-            if (AssociatedObject != null)
+            if (HoldEndCommand?.CanExecute(null) == true)
             {
-                AssociatedObject.RemoveHandler(
-                    routedEvent: InputElement.PointerPressedEvent,
-                    handler: OnPointerPressed);
-
-                AssociatedObject.RemoveHandler(
-                    routedEvent: InputElement.PointerReleasedEvent,
-                    handler: OnPointerReleased);
+                HoldEndCommand.Execute(null);
             }
 
-            base.OnDetaching();
+            SetIsPointerPressed(
+                obj: this,
+                value: false);
         }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private void OnHoldTimerElapsed(object sender, EventArgs e)
+        else
         {
-            StopHoldTimer();
-
-            isHolding = true;
-        }
-
-        private void OnPointerPressed(object sender, PointerPressedEventArgs e)
-        {
-            if (AssociatedObject == null) return;
-
-            wasPressed = GetIsPointerPressed(this);
+            if (TapCommand?.CanExecute(null) == true)
+            {
+                TapCommand.Execute(null);
+            }
 
             SetIsPointerPressed(
                 obj: this,
                 value: true);
-
-            if (!wasPressed)
-            {
-                if (HoldStartCommand?.CanExecute(null) == true)
-                {
-                    HoldStartCommand.Execute(null);
-                }
-            }
-
-            e.Pointer.Capture(AssociatedObject);
-
-            StartHoldTimer();
-
-            e.Handled = true;
         }
 
-        private void OnPointerReleased(object sender, PointerReleasedEventArgs e)
-        {
-            if (AssociatedObject == null || e.Pointer.Captured != AssociatedObject) return;
+        e.Pointer.Capture(null);
 
-            StopHoldTimer();
-
-            if (isHolding || wasPressed)
-            {
-                if (HoldEndCommand?.CanExecute(null) == true)
-                {
-                    HoldEndCommand.Execute(null);
-                }
-
-                SetIsPointerPressed(
-                    obj: this,
-                    value: false);
-            }
-            else
-            {
-                if (TapCommand?.CanExecute(null) == true)
-                {
-                    TapCommand.Execute(null);
-                }
-
-                SetIsPointerPressed(
-                    obj: this,
-                    value: true);
-            }
-
-            e.Pointer.Capture(null);
-
-            isHolding = false;
-            e.Handled = true;
-        }
-
-        private void StartHoldTimer()
-        {
-            StopHoldTimer();
-
-            holdTimer = new DispatcherTimer(
-                interval: HoldDuration,
-                priority: DispatcherPriority.Normal,
-                callback: OnHoldTimerElapsed);
-
-            isHolding = false;
-            holdTimer.Start();
-        }
-
-        private void StopHoldTimer()
-        {
-            if (holdTimer != null)
-            {
-                holdTimer.Stop();
-                holdTimer = null;
-            }
-        }
-
-        #endregion Private Methods
+        isHolding = false;
+        e.Handled = true;
     }
+
+    private void StartHoldTimer()
+    {
+        StopHoldTimer();
+
+        holdTimer = new DispatcherTimer(
+            interval: HoldDuration,
+            priority: DispatcherPriority.Normal,
+            callback: OnHoldTimerElapsed);
+
+        isHolding = false;
+        holdTimer.Start();
+    }
+
+    private void StopHoldTimer()
+    {
+        holdTimer?.Stop();
+        holdTimer = null;
+    }
+
+    #endregion Private Methods
 }

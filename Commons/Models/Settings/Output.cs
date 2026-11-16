@@ -2,25 +2,24 @@
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Settings;
+
+public class Output
 {
-    public class Output
-    {
-        #region Public Properties
+    #region Public Properties
 
-        public string DeviceName { get; set; }
+    public string DeviceName { get; set; }
 
-        public int SampleRate { get; set; }
+    public int SampleRate { get; set; }
 
-        [XmlAttribute]
-        public OutputType Type { get; set; }
+    [XmlAttribute]
+    public OutputType Type { get; set; }
 
-        public float Volume { get; set; } = Constants.VolumeMax;
+    public float Volume { get; set; } = Constants.VolumeMax;
 
-        public int VolumePercentageBackground { get; set; } = Defaults.VolumePercentageBackground;
+    public int VolumePercentageBackground { get; set; } = Defaults.VolumePercentageBackground;
 
-        public int VolumePercentageExternals { get; set; } = Defaults.VolumePercentageExternals;
+    public int VolumePercentageExternals { get; set; } = Defaults.VolumePercentageExternals;
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

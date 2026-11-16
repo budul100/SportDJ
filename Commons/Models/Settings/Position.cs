@@ -1,18 +1,17 @@
 ﻿using System.Xml.Serialization;
 
-namespace SportDJ.Commons.Models.Settings
+namespace SportDJ.Commons.Models.Settings;
+
+public class Position
 {
-    public class Position
-    {
-        #region Public Properties
+    #region Public Properties
 
-        public int Index { get; set; }
+    public int Index { get; set; }
 
-        [XmlAttribute]
-        public string Name { get; set; }
+    [XmlAttribute]
+    public string Name { get; set; }
 
-        public string Path { get; set; }
+    public string Path { get; set; }
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

@@ -5,33 +5,32 @@ using System.Threading.Tasks;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Records;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IControllerService
+    : IDisposable
 {
-    public interface IControllerService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        Controller Controller { get; }
+    Controller Controller { get; }
 
-        IEnumerable<Controller> Controllers { get; }
+    IEnumerable<Controller> Controllers { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        public void Colorize(Key key, int colorValue);
+    public void Colorize(Key key, int colorValue);
 
-        Task<Key> ListenAsync(CancellationToken cancellationToken);
+    Task<Key> ListenAsync(CancellationToken cancellationToken);
 
-        void Register(Key key, StrokeType strokeType, Action action);
+    void Register(Key key, StrokeType strokeType, Action action);
 
-        void Set(string name);
+    void Set(string name);
 
-        void Unregister(Key key);
+    void Unregister(Key key);
 
-        void Update();
+    void Update();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

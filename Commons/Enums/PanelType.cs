@@ -1,13 +1,12 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum PanelType
 {
-    public enum PanelType
-    {
-        Top,
+    Top,
 
-        Bottom,
+    Bottom,
 
-        Left,
+    Left,
 
-        Right,
-    }
+    Right,
 }

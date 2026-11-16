@@ -1,9 +1,8 @@
 ﻿using Prism.Events;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Commons.Events.Mixer
-{
-    public class MixerInitializedEvent
-        : PubSubEvent<IMixerService>
-    { }
-}
+namespace SportDJ.Commons.Events.Mixer;
+
+public class MixerInitializedEvent
+    : PubSubEvent<IMixerService>
+{ }

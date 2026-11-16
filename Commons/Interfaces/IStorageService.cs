@@ -1,32 +1,31 @@
 ﻿using System;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IStorageService<T>
+    : IDisposable
+    where T : class
 {
-    public interface IStorageService<T>
-        : IDisposable
-        where T : class
-    {
-        #region Public Properties
+    #region Public Properties
 
-        T Contents { get; }
+    T Contents { get; }
 
-        string Path { get; }
+    string Path { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        string GetPath(string appName, string fileName,
-            Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData);
+    string GetPath(string appName, string fileName,
+        Environment.SpecialFolder baseFolder = Environment.SpecialFolder.LocalApplicationData);
 
-        string GetPathFull(string path);
+    string GetPathFull(string path);
 
-        string GetPathRelative(string path);
+    string GetPathRelative(string path);
 
-        void Load(string filePath);
+    void Load(string filePath);
 
-        void Save(string filePath = default);
+    void Save(string filePath = default);
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

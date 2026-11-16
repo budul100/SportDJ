@@ -1,24 +1,23 @@
 ﻿using System;
 
-namespace SportDJ.Services.DeviceService.Windows.Exceptions
+namespace SportDJ.Services.DeviceService.Windows.Exceptions;
+
+[Serializable]
+public class NoDeviceAvailableException
+    : Exception
 {
-    [Serializable]
-    public class NoDeviceAvailableException
-        : Exception
-    {
-        #region Public Constructors
+    #region Public Constructors
 
-        public NoDeviceAvailableException()
-        { }
+    public NoDeviceAvailableException()
+    { }
 
-        public NoDeviceAvailableException(string message)
-            : base(message)
-        { }
+    public NoDeviceAvailableException(string message)
+        : base(message)
+    { }
 
-        public NoDeviceAvailableException(string message, Exception innerException)
-            : base(message: message, innerException: innerException)
-        { }
+    public NoDeviceAvailableException(string message, Exception innerException)
+        : base(message: message, innerException: innerException)
+    { }
 
-        #endregion Public Constructors
-    }
+    #endregion Public Constructors
 }

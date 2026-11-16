@@ -1,37 +1,36 @@
 ﻿using System;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Modules.SearchModule.DesignTime
+namespace SportDJ.Modules.SearchModule.DesignTime;
+
+public class SearchViewModel
+    : ViewModels.SearchViewModel
 {
-    public class SearchViewModel
-        : ViewModels.SearchViewModel
+    #region Public Constructors
+
+    public SearchViewModel()
+        : base(default)
     {
-        #region Public Constructors
+        var random = new Random();
 
-        public SearchViewModel()
-            : base(default)
+        for (var i = 1; i <= 10; i++)
         {
-            var random = new Random();
+            var duration = TimeSpan.FromSeconds(random.Next(10, 480));
 
-            for (var i = 1; i <= 10; i++)
+            var track = new Track("test", "test")
             {
-                var duration = TimeSpan.FromSeconds(random.Next(10, 480));
+                Title = $"Example Track {i}",
+                Info = $"Sample Artist - Sample Song",
+                Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
+            };
 
-                var track = new Track("test", "test")
-                {
-                    Title = $"Example Track {i}",
-                    Info = $"Sample Artist - Sample Song",
-                    Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
-                };
+            var entry = new Entry(
+                track: track,
+                selector: default);
 
-                var entry = new Entry(
-                    track: track,
-                    selector: default);
-
-                Entries.Add(entry);
-            }
+            Entries.Add(entry);
         }
-
-        #endregion Public Constructors
     }
+
+    #endregion Public Constructors
 }

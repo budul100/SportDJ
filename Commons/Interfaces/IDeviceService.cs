@@ -3,37 +3,36 @@ using System.Collections.Generic;
 using NAudio.Wave;
 using SportDJ.Commons.Models.Records;
 
-namespace SportDJ.Commons.Interfaces
+namespace SportDJ.Commons.Interfaces;
+
+public interface IDeviceService
+    : IDisposable
 {
-    public interface IDeviceService
-        : IDisposable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        Device Device { get; }
+    Device Device { get; }
 
-        IEnumerable<Device> Devices { get; }
+    IEnumerable<Device> Devices { get; }
 
-        bool IsActive { get; }
+    bool IsActive { get; }
 
-        float Volume { get; set; }
+    float Volume { get; set; }
 
-        WaveFormat WaveFormat { get; }
+    WaveFormat WaveFormat { get; }
 
-        #endregion Public Properties
+    #endregion Public Properties
 
-        #region Public Methods
+    #region Public Methods
 
-        void Initialize(ISampleProvider provider, float volume);
+    void Initialize(ISampleProvider provider, float volume);
 
-        void Play();
+    void Play();
 
-        void Set(string name, int sampleRate, bool takeDefaultIfMissing = false);
+    void Set(string name, int sampleRate, bool takeDefaultIfMissing = false);
 
-        void Stop();
+    void Stop();
 
-        void Update();
+    void Update();
 
-        #endregion Public Methods
-    }
+    #endregion Public Methods
 }

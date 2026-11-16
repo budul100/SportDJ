@@ -1,11 +1,10 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum FadeType
 {
-    public enum FadeType
-    {
-        None,
+    None,
 
-        Reduce,
+    Reduce,
 
-        Raise,
-    }
+    Raise,
 }

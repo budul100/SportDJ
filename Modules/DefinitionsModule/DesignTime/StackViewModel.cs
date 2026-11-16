@@ -1,39 +1,38 @@
 ﻿using System;
 using SportDJ.Commons.Models.Contents;
 
-namespace SportDJ.Modules.DefinitionsModule.DesignTime
+namespace SportDJ.Modules.DefinitionsModule.DesignTime;
+
+public class StackViewModel
+    : ViewModels.StackViewModel
 {
-    public class StackViewModel
-        : ViewModels.StackViewModel
+    #region Public Constructors
+
+    public StackViewModel()
+        : base(eventAggregator: default, dialogService: default)
     {
-        #region Public Constructors
+        var random = new Random();
 
-        public StackViewModel()
-            : base(eventAggregator: default, dialogService: default)
+        for (var i = 1; i <= 10; i++)
         {
-            var random = new Random();
+            var duration = TimeSpan.FromSeconds(random.Next(10, 480));
 
-            for (var i = 1; i <= 10; i++)
+            var track = new Track("test", "test")
             {
-                var duration = TimeSpan.FromSeconds(random.Next(10, 480));
+                Title = $"Example Track {i}",
+                Info = $"Sample Artist - Sample Song",
+                Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
+            };
 
-                var track = new Track("test", "test")
-                {
-                    Title = $"Example Track {i}",
-                    Info = $"Sample Artist - Sample Song",
-                    Duration = duration.Add(TimeSpan.FromSeconds(i * 10)),
-                };
+            var entry = new Entry(
+                track: track,
+                selector: default);
 
-                var entry = new Entry(
-                    track: track,
-                    selector: default);
-
-                Entries.Add(entry);
-            }
-
-            RaisePropertyChanged(nameof(Entries));
+            Entries.Add(entry);
         }
 
-        #endregion Public Constructors
+        RaisePropertyChanged(nameof(Entries));
     }
+
+    #endregion Public Constructors
 }

@@ -1,15 +1,14 @@
-namespace SportDJ.Modules.ControllerModule.DesignTime
+namespace SportDJ.Modules.ControllerModule.DesignTime;
+
+public class ControllerViewModel
+    : ViewModels.ControllerViewModel
 {
-    public class ControllerViewModel
-        : ViewModels.ControllerViewModel
-    {
-        #region Public Constructors
+    #region Public Constructors
 
-        public ControllerViewModel()
-            : base(regionManager: default, containerProvider: default, eventAggregator: default,
-                   settingsService: default, monitoringServices: default)
-        { }
+    public ControllerViewModel()
+        : base(regionManager: default, containerProvider: default, eventAggregator: default,
+               settingsService: default, monitoringServices: default)
+    { }
 
-        #endregion Public Constructors
-    }
+    #endregion Public Constructors
 }

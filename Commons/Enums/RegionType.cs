@@ -1,13 +1,12 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum RegionType
 {
-    public enum RegionType
-    {
-        PlayerRegion,
+    PlayerRegion,
 
-        DisplayRegion,
+    DisplayRegion,
 
-        ControllerRegion,
+    ControllerRegion,
 
-        MenuRegion,
-    }
+    MenuRegion,
 }

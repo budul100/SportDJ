@@ -1,11 +1,10 @@
-﻿namespace SportDJ.Commons.Models.Interfaces
+﻿namespace SportDJ.Commons.Models.Interfaces;
+
+public interface IKeyable
 {
-    public interface IKeyable
-    {
-        #region Public Properties
+    #region Public Properties
 
-        string KeyCode { get; set; }
+    string KeyCode { get; set; }
 
-        #endregion Public Properties
-    }
+    #endregion Public Properties
 }

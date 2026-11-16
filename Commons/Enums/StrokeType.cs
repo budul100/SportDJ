@@ -1,11 +1,10 @@
-﻿namespace SportDJ.Commons.Enums
+﻿namespace SportDJ.Commons.Enums;
+
+public enum StrokeType
 {
-    public enum StrokeType
-    {
-        Down,
+    Down,
 
-        Up,
+    Up,
 
-        //Hold,
-    }
+    //Hold,
 }

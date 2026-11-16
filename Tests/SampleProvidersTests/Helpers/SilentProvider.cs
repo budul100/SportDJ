@@ -1,28 +1,27 @@
 using NAudio.Wave;
 using System;
 
-namespace SportDJ.Tests.SampleProvidersTests.Helpers
+namespace SportDJ.Tests.SampleProvidersTests.Helpers;
+
+internal sealed class SilentProvider(int sampleRate = 44100, int channels = 2)
+    : ISampleProvider
 {
-    internal class SilentProvider(int sampleRate = 44100, int channels = 2)
-        : ISampleProvider
+    #region Public Properties
+
+    public WaveFormat WaveFormat { get; } = WaveFormat.CreateIeeeFloatWaveFormat(
+        sampleRate: sampleRate,
+        channels: channels);
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public int Read(Span<float> buffer)
     {
-        #region Public Properties
+        buffer.Clear(); // complete silence
 
-        public WaveFormat WaveFormat { get; } = WaveFormat.CreateIeeeFloatWaveFormat(
-            sampleRate: sampleRate,
-            channels: channels);
-
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public int Read(Span<float> buffer)
-        {
-            buffer.Clear(); // complete silence
-
-            return buffer.Length;
-        }
-
-        #endregion Public Methods
+        return buffer.Length;
     }
+
+    #endregion Public Methods
 }
