@@ -1,4 +1,11 @@
-﻿using ATL.AudioData;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ATL.AudioData;
 using ATL.Playlist;
 using Prism.Events;
 using PropertyModels.Extensions;
@@ -8,13 +15,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.TrackService;
 
@@ -23,23 +23,23 @@ public class Service
 {
     #region Private Fields
 
-    private readonly AudioDataIOFactory audioDataIOFactory;
-    private readonly CancellationTokenSource cancellationTokenSource = new();
-    private readonly ConcurrentDictionary<string, Track> tracks = [];
     private readonly ConcurrentQueue<Track> activeRenders = [];
     private readonly ConcurrentQueue<Track> activeUpdates = [];
-    private readonly ConcurrentQueue<Track> otherTrims = [];
-    private readonly ConcurrentQueue<Track> otherUpdates = [];
+    private readonly AudioDataIOFactory audioDataIOFactory;
+    private readonly CancellationTokenSource cancellationTokenSource = new();
+    private readonly IEventAggregator eventAggregator;
+    private readonly IEnumerable<ATL.Format> formatsAudio;
+    private readonly IEnumerable<ATL.Format> formatsPlaylist;
+
+    private bool isDisposed;
     private readonly ConcurrentQueue<Track> loadedRenders = [];
     private readonly ConcurrentQueue<Track> loadedTrims = [];
     private readonly ConcurrentQueue<Track> loadedUpdates = [];
-    private readonly IEnumerable<ATL.Format> formatsAudio;
-    private readonly IEnumerable<ATL.Format> formatsPlaylist;
-    private readonly IEventAggregator eventAggregator;
-    private readonly IStorageService<Set> settingsService;
+    private readonly ConcurrentQueue<Track> otherTrims = [];
+    private readonly ConcurrentQueue<Track> otherUpdates = [];
     private readonly PlaylistIOFactory playlistIOFactory;
-
-    private bool isDisposed;
+    private readonly IStorageService<Set> settingsService;
+    private readonly ConcurrentDictionary<string, Track> tracks = [];
 
     #endregion Private Fields
 
@@ -69,39 +69,11 @@ public class Service
 
     #region Public Methods
 
-    public void Play(Track track, bool isPause)
+    public void Dispose()
     {
-        ArgumentNullException.ThrowIfNull(track);
+        Dispose(true);
 
-        if (!isPause)
-        {
-            track.Counter++;
-        }
-
-        var register = new Register
-        {
-            Start = DateTime.Now
-        };
-
-        track.Registers.Add(register);
-
-        activeUpdates.Enqueue(track);
-        activeRenders.Enqueue(track);
-
-        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-    }
-
-    public void Stop(Track track)
-    {
-        ArgumentNullException.ThrowIfNull(track);
-
-        var register = track.Registers.LastOrDefault();
-
-        if (register.Start != default
-            && register.End == default)
-        {
-            register.End = DateTime.Now;
-        }
+        GC.SuppressFinalize(this);
     }
 
     public IEnumerable<Track> Get(IEnumerable<string> paths)
@@ -126,6 +98,28 @@ public class Service
         }
     }
 
+    public void Play(Track track, bool isPause)
+    {
+        ArgumentNullException.ThrowIfNull(track);
+
+        if (!isPause)
+        {
+            track.Counter++;
+        }
+
+        var register = new Register
+        {
+            Start = DateTime.Now
+        };
+
+        track.Registers.Add(register);
+
+        activeUpdates.Enqueue(track);
+        activeRenders.Enqueue(track);
+
+        eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+    }
+
     public IEnumerable<Track> Search(string search)
     {
         var result = default(IEnumerable<Track>);
@@ -142,6 +136,19 @@ public class Service
         return result;
     }
 
+    public void Stop(Track track)
+    {
+        ArgumentNullException.ThrowIfNull(track);
+
+        var register = track.Registers.LastOrDefault();
+
+        if (register.Start != default
+            && register.End == default)
+        {
+            register.End = DateTime.Now;
+        }
+    }
+
     public void Update(Track track)
     {
         if (track != default)
@@ -153,6 +160,23 @@ public class Service
     }
 
     #endregion Public Methods
+
+    #region Protected Methods
+
+    protected virtual void Dispose(bool isDisposing)
+    {
+        if (!isDisposed)
+        {
+            if (isDisposing)
+            {
+                cancellationTokenSource.Cancel();
+            }
+
+            isDisposed = true;
+        }
+    }
+
+    #endregion Protected Methods
 
     #region Private Methods
 
@@ -243,43 +267,6 @@ public class Service
         }
     }
 
-    private void TrimTrack(Track track)
-    {
-        if (track?.IsTrimmed == false)
-        {
-            var currentDuration = track.Duration;
-
-            var trimVolume = settingsService.Contents.Options.TrimVolumePercentage
-                / (float)Constants.OptionsPercentageMax;
-            var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage
-                / Constants.OptionsPercentageMax;
-
-            track.Trim(
-                cueVolume: trimVolume,
-                trimRearPortion: trimRearPortion);
-
-            if (track.Duration != currentDuration)
-            {
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-            }
-        }
-    }
-
-    private void UpdateTrack(Track track)
-    {
-        if (track?.IsUpdated == false)
-        {
-            var hashCode = track.GetHashCode();
-
-            track.Update();
-
-            if (track.GetHashCode() != hashCode)
-            {
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-            }
-        }
-    }
-
     private void ShapeTracks(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -322,25 +309,43 @@ public class Service
         }
     }
 
-    protected virtual void Dispose(bool isDisposing)
+    private void TrimTrack(Track track)
     {
-        if (!isDisposed)
+        if (track?.IsTrimmed == false)
         {
-            if (isDisposing)
-            {
-                cancellationTokenSource.Cancel();
-            }
+            var currentDuration = track.Duration;
 
-            isDisposed = true;
+            var trimVolume = settingsService.Contents.Options.TrimVolumePercentage
+                / (float)Constants.OptionsPercentageMax;
+            var trimRearPortion = settingsService.Contents.Options.TrimRearPercentage
+                / Constants.OptionsPercentageMax;
+
+            track.Trim(
+                cueVolume: trimVolume,
+                trimRearPortion: trimRearPortion);
+
+            if (track.Duration != currentDuration)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
         }
     }
 
-    public void Dispose()
+    private void UpdateTrack(Track track)
     {
-        Dispose(true);
+        if (track?.IsUpdated == false)
+        {
+            var hashCode = track.GetHashCode();
 
-        GC.SuppressFinalize(this);
+            track.Update();
+
+            if (track.GetHashCode() != hashCode)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
+        }
     }
+
+    #endregion Private Methods
 }
 
-#endregion Private Methods

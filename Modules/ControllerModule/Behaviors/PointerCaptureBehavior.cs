@@ -1,11 +1,11 @@
-﻿using Avalonia;
+﻿using System;
+using System.Windows.Input;
+using Avalonia;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.Xaml.Interactivity;
-using System;
-using System.Windows.Input;
 
 namespace SportDJ.Modules.ControllerModule.Behaviors;
 

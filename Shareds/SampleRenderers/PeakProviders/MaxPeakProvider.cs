@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace NAudio.WaveFormRenderer.PeakProviders;
 
-public class MaxPeakProvider 
+public class MaxPeakProvider
     : PeakProvider
 {
     #region Public Methods

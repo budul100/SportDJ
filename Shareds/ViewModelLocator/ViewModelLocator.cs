@@ -15,14 +15,14 @@ public static class ViewModelLocator
 
     #endregion Public Fields
 
-    #region Public Constructors
+    #region Private Constructors
 
     static ViewModelLocator()
     {
         AutoWireViewModelProperty.Changed.AddClassHandler<Control>(OnAutoWireViewModelChanged);
     }
 
-    #endregion Public Constructors
+    #endregion Private Constructors
 
     #region Public Methods
 

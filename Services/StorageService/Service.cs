@@ -28,14 +28,14 @@ public class Service<T>(IEventAggregator eventAggregator)
         OmitXmlDeclaration = true,
     };
 
+    private bool isDisposed;
+
     private readonly Lock saveLock = new();
     private readonly XmlSerializer serializer = new(typeof(T));
 
     private readonly SemaphoreSlim waitLock = new(
         initialCount: 1,
         maxCount: WaitingPositions);
-
-    private bool isDisposed;
 
     #endregion Private Fields
 
@@ -169,7 +169,6 @@ public class Service<T>(IEventAggregator eventAggregator)
         catch
         {
             // TODO: Log exception
-
             Debugger.Break();
         }
 
@@ -211,7 +210,6 @@ public class Service<T>(IEventAggregator eventAggregator)
         catch
         {
             // TODO: Log exception
-
             Debugger.Break();
         }
     }

@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Models.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using SportDJ.Commons.Models.Interfaces;
 
 namespace SportDJ.Commons.Models.Structure;
 

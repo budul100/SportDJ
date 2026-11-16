@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Enums;
+﻿using System.Linq;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
-using System.Linq;
 
 namespace SportDJ.Services.GridService.Extensions;
 

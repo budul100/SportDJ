@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -12,9 +15,6 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels;
 
@@ -23,12 +23,12 @@ public class ControllerViewModel
 {
     #region Private Fields
 
-    private readonly IMixerService mixerService;
-    private readonly IEnumerable<IMonitorService> monitorServices;
-    private readonly IOutputService outputLiveService;
     private bool isLoweredRequested;
     private bool isVolumePressed;
+    private readonly IMixerService mixerService;
+    private readonly IEnumerable<IMonitorService> monitorServices;
     private Options options;
+    private readonly IOutputService outputLiveService;
 
     #endregion Private Fields
 
@@ -249,42 +249,33 @@ public class ControllerViewModel
     }
 
     //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
-
     //public string Key => KeyCode.GetKey();
-
     //public string KeyCode
     //{
     //    get { return keyable?.KeyCode; }
-
     //    set
     //    {
     //        if (keyable != default
     //            && value != keyable.KeyCode)
     //        {
     //            keyable.KeyCode = value;
-
     //            settingsService.Save();
-
     //            RaisePropertyChanged(nameof(KeyCode));
     //            RaisePropertyChanged(nameof(HasKey));
     //            RaisePropertyChanged(nameof(Key));
     //        }
     //    }
     //}
-
     //private void ReceiveHook(string keyCode)
     //{
     //    if (isListening)
     //    {
     //        KeyCode = keyCode;
     //        isListening = false;
-
     //        listenChecker.Invoke();
-
     //        CloseMenu();
     //    }
     //}
-
     private void UpdateControls()
     {
         RaisePropertyChanged(nameof(IsActive));

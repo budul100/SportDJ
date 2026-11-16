@@ -10,9 +10,6 @@ public class RmsPeakProvider(int blockSize)
     private readonly int blockSize = blockSize;
 
     #endregion Private Fields
-    #region Public Constructors
-
-    #endregion Public Constructors
 
     #region Public Methods
 

@@ -2,7 +2,7 @@ using SkiaSharp;
 
 namespace NAudio.WaveFormRenderer.RendererSettings;
 
-public class StandardWaveFormRendererSettings 
+public class StandardWaveFormRendererSettings
     : WaveFormRendererSettings
 {
     #region Public Constructors

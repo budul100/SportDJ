@@ -1,4 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -10,10 +14,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace SportDJ.Services.MixerService;
 
@@ -25,16 +25,16 @@ public class Service
     private readonly IContainerProvider containerProvider;
     private readonly IEventAggregator eventAggregator;
     private readonly Dictionary<ISignalService, FadingProvider> fadingProviders = [];
-    private readonly Lock lockFadingProviders = new();
-    private readonly Lock lockSignalServices = new();
-    private readonly IStorageService<Set> settingsService;
-    private readonly HashSet<ISignalService> signalServices = [];
 
     private bool isDisposed;
+    private readonly Lock lockFadingProviders = new();
+    private readonly Lock lockSignalServices = new();
     private MixingProvider mixingProvider;
     private FadingProvider outputProvider;
+    private readonly IStorageService<Set> settingsService;
     private bool signalsCanOverlap;
     private ISignalService signalService;
+    private readonly HashSet<ISignalService> signalServices = [];
 
     #endregion Private Fields
 

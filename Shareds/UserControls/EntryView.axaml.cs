@@ -11,7 +11,7 @@ namespace SportDJ.Shareds.UserControls;
 public partial class EntryView
     : UserControl
 {
-    #region Public Fields
+    #region Fields
 
     public static readonly DirectProperty<EntryView, string> CounterProperty = AvaloniaProperty
         .RegisterDirect<EntryView, string>(
@@ -49,11 +49,6 @@ public partial class EntryView
         .RegisterDirect<EntryView, bool>(
             name: nameof(IsSelected),
             getter: o => o.isSelected);
-
-    #endregion Public Fields
-
-    #region Private Fields
-
     private string counter;
     private string duration;
     private Entry entry;
@@ -69,7 +64,7 @@ public partial class EntryView
 
     private SubscriptionToken trackUpdatedToken;
 
-    #endregion Private Fields
+    #endregion Fields
 
     #region Public Constructors
 

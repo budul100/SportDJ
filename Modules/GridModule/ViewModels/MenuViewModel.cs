@@ -15,15 +15,15 @@ public class MenuViewModel
 
     private readonly Action closeCallback;
     private readonly Action executeCallback;
-    private readonly Func<bool> isCheckedGetter;
-    private readonly List<SubscriptionToken> subscriptions = [];
 
     private string header;
     private bool isChecked;
+    private readonly Func<bool> isCheckedGetter;
     private bool isDisposed;
     private bool isPlayed;
     private bool isSelected;
     private MenuViewModel selected;
+    private readonly List<SubscriptionToken> subscriptions = [];
 
     #endregion Private Fields
 

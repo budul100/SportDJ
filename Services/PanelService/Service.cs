@@ -11,8 +11,6 @@ namespace SportDJ.Services.PanelService;
 public class Service(IEventAggregator eventAggregator)
     : IPanelService
 {
-    private sealed record Registration(PanelType Type, Control View, Action Action);
-
     #region Private Fields
 
     private readonly Dictionary<PanelType, Control> activeViews = [];
@@ -153,4 +151,10 @@ public class Service(IEventAggregator eventAggregator)
     }
 
     #endregion Private Methods
+
+    #region Private Classes
+
+    private sealed record Registration(PanelType Type, Control View, Action Action);
+
+    #endregion Private Classes
 }

@@ -9,13 +9,12 @@ public class EchoProvider(ISampleProvider sourceProvider)
 {
     #region Private Fields
 
-    private readonly Lock lockProvider = new();
-
     private TimeSpan delay;
     private float[] delayBuffer;
     private int delayBufferLength;
     private int delayBufferOffset;
     private float feedback;
+    private readonly Lock lockProvider = new();
     private float wetDryMix;
 
     #endregion Private Fields

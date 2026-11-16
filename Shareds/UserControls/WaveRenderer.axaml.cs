@@ -14,7 +14,7 @@ namespace SportDJ.Shareds.UserControls;
 public class WaveRenderer
     : Control
 {
-    #region Public Fields
+    #region Fields
 
     public static readonly StyledProperty<Bitmap> BitmapProperty = AvaloniaProperty
         .Register<WaveRenderer, Bitmap>(
@@ -33,16 +33,11 @@ public class WaveRenderer
     public static readonly StyledProperty<double> ProgressProperty = AvaloniaProperty
         .Register<WaveRenderer, double>(
             name: nameof(Progress));
-
-    #endregion Public Fields
-
-    #region Private Fields
-
     private bool isPlaying;
 
-    #endregion Private Fields
+    #endregion Fields
 
-    #region Public Constructors
+    #region Private Constructors
 
     static WaveRenderer()
     {
@@ -54,7 +49,7 @@ public class WaveRenderer
             ProgressProperty);
     }
 
-    #endregion Public Constructors
+    #endregion Private Constructors
 
     #region Public Properties
 

@@ -1,10 +1,10 @@
+using System.Collections.ObjectModel;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Navigation.Regions;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Prism;
-using System.Collections.ObjectModel;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 
@@ -14,9 +14,9 @@ public class CanvasViewModel
     #region Private Fields
 
     private readonly IContainerProvider containerProvider;
-    private readonly IGridService gridService;
 
     private GridViewModel grid;
+    private readonly IGridService gridService;
 
     #endregion Private Fields
 

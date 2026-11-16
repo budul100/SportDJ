@@ -29,12 +29,12 @@ public class SearchViewModel
 
     #region Public Properties
 
+    // The search itself is not implemented yet, the panel is always enabled
+    public static bool IsActive => true;
+
     public DelegateCommand ClearCommand { get; }
 
     public ObservableCollection<Entry> Entries { get; } = [];
-
-    // The search itself is not implemented yet, the panel is always enabled
-    public static bool IsActive => true;
 
     public string Search
     {

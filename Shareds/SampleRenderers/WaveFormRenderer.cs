@@ -1,8 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using NAudio.Wave;
 using NAudio.WaveFormRenderer.PeakProviders;
 using NAudio.WaveFormRenderer.RendererSettings;
 using SkiaSharp;
-using System;
 
 namespace NAudio.WaveFormRenderer;
 

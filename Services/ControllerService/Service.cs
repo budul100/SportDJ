@@ -1,4 +1,12 @@
-﻿using NAudio.Midi;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
+using NAudio.Midi;
 using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
@@ -11,14 +19,6 @@ using SportDJ.Services.ControllerService.Assets;
 using SportDJ.Services.ControllerService.Exceptions;
 using SportDJ.Services.ControllerService.Extensions;
 using SportDJ.Services.ControllerService.Records;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace SportDJ.Services.ControllerService;
 
@@ -28,14 +28,14 @@ public class Service
     #region Private Fields
 
     private readonly IEventAggregator eventAggregator;
-    private readonly Dictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
-    private readonly IEnumerable<Profile> profiles;
-    private readonly IStorageService<Session> sessionService;
 
     private bool isDisposed;
+    private readonly Dictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
     private TaskCompletionSource<Key> listenerTcs;
     private MidiIn midiIn;
     private MidiOut midiOut;
+    private readonly IEnumerable<Profile> profiles;
+    private readonly IStorageService<Session> sessionService;
     private byte[] sysExFinal;
     private byte[] sysExInit;
 
@@ -84,7 +84,6 @@ public class Service
                 case KeyType.Note:
 
                     // Send Note On with velocity = colorValue (often used for LED color)
-
                     var noteOnStatus = 0x90 | key.Channel; // Note On status byte
                     var noteOnData1 = key.Number;          // Note number
                     var noteOnData2 = colorValue;          // Velocity/color
@@ -97,7 +96,6 @@ public class Service
                 case KeyType.Control:
 
                     // Send Control Change with value = colorValue
-
                     var ccStatus = 0xB0 | key.Channel;     // Control Change status byte
                     var ccData1 = key.Number;              // Controller number
                     var ccData2 = colorValue;              // Value/color
@@ -259,7 +257,6 @@ public class Service
         catch
         {
             // TODO: Log exception
-
             Debugger.Break();
         }
 

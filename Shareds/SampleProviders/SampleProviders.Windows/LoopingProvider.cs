@@ -15,15 +15,14 @@ public class LoopingProvider
 {
     #region Private Fields
 
-    private readonly Lock lockAnalysis = new();
-    private readonly Lock lockLoop = new();
-    private readonly ISourceProvider sourceProvider;
-    private readonly Track track;
-
     private float[] allSamples;
     private long endSample;
     private bool isDisposed;
+    private readonly Lock lockAnalysis = new();
+    private readonly Lock lockLoop = new();
+    private readonly ISourceProvider sourceProvider;
     private long startSample;
+    private readonly Track track;
 
     #endregion Private Fields
 

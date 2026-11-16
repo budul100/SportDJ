@@ -4,9 +4,13 @@ namespace SportDJ.Services.ControllerService.Records;
 
 public record Match
 {
-    [XmlElement(ElementName = "ProductNameIncluded")]
-    public string ProductNameIncluded { get; init; }
+    #region Public Properties
 
     [XmlElement(ElementName = "ProductNameExcluded")]
     public string ProductNameExcluded { get; init; }
+
+    [XmlElement(ElementName = "ProductNameIncluded")]
+    public string ProductNameIncluded { get; init; }
+
+    #endregion Public Properties
 }

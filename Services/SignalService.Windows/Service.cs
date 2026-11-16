@@ -1,4 +1,8 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -10,10 +14,6 @@ using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 using SportDJ.Shareds.SampleProviders.Core;
 using SportDJ.Shareds.SampleProviders.Windows;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService.Windows;
 
@@ -24,7 +24,6 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
     #region Private Fields
 
     private readonly CancellationTokenSource cancellationTokenSource = new();
-    private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
     private FadingProvider fadingProvider;
     private bool isDisposed;
@@ -32,6 +31,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
     private LoopingProvider loopingProvider;
     private TimeSpan? nextThresholdOnPlay;
     private PlayingProvider playingProvider;
+    private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
     #endregion Private Fields
 

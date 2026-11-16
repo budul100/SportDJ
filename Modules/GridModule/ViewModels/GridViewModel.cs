@@ -1,13 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Material.Icons;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 
@@ -16,11 +16,10 @@ public class GridViewModel
 {
     #region Private Fields
 
-    private readonly Grid grid;
-    private readonly GroupViewModel parent;
-
     private int columns;
+    private readonly Grid grid;
     private bool isSelected;
+    private readonly GroupViewModel parent;
     private int rows;
 
     #endregion Private Fields

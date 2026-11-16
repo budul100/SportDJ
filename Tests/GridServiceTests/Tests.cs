@@ -1,11 +1,11 @@
-﻿using Moq;
+﻿using System.Linq;
+using Moq;
 using Prism.Events;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
-using System.Linq;
 using Xunit;
 
 namespace SportDJ.Tests.GridServiceTests;

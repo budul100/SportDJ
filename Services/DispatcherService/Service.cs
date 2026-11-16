@@ -1,7 +1,7 @@
-﻿using Avalonia.Threading;
-using SportDJ.Commons.Interfaces;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Avalonia.Threading;
+using SportDJ.Commons.Interfaces;
 
 namespace SportDJ.Services.DispatcherService;
 

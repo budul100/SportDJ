@@ -1,5 +1,5 @@
-using NAudio.Wave;
 using System;
+using NAudio.Wave;
 
 namespace SportDJ.Tests.SampleProvidersTests.Helpers;
 

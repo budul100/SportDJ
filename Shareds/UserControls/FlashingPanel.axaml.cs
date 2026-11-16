@@ -13,7 +13,7 @@ namespace SportDJ.Shareds.UserControls;
 public partial class FlashingPanel
     : UserControl
 {
-    #region Public Fields
+    #region Fields
 
     public static readonly StyledProperty<IBrush> ColorProperty = AvaloniaProperty.Register<FlashingPanel, IBrush>(
         name: nameof(Color));
@@ -36,11 +36,6 @@ public partial class FlashingPanel
     public static readonly StyledProperty<double> OpacityMinProperty = AvaloniaProperty.Register<FlashingPanel, double>(
         name: nameof(OpacityMin),
         defaultValue: Defaults.FlashingOpacityMin);
-
-    #endregion Public Fields
-
-    #region Private Fields
-
     // Used when no valid duration is set, an endless animation with zero duration must be avoided
     private const double DefaultDurationMilliSecs = 1000;
 
@@ -48,7 +43,7 @@ public partial class FlashingPanel
     private TimeSpan duration = TimeSpan.FromMilliseconds(DefaultDurationMilliSecs);
     private bool isAttached;
 
-    #endregion Private Fields
+    #endregion Fields
 
     #region Public Constructors
 
@@ -178,13 +173,6 @@ public partial class FlashingPanel
         return animation;
     }
 
-    private static TimeSpan GetDuration(double durationMilliSecs)
-    {
-        return TimeSpan.FromMilliseconds(durationMilliSecs > 0
-            ? durationMilliSecs
-            : DefaultDurationMilliSecs);
-    }
-
     private static KeyFrame CreateKeyFrame(double cue, double opacity)
     {
         var keyFrame = new KeyFrame
@@ -197,6 +185,13 @@ public partial class FlashingPanel
             value: opacity));
 
         return keyFrame;
+    }
+
+    private static TimeSpan GetDuration(double durationMilliSecs)
+    {
+        return TimeSpan.FromMilliseconds(durationMilliSecs > 0
+            ? durationMilliSecs
+            : DefaultDurationMilliSecs);
     }
 
     private static async Task RunAnimationAsync(Animation animation, Animatable target, CancellationToken cancellationToken)

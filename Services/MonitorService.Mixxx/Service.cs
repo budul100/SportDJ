@@ -1,4 +1,8 @@
-﻿using NAudio.Midi;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Midi;
 using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Volume;
@@ -6,10 +10,6 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Services.MonitorService.Mixxx.Assets;
 using SportDJ.Services.MonitorService.Mixxx.Extensions;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SportDJ.Services.MonitorService.Mixxx;
 
@@ -18,9 +18,8 @@ public class Service
 {
     #region Private Fields
 
-    private readonly IEventAggregator eventAggregator;
-
     private CancellationTokenSource cancellationTokenSource;
+    private readonly IEventAggregator eventAggregator;
     private bool isDisposed;
     private int? midiIndex;
 

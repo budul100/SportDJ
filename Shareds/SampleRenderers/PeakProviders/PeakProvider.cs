@@ -2,7 +2,7 @@
 
 namespace NAudio.WaveFormRenderer.PeakProviders;
 
-public abstract class PeakProvider 
+public abstract class PeakProvider
     : IPeakProvider
 {
     #region Protected Properties

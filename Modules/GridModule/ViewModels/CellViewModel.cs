@@ -39,14 +39,14 @@ public abstract class CellViewModel
     private static readonly HashSet<CellViewModel> listeningCells = [];
     private static readonly Lock listeningLock = new();
 
+    private Cell cell;
+    private bool isDisposed;
+    private bool isRenaming;
+
     private readonly IKeyable keyable;
     private readonly INameable nameable;
     private readonly IStorageService<Set> settingsService;
     private readonly List<SubscriptionToken> subscriptions = [];
-
-    private Cell cell;
-    private bool isDisposed;
-    private bool isRenaming;
 
     #endregion Private Fields
 
@@ -198,7 +198,7 @@ public abstract class CellViewModel
 
     #endregion Public Methods
 
-    #region Internal Methods
+    #region Protected Internal Methods
 
     protected internal void ReceiveKey(string keyCode)
     {
@@ -214,9 +214,17 @@ public abstract class CellViewModel
         CloseMenu();
     }
 
-    #endregion Internal Methods
+    #endregion Protected Internal Methods
 
     #region Protected Methods
+
+    protected void AddSubscription(SubscriptionToken subscription)
+    {
+        if (subscription != default)
+        {
+            subscriptions.Add(subscription);
+        }
+    }
 
     protected void CloseMenu()
     {
@@ -318,14 +326,6 @@ public abstract class CellViewModel
         MenuOpenEvent?.Invoke(
             sender: this,
             e: default);
-    }
-
-    protected void AddSubscription(SubscriptionToken subscription)
-    {
-        if (subscription != default)
-        {
-            subscriptions.Add(subscription);
-        }
     }
 
     protected virtual void UpdateOutput()

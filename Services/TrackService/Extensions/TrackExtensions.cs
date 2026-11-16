@@ -1,16 +1,16 @@
-﻿using Avalonia;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using Avalonia;
 using NAudio.Wave;
 using NAudio.WaveFormRenderer;
 using NAudio.WaveFormRenderer.RendererSettings;
 using SkiaSharp;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Models.Contents;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace SportDJ.Services.TrackService.Extensions;
 

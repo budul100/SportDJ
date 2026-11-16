@@ -19,9 +19,9 @@ public class StackViewModel
 
     private const string Titel = "Content";
 
-    private readonly IDialogService dialogService;
-
     private bool autoScroll;
+
+    private readonly IDialogService dialogService;
     private Entry entry;
     private bool isSettingActive = false;
     private bool isUpdating = false;
@@ -89,9 +89,13 @@ public class StackViewModel
     }
 
     public IEventAggregator EventAggregator { get; }
+
     public DelegateCommand ResetCommand { get; }
+
     public DelegateCommand<Entry> SelectCommand { get; }
+
     public DelegateCommand ShuffleCommand { get; }
+
     public override string Title => Titel;
 
     #endregion Public Properties

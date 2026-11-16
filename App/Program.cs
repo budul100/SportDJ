@@ -27,12 +27,25 @@ public static class Program
 
     #region Private Methods
 
+    private static double GetScaling(string[] args)
+    {
+        var idx = Array.IndexOf(args, "--scaling");
+
+        if (idx >= 0
+            && args.Length > idx + 1
+            && double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
+        {
+            return scaling;
+        }
+
+        return 1;
+    }
+
     private static int Main(string[] args)
     {
         var builder = BuildAvaloniaApp();
 
         // InitializeLogging();
-
         if (args.Contains("--fbdev"))
         {
             SilenceConsole();
@@ -47,20 +60,6 @@ public static class Program
         {
             return builder.StartWithClassicDesktopLifetime(args);
         }
-    }
-
-    private static double GetScaling(string[] args)
-    {
-        var idx = Array.IndexOf(args, "--scaling");
-
-        if (idx >= 0
-            && args.Length > idx + 1
-            && double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
-        {
-            return scaling;
-        }
-
-        return 1;
     }
 
     private static void SilenceConsole()

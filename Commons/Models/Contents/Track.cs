@@ -44,7 +44,7 @@ public class Track(string path, string file)
 
     #endregion Public Properties
 
-    #region Public Methods
+    #region Public Operators
 
     public static bool operator !=(Track left, Track right)
     {
@@ -60,6 +60,10 @@ public class Track(string path, string file)
 
         return left.Equals(right);
     }
+
+    #endregion Public Operators
+
+    #region Public Methods
 
     public override bool Equals(object obj)
     {

@@ -1,9 +1,9 @@
+using System;
+using System.Threading;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Shareds.SampleProviders.Core.Filters;
-using System;
-using System.Threading;
 
 namespace SportDJ.Shareds.SampleProviders.Core;
 
@@ -18,13 +18,13 @@ public class FadingProvider
     // Threshold for detecting silence (after applying volume)
     private const float SilenceThreshold = 1e-4f;
 
-    private readonly Lock lockProvider = new();
-    private readonly int silenceFramesRequired;
-    private readonly ISampleProvider sourceProvider;
-
     private int consecutiveSilentFrames;
     private long fadeSampleCount;
     private long fadeSamplePosition;
+
+    private readonly Lock lockProvider = new();
+    private readonly int silenceFramesRequired;
+    private readonly ISampleProvider sourceProvider;
     private SweepFilter sweepFilter;
     private float volumeCurrent;
     private float volumeFadeDiff;

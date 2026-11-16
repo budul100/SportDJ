@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
@@ -7,11 +12,6 @@ using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Services.DeviceService.Windows.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 
 namespace SportDJ.Services.DeviceService.Windows;
 
@@ -111,7 +111,6 @@ public class Service(IEventAggregator eventAggregator)
             catch
             {
                 // TO DO: Log exception
-
                 Debugger.Break();
             }
         }
@@ -297,7 +296,6 @@ public class Service(IEventAggregator eventAggregator)
             Debugger.Break();
 
             // TODO: Log exception
-
             CloseDevice();
         }
 

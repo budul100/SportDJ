@@ -1,9 +1,9 @@
+using System;
 using NAudio.Wave.SampleProviders;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Shareds.SampleProviders.Core;
 using SportDJ.Tests.SampleProvidersTests.Helpers;
-using System;
 using Xunit;
 
 namespace SportDJ.Tests.SampleProvidersTests;

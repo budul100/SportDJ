@@ -1,7 +1,7 @@
-﻿using SportDJ.Commons.Enums;
-using SportDJ.Commons.Models.Structure;
-using System;
+﻿using System;
 using System.Linq;
+using SportDJ.Commons.Enums;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Services.GridService.Extensions;
 

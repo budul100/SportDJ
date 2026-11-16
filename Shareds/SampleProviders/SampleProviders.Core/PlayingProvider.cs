@@ -12,17 +12,16 @@ public class PlayingProvider
 {
     #region Private Fields
 
-    private readonly Lock lockProvider = new();
-    private readonly long sampleFade;
-    private readonly IPlayingProvider sourceProvider;
-
     private bool isDisposed;
+    private readonly Lock lockProvider = new();
     private bool publishedCue;
     private bool publishedEnd;
     private bool publishedPause;
     private long sampleEnd;
+    private readonly long sampleFade;
     private long sampleStart;
     private long sampleStop;
+    private readonly IPlayingProvider sourceProvider;
 
     #endregion Private Fields
 

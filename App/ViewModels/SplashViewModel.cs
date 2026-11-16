@@ -1,7 +1,7 @@
-﻿using Prism.Commands;
+﻿using System.Threading;
+using Prism.Commands;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
-using System.Threading;
 
 namespace SportDJ.App.ViewModels;
 

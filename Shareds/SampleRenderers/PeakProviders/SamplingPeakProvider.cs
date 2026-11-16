@@ -10,9 +10,6 @@ public class SamplingPeakProvider(int sampleInterval)
     private readonly int sampleInterval = sampleInterval;
 
     #endregion Private Fields
-    #region Public Constructors
-
-    #endregion Public Constructors
 
     #region Public Methods
 

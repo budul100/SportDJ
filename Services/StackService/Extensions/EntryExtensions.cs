@@ -1,6 +1,6 @@
-﻿using SportDJ.Commons.Models.Contents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Services.StackService.Extensions;
 

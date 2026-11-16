@@ -210,6 +210,30 @@ public static class SampleExtensions
         return scores;
     }
 
+    /// <summary>
+    /// Normalized cross correlation of the first difference of two segments.
+    /// </summary>
+    private static double CorrelateDifference(float[] samples, long startA, long startB, long length, int step)
+    {
+        double sumAB = 0;
+        double sumAA = 0;
+        double sumBB = 0;
+
+        for (long i = 0; i < length; i += step)
+        {
+            var a = GetDifference(samples, startA + i);
+            var b = GetDifference(samples, startB + i);
+
+            sumAB += a * b;
+            sumAA += a * a;
+            sumBB += b * b;
+        }
+
+        return sumAA > 1e-12 && sumBB > 1e-12
+            ? sumAB / Math.Sqrt(sumAA * sumBB)
+            : -1.0;
+    }
+
     private static double CorrelateEnvelope(double[] envelope, int startA, int startB, int length)
     {
         double meanA = 0;
@@ -232,30 +256,6 @@ public static class SampleExtensions
         {
             var a = envelope[startA + i] - meanA;
             var b = envelope[startB + i] - meanB;
-
-            sumAB += a * b;
-            sumAA += a * a;
-            sumBB += b * b;
-        }
-
-        return sumAA > 1e-12 && sumBB > 1e-12
-            ? sumAB / Math.Sqrt(sumAA * sumBB)
-            : -1.0;
-    }
-
-    /// <summary>
-    /// Normalized cross correlation of the first difference of two segments.
-    /// </summary>
-    private static double CorrelateDifference(float[] samples, long startA, long startB, long length, int step)
-    {
-        double sumAB = 0;
-        double sumAA = 0;
-        double sumBB = 0;
-
-        for (long i = 0; i < length; i += step)
-        {
-            var a = GetDifference(samples, startA + i);
-            var b = GetDifference(samples, startB + i);
 
             sumAB += a * b;
             sumAA += a * a;
