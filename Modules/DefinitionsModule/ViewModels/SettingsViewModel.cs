@@ -1,6 +1,5 @@
 using Prism.Commands;
 using Prism.Events;
-using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
@@ -38,6 +37,7 @@ public class SettingsViewModel
 
     #region Public Properties
 
+    public static int MaxLengthName => Constants.NameMaxLength;
     public bool IsActive => player != default;
 
     public bool IsForeground
@@ -79,8 +79,6 @@ public class SettingsViewModel
             }
         }
     }
-
-    public static int MaxLengthName => Constants.NameMaxLength;
 
     public string Name
     {

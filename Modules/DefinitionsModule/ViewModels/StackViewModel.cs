@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using Prism.Commands;
 using Prism.Events;
-using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;

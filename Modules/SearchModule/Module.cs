@@ -1,6 +1,5 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Navigation.Regions;
 
 namespace SportDJ.Modules.SearchModule;
 
