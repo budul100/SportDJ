@@ -1,6 +1,4 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
@@ -39,7 +37,9 @@ public partial class FlashingPanel
     // Used when no valid duration is set, an endless animation with zero duration must be avoided
     private const double DefaultDurationMilliSecs = 1000;
 
-    private CancellationTokenSource animationCancellation;
+    private const string FlashingClass = "flashing";
+
+    private Style animationStyle;
     private TimeSpan duration = TimeSpan.FromMilliseconds(DefaultDurationMilliSecs);
     private bool isAttached;
 
@@ -194,23 +194,13 @@ public partial class FlashingPanel
             : DefaultDurationMilliSecs);
     }
 
-    private static async Task RunAnimationAsync(Animation animation, Animatable target, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await animation.RunAsync(target, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when the animation is stopped
-        }
-    }
-
+    // Looping animations must not be started with Animation.RunAsync (it throws for infinite iterations).
+    // They are attached as a style that is active while the panel has the flashing class.
     private void RestartAnimation()
     {
         StopAnimation();
 
-        if (!isAttached || !IsActive)
+        if (!isAttached || !IsActive || FlashPanel == default)
         {
             return;
         }
@@ -220,25 +210,28 @@ public partial class FlashingPanel
             opacityMin: OpacityMin,
             opacityMax: OpacityMax);
 
-        animationCancellation = new CancellationTokenSource();
+        animationStyle = new Style(x => x.OfType<Panel>().Class(FlashingClass));
+        animationStyle.Animations.Add(animation);
 
-        _ = RunAnimationAsync(
-            animation: animation,
-            target: FlashPanel,
-            cancellationToken: animationCancellation.Token);
+        FlashPanel.Styles.Add(animationStyle);
+        FlashPanel.Classes.Add(FlashingClass);
     }
 
     private void StopAnimation()
     {
-        if (animationCancellation == default)
+        if (FlashPanel == default)
         {
             return;
         }
 
-        animationCancellation.Cancel();
-        animationCancellation.Dispose();
+        FlashPanel.Classes.Remove(FlashingClass);
 
-        animationCancellation = default;
+        if (animationStyle != default)
+        {
+            FlashPanel.Styles.Remove(animationStyle);
+
+            animationStyle = default;
+        }
     }
 
     #endregion Private Methods
