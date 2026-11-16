@@ -34,17 +34,17 @@ public class Service
     private readonly IControllerService controllerService;
     private readonly IDialogService dialogService;
     private readonly IEventAggregator eventAggregator;
+    private readonly IStorageService<Set> settingsService;
+    private readonly HashSet<ISignalService> signalServices = [];
+    private readonly IStackService stackService;
+    private readonly CancellationTokenSource tokenSource = new();
+    private readonly ITrackService trackService;
 
     private bool isDisposed;
     private MixerType mixerType;
     private Player player;
-    private readonly IStorageService<Set> settingsService;
     private ISignalService signalService;
-    private readonly HashSet<ISignalService> signalServices = [];
-    private readonly IStackService stackService;
     private IStorageFolder startLocation;
-    private readonly CancellationTokenSource tokenSource = new();
-    private readonly ITrackService trackService;
 
     #endregion Private Fields
 

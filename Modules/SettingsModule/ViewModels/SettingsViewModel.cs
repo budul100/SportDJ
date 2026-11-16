@@ -26,21 +26,22 @@ public class SettingsViewModel
 {
     #region Private Fields
 
-    private Controller controller;
     private readonly IControllerService controllerService;
-    private bool controllersNotAvailable;
-    private Device device;
-    private bool devicesNotAvailable;
     private readonly IDialogService dialogService;
     private readonly IEventAggregator eventAggregator;
     private readonly FilePickerFileType[] fileTypeFilter = [new(Constants.SettingsExtension)];
-    private bool isUpdateControllers;
-    private bool isUpdateDevices;
     private readonly IOutputService outputService;
     private readonly Output outputSettings;
     private readonly IPanelService panelService;
     private readonly IStorageService<Session> sessionService;
     private readonly IStorageService<Set> settingsService;
+
+    private Controller controller;
+    private bool controllersNotAvailable;
+    private Device device;
+    private bool devicesNotAvailable;
+    private bool isUpdateControllers;
+    private bool isUpdateDevices;
     private IStorageFolder startLocation;
 
     #endregion Private Fields

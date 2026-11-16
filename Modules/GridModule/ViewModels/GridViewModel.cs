@@ -16,10 +16,11 @@ public class GridViewModel
 {
     #region Private Fields
 
-    private int columns;
     private readonly Grid grid;
-    private bool isSelected;
     private readonly GroupViewModel parent;
+
+    private int columns;
+    private bool isSelected;
     private int rows;
 
     #endregion Private Fields

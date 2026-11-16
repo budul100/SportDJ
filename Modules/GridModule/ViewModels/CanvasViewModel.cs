@@ -14,9 +14,9 @@ public class CanvasViewModel
     #region Private Fields
 
     private readonly IContainerProvider containerProvider;
+    private readonly IGridService gridService;
 
     private GridViewModel grid;
-    private readonly IGridService gridService;
 
     #endregion Private Fields
 

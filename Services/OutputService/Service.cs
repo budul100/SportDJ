@@ -26,20 +26,21 @@ public class Service
 {
     #region Private Fields
 
-    private MixingProvider backgroundProvider;
     private readonly CancellationTokenSource cancellationTokenSource = new();
     private readonly IContainerProvider containerProvider;
     private readonly IDeviceService deviceService;
     private readonly IEventAggregator eventAggregator;
+    private readonly HashSet<IMixerService> mixersAll = [];
+    private readonly HashSet<IMixerService> mixersForeground = [];
+    private readonly IStorageService<Session> sessionService;
+    private readonly IStorageService<Set> settingsService;
+
+    private MixingProvider backgroundProvider;
     private FadingProvider fadingProvider;
     private MixingProvider foregroundProvider;
     private bool isDisposed;
-    private readonly HashSet<IMixerService> mixersAll = [];
-    private readonly HashSet<IMixerService> mixersForeground = [];
     private IEnumerable<IMonitorService> monitorServices;
     private Output outputOptions;
-    private readonly IStorageService<Session> sessionService;
-    private readonly IStorageService<Set> settingsService;
 
     #endregion Private Fields
 

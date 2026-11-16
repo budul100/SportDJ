@@ -11,11 +11,12 @@ public class SourceProvider
 {
     #region Private Fields
 
+    private readonly Lock readerLock = new();
+
     private int blockAlign;
     private AudioFileReader fileReader;
     private bool isDisposed;
     private long length;
-    private readonly Lock readerLock = new();
 
     #endregion Private Fields
 

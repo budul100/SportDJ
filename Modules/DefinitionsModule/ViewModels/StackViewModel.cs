@@ -19,9 +19,9 @@ public class StackViewModel
 
     private const string Titel = "Content";
 
-    private bool autoScroll;
-
     private readonly IDialogService dialogService;
+
+    private bool autoScroll;
     private Entry entry;
     private bool isSettingActive = false;
     private bool isUpdating = false;

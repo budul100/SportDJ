@@ -16,9 +16,9 @@ public class SettingsViewModel
     private const string Titel = "Settings";
 
     private readonly IEventAggregator eventAggregator;
+    private readonly IStorageService<Set> settingsService;
 
     private Player player;
-    private readonly IStorageService<Set> settingsService;
 
     #endregion Private Fields
 

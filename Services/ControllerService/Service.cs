@@ -28,14 +28,14 @@ public class Service
     #region Private Fields
 
     private readonly IEventAggregator eventAggregator;
+    private readonly Dictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
+    private readonly IEnumerable<Profile> profiles;
+    private readonly IStorageService<Session> sessionService;
 
     private bool isDisposed;
-    private readonly Dictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
     private TaskCompletionSource<Key> listenerTcs;
     private MidiIn midiIn;
     private MidiOut midiOut;
-    private readonly IEnumerable<Profile> profiles;
-    private readonly IStorageService<Session> sessionService;
     private byte[] sysExFinal;
     private byte[] sysExInit;
 

@@ -18,8 +18,9 @@ public class Service
 {
     #region Private Fields
 
-    private CancellationTokenSource cancellationTokenSource;
     private readonly IEventAggregator eventAggregator;
+
+    private CancellationTokenSource cancellationTokenSource;
     private bool isDisposed;
     private int? midiIndex;
 

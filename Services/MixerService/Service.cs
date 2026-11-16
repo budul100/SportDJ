@@ -25,16 +25,16 @@ public class Service
     private readonly IContainerProvider containerProvider;
     private readonly IEventAggregator eventAggregator;
     private readonly Dictionary<ISignalService, FadingProvider> fadingProviders = [];
-
-    private bool isDisposed;
     private readonly Lock lockFadingProviders = new();
     private readonly Lock lockSignalServices = new();
+    private readonly IStorageService<Set> settingsService;
+    private readonly HashSet<ISignalService> signalServices = [];
+
+    private bool isDisposed;
     private MixingProvider mixingProvider;
     private FadingProvider outputProvider;
-    private readonly IStorageService<Set> settingsService;
     private bool signalsCanOverlap;
     private ISignalService signalService;
-    private readonly HashSet<ISignalService> signalServices = [];
 
     #endregion Private Fields
 

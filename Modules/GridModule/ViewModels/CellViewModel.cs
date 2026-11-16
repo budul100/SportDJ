@@ -39,14 +39,14 @@ public abstract class CellViewModel
     private static readonly HashSet<CellViewModel> listeningCells = [];
     private static readonly Lock listeningLock = new();
 
-    private Cell cell;
-    private bool isDisposed;
-    private bool isRenaming;
-
     private readonly IKeyable keyable;
     private readonly INameable nameable;
     private readonly IStorageService<Set> settingsService;
     private readonly List<SubscriptionToken> subscriptions = [];
+
+    private Cell cell;
+    private bool isDisposed;
+    private bool isRenaming;
 
     #endregion Private Fields
 

@@ -15,10 +15,11 @@ public class DefinitionsViewModel
 {
     #region Private Fields
 
-    private TabViewModel active;
     private readonly Dictionary<Type, TabViewModel> registrations = [];
     private readonly SettingsViewModel settingsViewModel;
     private readonly StackViewModel stackViewModel;
+
+    private TabViewModel active;
 
     #endregion Private Fields
 

@@ -30,8 +30,6 @@ public class Service
     private readonly IEventAggregator eventAggregator;
     private readonly IEnumerable<ATL.Format> formatsAudio;
     private readonly IEnumerable<ATL.Format> formatsPlaylist;
-
-    private bool isDisposed;
     private readonly ConcurrentQueue<Track> loadedRenders = [];
     private readonly ConcurrentQueue<Track> loadedTrims = [];
     private readonly ConcurrentQueue<Track> loadedUpdates = [];
@@ -40,6 +38,8 @@ public class Service
     private readonly PlaylistIOFactory playlistIOFactory;
     private readonly IStorageService<Set> settingsService;
     private readonly ConcurrentDictionary<string, Track> tracks = [];
+
+    private bool isDisposed;
 
     #endregion Private Fields
 

@@ -23,12 +23,13 @@ public class ControllerViewModel
 {
     #region Private Fields
 
-    private bool isLoweredRequested;
-    private bool isVolumePressed;
     private readonly IMixerService mixerService;
     private readonly IEnumerable<IMonitorService> monitorServices;
-    private Options options;
     private readonly IOutputService outputLiveService;
+
+    private bool isLoweredRequested;
+    private bool isVolumePressed;
+    private Options options;
 
     #endregion Private Fields
 

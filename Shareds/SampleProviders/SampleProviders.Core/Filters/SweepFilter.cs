@@ -16,13 +16,13 @@ public class SweepFilter(int sampleRate, int channels, double startCutoffFrequen
     private const double MinCutoffFrequency = 20.0;
     private const float SoftLimitKnee = 0.9f;
 
+    private readonly double[] ic1eq = new double[channels];
+    private readonly double[] ic2eq = new double[channels];
+
     private double a1;
     private double a2;
     private double a3;
     private int blockCounter;
-
-    private readonly double[] ic1eq = new double[channels];
-    private readonly double[] ic2eq = new double[channels];
     private double lfoPhase;
 
     #endregion Private Fields

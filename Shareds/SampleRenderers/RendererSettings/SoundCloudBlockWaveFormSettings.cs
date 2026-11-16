@@ -7,13 +7,14 @@ public class SoundCloudBlockWaveFormSettings
 {
     #region Private Fields
 
+    private readonly SKColor topSpacerStartColor;
+
     private SKShader bottomShader;
     private SKShader bottomSpacerShader;
     private int lastBottomHeight;
     private int lastTopHeight;
     private SKShader topShader;
     private SKShader topSpacerShader;
-    private readonly SKColor topSpacerStartColor;
 
     #endregion Private Fields
 

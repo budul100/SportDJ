@@ -24,6 +24,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
     #region Private Fields
 
     private readonly CancellationTokenSource cancellationTokenSource = new();
+    private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
     private FadingProvider fadingProvider;
     private bool isDisposed;
@@ -31,7 +32,6 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
     private LoopingProvider loopingProvider;
     private TimeSpan? nextThresholdOnPlay;
     private PlayingProvider playingProvider;
-    private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
     #endregion Private Fields
 

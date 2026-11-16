@@ -22,11 +22,12 @@ public class PlayerViewModel
 {
     #region Private Fields
 
-    private bool isSettingsVisible;
-    private bool isStackVisible;
     private readonly IPanelService panelService;
     private readonly Player player;
     private readonly IPlayerService playerService;
+
+    private bool isSettingsVisible;
+    private bool isStackVisible;
 
     #endregion Private Fields
 

@@ -18,13 +18,13 @@ public class FadingProvider
     // Threshold for detecting silence (after applying volume)
     private const float SilenceThreshold = 1e-4f;
 
-    private int consecutiveSilentFrames;
-    private long fadeSampleCount;
-    private long fadeSamplePosition;
-
     private readonly Lock lockProvider = new();
     private readonly int silenceFramesRequired;
     private readonly ISampleProvider sourceProvider;
+
+    private int consecutiveSilentFrames;
+    private long fadeSampleCount;
+    private long fadeSamplePosition;
     private SweepFilter sweepFilter;
     private float volumeCurrent;
     private float volumeFadeDiff;

@@ -34,17 +34,17 @@ public class MainViewModel
     private readonly IControllerService controllerService;
     private readonly IDialogService dialogService;
     private readonly IDispatcherService dispatcherService;
-
-    private bool isDisposed;
     private readonly HashSet<IOutputService> liveServices = [];
     private readonly HashSet<IOutputService> outputServices = [];
+    private readonly IPanelService panelService;
+    private readonly IStorageService<Session> sessionService;
+    private readonly IStorageService<Set> settingsService;
+
+    private bool isDisposed;
     private Control panelBottom;
     private Control panelLeft;
     private Control panelRight;
-    private readonly IPanelService panelService;
     private Control panelTop;
-    private readonly IStorageService<Session> sessionService;
-    private readonly IStorageService<Set> settingsService;
     private string title;
     private bool userWantsToQuit;
 

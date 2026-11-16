@@ -12,9 +12,9 @@ public class MixingProvider(WaveFormat waveFormat)
     #region Private Fields
 
     private readonly Lock lockProvider = new();
+    private readonly List<ISampleProvider> sourceProviders = [];
 
     private float[] sourceBuffer;
-    private readonly List<ISampleProvider> sourceProviders = [];
 
     #endregion Private Fields
 

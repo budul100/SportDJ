@@ -23,20 +23,21 @@ public class DisplayViewModel
 {
     #region Private Fields
 
-    private Bitmap bitmap;
     private readonly DispatcherTimer clockTimer;
-    private string content;
     private readonly IEventAggregator eventAggregator;
+    private readonly IMixerService mixerService;
+    private readonly IPanelService panelService;
+    private readonly IStorageService<Session> sessionService;
+    private readonly IStorageService<Set> settingsService;
+
+    private Bitmap bitmap;
+    private string content;
     private bool isDisposed;
     private bool isEnding;
     private bool isPlaying;
     private string lastWindowState;
-    private readonly IMixerService mixerService;
-    private readonly IPanelService panelService;
     private double? progress;
     private string remaining;
-    private readonly IStorageService<Session> sessionService;
-    private readonly IStorageService<Set> settingsService;
 
     #endregion Private Fields
 
