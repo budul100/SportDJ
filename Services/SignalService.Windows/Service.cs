@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -23,9 +24,15 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 {
     #region Private Fields
 
+    // Events raised by the providers run inside the audio callback and must never block it.
+    // They are queued here and processed in order by a single consumer outside the audio thread.
+    private readonly Channel<Action> audioEvents = Channel.CreateUnbounded<Action>(
+        new UnboundedChannelOptions { SingleReader = true });
+
     private readonly CancellationTokenSource cancellationTokenSource = new();
     private readonly long updatesInTicks = Constants.UpdatesInMilliSec * 10000;
 
+    private Task eventLoop;
     private FadingProvider fadingProvider;
     private bool isDisposed;
     private long lastPosition = 0;
@@ -104,6 +111,8 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
         if (File.Exists(track.Path) && State == StateType.None)
         {
             Track = track;
+
+            eventLoop ??= Task.Run(ProcessAudioEvents);
 
             var fadeOut = settingsService.Contents.Options.FadeOnMixOutMilliseconds > 0
                 ? TimeSpan.FromMilliseconds(settingsService.Contents.Options.FadeOnMixOutMilliseconds)
@@ -214,6 +223,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
         {
             if (isDisposing)
             {
+                audioEvents.Writer.TryComplete();
                 cancellationTokenSource?.Cancel();
 
                 if (fadingProvider != default)
@@ -253,13 +263,55 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     #region Private Methods
 
-    private void OnCueExceeded(object sender, EventArgs e)
+    private void Enqueue(Action action)
+    {
+        audioEvents.Writer.TryWrite(action);
+    }
+
+    private void HandleCueExceeded()
     {
         trackService?.Stop(Track);
 
         State = StateType.Stop;
 
         Pause();
+    }
+
+    private void HandleSignalEnded()
+    {
+        State = StateType.None;
+
+        eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
+    }
+
+    private void HandleSignalPaused()
+    {
+        trackService?.Stop(Track);
+
+        eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
+
+        if (IsOverNextThreshold)
+        {
+            End();
+        }
+        else
+        {
+            if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
+            {
+                var selectNextDelay = TimeSpan.FromSeconds(
+                    value: settingsService.Contents.Options.SelectNextOnPauseSeconds.Value);
+
+                Task.Delay(
+                    delay: selectNextDelay,
+                    cancellationToken: cancellationTokenSource.Token)
+                    .ContinueWith(_ => SelectNext());
+            }
+        }
+    }
+
+    private void OnCueExceeded(object sender, EventArgs e)
+    {
+        Enqueue(HandleCueExceeded);
     }
 
     private void OnFadingEnded(object sender, EventArgs e)
@@ -310,34 +362,12 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     private void OnSignalEnded(object sender, EventArgs e)
     {
-        State = StateType.None;
-
-        eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
+        Enqueue(HandleSignalEnded);
     }
 
     private void OnSignalPaused(object sender, EventArgs e)
     {
-        trackService?.Stop(Track);
-
-        eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
-
-        if (IsOverNextThreshold)
-        {
-            End();
-        }
-        else
-        {
-            if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
-            {
-                var selectNextDelay = TimeSpan.FromSeconds(
-                    value: settingsService.Contents.Options.SelectNextOnPauseSeconds.Value);
-
-                Task.Delay(
-                    delay: selectNextDelay,
-                    cancellationToken: cancellationTokenSource.Token)
-                    .ContinueWith(_ => SelectNext());
-            }
-        }
+        Enqueue(HandleSignalPaused);
     }
 
     private void OnSignalUpdated(object sender, EventArgs e)
@@ -356,12 +386,35 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
                     if (IsOverNextThreshold)
                     {
-                        SelectNext();
+                        // Selecting the next track loads and decodes a file, never do that in the audio thread
+                        Enqueue(SelectNext);
                     }
                 }
             }
 
             lastPosition = Current.Value.Ticks;
+        }
+    }
+
+    private async Task ProcessAudioEvents()
+    {
+        try
+        {
+            await foreach (var action in audioEvents.Reader.ReadAllAsync(cancellationTokenSource.Token))
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception)
+                {
+                    // A failing handler must not stop the processing of later events
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Disposed
         }
     }
 
