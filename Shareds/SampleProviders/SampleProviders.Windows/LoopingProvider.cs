@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Wave;
@@ -22,7 +22,7 @@ public class LoopingProvider
 
     private float[] allSamples;
     private long endSample;
-    private bool isDisposed;
+    private volatile bool isDisposed;
     private long startSample;
 
     #endregion Private Fields
@@ -34,7 +34,7 @@ public class LoopingProvider
         this.sourceProvider = sourceProvider;
         this.track = track;
 
-        Task.Run(InitializeAnalysis);
+        _ = Task.Run(InitializeAnalysis);
     }
 
     #endregion Public Constructors
@@ -211,8 +211,6 @@ public class LoopingProvider
 
     private float[] GetSamples()
     {
-        var result = default(float[]);
-
         try
         {
             // Decode with the same reader as the playback (SourceProvider), so the analysis
@@ -220,45 +218,86 @@ public class LoopingProvider
             // can differ in encoder delay and would shift the loop points.
             using var reader = new AudioFileReader(track.Path);
 
-            ISampleProvider sampleProvider = reader;
+            ISampleProvider monoProvider = reader.WaveFormat.Channels == 1
+                ? reader
+                : new StereoToMonoSampleProvider(reader);
 
-            var monoProvider = reader.WaveFormat.Channels == 1
-                ? sampleProvider
-                : new StereoToMonoSampleProvider(sampleProvider);
+            // Preallocate for the expected frame count. Growing a list would create several
+            // large temporary arrays on the large object heap for every loaded track.
+            var capacity = (int)Math.Max(reader.Length / reader.WaveFormat.BlockAlign, reader.WaveFormat.SampleRate);
+            var samples = GC.AllocateUninitializedArray<float>(capacity);
+            var chunkSize = reader.WaveFormat.SampleRate;
+            var count = 0;
 
-            var buffer = new List<float>();
-            var readBuffer = new float[reader.WaveFormat.SampleRate];
-
-            var samplesRead = 0;
-
-            while (!isDisposed
-                && (samplesRead = monoProvider.Read(readBuffer)) > 0)
+            while (!isDisposed)
             {
-                buffer.AddRange(readBuffer.AsSpan(0, samplesRead));
+                if (count == samples.Length)
+                {
+                    // The reported length was too small, grow by a small step
+                    Array.Resize(
+                        array: ref samples,
+                        newSize: samples.Length + chunkSize);
+                }
+
+                var toRead = Math.Min(chunkSize, samples.Length - count);
+                var samplesRead = monoProvider.Read(samples.AsSpan(count, toRead));
+
+                if (samplesRead <= 0)
+                {
+                    break;
+                }
+
+                count += samplesRead;
             }
 
-            result = buffer.ToArray();
-        }
-        catch
-        { }
+            if (isDisposed)
+            {
+                return null;
+            }
 
-        return result;
+            if (count != samples.Length)
+            {
+                Array.Resize(
+                    array: ref samples,
+                    newSize: count);
+            }
+
+            return samples;
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Loop analysis failed: {exception}");
+
+            return null;
+        }
     }
 
-    private async void InitializeAnalysis()
+    private async Task InitializeAnalysis()
     {
         var samples = await Task.Run(GetSamples);
+
+        var isReady = false;
 
         lock (lockAnalysis)
         {
             allSamples = samples;
             IsReady = allSamples?.Length > 0;
 
-            if (IsReady)
+            isReady = IsReady;
+        }
+
+        // Raised outside of the lock, a subscriber calling Activate must not deadlock
+        if (isReady)
+        {
+            try
             {
                 LoopReadyEvent?.Invoke(
                     sender: this,
                     e: default);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine($"LoopReadyEvent subscriber failed: {exception}");
             }
         }
     }

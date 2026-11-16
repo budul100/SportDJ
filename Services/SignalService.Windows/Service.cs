@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Channels;
@@ -34,12 +35,14 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     private Task eventLoop;
     private FadingProvider fadingProvider;
-    private bool isDisposed;
+    private volatile bool isDisposed;
+    private volatile bool isOverNextThreshold;
     private long lastPosition = 0;
     private LoopingProvider loopingProvider;
     private TimeSpan? nextThresholdOnPlay;
     private PlayingProvider playingProvider;
     private TimeSpan? selectNextOnPlayDuration;
+    private volatile StateType state;
 
     #endregion Private Fields
 
@@ -56,7 +59,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     public bool IsLoopReady => loopingProvider?.IsReady == true;
 
-    public bool IsOverNextThreshold { get; private set; }
+    public bool IsOverNextThreshold => isOverNextThreshold;
 
     public bool IsPlaying => playingProvider?.PlayType == PlayType.Playing;
 
@@ -74,7 +77,11 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     public TimeSpan? Remaining => playingProvider?.Remaining;
 
-    public StateType State { get; private set; }
+    public StateType State
+    {
+        get => state;
+        private set => state = value;
+    }
 
     public Track Track { get; private set; }
 
@@ -227,6 +234,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
             {
                 audioEvents.Writer.TryComplete();
                 cancellationTokenSource?.Cancel();
+                cancellationTokenSource?.Dispose();
 
                 if (fadingProvider != default)
                 {
@@ -272,6 +280,11 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     private void HandleCueExceeded()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         trackService?.Stop(Track);
 
         State = StateType.Stop;
@@ -281,6 +294,11 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     private void HandleSignalEnded()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         State = StateType.None;
 
         eventAggregator.GetEvent<SignalEndedEvent>().Publish(this);
@@ -288,6 +306,11 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
 
     private void HandleSignalPaused()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         trackService?.Stop(Track);
 
         eventAggregator.GetEvent<SignalStoppedEvent>().Publish(this);
@@ -306,7 +329,9 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                 Task.Delay(
                     delay: selectNextDelay,
                     cancellationToken: cancellationTokenSource.Token)
-                    .ContinueWith(_ => SelectNext());
+                    .ContinueWith(
+                        continuationAction: _ => SelectNext(),
+                        continuationOptions: TaskContinuationOptions.OnlyOnRanToCompletion);
             }
         }
     }
@@ -383,10 +408,10 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                 if (!IsOverNextThreshold
                     && nextThresholdOnPlay.HasValue)
                 {
-                    IsOverNextThreshold = Current?.Ticks > nextThresholdOnPlay.Value.Ticks
+                    isOverNextThreshold = Current?.Ticks > nextThresholdOnPlay.Value.Ticks
                         || Remaining?.Ticks < selectNextOnPlayDuration.Value.Ticks;
 
-                    if (IsOverNextThreshold)
+                    if (isOverNextThreshold)
                     {
                         // Selecting the next track loads and decodes a file, never do that in the audio thread
                         Enqueue(SelectNext);
@@ -408,9 +433,10 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                 {
                     action();
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
                     // A failing handler must not stop the processing of later events
+                    Debug.WriteLine($"SignalService event failed: {exception}");
                 }
             }
         }
