@@ -9,6 +9,7 @@
     xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
     xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     vml:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:DefinitionsViewModel"
     d:DesignHeight="500"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -19,13 +20,13 @@
         MinHeight="200">
 
         <TabControl.ItemTemplate>
-            <DataTemplate>
+            <DataTemplate x:DataType="vm:TabViewModel">
                 <TextBlock Text="{Binding Title}"/>
             </DataTemplate>
         </TabControl.ItemTemplate>
 
         <TabControl.ContentTemplate>
-            <DataTemplate>
+            <DataTemplate x:DataType="vm:TabViewModel">
                 <ContentControl Content="{Binding}">
                     <ContentControl.DataTemplates>
 

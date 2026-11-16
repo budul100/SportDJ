@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Text;
 
@@ -17,6 +17,11 @@ namespace SportDJ.Commons.Converters
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value is not Enum)
+            {
+                return string.Empty;
+            }
+
             var valueName = Enum.GetName(value.GetType(), value);
 
             if (string.IsNullOrEmpty(WordSeparator) || valueName == null || valueName.Length <= 1)
@@ -27,7 +32,9 @@ namespace SportDJ.Commons.Converters
 
             for (var index = 1; index < valueName.Length; index++)
             {
-                if (char.IsUpper(valueName, index)
+                // The last character has no successor, so names like "PFL" must not be checked beyond their length
+                if (index + 1 < valueName.Length
+                    && char.IsUpper(valueName, index)
                     && char.IsLower(valueName, index + 1))
                 {
                     sb.Append(WordSeparator);

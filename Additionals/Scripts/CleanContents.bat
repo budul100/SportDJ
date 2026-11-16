@@ -14,9 +14,6 @@ if not exist "*.sln" if not exist "*.csproj" if not exist "*.vbproj" if not exis
     set /p continue=
     if /i not "!continue!"=="y" if /i not "!continue!"=="yes" (
         echo Cancelled.
-        :: Hier optional ein Pause, falls man die "Cancelled" Nachricht lesen will, 
-        :: bevor das Fenster zugeht. Sonst geht es sofort zu.
-        timeout /t 2 >nul
         goto :end
     )
 )
@@ -26,7 +23,7 @@ set /a deleted_count=0
 set /a error_count=0
 
 echo.
-echo Searching for bin and obj folders...
+echo Searching for build and test artifacts...
 echo.
 
 :: Delete bin folders
@@ -54,6 +51,20 @@ for /f "tokens=*" %%G in ('dir /b /ad /s obj 2^>nul') do (
         set /a error_count+=1
     )
 )
+
+:: Delete TestResults folders
+echo [INFO] Deleting TestResults folders...
+for /f "tokens=*" %%G in ('dir /b /ad /s TestResults 2^>nul') do (
+    echo Deleting Test Results: %%G
+    rmdir /s /q "%%G" 2>nul
+    if !errorlevel! equ 0 (
+        set /a deleted_count+=1
+    ) else (
+        echo [ERROR] Could not delete: %%G
+        set /a error_count+=1
+    )
+)
+:: --------------------------------------------
 
 :: Optional: Delete other temporary files
 echo.
@@ -94,12 +105,4 @@ if !error_count! gtr 0 (
 echo.
 
 :end
-if !error_count! gtr 0 (
-    echo.
-    echo -------------------------------------------------------
-    echo There were !error_count! errors.
-    pause >nul
-)
-
-:: Aufräumen des pushd vom Anfang
-popd
+pause

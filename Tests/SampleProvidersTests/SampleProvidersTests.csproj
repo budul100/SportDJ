@@ -1,27 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<IsPackable>false</IsPackable>
-		<IsTestProject>true</IsTestProject>
-		<RootNamespace>SportDJ.Tests.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
-	</PropertyGroup>
-	
 	<ItemGroup>
-		<PackageReference Include="coverlet.collector" Version="6.0.4">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="xunit.v3" Version="3.2.2" />
+		<ProjectReference Include="..\..\Shareds\SampleProviders\SampleProviders.Core\SampleProviders.Core.csproj" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Shareds\SampleProviders\SampleProviders.Core\SampleProviders.Core.csproj" />
+	  <PackageReference Update="coverlet.collector" Version="10.1.1" />
+	  <PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+	  <PackageReference Update="Moq" Version="4.21.0" />
+	  <PackageReference Update="xunit.runner.visualstudio" Version="4.0.1" />
+	  <PackageReference Update="xunit.v3" Version="4.0.3" />
 	</ItemGroup>
 
 </Project>

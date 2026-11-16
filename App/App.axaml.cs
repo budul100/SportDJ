@@ -94,8 +94,6 @@ namespace SportDJ.App
                 name: nameof(Modules.SettingsModule));
             moduleCatalog.AddModule<Modules.SearchModule.Module>(
                 name: nameof(Modules.SearchModule));
-            moduleCatalog.AddModule<Modules.MenuModule.Module>(
-                name: nameof(Modules.MenuModule));
         }
 
         protected override AvaloniaObject CreateShell()

@@ -9,12 +9,14 @@
     xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:SportDJ.Commons.Models"
+    xmlns:rec="using:SportDJ.Commons.Models.Records"
     xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:SportDJ.Modules.SettingsModule.ViewModels"
     d:DesignHeight="500"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:SettingsViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -81,7 +83,7 @@
                     </ComboBox.Styles>
 
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:Records.Device">
+                        <DataTemplate x:DataType="rec:Device">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Name}"/>
                                 <TextBlock Text=" ("/>
@@ -132,7 +134,7 @@
                     SelectedItem="{Binding Controller}">
 
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:Records.Controller">
+                        <DataTemplate x:DataType="rec:Controller">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Name}"/>
                             </StackPanel>

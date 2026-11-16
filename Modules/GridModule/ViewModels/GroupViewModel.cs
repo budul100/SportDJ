@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Prism.Events;
 using Prism.Ioc;
@@ -14,7 +14,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private readonly GridViewModel parent;
 
-        private bool isDisposed;
         private GridViewModel selected;
 
         #endregion Private Fields
@@ -26,15 +25,13 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             this.parent = parent;
 
-            var eventAggregator = containerProvider?.Resolve<IEventAggregator>();
-
-            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: _ => parent.IsVisible);
+                filter: _ => IsVisible));
 
-            Initialize(
+            InitializeTabs(
                 containerProvider: containerProvider,
                 group: group,
                 isOnCanvas: isOnCanvas);
@@ -76,17 +73,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected override void Dispose(bool isDisposing)
         {
-            if (!isDisposed)
+            if (isDisposing)
             {
-                if (isDisposing)
+                foreach (var tab in Tabs.ToArray())
                 {
-                    foreach (var tab in Tabs)
-                    {
-                        tab.Dispose();
-                    }
+                    tab.Dispose();
                 }
-
-                isDisposed = true;
             }
 
             base.Dispose(
@@ -97,12 +89,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Methods
 
-        private void Initialize(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+        private void InitializeTabs(IContainerProvider containerProvider, Group group, bool isOnCanvas)
         {
             Rows = 1;
             Columns = 1;
-
-            Tabs?.Clear();
 
             if (group?.Grids?.Count > 0)
             {
@@ -127,27 +117,29 @@ namespace SportDJ.Modules.GridModule.ViewModels
                         currentTab.Columns = Columns;
                     }
                 }
+
+                // The selection must not depend on the view, otherwise no tab is visible
+                // (and no key is processed) until the TabControl is realized
+                Selected = Tabs.First();
             }
 
-            RaisePropertyChanged(nameof(Rows));
-            RaisePropertyChanged(nameof(Columns));
-
-            this.RowSpan = Rows;
-            this.ColumnSpan = Columns;
-
-            RaisePropertyChanged(nameof(RowSpan));
-            RaisePropertyChanged(nameof(ColumnSpan));
+            RowSpan = Rows;
+            ColumnSpan = Columns;
 
             base.Initialize();
         }
 
         private void OnKeyPressed(string keyCode)
         {
-            if (isListening)
+            // The key assignment is started in the menu of a tab, so the tab has to receive the key
+            var listeningTab = Tabs
+                .FirstOrDefault(t => t.IsListening);
+
+            if (listeningTab != default)
             {
-                ReceiveKey(keyCode);
+                listeningTab.ReceiveKey(keyCode);
             }
-            else
+            else if (!IsAnyListening)
             {
                 SelectTab(keyCode);
             }

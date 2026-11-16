@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using System;
 using System.Globalization;
 
@@ -11,11 +11,14 @@ namespace SportDJ.Commons.Converters
 
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var size = ((bool)value)
+            // Null or unset values must not throw, they are treated as "hidden"
+            var isVisible = value is true;
+
+            var size = isVisible
                 ? 1d
                 : 0d;
 
-            var type = ((bool)value)
+            var type = isVisible
                 ? GridUnitType.Auto
                 : GridUnitType.Pixel;
 

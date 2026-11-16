@@ -1,6 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
@@ -25,7 +27,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         protected readonly IEventAggregator eventAggregator;
         protected readonly IGridService gridService;
 
-        protected bool isListening;
         protected Action listenChecker;
         protected IOutputService outputServiceLive;
 
@@ -33,14 +34,19 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Private Fields
 
+        // All cells which currently wait for a key to be assigned. Shared, so that
+        // other cells do not react on the key which is meant to be assigned.
+        private static readonly HashSet<CellViewModel> listeningCells = [];
+        private static readonly Lock listeningLock = new();
+
         private readonly IKeyable keyable;
         private readonly INameable nameable;
         private readonly IStorageService<Set> settingsService;
+        private readonly List<SubscriptionToken> subscriptions = [];
 
         private Cell cell;
         private bool isDisposed;
         private bool isRenaming;
-        private string name;
 
         #endregion Private Fields
 
@@ -51,7 +57,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.containerProvider = containerProvider;
 
             cell = element is Grid grid
-                ? grid?.Group
+                ? grid.Group
                 : element as Cell;
 
             nameable = element as INameable;
@@ -62,9 +68,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
             dialogService = containerProvider?.Resolve<IDialogService>();
             gridService = containerProvider?.Resolve<IGridService>();
 
-            eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => UpdateOutput(),
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true));
         }
 
         #endregion Protected Constructors
@@ -79,25 +85,27 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #region Public Properties
 
-        [Obsolete]
-        public static int MaxLengthName => Constants.NameMaxLength;
-
         public virtual int Column => cell.Column;
 
         public int ColumnSpan { get; protected set; } = 1;
 
         public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
+        public bool IsListening
+        {
+            get
+            {
+                lock (listeningLock)
+                {
+                    return listeningCells.Contains(this);
+                }
+            }
+        }
+
         public bool IsRenaming
         {
             get { return isRenaming; }
-            set
-            {
-                if (IsRenaming != value)
-                {
-                    SetProperty(ref isRenaming, value);
-                }
-            }
+            set { SetProperty(ref isRenaming, value); }
         }
 
         public string Key => KeyCode?.GetKey();
@@ -129,22 +137,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual string Name
         {
-            get { return name ?? nameable?.Name; }
+            get { return nameable?.Name; }
 
             set
             {
-                if (nameable != default
-                    && value != name)
+                if (nameable != default)
                 {
-                    name = value;
+                    var trimmed = value?.Trim();
 
-                    if (!string.IsNullOrWhiteSpace(name))
+                    if (!string.IsNullOrWhiteSpace(trimmed)
+                        && trimmed != nameable.Name)
                     {
-                        nameable.Name = value.Trim();
+                        nameable.Name = trimmed;
 
                         settingsService?.Save();
                     }
 
+                    // Always notify, so the UI falls back to the stored name after an invalid input
                     RaisePropertyChanged(nameof(Name));
                 }
             }
@@ -156,18 +165,56 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Properties
 
+        #region Protected Properties
+
+        protected static bool IsAnyListening
+        {
+            get
+            {
+                lock (listeningLock)
+                {
+                    return listeningCells.Count > 0;
+                }
+            }
+        }
+
+        #endregion Protected Properties
+
         #region Public Methods
 
         public void Dispose()
         {
-            Dispose(
-                isDisposing: true);
+            if (!isDisposed)
+            {
+                isDisposed = true;
 
-            GC.SuppressFinalize(
-                obj: this);
+                Dispose(
+                    isDisposing: true);
+
+                GC.SuppressFinalize(
+                    obj: this);
+            }
         }
 
         #endregion Public Methods
+
+        #region Internal Methods
+
+        protected internal void ReceiveKey(string keyCode)
+        {
+            lock (listeningLock)
+            {
+                listeningCells.Remove(this);
+            }
+
+            KeyCode = keyCode;
+
+            listenChecker?.Invoke();
+
+            CloseMenu();
+        }
+
+        #endregion Internal Methods
 
         #region Protected Methods
 
@@ -182,14 +229,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected virtual void Dispose(bool isDisposing)
         {
-            if (!isDisposed)
+            if (isDisposing)
             {
-                if (isDisposing)
+                lock (listeningLock)
                 {
-                    cell = default;
+                    listeningCells.Remove(this);
                 }
 
-                isDisposed = true;
+                foreach (var subscription in subscriptions)
+                {
+                    subscription.Dispose();
+                }
+
+                subscriptions.Clear();
+
+                DisposeMenus();
+
+                cell = default;
             }
         }
 
@@ -204,70 +260,56 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.GridAddHeader} {orientation}";
-
-                void callback() => gridService.AddPlayer(
-                    cell: cell,
-                    orientation: orientation);
-
-                var addItem = new MenuViewModel(
-                    header: header,
-                    executeCallback: callback,
+                yield return new MenuViewModel(
+                    header: $"{Texts.GridAddHeader} {orientation}",
+                    executeCallback: () => gridService.AddPlayer(
+                        cell: cell,
+                        orientation: orientation),
                     closeCallback: CloseMenu);
-
-                yield return addItem;
             }
 
             yield return new SeparatorViewModel();
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.GridMoveHeader} {orientation}";
-
-                void callback() => gridService.MoveCell(
-                    cell: cell,
-                    orientation: orientation);
-
-                var moveItem = new MenuViewModel(
-                    header: header,
-                    executeCallback: callback,
+                yield return new MenuViewModel(
+                    header: $"{Texts.GridMoveHeader} {orientation}",
+                    executeCallback: () => gridService.MoveCell(
+                        cell: cell,
+                        orientation: orientation),
                     closeCallback: CloseMenu);
-
-                yield return moveItem;
             }
 
             yield return new SeparatorViewModel();
 
-            var swapItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.CellSwapHeader}...",
                 executeCallback: () => gridService.SwapAsync(cell),
                 closeCallback: CloseMenu);
 
-            yield return swapItem;
-
-            var removeItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.CellRemoveHeader}...",
                 executeCallback: () => gridService.RemoveCellAsync(cell),
                 closeCallback: CloseMenu);
-
-            yield return removeItem;
         }
 
         protected virtual void Initialize()
         {
             UpdateOutput();
 
-            var menus = GetElementMenus();
-            Menus = new ObservableCollection<BindableBase>(menus);
+            // The old menu items hold event subscriptions, which have to be released
+            DisposeMenus();
+
+            Menus = new ObservableCollection<BindableBase>(GetElementMenus());
 
             RaisePropertyChanged(nameof(Menus));
         }
 
         protected void ListenHook()
         {
-            if (!isListening)
+            lock (listeningLock)
             {
-                isListening = true;
+                listeningCells.Add(this);
             }
         }
 
@@ -278,14 +320,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
                 e: default);
         }
 
-        protected void ReceiveKey(string keyCode)
+        protected void AddSubscription(SubscriptionToken subscription)
         {
-            KeyCode = keyCode;
-            isListening = false;
-
-            listenChecker.Invoke();
-
-            CloseMenu();
+            if (subscription != default)
+            {
+                subscriptions.Add(subscription);
+            }
         }
 
         protected virtual void UpdateOutput()
@@ -295,5 +335,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         #endregion Protected Methods
+
+        #region Private Methods
+
+        private void DisposeMenus()
+        {
+            if (Menus != default)
+            {
+                foreach (var menu in Menus.OfType<IDisposable>().ToArray())
+                {
+                    menu.Dispose();
+                }
+            }
+        }
+
+        #endregion Private Methods
     }
 }

@@ -1,7 +1,11 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Styling;
 using SportDJ.Commons.Assets;
 
 namespace SportDJ.Shareds.UserControls
@@ -14,14 +18,13 @@ namespace SportDJ.Shareds.UserControls
         public static readonly StyledProperty<IBrush> ColorProperty = AvaloniaProperty.Register<FlashingPanel, IBrush>(
             name: nameof(Color));
 
-        public static readonly DirectProperty<FlashingPanel, double> DurationMilliSecsProperty = AvaloniaProperty.RegisterDirect<FlashingPanel, double>(
+        public static readonly StyledProperty<double> DurationMilliSecsProperty = AvaloniaProperty.Register<FlashingPanel, double>(
             name: nameof(DurationMilliSecs),
-            getter: o => o.DurationMilliSecs,
-            setter: (o, v) => o.DurationMilliSecs = v);
+            defaultValue: DefaultDurationMilliSecs);
 
         public static readonly DirectProperty<FlashingPanel, TimeSpan> DurationProperty = AvaloniaProperty.RegisterDirect<FlashingPanel, TimeSpan>(
             name: nameof(Duration),
-            getter: o => GetDuration(o.DurationMilliSecs));
+            getter: o => o.duration);
 
         public static readonly StyledProperty<bool> IsActiveProperty = AvaloniaProperty.Register<FlashingPanel, bool>(
             name: nameof(IsActive));
@@ -38,8 +41,12 @@ namespace SportDJ.Shareds.UserControls
 
         #region Private Fields
 
-        private TimeSpan duration;
-        private double durationMilliSecs;
+        // Used when no valid duration is set, an endless animation with zero duration must be avoided
+        private const double DefaultDurationMilliSecs = 1000;
+
+        private CancellationTokenSource animationCancellation;
+        private TimeSpan duration = TimeSpan.FromMilliseconds(DefaultDurationMilliSecs);
+        private bool isAttached;
 
         #endregion Private Fields
 
@@ -63,30 +70,15 @@ namespace SportDJ.Shareds.UserControls
                 value: value);
         }
 
-        public TimeSpan Duration
-        {
-            get => duration;
-        }
+        public TimeSpan Duration => duration;
 
         public double DurationMilliSecs
         {
-            get => durationMilliSecs;
+            get => GetValue(DurationMilliSecsProperty);
 
-            set
-            {
-                if (value != durationMilliSecs)
-                {
-                    SetAndRaise(
-                        property: DurationMilliSecsProperty,
-                        field: ref durationMilliSecs,
-                        value: value);
-
-                    SetAndRaise(
-                        property: DurationProperty,
-                        field: ref duration,
-                        value: GetDuration(durationMilliSecs));
-                }
-            }
+            set => SetValue(
+                property: DurationMilliSecsProperty,
+                value: value);
         }
 
         public bool IsActive
@@ -118,11 +110,140 @@ namespace SportDJ.Shareds.UserControls
 
         #endregion Public Properties
 
+        #region Protected Methods
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+
+            isAttached = true;
+
+            RestartAnimation();
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            isAttached = false;
+
+            StopAnimation();
+
+            base.OnDetachedFromVisualTree(e);
+        }
+
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+
+            if (change.Property == DurationMilliSecsProperty)
+            {
+                SetAndRaise(
+                    property: DurationProperty,
+                    field: ref duration,
+                    value: GetDuration(change.GetNewValue<double>()));
+            }
+
+            if (change.Property == DurationMilliSecsProperty
+                || change.Property == IsActiveProperty
+                || change.Property == OpacityMaxProperty
+                || change.Property == OpacityMinProperty)
+            {
+                RestartAnimation();
+            }
+        }
+
+        #endregion Protected Methods
+
         #region Private Methods
+
+        private static Animation CreateAnimation(TimeSpan duration, double opacityMin, double opacityMax)
+        {
+            var animation = new Animation
+            {
+                Duration = duration,
+                IterationCount = IterationCount.Infinite,
+            };
+
+            animation.Children.Add(CreateKeyFrame(
+                cue: 0.0,
+                opacity: opacityMin));
+
+            animation.Children.Add(CreateKeyFrame(
+                cue: 0.5,
+                opacity: opacityMax));
+
+            animation.Children.Add(CreateKeyFrame(
+                cue: 1.0,
+                opacity: opacityMin));
+
+            return animation;
+        }
 
         private static TimeSpan GetDuration(double durationMilliSecs)
         {
-            return TimeSpan.FromMilliseconds(durationMilliSecs);
+            return TimeSpan.FromMilliseconds(durationMilliSecs > 0
+                ? durationMilliSecs
+                : DefaultDurationMilliSecs);
+        }
+
+        private static KeyFrame CreateKeyFrame(double cue, double opacity)
+        {
+            var keyFrame = new KeyFrame
+            {
+                Cue = new Cue(cue),
+            };
+
+            keyFrame.Setters.Add(new Setter(
+                property: OpacityProperty,
+                value: opacity));
+
+            return keyFrame;
+        }
+
+        private static async Task RunAnimationAsync(Animation animation, Animatable target, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await animation.RunAsync(target, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when the animation is stopped
+            }
+        }
+
+        private void RestartAnimation()
+        {
+            StopAnimation();
+
+            if (!isAttached || !IsActive)
+            {
+                return;
+            }
+
+            var animation = CreateAnimation(
+                duration: duration,
+                opacityMin: OpacityMin,
+                opacityMax: OpacityMax);
+
+            animationCancellation = new CancellationTokenSource();
+
+            _ = RunAnimationAsync(
+                animation: animation,
+                target: FlashPanel,
+                cancellationToken: animationCancellation.Token);
+        }
+
+        private void StopAnimation()
+        {
+            if (animationCancellation == default)
+            {
+                return;
+            }
+
+            animationCancellation.Cancel();
+            animationCancellation.Dispose();
+
+            animationCancellation = default;
         }
 
         #endregion Private Methods

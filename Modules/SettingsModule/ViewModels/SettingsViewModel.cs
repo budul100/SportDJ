@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,46 +79,48 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
             eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
                 action: InitializeSettings,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
                 action: _ => RefreshSettings(),
                 keepSubscriberReferenceAlive: true,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 filter: p => p.Type == typeof(IStorageService<Session>));
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Session>>().Subscribe(
                 action: SaveSettings,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => DevicesNotAvailable = true,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
                 action: _ => DevicesNotAvailable = false,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<ControllerUpdatedEvent>().Subscribe(
                 action: SetController,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<ControllersUpdatedEvent>().Subscribe(
                 action: SetControllers,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<DevicesUpdatedEvent>().Subscribe(
                 action: SetDevices,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
                 action: _ => SetDevice(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
         }
 
@@ -198,6 +201,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             set
             {
                 if (outputSettings != default
+                    && outputService != default
                     && value != outputService.Volume)
                 {
                     outputService.Volume = value;
@@ -252,7 +256,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             UpdateDevices();
             UpdateControllers();
 
-            SetStartLocation();
+            _ = SetStartLocationAsync();
         }
 
         private async Task LoadSettingsAsync()
@@ -277,7 +281,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
                     settingsService.Load(path);
 
-                    SetStartLocation();
+                    await SetStartLocationAsync();
                 }
             }
         }
@@ -325,7 +329,7 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
 
                 settingsService.Save(path.Path.LocalPath);
 
-                SetStartLocation();
+                await SetStartLocationAsync();
             }
         }
 
@@ -399,10 +403,18 @@ namespace SportDJ.Modules.SettingsModule.ViewModels
             }
         }
 
-        private void SetStartLocation()
+        private async Task SetStartLocationAsync()
         {
-            Task.Run(async () => startLocation = await dialogService
-                .GetFolderAsync(sessionService?.Contents?.SettingsPath));
+            // The storage provider belongs to the UI thread, so no Task.Run here
+            try
+            {
+                startLocation = await dialogService
+                    .GetFolderAsync(sessionService?.Contents?.SettingsPath);
+            }
+            catch (Exception)
+            {
+                startLocation = default;
+            }
         }
 
         private void UpdateControllers()

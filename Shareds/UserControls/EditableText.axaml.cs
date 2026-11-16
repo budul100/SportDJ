@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Threading;
 
 namespace SportDJ.Shareds.UserControls
@@ -20,9 +19,17 @@ namespace SportDJ.Shareds.UserControls
 
         public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<EditableText, string>(
             name: nameof(Text),
+            defaultValue: string.Empty,
             defaultBindingMode: BindingMode.TwoWay);
 
         #endregion Public Fields
+
+        #region Private Fields
+
+        // Text at the moment the editing started, used to revert on Escape
+        private string textBeforeEdit;
+
+        #endregion Private Fields
 
         #region Public Constructors
 
@@ -64,32 +71,62 @@ namespace SportDJ.Shareds.UserControls
 
         #endregion Public Properties
 
+        #region Protected Methods
+
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+
+            if (change.Property == IsActiveProperty
+                && change.GetNewValue<bool>())
+            {
+                textBeforeEdit = Text;
+
+                // The TextBox becomes visible with this change, so focus it afterwards
+                Dispatcher.Post(
+                    action: () => InputBox.Focus(),
+                    priority: DispatcherPriority.Input);
+            }
+        }
+
+        #endregion Protected Methods
+
         #region Private Methods
 
-        private void OnGotFocus(object sender, GotFocusEventArgs e)
+        private void OnGotFocus(object sender, FocusChangedEventArgs e)
         {
             if (sender is TextBox textBox)
             {
-                Dispatcher.UIThread.Post(textBox.SelectAll);
+                Dispatcher.Post(
+                    action: textBox.SelectAll,
+                    priority: DispatcherPriority.Input);
             }
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is TextBox)
+            if (sender is not TextBox)
             {
-                if (e.Key == Key.Return
-                    || e.Key == Key.Enter
-                    || e.Key == Key.Escape)
-                {
-                    IsActive = false;
+                return;
+            }
 
-                    e.Handled = true;
-                }
+            if (e.Key == Key.Enter)
+            {
+                IsActive = false;
+
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                Text = textBeforeEdit;
+
+                IsActive = false;
+
+                e.Handled = true;
             }
         }
 
-        private void OnLostFocus(object sender, RoutedEventArgs e)
+        private void OnLostFocus(object sender, FocusChangedEventArgs e)
         {
             if (sender is TextBox)
             {

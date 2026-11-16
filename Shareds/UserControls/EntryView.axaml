@@ -5,13 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:SportDJ.Shareds.UserControls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:SportDJ.Commons.Models.Contents"
-    xmlns:prism="http://prismlibrary.com/"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     d:DesignHeight="40"
     d:DesignWidth="300"
     mc:Ignorable="d"
-    x:Name="Root">
+    x:Name="Root"
+    x:DataType="local:EntryView">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -23,21 +21,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Design.DataContext>
-        <models:Entry>
-            <models:Entry.Track>
-                <models:Track 
-                    Title="Example Song" 
-                    Info="More Info" 
-                    Counter="5">
-                    <models:Track.Duration>
-                        <sys:TimeSpan>0:04:15</sys:TimeSpan>
-                    </models:Track.Duration>
-                </models:Track>
-            </models:Entry.Track>
-        </models:Entry>
-    </Design.DataContext>
-
     <Border
         Name="SelectionBorder"
         Margin="0"
@@ -46,14 +29,15 @@
         CornerRadius="{StaticResource PlayerCornerRadius}">
 
         <Border.Styles>
-            <Style Selector="Border.IsSelected">
-                <Setter Property="BorderBrush" Value="{StaticResource ColorIsSelected}" />
-            </Style>
-            <Style Selector="Border">
+            <!-- The later style wins, so the selected state has to be declared last -->
+            <Style Selector="Border#SelectionBorder">
                 <Setter Property="BorderBrush" Value="Transparent" />
             </Style>
+            <Style Selector="Border#SelectionBorder.IsSelected">
+                <Setter Property="BorderBrush" Value="{StaticResource ColorIsSelected}" />
+            </Style>
         </Border.Styles>
-        
+
         <Grid Margin="{StaticResource ContentMargin}">
 
             <Grid.ColumnDefinitions>
@@ -88,7 +72,7 @@
                 FontWeight="{Binding #Root.IsSelected, Converter={StaticResource BoolToFontWeightConverter}, ConverterParameter={StaticResource TrackFontWeightSelected}}"
                 FontSize="{StaticResource TrackFontSize}"
                 Text="{Binding #Root.Counter}" />
-        
+
         </Grid>
     </Border>
 </UserControl>

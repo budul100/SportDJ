@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media.Imaging;
@@ -27,7 +26,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly Player player;
         private readonly IPlayerService playerService;
 
-        private bool isDisposed;
         private bool isSettingsVisible;
         private bool isStackVisible;
 
@@ -60,57 +58,58 @@ namespace SportDJ.Modules.GridModule.ViewModels
             ShowStackCommand = new DelegateCommand(
                 executeMethod: ShowStack);
 
-            eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
                 action: _ => Initialize(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => player == p);
+                filter: p => player == p));
 
-            eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => player == p);
+                filter: p => player == p));
 
-            eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<PlayerShiftedEvent>().Subscribe(
                 action: _ => UpdateDuration(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: p => player == p);
+                filter: p => player == p));
 
-            eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<OutputStartedEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: o => outputServiceLive == o);
+                filter: o => outputServiceLive == o));
 
-            eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<OutputStoppedEvent>().Subscribe(
                 action: _ => UpdateContent(),
                 threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
-                filter: o => outputServiceLive == o);
+                filter: o => outputServiceLive == o));
 
-            eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+            // While any cell waits for a key to be assigned, only this cell must react
+            AddSubscription(eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
                 threadOption: ThreadOption.PublisherThread,
                 keepSubscriberReferenceAlive: true,
-                filter: k => parent.IsVisible
-                    && k == player.KeyCode);
+                filter: k => parent?.IsVisible == true
+                    && (IsListening || (!IsAnyListening && k == player.KeyCode))));
 
-            eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
                 action: p => { IsSettingsVisible = p == player; IsStackVisible = false; },
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true));
 
-            eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
                 action: p => { IsSettingsVisible = false; IsStackVisible = p == player; },
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true));
 
-            eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+            AddSubscription(eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
                 action: t => UpdatePanelButtons(),
                 threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true);
+                keepSubscriberReferenceAlive: true));
 
             playerService?.Initialize(
                 player: player);
@@ -146,7 +145,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public bool IsEnding => playerService?.IsEnding == true;
 
-        [Obsolete]
         public bool IsForeground
         {
             get { return playerService?.IsForeground == true; }
@@ -180,7 +178,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
-        [Obsolete]
         public bool ResetPosition
         {
             get { return playerService?.ResetPosition == true; }
@@ -210,14 +207,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected override void Dispose(bool isDisposing)
         {
-            if (!isDisposed)
+            if (isDisposing)
             {
-                if (isDisposing)
-                {
-                    playerService?.Dispose();
-                }
-
-                isDisposed = true;
+                playerService?.Dispose();
             }
 
             base.Dispose(
@@ -228,28 +220,25 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var gridMenus = GetGridMenus().ToArray();
 
-            var gridMenu = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.GridEditHeader}...",
                 menuItems: gridMenus,
                 closeCallback: CloseMenu);
 
-            yield return gridMenu;
-
             var playerMenus = GetPlayerMenus().ToArray();
 
-            var playerMenu = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.PlayerEditHeader}...",
                 menuItems: playerMenus,
                 closeCallback: CloseMenu);
 
-            yield return playerMenu;
-
             if (playerService?.HasPaths == true)
             {
+                // Sorted by the same text, which is used to build the group headers
                 var menuItems = GetMenuTracks()
-                    .OrderBy(m => m.Header).ToArray();
+                    .OrderBy(m => m.Entry.Track?.Info).ToArray();
 
-                if (menuItems?.Length > 1)
+                if (menuItems.Length > 1)
                 {
                     yield return new SeparatorViewModel();
 
@@ -260,12 +249,10 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
                     foreach (var group in groups)
                     {
-                        var result = new MenuViewModel(
+                        yield return new TrackGroupMenuViewModel(
                             eventAggregator: eventAggregator,
                             menuItems: group,
                             closeCallback: CloseMenu);
-
-                        yield return result;
                     }
                 }
             }
@@ -314,103 +301,87 @@ namespace SportDJ.Modules.GridModule.ViewModels
             }
         }
 
-        private IEnumerable<MenuViewModel> GetMenuTracks()
+        private IEnumerable<TrackMenuViewModel> GetMenuTracks()
         {
             if (playerService?.Entries?.Any() == true)
             {
                 foreach (var entry in playerService.Entries)
                 {
-                    var result = new MenuViewModel(
+                    yield return new TrackMenuViewModel(
                         eventAggregator: eventAggregator,
                         entry: entry,
                         closeCallback: CloseMenu);
-
-                    yield return result;
                 }
             }
         }
 
         private IEnumerable<BindableBase> GetPlayerMenus()
         {
-            var selectFileItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.PlayerSelectionFileHeader}...",
                 executeCallback: () => playerService?.SetFileAsync(),
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.FileMultipleOutline);
 
-            yield return selectFileItem;
-
-            var selectFolderItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.PlayerSelectionFolderHeader}...",
                 executeCallback: () => playerService?.SetFolderAsync(),
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.FolderMultipleOutline);
 
-            yield return selectFolderItem;
-
-            var resetItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: Texts.PlayerResetHeader,
                 executeCallback: () => playerService.ClearAsync(),
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.CloseCircleOutline);
 
-            yield return resetItem;
-
             yield return new SeparatorViewModel();
 
-            var renameItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: Texts.PlayerRenameHeader,
                 executeCallback: RenamePlayer,
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.FormTextbox);
 
-            yield return renameItem;
-
             var listenItem = new MenuViewModel(
                 header: Texts.KeyListenHeader,
                 executeCallback: ListenHook,
-                isCheckedGetter: () => isListening,
+                isCheckedGetter: () => IsListening,
                 icon: MaterialIconKind.KeyboardOutline);
 
             listenChecker = listenItem.Update;
 
             yield return listenItem;
 
-            var unhookItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: Texts.KeyUnhookHeader,
                 executeCallback: () => KeyCode = default,
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.KeyboardOffOutline);
 
-            yield return unhookItem;
-
             if (playerService?.HasPaths == true)
             {
                 yield return new SeparatorViewModel();
 
-                var isForegroundItem = new MenuViewModel(
+                yield return new MenuViewModel(
                     header: Texts.PlayerOnForegroundHeader,
                     executeCallback: () => IsForeground = !IsForeground,
                     closeCallback: CloseMenu,
                     isCheckedGetter: () => IsForeground,
                     icon: MaterialIconKind.ChevronUpBoxOutline);
 
-                yield return isForegroundItem;
-
-                var resetPositionsItem = new MenuViewModel(
+                yield return new MenuViewModel(
                     header: Texts.PlayerResetPosition,
                     executeCallback: () => ResetPosition = !ResetPosition,
                     closeCallback: CloseMenu,
                     isCheckedGetter: () => ResetPosition,
                     icon: MaterialIconKind.FileRestoreOutline);
-
-                yield return resetPositionsItem;
             }
         }
 
         private void OnKeyPressed(string keyCode)
         {
-            if (isListening)
+            if (IsListening)
             {
                 ReceiveKey(keyCode);
             }
@@ -482,7 +453,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
             RaisePropertyChanged(nameof(HasPFLOrKey));
             RaisePropertyChanged(nameof(HasStack));
 
-            RaisePropertyChanged(nameof(Menus));
             RaisePropertyChanged(nameof(Name));
             RaisePropertyChanged(nameof(IsForeground));
             RaisePropertyChanged(nameof(ResetPosition));

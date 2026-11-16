@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -133,36 +132,38 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                 obj: this);
         }
 
-        public int Read(float[] buffer, int offset, int count)
+        public int Read(Span<float> buffer)
         {
+            var count = buffer.Length;
             var samplesRead = 0;
 
             lock (lockLoop)
             {
                 if (IsLoop)
                 {
+                    var channels = WaveFormat.Channels;
+
                     while (samplesRead < count)
                     {
                         var samplesNeeded = count - samplesRead;
-                        var samplesUntilEnd = (int)(endSample - Position);
+
+                        // Position and loop bounds are in frames, the buffer is in interleaved samples
+                        var samplesUntilEnd = (endSample - Position) * channels;
 
                         if (samplesUntilEnd <= 0)
                         {
                             Position = startSample;
-                            samplesUntilEnd = (int)(endSample - startSample);
+                            samplesUntilEnd = (endSample - startSample) * channels;
                         }
 
-                        var toRead = Math.Min(samplesNeeded, samplesUntilEnd);
+                        var toRead = (int)Math.Min(samplesNeeded, samplesUntilEnd);
 
                         if (toRead <= 0)
                         {
                             break;
                         }
 
-                        var samplesLoop = sourceProvider.Read(
-                            buffer: buffer,
-                            offset: offset + samplesRead,
-                            count: toRead);
+                        var samplesLoop = sourceProvider.Read(buffer.Slice(samplesRead, toRead));
 
                         if (samplesLoop == 0)
                         {
@@ -174,10 +175,7 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                 }
                 else
                 {
-                    samplesRead = sourceProvider.Read(
-                        buffer: buffer,
-                        offset: offset,
-                        count: count);
+                    samplesRead = sourceProvider.Read(buffer);
                 }
             }
 
@@ -216,15 +214,12 @@ namespace SportDJ.Shareds.SampleProviders.Windows
 
             try
             {
-                using var stream = new FileStream(
-                    path: track.Path,
-                    mode: FileMode.Open,
-                    access: FileAccess.Read,
-                    share: FileShare.Read);
+                // Decode with the same reader as the playback (SourceProvider), so the analysis
+                // timeline matches the played samples exactly. Another decoder (e.g. Media Foundation)
+                // can differ in encoder delay and would shift the loop points.
+                using var reader = new AudioFileReader(track.Path);
 
-                using var reader = new StreamMediaFoundationReader(stream);
-
-                var sampleProvider = reader.ToSampleProvider();
+                ISampleProvider sampleProvider = reader;
 
                 var monoProvider = reader.WaveFormat.Channels == 1
                     ? sampleProvider
@@ -236,15 +231,9 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                 var samplesRead = 0;
 
                 while (!isDisposed
-                    && (samplesRead = monoProvider.Read(
-                        buffer: readBuffer,
-                        offset: 0,
-                        count: readBuffer.Length)) > 0)
+                    && (samplesRead = monoProvider.Read(readBuffer)) > 0)
                 {
-                    for (var i = 0; i < samplesRead; i++)
-                    {
-                        buffer.Add(readBuffer[i]);
-                    }
+                    buffer.AddRange(readBuffer.AsSpan(0, samplesRead));
                 }
 
                 result = buffer.ToArray();

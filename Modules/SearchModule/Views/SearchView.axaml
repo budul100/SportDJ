@@ -7,10 +7,13 @@
     xmlns:dt="using:SportDJ.Modules.SearchModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:SportDJ.Commons.Models.Contents"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:SportDJ.Modules.SearchModule.ViewModels"
     d:DesignHeight="500"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:SearchViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -42,7 +45,7 @@
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Command="{Binding UpdateDevicesCommand}"
+                Command="{Binding ClearCommand}"
                 DockPanel.Dock="Right"
                 Focusable="False">
                 <mat:MaterialIcon
@@ -64,7 +67,7 @@
 
         <ListBox ItemsSource="{Binding Entries}">
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:Entry">
                     <ct:EntryView Entry="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>

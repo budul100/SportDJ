@@ -1,30 +1,29 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Events.Entry;
-using SportDJ.Commons.Events.Track;
-using SportDJ.Commons.Models.Contents;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
     public class MenuViewModel
-        : BindableBase
+        : BindableBase, IDisposable
     {
         #region Private Fields
 
+        private readonly Action closeCallback;
         private readonly Action executeCallback;
         private readonly Func<bool> isCheckedGetter;
+        private readonly List<SubscriptionToken> subscriptions = [];
 
         private string header;
         private bool isChecked;
+        private bool isDisposed;
         private bool isPlayed;
         private bool isSelected;
+        private MenuViewModel selected;
 
         #endregion Private Fields
 
@@ -33,6 +32,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
         public MenuViewModel(string header, Action executeCallback, Action closeCallback = default,
             Func<bool> isCheckedGetter = default, MaterialIconKind? icon = default)
         {
+            this.closeCallback = closeCallback;
             this.executeCallback = executeCallback;
             this.isCheckedGetter = isCheckedGetter;
 
@@ -40,78 +40,23 @@ namespace SportDJ.Modules.GridModule.ViewModels
             Header = header;
             Icon = icon;
 
-            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
-
             Update();
         }
 
         public MenuViewModel(string header, IEnumerable<BindableBase> menuItems, Action closeCallback,
             MaterialIconKind? icon = default)
+            : this(header: header, executeCallback: default, closeCallback: closeCallback, icon: icon)
         {
-            Command = new DelegateCommand(ExecuteCallback);
-            Header = header;
-            Icon = icon;
+            MenuItems = menuItems?.ToArray();
 
-            MenuItems = new ObservableCollection<BindableBase>(menuItems);
-
-            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
-
-            UpdateItems();
-        }
-
-        public MenuViewModel(IEventAggregator eventAggregator, IEnumerable<BindableBase> menuItems, 
-            Action closeCallback)
-        {
-            eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
-                action: _ => UpdateItems(),
-                keepSubscriberReferenceAlive: true);
-
-            Command = new DelegateCommand(ExecuteCallback);
-            Header = GetHeader(menuItems);
-
-            MenuItems = new ObservableCollection<BindableBase>(menuItems);
-            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
-
-            UpdateItems();
-        }
-
-        public MenuViewModel(IEventAggregator eventAggregator, Entry entry, Action closeCallback)
-        {
-            this.executeCallback = entry.Selector;
-
-            eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
-                action: _ => UpdateItem(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: e => e == entry);
-
-            eventAggregator.GetEvent<TrackUpdatedEvent>().Subscribe(
-                action: _ => UpdateTrack(),
-                threadOption: ThreadOption.PublisherThread,
-                keepSubscriberReferenceAlive: true,
-                filter: t => t == entry.Track);
-
-            Entry = entry;
-            Command = new DelegateCommand(ExecuteCallback);
-
-            MenuCloseEvent += (s, e) => closeCallback?.Invoke();
-
-            UpdateTrack();
+            UpdateSelection();
         }
 
         #endregion Public Constructors
 
-        #region Public Events
-
-        public event EventHandler MenuCloseEvent;
-
-        #endregion Public Events
-
         #region Public Properties
 
         public DelegateCommand Command { get; }
-
-        public Entry Entry { get; }
 
         public bool HasIcon => Icon != default;
 
@@ -122,6 +67,9 @@ namespace SportDJ.Modules.GridModule.ViewModels
         }
 
         public MaterialIconKind? Icon { get; }
+
+        // Non nullable variant for the binding of the icon control
+        public MaterialIconKind IconKind => Icon ?? default;
 
         public bool IsChecked
         {
@@ -141,13 +89,31 @@ namespace SportDJ.Modules.GridModule.ViewModels
             set { SetProperty(ref isSelected, value); }
         }
 
-        public ObservableCollection<BindableBase> MenuItems { get; }
+        public IReadOnlyList<BindableBase> MenuItems { get; }
 
-        public MenuViewModel Selected { get; private set; }
+        public MenuViewModel Selected
+        {
+            get { return selected; }
+            private set { SetProperty(ref selected, value); }
+        }
 
         #endregion Public Properties
 
         #region Public Methods
+
+        public void Dispose()
+        {
+            if (!isDisposed)
+            {
+                isDisposed = true;
+
+                Dispose(
+                    isDisposing: true);
+
+                GC.SuppressFinalize(
+                    obj: this);
+            }
+        }
 
         public void Update()
         {
@@ -159,68 +125,56 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         #endregion Public Methods
 
-        #region Private Methods
+        #region Protected Methods
 
-        private static string GetHeader(IEnumerable<BindableBase> menuItems)
+        protected void AddSubscription(SubscriptionToken subscription)
         {
-            var result = default(string);
-
-            var relevants = menuItems?
-                .OfType<MenuViewModel>().ToArray();
-
-            if (relevants?.Length > 0)
+            if (subscription != default)
             {
-                var first = relevants[0].Entry.Track.Info;
-                var last = relevants[^1].Entry.Track.Info;
-
-                var length = string.Concat(first.TakeWhile((c, i) => c == last[i])).Length + Constants.MenuGroupTextLength;
-
-                var firstHeader = first.Length > length
-                    ? $"{first[..length]}..."
-                    : first;
-
-                var lastHeader = last.Length > length
-                    ? $"{last[..length]}..."
-                    : last;
-
-                result = $"Tracks {firstHeader} - {lastHeader}";
+                subscriptions.Add(subscription);
             }
-
-            return result;
         }
 
-        private void ExecuteCallback()
+        protected virtual void Dispose(bool isDisposing)
         {
-            MenuCloseEvent?.Invoke(
-                sender: this,
-                e: default);
+            if (isDisposing)
+            {
+                foreach (var subscription in subscriptions)
+                {
+                    subscription.Dispose();
+                }
 
-            executeCallback?.Invoke();
+                subscriptions.Clear();
 
-            Update();
+                if (MenuItems != default)
+                {
+                    foreach (var menuItem in MenuItems.OfType<IDisposable>().ToArray())
+                    {
+                        menuItem.Dispose();
+                    }
+                }
+            }
         }
 
-        private void UpdateItem()
+        protected void UpdateSelection()
         {
-            IsPlayed = Entry.IsPlayed;
-            IsSelected = Entry.IsSelected;
-        }
-
-        private void UpdateItems()
-        {
-            Selected = MenuItems?.OfType<MenuViewModel>()
+            Selected = MenuItems?.OfType<TrackMenuViewModel>()
                 .FirstOrDefault(m => m.Entry?.IsSelected == true);
 
             IsSelected = Selected != default;
         }
 
-        private void UpdateTrack()
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private void ExecuteCallback()
         {
-            var duration = Entry.Track?.Duration?.ToString(Constants.FormatDuration);
+            closeCallback?.Invoke();
 
-            Header = $"{Entry.Track.Info} ({duration}) [{Entry.Track.Counter}]";
+            executeCallback?.Invoke();
 
-            UpdateItem();
+            Update();
         }
 
         #endregion Private Methods

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using NAudio.Utils;
 using NAudio.Wave;
 using SportDJ.Commons.Assets;
 
@@ -45,18 +44,18 @@ namespace SportDJ.Shareds.SampleProviders.Core
             }
         }
 
-        public override int Read(float[] buffer, int offset, int count)
+        public override int Read(Span<float> buffer)
         {
+            var count = buffer.Length;
             var samplesMerged = 0;
 
-            sourceBuffer = BufferHelpers.Ensure(
-                buffer: sourceBuffer,
-                samplesRequired: count);
-
-            for (var i = 0; i < count; i++)
+            if (sourceBuffer == null
+                || sourceBuffer.Length < count)
             {
-                buffer[offset + i] = 0;
+                sourceBuffer = new float[count];
             }
+
+            buffer.Clear();
 
             lock (lockProvider)
             {
@@ -66,14 +65,11 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 {
                     var source = sourceProviders[index];
 
-                    var samplesRead = source.Read(
-                        buffer: sourceBuffer,
-                        offset: 0,
-                        count: count);
+                    var samplesRead = source.Read(sourceBuffer.AsSpan(0, count));
 
                     for (var n = 0; n < samplesRead; n++)
                     {
-                        buffer[offset + n] += sourceBuffer[n];
+                        buffer[n] += sourceBuffer[n];
                     }
 
                     samplesMerged = Math.Max(

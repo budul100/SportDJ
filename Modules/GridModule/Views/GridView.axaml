@@ -12,7 +12,7 @@
     d:DesignHeight="300"
     d:DesignWidth="300"
     prism:ViewModelLocator.AutoWireViewModel="False"
-    x:DataType="dt:GridViewModel"
+    x:DataType="vm:GridViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -27,7 +27,7 @@
         <dt:GridViewModel />
     </Design.DataContext>
 
-    <ItemsControl x:DataType="vm:GridViewModel" ItemsSource="{Binding Cells}">
+    <ItemsControl ItemsSource="{Binding Cells}">
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate x:DataType="vm:GridViewModel">
@@ -56,12 +56,6 @@
                 <v:GroupView />
             </DataTemplate>
             <DataTemplate x:DataType="vm:PlayerViewModel">
-                <v:PlayerView />
-            </DataTemplate>
-            <DataTemplate x:DataType="dt:GroupViewModel">
-                <v:GroupView />
-            </DataTemplate>
-            <DataTemplate x:DataType="dt:PlayerViewModel">
                 <v:PlayerView />
             </DataTemplate>
         </ItemsControl.DataTemplates>

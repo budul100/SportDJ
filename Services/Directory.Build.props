@@ -1,0 +1,13 @@
+<Project>
+
+	<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+	<PropertyGroup>
+		<RootNamespace>SportDJ.Services.$(MSBuildProjectName)</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="$(MSBuildThisFileDirectory)../Commons/Commons.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
@@ -14,7 +14,7 @@ using SportDJ.Commons.Models.Structure;
 namespace SportDJ.Modules.DefinitionsModule.ViewModels
 {
     public class StackViewModel
-        : BindableBase
+        : TabViewModel
     {
         #region Private Fields
 
@@ -47,15 +47,13 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
             eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
                 action: _ => UpdateEntries(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
         }
 
         #endregion Public Constructors
 
         #region Public Properties
-
-        public static string Title => Titel;
 
         public bool AutoScroll
         {
@@ -92,12 +90,10 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
         }
 
         public IEventAggregator EventAggregator { get; }
-
         public DelegateCommand ResetCommand { get; }
-
         public DelegateCommand<Entry> SelectCommand { get; }
-
         public DelegateCommand ShuffleCommand { get; }
+        public override string Title => Titel;
 
         #endregion Public Properties
 

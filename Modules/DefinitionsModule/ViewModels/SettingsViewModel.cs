@@ -1,4 +1,4 @@
-﻿using Prism.Commands;
+using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
@@ -9,7 +9,8 @@ using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels
 {
-    public class SettingsViewModel : BindableBase
+    public class SettingsViewModel
+        : TabViewModel
     {
         #region Private Fields
 
@@ -37,9 +38,7 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
         #region Public Properties
 
-        public static int MaxLengthName => Constants.NameMaxLength;
-
-        public static string Title => Titel;
+        public bool IsActive => player != default;
 
         public bool IsForeground
         {
@@ -81,6 +80,8 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
             }
         }
 
+        public int MaxLengthName => Constants.NameMaxLength;
+
         public string Name
         {
             get => player?.Name;
@@ -102,6 +103,8 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
         public DelegateCommand RegisterCommand { get; private set; }
 
+        public override string Title => Titel;
+
         public DelegateCommand UnregisterCommand { get; private set; }
 
         #endregion Public Properties
@@ -114,6 +117,12 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
                 && this.player != player)
             {
                 this.player = player;
+
+                // The bindings still show the values of the previous player otherwise
+                RaisePropertyChanged(nameof(IsActive));
+                RaisePropertyChanged(nameof(IsForeground));
+                RaisePropertyChanged(nameof(IsReset));
+                RaisePropertyChanged(nameof(Name));
             }
         }
 

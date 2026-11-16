@@ -1,19 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Shareds.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<AvaloniaXamlReportImportance>High</AvaloniaXamlReportImportance>
 		<AvaloniaXamlVerboseExceptions>true</AvaloniaXamlVerboseExceptions>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Avalonia" Version="11.3.11" />
+		<PackageReference Include="Avalonia" Version="12.1.6" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<ProjectReference Include="..\..\Commons\Commons.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Midi;
+﻿using NAudio.Midi;
 using SportDJ.Services.MonitorService.Mixxx.Assets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.MonitorService.Mixxx.Extensions
 {

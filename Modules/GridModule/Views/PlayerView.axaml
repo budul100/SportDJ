@@ -2,11 +2,10 @@
     x:Class="SportDJ.Modules.GridModule.Views.PlayerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:assets="using:SportDJ.Commons.Assets"
     xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -15,7 +14,7 @@
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
-    x:DataType="dt:PlayerViewModel"
+    x:DataType="vm:PlayerViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -44,11 +43,12 @@
         CornerRadius="{StaticResource PlayerCornerRadius}">
 
         <Border.Styles>
-            <Style Selector="Border.IsActive">
-                <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
-            </Style>
+            <!-- Avalonia has no style specificity, the style declared last wins: default first -->
             <Style Selector="Border">
                 <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+            <Style Selector="Border.IsActive">
+                <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
             </Style>
         </Border.Styles>
 
@@ -148,18 +148,19 @@
                 Classes.IsPlaying="{Binding IsPlaying}">
 
                 <Border.Styles>
+                    <Style Selector="Border">
+                        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
+                    </Style>
                     <Style Selector="Border.IsForeground">
                         <Setter Property="Background" Value="{StaticResource ColorIsForeground}" />
                     </Style>
                     <Style Selector="Border.IsPlaying">
                         <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
                     </Style>
-                    <Style Selector="Border">
-                        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
-                    </Style>
                 </Border.Styles>
 
                 <Button
+                    Name="ExecuteButton"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Background="Transparent"
@@ -168,7 +169,7 @@
 
                     <Button.ContextMenu>
                         <ContextMenu
-                            Name="ContextMenu"
+                            Closed="OnContextMenuClosed"
                             ItemsSource="{Binding Menus}"
                             Opened="OnContextMenuOpened">
 
@@ -225,7 +226,7 @@
                                     FontSize="{StaticResource FontSizeState}"
                                     FontStyle="Italic"
                                     IsActive="{Binding IsRenaming}"
-                                    MaxLength="{Binding MaxLengthName}"
+                                    MaxLength="{x:Static assets:Constants.NameMaxLength}"
                                     Text="{Binding Name}" />
                             </Viewbox>
 

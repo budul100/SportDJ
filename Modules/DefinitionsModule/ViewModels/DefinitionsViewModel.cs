@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Prism.Events;
@@ -15,11 +15,11 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
     {
         #region Private Fields
 
-        private readonly Dictionary<Type, BindableBase> registrations = [];
+        private readonly Dictionary<Type, TabViewModel> registrations = [];
         private readonly SettingsViewModel settingsViewModel;
         private readonly StackViewModel stackViewModel;
 
-        private BindableBase active;
+        private TabViewModel active;
 
         #endregion Private Fields
 
@@ -33,21 +33,21 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
             eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
                 action: SetPlayer,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
                 action: SetPlayer,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
-            registrations = new Dictionary<Type, BindableBase>
+            registrations = new Dictionary<Type, TabViewModel>
             {
                 { typeof(IPlayerService), settingsViewModel },
                 { typeof(IStackService), stackViewModel }
             };
 
-            Tabs = new ObservableCollection<BindableBase>(registrations.Values);
+            Tabs = new ObservableCollection<TabViewModel>(registrations.Values);
 
             if (Tabs.Count > 0)
             {
@@ -59,13 +59,13 @@ namespace SportDJ.Modules.DefinitionsModule.ViewModels
 
         #region Public Properties
 
-        public BindableBase Active
+        public TabViewModel Active
         {
             get => active;
             set => SetProperty(ref active, value);
         }
 
-        public ObservableCollection<BindableBase> Tabs { get; }
+        public ObservableCollection<TabViewModel> Tabs { get; }
 
         #endregion Public Properties
 

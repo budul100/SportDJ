@@ -1,18 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Shareds.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
-	</PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<PackageReference Include="NAudio.Core" Version="2.2.1" />
+		<PackageReference Include="NAudio.Core" Version="3.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Commons\Commons.csproj" />
 		<ProjectReference Include="..\SampleProviders.Abstractions\SampleProviders.Abstractions.csproj" />
-	</ItemGroup>	  
+	</ItemGroup>
 
 </Project>

@@ -32,7 +32,7 @@
             Grid.ColumnSpan="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Source="/Assets/SportDJ.jpg" />
+            Source="/Assets/SportDJ.png" />
         <TextBlock
             Grid.Row="1"
             Grid.Column="0"

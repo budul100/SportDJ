@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFrameworks>net8.0-windows</TargetFrameworks>
+		<TargetFramework>$(WindowsTargetFramework)</TargetFramework>
 		<RootNamespace>SportDJ.App</RootNamespace>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>8</VersionMinor>
@@ -16,7 +16,6 @@
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<IsRidAgnostic>false</IsRidAgnostic>
 	</PropertyGroup>
 
@@ -25,25 +24,24 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.11" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
-		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.11" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
-		<PackageReference Include="Prism.DryIoc.Avalonia" Version="9.0.537.11130" />
-		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.3" />
-		<PackageReference Include="Xaml.Behaviors.Interactions" Version="11.3.9.3" />
-		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9.3" />
+		<PackageReference Include="Avalonia" Version="12.1.6" />
+		<PackageReference Include="Avalonia.Desktop" Version="12.1.6" />
+		<PackageReference Include="Avalonia.LinuxFramebuffer" Version="12.1.6" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.6" />
+		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
+		<PackageReference Include="Prism.DryIoc.Avalonia" Version="9.0.537.11321" />
+		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="12.1.5" />
+		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.1.5" />
+		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.1.5" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<ProjectReference Include="..\Commons\Commons.csproj" />
 		<ProjectReference Include="..\Modules\ControllerModule\ControllerModule.csproj" />
 		<ProjectReference Include="..\Modules\DefinitionsModule\DefinitionsModule.csproj" />
 		<ProjectReference Include="..\Modules\DisplayModule\DisplayModule.csproj" />
 		<ProjectReference Include="..\Modules\GridModule\GridModule.csproj" />
-		<ProjectReference Include="..\Modules\MenuModule\MenuModule.csproj" />
 		<ProjectReference Include="..\Modules\SearchModule\SearchModule.csproj" />
 		<ProjectReference Include="..\Modules\SettingsModule\SettingsModule.csproj" />
 		<ProjectReference Include="..\Services\ControllerService\ControllerService.csproj" />

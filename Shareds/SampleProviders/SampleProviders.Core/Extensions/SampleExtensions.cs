@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SportDJ.Shareds.SampleProviders.Core.Extensions
 {
@@ -6,12 +6,26 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
     {
         #region Private Fields
 
-        // Resolution of the analysis. 1024 samples @ 44.1kHz ≈ 23ms per step.
-        // Good balance between performance and accuracy for long phrases.
-        private const int HopSize = 1024;
+        // Resolution of the energy envelope. 512 samples @ 44.1kHz ≈ 11.6ms per step.
+        private const int HopSize = 512;
+
+        // Minimum waveform similarity (0..1) of the loop seam. Below it, no loop is reported.
+        private const double MinSeamQuality = 0.35;
+
+        // Minimum similarity (0..1) of the envelope pattern. Below it, the track has no repeating structure.
+        private const double MinStructureScore = 0.5;
+
+        // Length of the pattern that is compared against the past. It has to cover a full harmonic phrase.
+        // With a short pattern (1.5s), every multiple of the beat matches, because the drums repeat
+        // every bar, and the loop ends up in the middle of a chord progression.
+        private const double PatternSeconds = 8.0;
+
+        // Lags with a score within this distance of the best score are treated as equally good.
+        // The shortest of them wins (shortest repeating unit).
+        private const double ScoreTolerance = 0.03;
 
         // Window size for RMS calculation (smoothing).
-        private const int WindowSize = 2048;
+        private const int WindowSize = 1024;
 
         #endregion Private Fields
 
@@ -19,13 +33,15 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
 
         /// <summary>
         /// Detects a loop ending near the current position by analyzing the audio history.
+        /// The loop length is searched on a coarse energy envelope (musical structure) and then
+        /// refined on the waveform (sample accurate), so the jump from end to start is seamless.
         /// </summary>
-        /// <param name="allSamples">The full audio buffer.</param>
-        /// <param name="position">The current playback cursor position (in samples).</param>
+        /// <param name="allSamples">The full mono audio buffer. Must be decoded the same way as the played audio.</param>
+        /// <param name="position">The current playback cursor position (in frames).</param>
         /// <param name="sampleRate">The sample rate of the audio.</param>
-        /// <param name="minLoopDuration">Minimum length of the loop in seconds (default: 10s).</param>
-        /// <param name="maxLoopDuration">Maximum length of the loop in seconds (default: 45s).</param>
-        /// <returns>A tuple containing Start and End sample positions, or null if no loop found.</returns>
+        /// <param name="minLoopDuration">Minimum length of the loop in seconds (default: 5s).</param>
+        /// <param name="maxLoopDuration">Maximum length of the loop in seconds (default: 20s).</param>
+        /// <returns>A tuple containing Start and End frame positions, or null if no loop found.</returns>
         public static (long? Start, long? End) DetectLoop(this
             float[] allSamples,
             long position,
@@ -35,66 +51,98 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
         {
             // Ensure we have enough history for the minimum requested loop
             var neededHistory = (long)(sampleRate * minLoopDuration);
-            if (allSamples == null || position < neededHistory) return (null, null);
 
-            // 1. FIND ANCHOR (Future)
-            // We search in the near future (now ... now + 1.5s) for a strong downbeat/transient.
-            // This ensures the loop ends cleanly on a beat.
-            var refinedEnd = FindStrongestTransient(allSamples, position, (long)(sampleRate * 1.5));
-
-            // Fallback: If no transient found in future, snap to current position
-            if (refinedEnd < position) refinedEnd = position;
-
-            // 2. SEARCH PATTERN (Past)
-            // We analyze a window far enough back to cover the max loop duration + buffer
-            var analysisSeconds = (long)maxLoopDuration + 15;
-            var analysisLength = sampleRate * analysisSeconds;
-            var startAnalysis = Math.Max(0, refinedEnd - analysisLength);
-            var lengthAnalysis = refinedEnd - startAnalysis;
-
-            // Create RMS envelope (energy curve)
-            var envelope = CalculateEnvelope(allSamples, startAnalysis, lengthAnalysis);
-
-            var envSampleRate = sampleRate / HopSize;
-            var minLagIdx = (int)(minLoopDuration * envSampleRate);
-            var maxLagIdx = (int)(maxLoopDuration * envSampleRate);
-
-            // Define the "Fingerprint" size we compare (last 1.5 seconds of the envelope)
-            var patternWidth = (int)(1.5 * envSampleRate);
-
-            // Perform the search (Difference Function / Autocorrelation)
-            var bestLag = FindBestPatternMatch(envelope, minLagIdx, maxLagIdx, patternWidth);
-
-            if (bestLag <= 0) return (null, null);
-
-            // 3. CALCULATE START
-            var loopLengthSamples = (long)bestLag * HopSize;
-
-            // Strict Phase Locking: The start is derived exactly from the End minus Length.
-            // We do NOT search for a separate transient peak for the start, to ensure rhythm consistency.
-            var exactStart = refinedEnd - loopLengthSamples;
-
-            // 4. FINE TUNING (Anti-Click / Phase Alignment)
-            // Find the nearest zero-crossing (rising edge) within +/- 50ms to ensure the waveform matches.
-            var refinedStart = SnapToZeroCrossing(allSamples, exactStart, sampleRate / 20);
-
-            // STUMBLE CHECK / PRE-TRANSIENT CORRECTION:
-            // Check if we accidentally locked onto the silence/noise *before* the kick.
-            // If the signal 15ms later is significantly louder (> 2x), we were too early.
-            var checkPos = refinedStart + sampleRate / 70; // check ~14ms ahead
-
-            if (checkPos < allSamples.Length &&
-                Math.Abs(allSamples[checkPos]) > Math.Abs(allSamples[refinedStart]) * 2.0)
+            if (allSamples == null
+                || position < neededHistory
+                || position >= allSamples.Length)
             {
-                // We were in the "pre-roll". Snap forward to the actual loud peak.
-                refinedStart = FindRisingEdgeTransient(allSamples, refinedStart, refinedStart + sampleRate / 10);
+                return (null, null);
             }
 
-            // Final Validation
-            // Ensure start is valid and the loop isn't impossibly short
-            if (refinedStart >= 0 && refinedEnd > refinedStart + sampleRate * minLoopDuration * 0.9)
+            // 1. FIND ANCHOR (Future)
+            // We search in the near future (now ... now + 1.5s) for a strong transient.
+            // This ensures the loop ends cleanly on a beat.
+            var end = FindStrongestTransient(allSamples, position, (long)(sampleRate * 1.5));
+
+            if (end < position)
             {
-                return (refinedStart, refinedEnd);
+                end = position;
+            }
+
+            // 2. ENERGY ENVELOPE (Past)
+            // Far enough back to cover the maximum loop plus the pattern that is compared.
+            var analysisLength = (long)(sampleRate * (maxLoopDuration + PatternSeconds + 1));
+            var startAnalysis = Math.Max(0, end - analysisLength);
+            var lengthAnalysis = Math.Min(end, allSamples.Length) - startAnalysis;
+
+            var envelope = CalculateEnvelope(allSamples, startAnalysis, lengthAnalysis);
+
+            var envelopeRate = (double)sampleRate / HopSize;
+            var minLag = (int)(minLoopDuration * envelopeRate);
+            var maxLag = (int)(maxLoopDuration * envelopeRate);
+
+            // With a short history the pattern shrinks, but it must stay long enough to be meaningful
+            var patternWidth = Math.Min(
+                val1: (int)(PatternSeconds * envelopeRate),
+                val2: envelope.Length - minLag - 1);
+
+            if (patternWidth < (int)(2.0 * envelopeRate))
+            {
+                return (null, null);
+            }
+
+            maxLag = Math.Min(maxLag, envelope.Length - patternWidth);
+
+            if (maxLag <= minLag + 1)
+            {
+                return (null, null);
+            }
+
+            // 3. COARSE LOOP LENGTH
+            var scores = CalculateScores(envelope, minLag, maxLag, patternWidth);
+            var bestLag = SelectLag(scores, minLag, maxLag);
+
+            if (bestLag < 0)
+            {
+                return (null, null);
+            }
+
+            // 4. FINE TUNING (Sample accuracy)
+            // First +/- 2 envelope steps with every 4th sample, then +/- 4 samples exactly.
+            // The first difference of the signal emphasizes transients (timing) over the bass (phase).
+            var before = (int)(0.2 * sampleRate);
+            var after = (int)(0.3 * sampleRate);
+
+            var loopLength = RefineLength(
+                samples: allSamples,
+                end: end,
+                length: (long)bestLag * HopSize,
+                radius: 2 * HopSize,
+                before: before,
+                after: after,
+                step: 4,
+                quality: out _);
+
+            loopLength = RefineLength(
+                samples: allSamples,
+                end: end,
+                length: loopLength,
+                radius: 4,
+                before: before,
+                after: after,
+                step: 1,
+                quality: out var quality);
+
+            // Strict Phase Locking: The start is derived exactly from the End minus Length.
+            var start = end - loopLength;
+
+            // Final Validation
+            // Ensure start is valid, the seam matches and the loop isn't impossibly short
+            if (start >= 0
+                && quality >= MinSeamQuality
+                && loopLength >= sampleRate * minLoopDuration * 0.9)
+            {
+                return (start, end);
             }
 
             return (null, null);
@@ -106,70 +154,117 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
 
         /// <summary>
         /// Calculates the Root Mean Square (RMS) envelope of the audio signal.
-        /// This creates a low-resolution "map" of the song's energy.
+        /// This creates a low-resolution "map" of the song's energy. The square root compresses
+        /// the dynamics, so loud kicks do not dominate the comparison.
         /// </summary>
-        private static float[] CalculateEnvelope(float[] samples, long offset, long count)
+        private static double[] CalculateEnvelope(float[] samples, long offset, long count)
         {
-            var envelopeLength = (int)(count / HopSize);
-            var envelope = new float[envelopeLength];
-            var envIndex = 0;
+            var envelopeLength = (int)((count - WindowSize) / HopSize) + 1;
 
-            for (long i = 0; i < count - WindowSize; i += HopSize)
+            if (envelopeLength <= 0)
             {
+                return [];
+            }
+
+            var envelope = new double[envelopeLength];
+
+            for (var index = 0; index < envelopeLength; index++)
+            {
+                var windowStart = offset + (long)index * HopSize;
+
                 double sum = 0;
+
                 // Optimization: Sampling every 8th value is sufficient for RMS accuracy here
                 for (var j = 0; j < WindowSize; j += 8)
                 {
-                    var val = samples[offset + i + j];
-                    sum += val * val;
+                    var value = samples[windowStart + j];
+                    sum += value * value;
                 }
-                envelope[envIndex++] = (float)Math.Sqrt(sum / (WindowSize / 8));
-                if (envIndex >= envelopeLength) break;
+
+                envelope[index] = Math.Sqrt(Math.Sqrt(sum / (WindowSize / 8)));
             }
+
             return envelope;
         }
 
         /// <summary>
-        /// Finds the best match for the end-pattern in the past using Mean Squared Error (Difference Function).
+        /// Pearson correlation of the envelope pattern at the end with the pattern "lag" steps earlier.
         /// </summary>
-        private static int FindBestPatternMatch(float[] envelope, int minLag, int maxLag, int patternWidth)
+        private static double[] CalculateScores(double[] envelope, int minLag, int maxLag, int patternWidth)
         {
-            var signalEnd = envelope.Length - 1;
+            var scores = new double[maxLag + 1];
 
-            // Safety check: Is the envelope long enough?
-            if (signalEnd - patternWidth < 0) return -1;
+            Array.Fill(scores, -1.0);
 
-            // Limit maxLag to available history
-            var searchLimit = envelope.Length - patternWidth;
-            if (maxLag > searchLimit) maxLag = searchLimit;
+            var referenceStart = envelope.Length - patternWidth;
 
-            var minDifference = double.MaxValue;
-            var bestLag = -1;
-
-            // Iterate backwards through history within the allowed range
-            for (var lag = minLag; lag < maxLag; lag++)
+            for (var lag = minLag; lag <= maxLag; lag++)
             {
-                double currentDiff = 0;
-
-                // Compare the pattern at the end (Future/Now) with the pattern in the past (Now - lag)
-                for (var i = 0; i < patternWidth; i++)
-                {
-                    var patternVal = envelope[signalEnd - i];      // Reference (Target)
-                    var pastVal = envelope[signalEnd - i - lag];   // Candidate
-
-                    var diff = patternVal - pastVal;
-                    currentDiff += diff * diff;
-                }
-
-                // We want the LOWEST difference (best similarity)
-                if (currentDiff < minDifference)
-                {
-                    minDifference = currentDiff;
-                    bestLag = lag;
-                }
+                scores[lag] = CorrelateEnvelope(
+                    envelope: envelope,
+                    startA: referenceStart,
+                    startB: referenceStart - lag,
+                    length: patternWidth);
             }
 
-            return bestLag;
+            return scores;
+        }
+
+        private static double CorrelateEnvelope(double[] envelope, int startA, int startB, int length)
+        {
+            double meanA = 0;
+            double meanB = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                meanA += envelope[startA + i];
+                meanB += envelope[startB + i];
+            }
+
+            meanA /= length;
+            meanB /= length;
+
+            double sumAB = 0;
+            double sumAA = 0;
+            double sumBB = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var a = envelope[startA + i] - meanA;
+                var b = envelope[startB + i] - meanB;
+
+                sumAB += a * b;
+                sumAA += a * a;
+                sumBB += b * b;
+            }
+
+            return sumAA > 1e-12 && sumBB > 1e-12
+                ? sumAB / Math.Sqrt(sumAA * sumBB)
+                : -1.0;
+        }
+
+        /// <summary>
+        /// Normalized cross correlation of the first difference of two segments.
+        /// </summary>
+        private static double CorrelateDifference(float[] samples, long startA, long startB, long length, int step)
+        {
+            double sumAB = 0;
+            double sumAA = 0;
+            double sumBB = 0;
+
+            for (long i = 0; i < length; i += step)
+            {
+                var a = GetDifference(samples, startA + i);
+                var b = GetDifference(samples, startB + i);
+
+                sumAB += a * b;
+                sumAA += a * a;
+                sumBB += b * b;
+            }
+
+            return sumAA > 1e-12 && sumBB > 1e-12
+                ? sumAB / Math.Sqrt(sumAA * sumBB)
+                : -1.0;
         }
 
         /// <summary>
@@ -224,50 +319,86 @@ namespace SportDJ.Shareds.SampleProviders.Core.Extensions
             return FindRisingEdgeTransient(samples, start, start + length);
         }
 
-        /// <summary>
-        /// Searches a small radius around a specific point for the nearest Rising Edge Zero-Crossing.
-        /// Used for phase alignment without changing the rhythmic feel.
-        /// </summary>
-        private static long SnapToZeroCrossing(float[] samples, long position, int searchRadius)
+        private static double GetDifference(float[] samples, long index)
         {
-            var start = Math.Max(1, position - searchRadius);
-            var end = Math.Min(samples.Length - 1, position + searchRadius);
+            return index > 0
+                ? samples[index] - samples[index - 1]
+                : 0;
+        }
 
-            var bestPos = position;
-            var closestDist = long.MaxValue;
-            var found = false;
+        /// <summary>
+        /// Searches the length around the coarse value, where the waveform around the end
+        /// matches the waveform around the (end - length) best.
+        /// </summary>
+        private static long RefineLength(float[] samples, long end, long length, int radius, int before,
+            int after, int step, out double quality)
+        {
+            var bestLength = length;
+            quality = -2.0;
 
-            for (var i = start; i < end; i++)
+            var windowStart = end - before;
+            var windowEnd = Math.Min(samples.Length, end + after);
+
+            for (var candidate = length - radius; candidate <= length + radius; candidate += step)
             {
-                // Check for Rising Edge (- to +)
-                if (samples[i] >= 0 && samples[i - 1] < 0)
+                var shifted = windowStart - candidate;
+
+                if (shifted < 1)
                 {
-                    var dist = Math.Abs(i - position);
-                    if (dist < closestDist)
-                    {
-                        closestDist = dist;
-                        bestPos = i;
-                        found = true;
-                    }
+                    continue;
+                }
+
+                var similarity = CorrelateDifference(
+                    samples: samples,
+                    startA: windowStart,
+                    startB: shifted,
+                    length: windowEnd - windowStart,
+                    step: step);
+
+                if (similarity > quality)
+                {
+                    quality = similarity;
+                    bestLength = candidate;
                 }
             }
 
-            // Fallback: If no rising edge found (e.g., extremely low freq), find lowest amplitude point
-            if (!found)
+            return bestLength;
+        }
+
+        /// <summary>
+        /// Picks the shortest local maximum that is almost as good as the best one.
+        /// Multiples of the shortest repeating unit score equally well, but shorter loops are preferred.
+        /// </summary>
+        private static int SelectLag(double[] scores, int minLag, int maxLag)
+        {
+            var best = double.MinValue;
+            var bestLag = -1;
+
+            for (var lag = minLag; lag <= maxLag; lag++)
             {
-                var minAmp = float.MaxValue;
-                for (var i = start; i < end; i++)
+                if (scores[lag] > best)
                 {
-                    var amp = Math.Abs(samples[i]);
-                    if (amp < minAmp)
-                    {
-                        minAmp = amp;
-                        bestPos = i;
-                    }
+                    best = scores[lag];
+                    bestLag = lag;
                 }
             }
 
-            return bestPos;
+            if (best < MinStructureScore)
+            {
+                return -1;
+            }
+
+            for (var lag = minLag + 1; lag < maxLag; lag++)
+            {
+                if (scores[lag] >= scores[lag - 1]
+                    && scores[lag] >= scores[lag + 1]
+                    && scores[lag] >= best - ScoreTolerance)
+                {
+                    return lag;
+                }
+            }
+
+            return bestLag;
         }
 
         #endregion Private Methods

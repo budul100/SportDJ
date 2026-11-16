@@ -16,12 +16,12 @@ namespace SportDJ.Shareds.UserControls
         public static readonly DirectProperty<EntryView, string> CounterProperty = AvaloniaProperty
             .RegisterDirect<EntryView, string>(
                 name: nameof(Counter),
-                getter: o => GetCounter(o.entry));
+                getter: o => o.counter);
 
         public static readonly DirectProperty<EntryView, string> DurationProperty = AvaloniaProperty
             .RegisterDirect<EntryView, string>(
                 name: nameof(Duration),
-                getter: o => GetDuration(o.entry));
+                getter: o => o.duration);
 
         public static readonly DirectProperty<EntryView, Entry> EntryProperty = AvaloniaProperty
             .RegisterDirect<EntryView, Entry>(
@@ -38,24 +38,36 @@ namespace SportDJ.Shareds.UserControls
         public static readonly DirectProperty<EntryView, string> InfoProperty = AvaloniaProperty
             .RegisterDirect<EntryView, string>(
                 name: nameof(Info),
-                getter: o => o.entry?.Track?.Info);
+                getter: o => o.info);
 
         public static readonly DirectProperty<EntryView, bool> IsPlayedProperty = AvaloniaProperty
             .RegisterDirect<EntryView, bool>(
                 name: nameof(IsPlayed),
-                getter: o => o.entry?.IsPlayed ?? false);
+                getter: o => o.isPlayed);
 
         public static readonly DirectProperty<EntryView, bool> IsSelectedProperty = AvaloniaProperty
             .RegisterDirect<EntryView, bool>(
                 name: nameof(IsSelected),
-                getter: o => o.entry?.IsSelected ?? false);
+                getter: o => o.isSelected);
 
         #endregion Public Fields
 
         #region Private Fields
 
+        private string counter;
+        private string duration;
         private Entry entry;
+        private SubscriptionToken entryUpdatedToken;
         private IEventAggregator eventAggregator;
+        private string info;
+        private bool isAttached;
+        private bool isPlayed;
+        private bool isSelected;
+
+        // The aggregator the tokens belong to, the property may already point to a new one when unsubscribing
+        private IEventAggregator subscribedAggregator;
+
+        private SubscriptionToken trackUpdatedToken;
 
         #endregion Private Fields
 
@@ -70,9 +82,9 @@ namespace SportDJ.Shareds.UserControls
 
         #region Public Properties
 
-        public string Counter => GetCounter(entry);
+        public string Counter => counter;
 
-        public string Duration => GetDuration(entry);
+        public string Duration => duration;
 
         public Entry Entry
         {
@@ -80,41 +92,13 @@ namespace SportDJ.Shareds.UserControls
 
             set
             {
-                var oldInfo = Info;
-                var oldCounter = Counter;
-                var oldDuration = Duration;
-                var oldIsPlayed = IsPlayed;
-                var oldIsSelected = IsSelected;
-
                 if (SetAndRaise(
                     property: EntryProperty,
                     field: ref entry,
                     value: value))
                 {
-                    RaisePropertyChanged(
-                        property: InfoProperty,
-                        oldValue: oldInfo,
-                        newValue: Info);
-
-                    RaisePropertyChanged(
-                        property: CounterProperty,
-                        oldValue: oldCounter,
-                        newValue: Counter);
-
-                    RaisePropertyChanged(
-                        property: DurationProperty,
-                        oldValue: oldDuration,
-                        newValue: Duration);
-
-                    RaisePropertyChanged(
-                        property: IsPlayedProperty,
-                        oldValue: oldIsPlayed,
-                        newValue: IsPlayed);
-
-                    RaisePropertyChanged(
-                        property: IsSelectedProperty,
-                        oldValue: oldIsSelected,
-                        newValue: IsSelected);
+                    RefreshEntry();
+                    RefreshTrack();
 
                     SubscribeEvents();
                 }
@@ -137,20 +121,46 @@ namespace SportDJ.Shareds.UserControls
             }
         }
 
-        public string Info => entry?.Track?.Info;
+        public string Info => info;
 
-        public bool IsPlayed => entry?.IsPlayed ?? false;
+        public bool IsPlayed => isPlayed;
 
-        public bool IsSelected => entry?.IsSelected ?? false;
+        public bool IsSelected => isSelected;
 
         #endregion Public Properties
+
+        #region Protected Methods
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+
+            isAttached = true;
+
+            // Events may have been missed while detached
+            RefreshEntry();
+            RefreshTrack();
+
+            SubscribeEvents();
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            isAttached = false;
+
+            UnsubscribeEvents();
+
+            base.OnDetachedFromVisualTree(e);
+        }
+
+        #endregion Protected Methods
 
         #region Private Methods
 
         private static string GetCounter(Entry entry)
         {
             return entry?.Track?.Counter > 0
-                ? $"({entry?.Track?.Counter})"
+                ? $"({entry.Track.Counter})"
                 : default;
         }
 
@@ -160,60 +170,84 @@ namespace SportDJ.Shareds.UserControls
                 .ToString(Constants.FormatDuration);
         }
 
+        private void RefreshEntry()
+        {
+            SetAndRaise(
+                property: IsPlayedProperty,
+                field: ref isPlayed,
+                value: entry?.IsPlayed ?? false);
+
+            SetAndRaise(
+                property: IsSelectedProperty,
+                field: ref isSelected,
+                value: entry?.IsSelected ?? false);
+        }
+
+        private void RefreshTrack()
+        {
+            SetAndRaise(
+                property: InfoProperty,
+                field: ref info,
+                value: entry?.Track?.Info);
+
+            SetAndRaise(
+                property: DurationProperty,
+                field: ref duration,
+                value: GetDuration(entry));
+
+            SetAndRaise(
+                property: CounterProperty,
+                field: ref counter,
+                value: GetCounter(entry));
+        }
+
         private void SubscribeEvents()
         {
-            if (eventAggregator != default && entry != default)
+            UnsubscribeEvents();
+
+            if (!isAttached
+                || eventAggregator == default
+                || entry == default)
             {
-                eventAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
-                    action: _ => UpdateEntry(),
-                    threadOption: ThreadOption.UIThread,
-                    keepSubscriberReferenceAlive: true,
-                    filter: e => e == entry);
-
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Subscribe(
-                    action: _ => UpdateTrack(),
-                    threadOption: ThreadOption.UIThread,
-                    keepSubscriberReferenceAlive: true,
-                    filter: t => t == entry?.Track);
+                return;
             }
+
+            // Captured locally, so a later change of the property does not affect this subscription
+            var currentEntry = entry;
+
+            subscribedAggregator = eventAggregator;
+
+            entryUpdatedToken = subscribedAggregator.GetEvent<EntryUpdatedEvent>().Subscribe(
+                action: _ =>
+                {
+                    RefreshEntry();
+                    RefreshTrack();
+                },
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: e => e == currentEntry);
+
+            trackUpdatedToken = subscribedAggregator.GetEvent<TrackUpdatedEvent>().Subscribe(
+                action: _ => RefreshTrack(),
+                threadOption: ThreadOption.UIThread,
+                keepSubscriberReferenceAlive: true,
+                filter: t => t == currentEntry.Track);
         }
 
-        private void UpdateEntry()
+        private void UnsubscribeEvents()
         {
-            var oldIsPlayed = IsPlayed;
-            var oldIsSelected = IsSelected;
+            if (subscribedAggregator == default)
+            {
+                return;
+            }
 
-            RaisePropertyChanged(
-                property: IsPlayedProperty,
-                oldValue: oldIsPlayed,
-                newValue: IsPlayed);
+            subscribedAggregator.GetEvent<EntryUpdatedEvent>().Unsubscribe(entryUpdatedToken);
+            subscribedAggregator.GetEvent<TrackUpdatedEvent>().Unsubscribe(trackUpdatedToken);
 
-            RaisePropertyChanged(
-                property: IsSelectedProperty,
-                oldValue: oldIsSelected,
-                newValue: IsSelected);
-        }
+            entryUpdatedToken = default;
+            trackUpdatedToken = default;
 
-        private void UpdateTrack()
-        {
-            var oldInfo = Info;
-            var oldDuration = Duration;
-            var oldCounter = Counter;
-
-            RaisePropertyChanged(
-                property: InfoProperty,
-                oldValue: oldInfo,
-                newValue: Info);
-
-            RaisePropertyChanged(
-                property: DurationProperty,
-                oldValue: oldDuration,
-                newValue: Duration);
-
-            RaisePropertyChanged(
-                property: CounterProperty,
-                oldValue: oldCounter,
-                newValue: Counter);
+            subscribedAggregator = default;
         }
 
         #endregion Private Methods

@@ -1,4 +1,4 @@
-﻿using Prism.Events;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Navigation.Regions;
 using SportDJ.Commons.Events.Grid;
@@ -29,9 +29,17 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.containerProvider = containerProvider;
             this.gridService = gridService;
 
+            // The collection is bound to the UI, so it must only be changed on the UI thread
             eventAggregator.GetEvent<GridUpdatedEvent>().Subscribe(
                 action: Initialize,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
+
+            // The grid might already be available, if the event was published before this view model exists
+            if (gridService.Grid != default)
+            {
+                Initialize();
+            }
         }
 
         #endregion Public Constructors
@@ -46,13 +54,20 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         private void Initialize()
         {
+            // The old grid has to leave the collection, otherwise all grids are stacked on each other
+            Grids.Clear();
+
             grid?.Dispose();
+            grid = default;
 
-            grid = new GridViewModel(
-                containerProvider: containerProvider,
-                grid: gridService.Grid);
+            if (gridService.Grid != default)
+            {
+                grid = new GridViewModel(
+                    containerProvider: containerProvider,
+                    grid: gridService.Grid);
 
-            Grids.Add(grid);
+                Grids.Add(grid);
+            }
         }
 
         #endregion Private Methods

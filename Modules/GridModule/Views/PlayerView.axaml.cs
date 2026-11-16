@@ -1,3 +1,5 @@
+using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -10,9 +12,12 @@ public partial class PlayerView
 {
     #region Private Fields
 
-    private Control button;
-    private ContextMenu contextMenu;
-    private PlayerViewModel currentViewModel;
+    private readonly Button executeButton;
+
+    private bool isAttached;
+    private ContextMenu openedContextMenu;
+    private CellViewModel openedViewModel;
+    private PlayerViewModel subscribedViewModel;
 
     #endregion Private Fields
 
@@ -22,106 +27,111 @@ public partial class PlayerView
     {
         InitializeComponent();
 
-        this.DataContextChanged += OnDataContextChanged;
+        executeButton = this.FindControl<Button>("ExecuteButton");
+
+        DataContextChanged += OnDataContextChanged;
     }
 
     #endregion Public Constructors
 
-    #region Private Methods
+    #region Protected Methods
 
-    private Control FindControl(Control parent, ContextMenu targetContextMenu)
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (parent is Button button
-            && button.ContextMenu == targetContextMenu)
-        {
-            return button;
-        }
+        base.OnAttachedToVisualTree(e);
 
-        if (parent is Panel panel)
-        {
-            foreach (var child in panel.Children)
-            {
-                if (child is Control control)
-                {
-                    var result = FindControl(
-                        parent: control,
-                        targetContextMenu: targetContextMenu);
+        isAttached = true;
 
-                    if (result != default)
-                    {
-                        return result;
-                    }
-                }
-            }
-        }
-        else if (parent is ContentControl contentControl
-            && contentControl.Content is Control childControl)
-        {
-            return FindControl(
-                parent: childControl,
-                targetContextMenu: targetContextMenu);
-        }
-        else if (parent is Decorator decorator
-            && decorator.Child is Control decoratorChild)
-        {
-            return FindControl(
-                parent: decoratorChild,
-                targetContextMenu: targetContextMenu);
-        }
-
-        return default;
+        UpdateSubscription();
     }
 
-    private void OnButtonKeyDown(object sender, Avalonia.Input.KeyEventArgs e)
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        e.Handled = true;
+        isAttached = false;
+
+        UpdateSubscription();
+
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    #endregion Protected Methods
+
+    #region Private Methods
+
+    private void Detach()
+    {
+        if (openedViewModel != default)
+        {
+            openedViewModel.MenuCloseEvent -= OnMenuClose;
+        }
+
+        openedViewModel = default;
+        openedContextMenu = default;
+    }
+
+    private void OnContextMenuClosed(object sender, RoutedEventArgs e)
+    {
+        Detach();
     }
 
     private void OnContextMenuOpened(object sender, RoutedEventArgs e)
     {
-        if (sender is ContextMenu contextMenu)
-        {
-            var viewModel = contextMenu.DataContext as CellViewModel;
+        // The handler is only attached while the menu is open, otherwise it would pile up on each opening
+        Detach();
 
-            if (viewModel != default)
-            {
-                viewModel.MenuCloseEvent += (s, e) => Dispatcher.UIThread.Invoke(() => contextMenu.Close());
-            }
+        if (sender is ContextMenu contextMenu
+            && contextMenu.DataContext is CellViewModel viewModel)
+        {
+            openedContextMenu = contextMenu;
+            openedViewModel = viewModel;
+
+            viewModel.MenuCloseEvent += OnMenuClose;
         }
     }
 
-    private void OnDataContextChanged(object sender, System.EventArgs e)
+    private void OnDataContextChanged(object sender, EventArgs e)
     {
-        if (currentViewModel != default)
-        {
-            currentViewModel.MenuOpenEvent -= OnMenuOpen;
-        }
+        UpdateSubscription();
+    }
 
-        contextMenu = this.FindControl<ContextMenu>("ContextMenu");
+    private void OnMenuClose(object sender, EventArgs e)
+    {
+        var contextMenu = openedContextMenu;
 
         if (contextMenu != default)
         {
-            var viewModel = DataContext as PlayerViewModel;
-
-            if (viewModel != default)
-            {
-                currentViewModel = viewModel;
-
-                button = FindControl(
-                    parent: this,
-                    targetContextMenu: contextMenu);
-
-                if (button != default)
-                {
-                    viewModel.MenuOpenEvent += OnMenuOpen;
-                }
-            }
+            // The event might be raised from a non UI thread (e.g. by a key press)
+            Dispatcher.UIThread.Post(contextMenu.Close);
         }
     }
 
-    private void OnMenuOpen(object s, System.EventArgs args)
+    private void OnMenuOpen(object sender, EventArgs e)
     {
-        contextMenu.Open(button);
+        // The event might be raised from a non UI thread (e.g. by a key press)
+        Dispatcher.UIThread.Post(() => executeButton?.ContextMenu?.Open(executeButton));
+    }
+
+    private void UpdateSubscription()
+    {
+        // Only views in the visual tree listen, otherwise replaced views would stay subscribed
+        var viewModel = isAttached
+            ? DataContext as PlayerViewModel
+            : default;
+
+        if (viewModel != subscribedViewModel)
+        {
+            if (subscribedViewModel != default)
+            {
+                subscribedViewModel.MenuOpenEvent -= OnMenuOpen;
+            }
+
+            subscribedViewModel = viewModel;
+
+            if (subscribedViewModel != default)
+            {
+                subscribedViewModel.MenuOpenEvent += OnMenuOpen;
+            }
+        }
     }
 
     #endregion Private Methods

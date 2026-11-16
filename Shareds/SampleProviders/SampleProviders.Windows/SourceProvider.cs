@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using NAudio.Wave;
 using SportDJ.Shareds.SampleProviders.Abstractions;
@@ -29,7 +29,7 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             {
                 lock (readerLock)
                 {
-                    return fileReader?.Position != default
+                    return fileReader != default
                         ? fileReader.Position / blockAlign
                         : 0;
                 }
@@ -72,13 +72,21 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                     fileName: filePath);
             }
 
-            fileReader = new(filePath);
+            var reader = new AudioFileReader(filePath);
 
-            blockAlign = fileReader.WaveFormat.BlockAlign;
-            length = fileReader.Length / blockAlign;
+            lock (readerLock)
+            {
+                // A second initialization must not leak the previous file handle
+                fileReader?.Dispose();
+
+                fileReader = reader;
+
+                blockAlign = reader.WaveFormat.BlockAlign;
+                length = reader.Length / blockAlign;
+            }
         }
 
-        public int Read(float[] buffer, int offset, int count)
+        public int Read(Span<float> buffer)
         {
             var samplesRead = 0;
 
@@ -86,10 +94,7 @@ namespace SportDJ.Shareds.SampleProviders.Windows
             {
                 if (fileReader != default)
                 {
-                    samplesRead = fileReader.Read(
-                        buffer: buffer,
-                        offset: offset,
-                        count: count);
+                    samplesRead = fileReader.Read(buffer);
                 }
             }
 
@@ -108,7 +113,8 @@ namespace SportDJ.Shareds.SampleProviders.Windows
                 {
                     lock (readerLock)
                     {
-                        fileReader.Dispose();
+                        // Null when Initialize was never called
+                        fileReader?.Dispose();
 
                         fileReader = default;
                     }

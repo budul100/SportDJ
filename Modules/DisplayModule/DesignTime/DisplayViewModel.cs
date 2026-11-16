@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+using System;
+using System.IO;
+using Avalonia.Media.Imaging;
 
 namespace SportDJ.Modules.DisplayModule.DesignTime
 {
@@ -14,10 +16,25 @@ namespace SportDJ.Modules.DisplayModule.DesignTime
             Content = "Example - Example";
             Remaining = "00:05.3";
 
-            Bitmap = new Bitmap(@".\Additionals\Samples\Sample1.png");
+            Bitmap = LoadSample();
             Progress = 0.2;
         }
 
         #endregion Public Constructors
+
+        #region Private Methods
+
+        private static Bitmap LoadSample()
+        {
+            // Relative to the application directory instead of the working directory,
+            // and without exception if the sample is missing
+            var path = Path.Combine(AppContext.BaseDirectory, "Additionals", "Samples", "Sample1.png");
+
+            return File.Exists(path)
+                ? new Bitmap(path)
+                : default;
+        }
+
+        #endregion Private Methods
     }
 }

@@ -1,14 +1,3 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
-	</ItemGroup>
-
 </Project>
-

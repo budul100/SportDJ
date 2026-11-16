@@ -1,4 +1,4 @@
-﻿namespace SportDJ.Modules.GridModule.DesignTime
+namespace SportDJ.Modules.GridModule.DesignTime
 {
     public class GridViewModel
         : ViewModels.GridViewModel
@@ -14,8 +14,6 @@
         public GridViewModel()
             : base(containerProvider: default, grid: default, parent: default)
         {
-            Name = "Group";
-
             Columns = SideCount;
             Rows = SideCount;
 
@@ -34,5 +32,12 @@
         }
 
         #endregion Public Constructors
+
+        #region Public Properties
+
+        // The base implementation needs a model, which does not exist at design time
+        public override string Name { get; set; } = "Group";
+
+        #endregion Public Properties
     }
 }

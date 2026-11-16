@@ -11,28 +11,11 @@
     x:Name="Root"
     x:DataType="local:FlashingPanel">
 
+    <!-- The opacity animation is created in code behind, because bindings are not supported inside animations -->
     <Panel
+        Name="FlashPanel"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Classes.IsActive="{Binding #Root.IsActive}">
-
-        <Panel.Styles>
-            <Style Selector="Panel.IsActive">
-                <Setter Property="Background" Value="{Binding #Root.Color}" />
-                <Style.Animations>
-                    <Animation IterationCount="INFINITE" Duration="{Binding #Root.Duration}">
-                        <KeyFrame Cue="0%">
-                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMin}" />
-                        </KeyFrame>
-                        <KeyFrame Cue="50%">
-                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMax}" />
-                        </KeyFrame>
-                        <KeyFrame Cue="100%">
-                            <Setter Property="Opacity" Value="{Binding #Root.OpacityMin}" />
-                        </KeyFrame>
-                    </Animation>
-                </Style.Animations>
-            </Style>
-        </Panel.Styles>
-    </Panel>
+        Background="{Binding #Root.Color}"
+        IsVisible="{Binding #Root.IsActive}" />
 </UserControl>

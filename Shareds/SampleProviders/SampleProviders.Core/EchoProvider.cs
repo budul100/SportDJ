@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NAudio.Wave;
 
 namespace SportDJ.Shareds.SampleProviders.Core
@@ -46,31 +46,37 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
             lock (lockProvider)
             {
-                this.wetDryMix = wetDryMix;
                 this.feedback = feedback;
 
                 delay = TimeSpan.FromMilliseconds(delayMilliSeconds);
 
-                delayBufferLength = (int)(WaveFormat.SampleRate * WaveFormat.Channels * delay.TotalSeconds);
+                // Whole frames only, so the channels stay aligned inside the ring buffer
+                var frames = Math.Max(
+                    val1: 1,
+                    val2: (int)(WaveFormat.SampleRate * delay.TotalSeconds));
+
+                delayBufferLength = frames * WaveFormat.Channels;
                 delayBuffer = new float[delayBufferLength];
+
+                // The old offset may exceed the length of the new buffer
+                delayBufferOffset = 0;
+
+                // Set last, so the audio thread never sees the mix without a matching buffer
+                this.wetDryMix = wetDryMix;
             }
         }
 
-        public override int Read(float[] buffer, int offset, int count)
+        public override int Read(Span<float> buffer)
         {
-            var samplesRead = sourceProvider.Read(
-                buffer: buffer,
-                offset: offset,
-                count: count);
+            var samplesRead = sourceProvider.Read(buffer);
 
-            if (wetDryMix > 0)
+            lock (lockProvider)
             {
-                lock (lockProvider)
+                if (wetDryMix > 0
+                    && delayBuffer != null)
                 {
                     SetEcho(
-                        buffer: buffer,
-                        offset: offset,
-                        count: samplesRead);
+                        buffer: buffer[..samplesRead]);
                 }
             }
 
@@ -79,21 +85,24 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
         public void Reset()
         {
-            wetDryMix = 0;
+            lock (lockProvider)
+            {
+                wetDryMix = 0;
+            }
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void SetEcho(float[] buffer, int offset, int count)
+        private void SetEcho(Span<float> buffer)
         {
-            for (var sample = 0; sample < count; sample++)
+            for (var sample = 0; sample < buffer.Length; sample++)
             {
-                var drySample = buffer[offset + sample];
+                var drySample = buffer[sample];
                 var wetSample = delayBuffer[delayBufferOffset];
 
-                buffer[offset + sample] = drySample * (1 - wetDryMix) + wetSample * wetDryMix;
+                buffer[sample] = drySample * (1 - wetDryMix) + wetSample * wetDryMix;
 
                 delayBuffer[delayBufferOffset] = drySample + wetSample * feedback;
 

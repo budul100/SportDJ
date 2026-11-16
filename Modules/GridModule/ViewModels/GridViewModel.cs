@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Material.Icons;
 using Prism.Ioc;
 using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SportDJ.Modules.GridModule.ViewModels
 {
@@ -20,7 +20,6 @@ namespace SportDJ.Modules.GridModule.ViewModels
         private readonly GroupViewModel parent;
 
         private int columns;
-        private bool isDisposed;
         private bool isSelected;
         private int rows;
 
@@ -34,7 +33,7 @@ namespace SportDJ.Modules.GridModule.ViewModels
             this.grid = grid;
             this.parent = parent;
 
-            Initialize(
+            InitializeCells(
                 containerProvider: containerProvider,
                 grid: grid);
         }
@@ -78,18 +77,12 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
         protected override void Dispose(bool isDisposing)
         {
-            if (!isDisposed)
+            if (isDisposing)
             {
-                if (isDisposing
-                    && Cells?.Any() == true)
+                foreach (var child in Cells.ToArray())
                 {
-                    foreach (var cell in Cells)
-                    {
-                        cell.Dispose();
-                    }
+                    child.Dispose();
                 }
-
-                isDisposed = true;
             }
 
             base.Dispose(
@@ -100,30 +93,24 @@ namespace SportDJ.Modules.GridModule.ViewModels
         {
             var gridMenus = base.GetGridMenus().ToArray();
 
-            var gridMenu = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.GridEditHeader}...",
                 menuItems: gridMenus,
                 closeCallback: CloseMenu);
 
-            yield return gridMenu;
-
             var groupMenus = GetGroupMenus().ToArray();
 
-            var groupMenu = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.GroupEditHeader}...",
                 menuItems: groupMenus,
                 closeCallback: CloseMenu);
 
-            yield return groupMenu;
-
             var tabMenus = GetTabMenus().ToArray();
 
-            var tabMenu = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.TabEditHeader}...",
                 menuItems: tabMenus,
                 closeCallback: CloseMenu);
-
-            yield return tabMenu;
         }
 
         #endregion Protected Methods
@@ -137,140 +124,112 @@ namespace SportDJ.Modules.GridModule.ViewModels
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.GroupAddHeader} {orientation}";
-
-                void callback() => gridService.AddGrid(
-                    grid: grid,
-                    orientation: orientation);
-
-                var addItem = new MenuViewModel(
-                    header: header,
-                    executeCallback: callback,
+                yield return new MenuViewModel(
+                    header: $"{Texts.GroupAddHeader} {orientation}",
+                    executeCallback: () => gridService.AddGrid(
+                        grid: grid,
+                        orientation: orientation),
                     closeCallback: CloseMenu);
-
-                yield return addItem;
             }
 
             yield return new SeparatorViewModel();
 
             foreach (var orientation in orientations)
             {
-                var header = $"{Texts.GroupMoveHeader} {orientation}";
-
-                void callback() => gridService.MoveGrid(
-                    grid: grid,
-                    orientation: orientation);
-
-                var moveItem = new MenuViewModel(
-                    header: header,
-                    executeCallback: callback,
+                yield return new MenuViewModel(
+                    header: $"{Texts.GroupMoveHeader} {orientation}",
+                    executeCallback: () => gridService.MoveGrid(
+                        grid: grid,
+                        orientation: orientation),
                     closeCallback: CloseMenu);
-
-                yield return moveItem;
             }
 
             yield return new SeparatorViewModel();
 
-            var removeItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: $"{Texts.TabRemoveHeader}...",
                 executeCallback: () => gridService.RemoveGridAsync(grid),
                 closeCallback: CloseMenu);
-
-            yield return removeItem;
         }
 
         private IEnumerable<BindableBase> GetTabMenus()
         {
-            var renameItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: Texts.TabRenameHeader,
                 executeCallback: () => IsRenaming = true,
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.FormTextbox);
 
-            yield return renameItem;
-
             var listenItem = new MenuViewModel(
                 header: Texts.KeyListenHeader,
                 executeCallback: ListenHook,
-                isCheckedGetter: () => isListening,
+                isCheckedGetter: () => IsListening,
                 icon: MaterialIconKind.KeyboardOutline);
 
             listenChecker = listenItem.Update;
 
             yield return listenItem;
 
-            var unhookItem = new MenuViewModel(
+            yield return new MenuViewModel(
                 header: Texts.KeyUnhookHeader,
                 executeCallback: () => KeyCode = default,
                 closeCallback: CloseMenu,
                 icon: MaterialIconKind.KeyboardOffOutline);
-
-            yield return unhookItem;
         }
 
-        private void Initialize(IContainerProvider containerProvider, Grid grid)
+        private void InitializeCells(IContainerProvider containerProvider, Grid grid)
         {
-            Name = grid?.Name;
-            KeyCode = grid?.KeyCode;
+            var rowsCount = 0;
+            var columnsCount = 0;
 
             if (grid?.Cells?.Count > 0)
             {
-                var rowsCount = 0;
-                var columnsCount = 0;
+                var isOnCanvas = parent == default
+                    && grid.Cells.Count == 1;
 
                 foreach (var element in grid.Cells)
                 {
                     switch (element)
                     {
                         case Player player:
+                            {
+                                var playerCell = new PlayerViewModel(
+                                    containerProvider: containerProvider,
+                                    player: player,
+                                    parent: this);
 
-                            var playerCell = new PlayerViewModel(
-                                containerProvider: containerProvider,
-                                player: player,
-                                parent: this);
+                                Cells.Add(playerCell);
 
-                            Cells.Add(playerCell);
+                                rowsCount = Math.Max(rowsCount, element.Row + 1);
+                                columnsCount = Math.Max(columnsCount, element.Column + 1);
 
-                            rowsCount = element.Row + 1 > rowsCount
-                                ? element.Row + 1
-                                : rowsCount;
-
-                            columnsCount = element.Column + 1 > columnsCount
-                                ? element.Column + 1
-                                : columnsCount;
-
-                            break;
+                                break;
+                            }
 
                         case Group group:
+                            {
+                                var groupCell = new GroupViewModel(
+                                    containerProvider: containerProvider,
+                                    group: group,
+                                    parent: this,
+                                    isOnCanvas: isOnCanvas);
 
-                            var isOnCanvas = parent == default
-                                && grid.Cells.Count == 1;
+                                Cells.Add(groupCell);
 
-                            var groupCell = new GroupViewModel(
-                                containerProvider: containerProvider,
-                                group: group,
-                                parent: this,
-                                isOnCanvas: isOnCanvas);
+                                rowsCount = Math.Max(rowsCount, groupCell.Row + groupCell.Rows);
+                                columnsCount = Math.Max(columnsCount, groupCell.Column + groupCell.Columns);
 
-                            Cells.Add(groupCell);
-
-                            rowsCount = groupCell.Row + groupCell.Rows > rowsCount
-                                ? groupCell.Row + groupCell.Rows
-                                : rowsCount;
-
-                            columnsCount = groupCell.Column + groupCell.Columns > columnsCount
-                                ? groupCell.Column + groupCell.Columns
-                                : columnsCount;
-
-                            break;
+                                break;
+                            }
                     }
                 }
-
-                Rows = rowsCount;
-                Columns = columnsCount;
-
-                base.Initialize();
             }
+
+            Rows = rowsCount;
+            Columns = columnsCount;
+
+            // Also an empty grid needs its menus, otherwise no first element could be added
+            base.Initialize();
         }
 
         #endregion Private Methods

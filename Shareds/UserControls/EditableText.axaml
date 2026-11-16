@@ -21,7 +21,7 @@
             Text="{Binding #Root.Text}" />
 
         <TextBox
-            Name="TextBox"
+            Name="InputBox"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             AcceptsReturn="False"
@@ -36,7 +36,6 @@
             MaxLength="{Binding #Root.MaxLength}"
             MaxLines="1"
             Text="{Binding #Root.Text}"
-            TextAlignment="Justify"
             TextWrapping="NoWrap" />
 
     </Grid>

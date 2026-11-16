@@ -1,5 +1,5 @@
-﻿using System;
 using NAudio.Wave;
+using System;
 
 namespace SportDJ.Shareds.SampleProviders.Core
 {
@@ -46,7 +46,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
                 obj: this);
         }
 
-        public abstract int Read(float[] buffer, int offset, int count);
+        public abstract int Read(Span<float> buffer);
 
         #endregion Public Methods
 

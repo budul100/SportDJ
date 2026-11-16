@@ -1,5 +1,5 @@
-using System;
 using NAudio.Wave;
+using System;
 
 namespace SportDJ.Tests.SampleProvidersTests.Helpers
 {
@@ -16,10 +16,11 @@ namespace SportDJ.Tests.SampleProvidersTests.Helpers
 
         #region Public Methods
 
-        public int Read(float[] buffer, int offset, int count)
+        public int Read(Span<float> buffer)
         {
-            Array.Clear(buffer, offset, count); // komplette Stille
-            return count;
+            buffer.Clear(); // complete silence
+
+            return buffer.Length;
         }
 
         #endregion Public Methods

@@ -1,0 +1,10 @@
+<Project>
+
+	<PropertyGroup>
+		<NetVersion>10.0</NetVersion>
+		<TargetFramework>net$(NetVersion)</TargetFramework>
+		<WindowsTargetFramework>net$(NetVersion)-windows</WindowsTargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+	</PropertyGroup>
+
+</Project>

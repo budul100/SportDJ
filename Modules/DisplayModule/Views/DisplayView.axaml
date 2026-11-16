@@ -10,8 +10,11 @@
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:SportDJ.Modules.DisplayModule.ViewModels"
     d:DesignHeight="50"
     d:DesignWidth="600"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:DisplayViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -178,7 +181,7 @@
                         HorizontalAlignment="Stretch"
                         Bitmap="{Binding Bitmap}"
                         OpacityPlayed="{StaticResource TrackOpacityPlayed}"
-                        Progress="{Binding Progress}" />
+                        Progress="{Binding Progress, TargetNullValue=0}" />
                 </Grid>
             </Border>
 

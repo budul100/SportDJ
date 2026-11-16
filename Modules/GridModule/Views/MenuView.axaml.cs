@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using System.Linq;
@@ -15,11 +16,6 @@ public partial class MenuView
     #endregion Private Fields
 
     #region Public Constructors
-
-    public MenuView(MenuItem menuItem)
-    {
-        this.menuItem = menuItem;
-    }
 
     public MenuView()
     {
@@ -38,16 +34,21 @@ public partial class MenuView
 
     #region Private Methods
 
-    private void OnSubmenuOpened(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void OnSubmenuOpened(object sender, RoutedEventArgs e)
     {
-        var groupItems = this.FindAncestorOfType<ContextMenu>()
-            .GetLogicalChildren().OfType<MenuItem>()
-            .Where(c => c.DataContext != menuItem.DataContext
-                && c.IsSubMenuOpen).ToArray();
+        var contextMenu = this.FindAncestorOfType<ContextMenu>();
 
-        foreach (var groupItem in groupItems)
+        if (contextMenu != default)
         {
-            groupItem.IsSubMenuOpen = false;
+            var groupItems = contextMenu
+                .GetLogicalChildren().OfType<MenuItem>()
+                .Where(c => c.DataContext != menuItem.DataContext
+                    && c.IsSubMenuOpen).ToArray();
+
+            foreach (var groupItem in groupItems)
+            {
+                groupItem.IsSubMenuOpen = false;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 namespace NAudio.WaveFormRenderer.PeakProviders
@@ -25,9 +25,9 @@ namespace NAudio.WaveFormRenderer.PeakProviders
 
         public override PeakInfo GetNextPeak()
         {
-            var samplesRead = Provider.Read(ReadBuffer, 0, ReadBuffer.Length);
+            var samplesRead = Provider.Read(ReadBuffer);
             var sum = samplesRead == 0 ? 0 : ReadBuffer.Take(samplesRead).Select(s => Math.Abs(s)).Sum();
-            var average = sum / samplesRead;
+            var average = samplesRead == 0 ? 0 : sum / samplesRead;
 
             return new PeakInfo(average * (0 - scale), average * scale);
         }

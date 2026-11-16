@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -73,16 +73,18 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
             eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
                 action: OnKeyPressed,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
                 action: () => RaisePropertyChanged(nameof(IsSettingsVisible)),
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
                 action: t => RaisePropertyChanged(nameof(IsSettingsVisible)),
                 keepSubscriberReferenceAlive: true,
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 filter: p => p.Type == typeof(IStorageService<Session>));
 
             clockTimer = GetClockTimer();
@@ -93,7 +95,7 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         #region Public Properties
 
-        public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
+        public string Clock => DateTime.Now.ToString(Constants.FormatClock);
 
         public Bitmap Bitmap
         {
@@ -215,15 +217,16 @@ namespace SportDJ.Modules.DisplayModule.ViewModels
 
         private bool IsFullScreen()
         {
-            var result = !string.IsNullOrWhiteSpace(sessionService.Contents.WindowState)
-                && Enum.Parse<WindowState>(sessionService.Contents.WindowState) == WindowState.FullScreen;
+            // TryParse, so an invalid value in the session file cannot throw
+            var result = Enum.TryParse<WindowState>(sessionService?.Contents?.WindowState, out var state)
+                && state == WindowState.FullScreen;
 
             return result;
         }
 
         private void OnKeyPressed(string keyCode)
         {
-            if (keyCode == settingsService?.Contents?.Options.KeyCodeScreenChange)
+            if (keyCode == settingsService?.Contents?.Options?.KeyCodeScreenChange)
             {
                 ShowFullscreen = !ShowFullscreen;
             }

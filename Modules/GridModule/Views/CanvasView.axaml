@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:gd="using:AvaloniaGridDefinitionBehavoir"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
@@ -11,9 +10,10 @@
     d:DesignHeight="300"
     d:DesignWidth="500"
     prism:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:CanvasViewModel"
     mc:Ignorable="d">
 
-    <ItemsControl x:DataType="vm:GridViewModel" ItemsSource="{Binding Grids}">
+    <ItemsControl ItemsSource="{Binding Grids}">
 
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate x:DataType="vm:CanvasViewModel">

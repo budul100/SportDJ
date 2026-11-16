@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.IO;
 using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
 
@@ -24,7 +25,7 @@ namespace SportDJ.Modules.GridModule.DesignTime
 
         #region Public Properties
 
-        public override Bitmap Bitmap { get; } = new(@".\Additionals\Samples\Sample1.png");
+        public override Bitmap Bitmap { get; } = LoadSample();
 
         public override int Column => column;
 
@@ -43,5 +44,20 @@ namespace SportDJ.Modules.GridModule.DesignTime
         public override int Row => row;
 
         #endregion Public Properties
+
+        #region Private Methods
+
+        private static Bitmap LoadSample()
+        {
+            // Relative to the application directory instead of the working directory,
+            // and without exception if the sample is missing
+            var path = Path.Combine(AppContext.BaseDirectory, "Additionals", "Samples", "Sample1.png");
+
+            return File.Exists(path)
+                ? new Bitmap(path)
+                : default;
+        }
+
+        #endregion Private Methods
     }
 }

@@ -1,27 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
-	</PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
+		<PackageReference Include="NAudio.Midi" Version="3.3.0" />
+		<PackageReference Include="NAudio.WinMM" Version="3.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+		<None Remove="Midi\SportDJ2Mixxx.midi.xml" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Midi\SportDJ2Mixxx.midi.xml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Midi\SportDJ2Mixxx.midi.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+		<Content Include="Midi\SportDJ2Mixxx.midi.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>

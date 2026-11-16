@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -6,8 +7,12 @@ using SportDJ.Commons.Assets;
 
 namespace SportDJ.Shareds.UserControls
 {
-    public partial class WaveRenderer
-        : UserControl
+    /// <summary>
+    /// Draws a wave bitmap. While playing, the part left of the progress position is drawn with reduced opacity.
+    /// Rendered directly instead of using three images with clip geometries, so progress updates do not allocate.
+    /// </summary>
+    public class WaveRenderer
+        : Control
     {
         #region Public Fields
 
@@ -18,42 +23,35 @@ namespace SportDJ.Shareds.UserControls
         public static readonly DirectProperty<WaveRenderer, bool> IsPlayingProperty = AvaloniaProperty
             .RegisterDirect<WaveRenderer, bool>(
                 name: nameof(IsPlaying),
-                getter: o => o.Progress > 0);
+                getter: o => o.isPlaying);
 
         public static readonly StyledProperty<double> OpacityPlayedProperty = AvaloniaProperty
             .Register<WaveRenderer, double>(
                 name: nameof(OpacityPlayed),
                 defaultValue: Defaults.TrackOpacityPlayed);
 
-        public static readonly DirectProperty<WaveRenderer, Geometry> PlayedClipProperty = AvaloniaProperty
-            .RegisterDirect<WaveRenderer, Geometry>(
-                name: nameof(PlayedClip),
-                getter: o => GetPlayedClip(o.Progress, (int)o.Bounds.Width, (int)o.Bounds.Height));
-
-        public static readonly DirectProperty<WaveRenderer, double> ProgressProperty = AvaloniaProperty
-            .RegisterDirect<WaveRenderer, double>(
-                name: nameof(Progress),
-                getter: o => o.Progress,
-                setter: (o, v) => o.Progress = v);
-
-        public static readonly DirectProperty<WaveRenderer, RectangleGeometry> RemainingClipProperty = AvaloniaProperty
-            .RegisterDirect<WaveRenderer, RectangleGeometry>(
-                name: nameof(RemainingClip),
-                getter: o => GetRemainingClip(o.Progress, o.Bounds.Width, o.Bounds.Height));
+        public static readonly StyledProperty<double> ProgressProperty = AvaloniaProperty
+            .Register<WaveRenderer, double>(
+                name: nameof(Progress));
 
         #endregion Public Fields
 
         #region Private Fields
 
-        private double progress;
+        private bool isPlaying;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public WaveRenderer()
+        static WaveRenderer()
         {
-            InitializeComponent();
+            AffectsMeasure<WaveRenderer>(BitmapProperty);
+
+            AffectsRender<WaveRenderer>(
+                BitmapProperty,
+                OpacityPlayedProperty,
+                ProgressProperty);
         }
 
         #endregion Public Constructors
@@ -69,10 +67,7 @@ namespace SportDJ.Shareds.UserControls
                 value: value);
         }
 
-        public bool IsPlaying
-        {
-            get => Progress > 0;
-        }
+        public bool IsPlaying => isPlaying;
 
         public double OpacityPlayed
         {
@@ -83,40 +78,88 @@ namespace SportDJ.Shareds.UserControls
                 value: value);
         }
 
-        public Geometry PlayedClip => GetPlayedClip(
-            progress: Progress,
-            totalWidth: Bounds.Width,
-            totalHeight: Bounds.Height);
-
         public double Progress
         {
-            get => progress;
+            get => GetValue(ProgressProperty);
 
-            set
+            set => SetValue(
+                property: ProgressProperty,
+                value: value);
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public override void Render(DrawingContext context)
+        {
+            base.Render(context);
+
+            var bitmap = Bitmap;
+
+            if (bitmap == default
+                || Bounds.Width <= 0
+                || Bounds.Height <= 0)
             {
-                if (value != progress)
-                {
-                    SetAndRaise(
-                        property: ProgressProperty,
-                        field: ref progress,
-                        value: value);
+                return;
+            }
 
-                    RaisePropertyChanged(
-                        property: IsPlayingProperty,
-                        oldValue: default,
-                        newValue: IsPlaying);
+            var source = new Rect(bitmap.Size);
+            var destination = new Rect(Bounds.Size);
+            var progress = GetProgress(Progress);
+
+            if (progress <= 0)
+            {
+                context.DrawImage(bitmap, source, destination);
+
+                return;
+            }
+
+            var splitX = destination.Width * progress;
+
+            var playedClip = new Rect(
+                x: 0,
+                y: 0,
+                width: splitX,
+                height: destination.Height);
+
+            var remainingClip = new Rect(
+                x: splitX,
+                y: 0,
+                width: destination.Width - splitX,
+                height: destination.Height);
+
+            if (playedClip.Width > 0)
+            {
+                using (context.PushClip(playedClip))
+                using (context.PushOpacity(OpacityPlayed))
+                {
+                    context.DrawImage(bitmap, source, destination);
+                }
+            }
+
+            if (remainingClip.Width > 0)
+            {
+                using (context.PushClip(remainingClip))
+                {
+                    context.DrawImage(bitmap, source, destination);
                 }
             }
         }
 
-        public RectangleGeometry RemainingClip => GetRemainingClip(
-            progress: Progress,
-            totalWidth: Bounds.Width,
-            totalHeight: Bounds.Height);
-
-        #endregion Public Properties
+        #endregion Public Methods
 
         #region Protected Methods
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            var size = Bitmap?.Size ?? default;
+
+            // Same behavior as an image with Stretch.Fill: use the available space, fall back to the natural size
+            return new Size(
+                width: double.IsInfinity(availableSize.Width) ? size.Width : availableSize.Width,
+                height: double.IsInfinity(availableSize.Height) ? size.Height : availableSize.Height);
+        }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
         {
@@ -124,23 +167,10 @@ namespace SportDJ.Shareds.UserControls
 
             if (change.Property == ProgressProperty)
             {
-                RaisePropertyChanged(
+                SetAndRaise(
                     property: IsPlayingProperty,
-                    oldValue: default,
-                    newValue: IsPlaying);
-            }
-
-            if (change.Property == ProgressProperty || change.Property == BoundsProperty)
-            {
-                RaisePropertyChanged(
-                    property: PlayedClipProperty,
-                    oldValue: default,
-                    newValue: PlayedClip);
-
-                RaisePropertyChanged(
-                    property: RemainingClipProperty,
-                    oldValue: default,
-                    newValue: RemainingClip);
+                    field: ref isPlaying,
+                    value: GetProgress(Progress) > 0);
             }
         }
 
@@ -148,38 +178,14 @@ namespace SportDJ.Shareds.UserControls
 
         #region Private Methods
 
-        private static RectangleGeometry GetPlayedClip(double progress, double totalWidth, double totalHeight)
+        private static double GetProgress(double progress)
         {
-            var clipWidth = totalWidth * progress;
-
-            if (totalWidth <= 0 || clipWidth <= 0)
-                return default;
-
-            var rect = new Rect(
-                x: 0,
-                y: 0,
-                width: clipWidth,
-                height: totalHeight);
-
-            return new RectangleGeometry(rect);
-        }
-
-        private static RectangleGeometry GetRemainingClip(double progress, double totalWidth, double totalHeight)
-        {
-            var startX = totalWidth * progress;
-
-            var clipWidth = totalWidth - startX;
-
-            if (totalWidth <= 0 || clipWidth <= 0)
-                return default;
-
-            var rect = new Rect(
-                x: startX,
-                y: 0,
-                width: clipWidth,
-                height: totalHeight);
-
-            return new RectangleGeometry(rect);
+            return double.IsNaN(progress)
+                ? 0
+                : Math.Clamp(
+                    value: progress,
+                    min: 0,
+                    max: 1);
         }
 
         #endregion Private Methods

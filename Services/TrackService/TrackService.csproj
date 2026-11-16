@@ -1,19 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>SportDJ.Services.$(MSBuildProjectName.Replace(" ", ""))</RootNamespace>
-	</PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Commons\Commons.csproj" />
-		<ProjectReference Include="..\..\Shareds\SampleRenderers\SampleRenderers.csproj" />
+		<PackageReference Include="NAudio" Version="3.3.0" />
+		<PackageReference Include="z440.atl.core" Version="7.20.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="z440.atl.core" Version="7.10.0" />
+		<ProjectReference Include="..\..\Shareds\SampleRenderers\SampleRenderers.csproj" />
 	</ItemGroup>
 
 </Project>

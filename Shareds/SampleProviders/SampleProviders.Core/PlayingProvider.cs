@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Shareds.SampleProviders.Abstractions;
@@ -99,7 +99,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
             }
         }
 
-        public override int Read(float[] buffer, int offset, int count)
+        public override int Read(Span<float> buffer)
         {
             var samplesRead = 0;
 
@@ -122,15 +122,9 @@ namespace SportDJ.Shareds.SampleProviders.Core
 
                     lock (lockProvider)
                     {
-                        samplesRead = sourceProvider.Read(
-                            buffer: buffer,
-                            offset: offset,
-                            count: count);
+                        samplesRead = sourceProvider.Read(buffer);
 
-                        MuteBuffer(
-                            buffer: buffer,
-                            offset: offset,
-                            count: count);
+                        buffer.Clear();
 
                         sourceProvider.Position = Position;
                     }
@@ -146,10 +140,7 @@ namespace SportDJ.Shareds.SampleProviders.Core
                             sourceProvider.Position = sampleStart;
                         }
 
-                        samplesRead = sourceProvider.Read(
-                            buffer: buffer,
-                            offset: offset,
-                            count: count);
+                        samplesRead = sourceProvider.Read(buffer);
 
                         position = sourceProvider.Position;
                     }
@@ -225,14 +216,6 @@ namespace SportDJ.Shareds.SampleProviders.Core
         #endregion Protected Methods
 
         #region Private Methods
-
-        private static void MuteBuffer(float[] buffer, int offset, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                buffer[offset + i] = 0;
-            }
-        }
 
         private void SendSignalEnded()
         {

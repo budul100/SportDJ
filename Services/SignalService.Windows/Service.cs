@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Prism.Events;
 using SportDJ.Commons.Assets;
@@ -14,6 +10,10 @@ using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Abstractions;
 using SportDJ.Shareds.SampleProviders.Core;
 using SportDJ.Shareds.SampleProviders.Windows;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.SignalService.Windows
 {
@@ -327,7 +327,6 @@ namespace SportDJ.Services.SignalService.Windows
             }
             else
             {
-
                 if (settingsService.Contents.Options.SelectNextOnPauseSeconds.HasValue)
                 {
                     var selectNextDelay = TimeSpan.FromSeconds(

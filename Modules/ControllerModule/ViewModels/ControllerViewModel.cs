@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Material.Icons;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
-using Prism.Navigation;
 using Prism.Navigation.Regions;
-using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
@@ -18,6 +12,9 @@ using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Prism;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels
 {
@@ -27,11 +24,8 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Private Fields
 
         private readonly IMixerService mixerService;
-        private readonly IRegionNavigationService navigationService;
-        private readonly IOutputService outputLiveService;
         private readonly IEnumerable<IMonitorService> monitorServices;
-
-        private bool isListening;
+        private readonly IOutputService outputLiveService;
         private bool isLoweredRequested;
         private bool isVolumePressed;
         private Options options;
@@ -41,11 +35,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #region Public Constructors
 
         public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
-            IEventAggregator eventAggregator, IRegionNavigationService navigationService,
+            IEventAggregator eventAggregator,
             IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
             : base(regionManager)
         {
-            this.navigationService = navigationService;
             this.monitorServices = monitoringServices;
 
             mixerService = containerProvider?.Resolve<IMixerService>(
@@ -73,16 +66,24 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 canExecuteMethod: () => IsActive);
 
             eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
-                action: () => options = settingsService?.Contents?.Options,
+                action: () =>
+                {
+                    options = settingsService?.Contents?.Options;
+
+                    // Without this the key badges stay empty after loading
+                    UpdateOptions();
+                },
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<SettingsUpdatedEvent<Set>>().Subscribe(
                 action: UpdateOptions,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true);
 
             eventAggregator?.GetEvent<MonitorUpdatedEvent>().Subscribe(
                 action: _ => UpdateControls(),
-                threadOption: ThreadOption.PublisherThread,
+                threadOption: ThreadOption.UIThread,
                 keepSubscriberReferenceAlive: true,
                 filter: v => monitoringServices?.Contains(v) == true);
 
@@ -130,17 +131,10 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
                 action: OnKeyReleased,
                 keepSubscriberReferenceAlive: true);
 
-            InitializeMenus();
             UpdateControls();
         }
 
         #endregion Public Constructors
-
-        #region Public Events
-
-        public event EventHandler ListenerCheckEvent;
-
-        #endregion Public Events
 
         #region Public Properties
 
@@ -185,30 +179,6 @@ namespace SportDJ.Modules.ControllerModule.ViewModels
         #endregion Public Properties
 
         #region Private Methods
-
-        private void InitializeMenus()
-        {
-            var navigationParameters = new NavigationParameters
-            {
-                { "header", Texts.KeyListenHeader },
-                { "executeCallback", () => ListenHook() },
-                { "isCheckedGetter", isListening },
-                { "isCheckedEvent", ListenerCheckEvent },
-                { "icon", MaterialIconKind.KeyboardOutline }
-            };
-
-            navigationService?.RequestNavigate(
-                target: nameof(RegionType.MenuRegion),
-                navigationParameters: navigationParameters);
-        }
-
-        private void ListenHook()
-        {
-            if (!isListening)
-            {
-                isListening = true;
-            }
-        }
 
         private void LowerOutput()
         {

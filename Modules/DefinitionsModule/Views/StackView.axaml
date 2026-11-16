@@ -10,9 +10,12 @@
     xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:SportDJ.Commons.Models.Contents"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
     xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
-    vml:ViewModelLocator.AutoWireViewModel="True"    
+    vml:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:StackViewModel"
     d:DesignHeight="500"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -83,10 +86,10 @@
             Margin="{StaticResource ContentMargin}">
 
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:Entry">
                     <ct:EntryView
                         Entry="{Binding}"
-                        EventAggregator="{Binding #StackViewControl.DataContext.EventAggregator}">
+                        EventAggregator="{Binding #StackViewControl.((vm:StackViewModel)DataContext).EventAggregator}">
                     </ct:EntryView>
                 </DataTemplate>
             </ListBox.ItemTemplate>

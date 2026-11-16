@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using NAudio.Midi;
+﻿using NAudio.Midi;
 using Prism.Events;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.App;
@@ -19,6 +11,14 @@ using SportDJ.Services.ControllerService.Assets;
 using SportDJ.Services.ControllerService.Exceptions;
 using SportDJ.Services.ControllerService.Extensions;
 using SportDJ.Services.ControllerService.Records;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SportDJ.Services.ControllerService
 {

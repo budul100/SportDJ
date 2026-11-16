@@ -1,4 +1,3 @@
-﻿using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Prism.DryIoc;
@@ -52,12 +51,20 @@ namespace SportDJ.Shareds.ViewModelLocator
                 }
 
                 var viewType = control.GetType();
-                var viewModelTypeName = viewType.FullName
+
+                // Convention: ...Views.XView -> ...ViewModels.XViewModel in the same assembly
+                var viewModelTypeName = viewType.FullName?
                     .Replace("View", "ViewModel");
 
-                var viewModelType = viewType.Assembly
-                    .GetTypes()
-                    .FirstOrDefault(t => t.FullName == viewModelTypeName);
+                if (string.IsNullOrEmpty(viewModelTypeName))
+                {
+                    return;
+                }
+
+                // Direct lookup instead of scanning all types of the assembly for every created view
+                var viewModelType = viewType.Assembly.GetType(
+                    name: viewModelTypeName,
+                    throwOnError: false);
 
                 if (viewModelType != default
                     && Application.Current is PrismApplication prismApp)

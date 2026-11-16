@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace NAudio.WaveFormRenderer.PeakProviders
 {
@@ -24,7 +24,7 @@ namespace NAudio.WaveFormRenderer.PeakProviders
 
         public override PeakInfo GetNextPeak()
         {
-            var samplesRead = Provider.Read(ReadBuffer, 0, ReadBuffer.Length);
+            var samplesRead = Provider.Read(ReadBuffer);
 
             var max = 0.0f;
             for (var x = 0; x < samplesRead; x += blockSize)

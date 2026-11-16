@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using Prism.Events;
 using Prism.Ioc;
 using SportDJ.Commons.Assets;
@@ -18,6 +13,11 @@ using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SportDJ.Services.OutputService
 {

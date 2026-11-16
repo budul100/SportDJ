@@ -2,9 +2,7 @@
     x:Class="SportDJ.Modules.GridModule.Views.MenuView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -13,6 +11,7 @@
     d:DesignHeight="150"
     d:DesignWidth="150"
     prism:ViewModelLocator.AutoWireViewModel="False"
+    x:DataType="vm:MenuViewModel"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -36,7 +35,7 @@
         FontWeight="{Binding IsSelected, Converter={StaticResource BoolToFontWeightConverter}, ConverterParameter={StaticResource TrackFontWeightSelected}}"
         Header="{Binding Header}"
         ItemsSource="{Binding MenuItems}"
-        SelectedItem="{Binding Selected}"
+        SelectedItem="{Binding Selected, Mode=OneWay}"
         StaysOpenOnClick="False">
 
         <MenuItem.Styles>
@@ -50,7 +49,7 @@
                 Width="{StaticResource MenuIconSize}"
                 Height="{StaticResource MenuIconSize}"
                 IsVisible="{Binding HasIcon}"
-                Kind="{Binding Icon}" />
+                Kind="{Binding IconKind}" />
         </MenuItem.Icon>
 
         <MenuItem.DataTemplates>

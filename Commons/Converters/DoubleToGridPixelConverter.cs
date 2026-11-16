@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using System;
 using System.Globalization;
@@ -35,7 +36,8 @@ namespace SportDJ.Commons.Converters
             }
             else
             {
-                return 0;
+                // Do not write 0 into the source, this would collapse the panel on the next start
+                return BindingOperations.DoNothing;
             }
         }
 

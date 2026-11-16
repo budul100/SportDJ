@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Avalonia;
 using Avalonia.Dialogs;
-using Avalonia.ReactiveUI;
 
 namespace SportDJ.App
 {
@@ -22,7 +21,6 @@ namespace SportDJ.App
             })
             .With(new Win32PlatformOptions())
             .UseSkia()
-            .UseReactiveUI()
             .UseManagedSystemDialogs();
 
         #endregion Public Methods
@@ -31,19 +29,6 @@ namespace SportDJ.App
 
         private static int Main(string[] args)
         {
-            double GetScaling()
-            {
-                var idx = Array.IndexOf(args, "--scaling");
-
-                if (idx != 0 && args.Length > idx + 1 &&
-                    double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
-                {
-                    return scaling;
-                }
-
-                return 1;
-            }
-
             var builder = BuildAvaloniaApp();
 
             // InitializeLogging();
@@ -51,17 +36,31 @@ namespace SportDJ.App
             if (args.Contains("--fbdev"))
             {
                 SilenceConsole();
-                return builder.StartLinuxFbDev(args, scaling: GetScaling());
+                return builder.StartLinuxFbDev(args, scaling: GetScaling(args));
             }
             else if (args.Contains("--drm"))
             {
                 SilenceConsole();
-                return builder.StartLinuxDrm(args, scaling: GetScaling());
+                return builder.StartLinuxDrm(args, scaling: GetScaling(args));
             }
             else
             {
                 return builder.StartWithClassicDesktopLifetime(args);
             }
+        }
+
+        private static double GetScaling(string[] args)
+        {
+            var idx = Array.IndexOf(args, "--scaling");
+
+            if (idx >= 0
+                && args.Length > idx + 1
+                && double.TryParse(args[idx + 1], NumberStyles.Any, CultureInfo.InvariantCulture, out var scaling))
+            {
+                return scaling;
+            }
+
+            return 1;
         }
 
         private static void SilenceConsole()
