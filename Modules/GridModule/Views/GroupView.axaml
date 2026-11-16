@@ -37,19 +37,15 @@
         <TabControl.ItemTemplate>
             <DataTemplate x:DataType="vm:GridViewModel">
 
-                <Grid
+                <!-- The looks of TabHeader and KeyBadge are defined in Styles.axaml -->
+                <Border
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="{StaticResource ColorBackground}"
+                    Classes="TabHeader"
                     IsTabStop="False"
                     Focusable="False">
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.ContextMenu>
+                    <Border.ContextMenu>
                         <ContextMenu
                             Closed="OnContextMenuClosed"
                             ItemsSource="{Binding Menus}"
@@ -64,50 +60,49 @@
                                 </DataTemplate>
                             </ContextMenu.DataTemplates>
                         </ContextMenu>
-                    </Grid.ContextMenu>
+                    </Border.ContextMenu>
 
-                    <Viewbox
-                        Grid.Column="0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Focusable="False"
-                        Stretch="Uniform"
-                        StretchDirection="DownOnly">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                        </Grid.ColumnDefinitions>
 
-                        <ct:EditableText
-                            Margin="{StaticResource GroupTabMargin}"
-                            FontSize="{StaticResource FontSizeContentSub}"
-                            FontStyle="Italic"
-                            IsActive="{Binding IsRenaming}"
-                            MaxLength="{x:Static assets:Constants.NameMaxLength}"
-                            Text="{Binding Name}" />
-                    </Viewbox>
+                        <Viewbox
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Focusable="False"
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly">
 
-                    <Viewbox
-                        Grid.Column="1"
-                        Margin="{StaticResource KeyMargin}"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Focusable="False"
-                        IsVisible="{Binding HasKey}"
-                        Stretch="Uniform"
-                        StretchDirection="DownOnly">
+                            <ct:EditableText
+                                Margin="{StaticResource GroupTabMargin}"
+                                FontSize="{StaticResource FontSizeContentSub}"
+                                FontWeight="{StaticResource FontWeightTitle}"
+                                IsActive="{Binding IsRenaming}"
+                                MaxLength="{x:Static assets:Constants.NameMaxLength}"
+                                Text="{Binding Name}" />
+                        </Viewbox>
 
-                        <Border
-                            Padding="{StaticResource KeyPadding}"
-                            Background="{StaticResource KeyBackgroundColor}"
-                            BorderBrush="{StaticResource KeyBorderColor}"
-                            BorderThickness="{StaticResource KeyBorderThickness}"
-                            CornerRadius="{StaticResource KeyCornerRadius}">
+                        <Viewbox
+                            Grid.Column="1"
+                            Margin="{StaticResource KeyMargin}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Focusable="False"
+                            IsVisible="{Binding HasKey}"
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly">
 
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="{StaticResource FontSizeState}"
-                                Text="{Binding Key}" />
-                        </Border>
-                    </Viewbox>
-                </Grid>
+                            <Border Classes="KeyBadge">
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeState}"
+                                    Text="{Binding Key}" />
+                            </Border>
+                        </Viewbox>
+                    </Grid>
+                </Border>
             </DataTemplate>
         </TabControl.ItemTemplate>
 

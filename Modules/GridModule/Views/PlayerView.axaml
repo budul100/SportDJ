@@ -22,8 +22,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <Thickness x:Key="InnerMargin">1</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -35,22 +33,12 @@
         <dt:PlayerViewModel />
     </Design.DataContext>
 
+    <!-- The looks of PlayerCard and PlayerSurface (radii, states, transitions) are defined in Styles.axaml -->
     <Border
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
-        BorderThickness="{StaticResource PlayerBorderThickness}"
-        Classes.IsActive="{Binding IsActive}"
-        CornerRadius="{StaticResource PlayerCornerRadius}">
-
-        <Border.Styles>
-            <!-- Avalonia has no style specificity, the style declared last wins: default first -->
-            <Style Selector="Border">
-                <Setter Property="BorderBrush" Value="Transparent" />
-            </Style>
-            <Style Selector="Border.IsActive">
-                <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
-            </Style>
-        </Border.Styles>
+        Classes="PlayerCard"
+        Classes.IsActive="{Binding IsActive}">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -59,12 +47,13 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!-- Top row: PFL, key, settings -->
             <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -91,11 +80,7 @@
                     Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Margin="{StaticResource KeyMargin}"
-                    Background="{StaticResource KeyBackgroundColor}"
-                    BorderBrush="{StaticResource KeyBorderColor}"
-                    BorderThickness="{StaticResource KeyBorderThickness}"
-                    CornerRadius="{StaticResource KeyCornerRadius}"
+                    Classes="KeyBadge"
                     IsVisible="{Binding HasKey}">
 
                     <Viewbox
@@ -107,7 +92,6 @@
                         StretchDirection="Both">
 
                         <TextBlock
-                            Padding="{StaticResource KeyPadding}"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="{StaticResource FontSizeContentMain}"
@@ -138,26 +122,15 @@
                 </ToggleButton>
             </Grid>
 
-
+            <!-- Main surface -->
             <Border
                 Grid.Row="1"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
+                Classes="PlayerSurface"
                 Classes.IsForeground="{Binding IsForeground}"
                 Classes.IsPlaying="{Binding IsPlaying}">
-
-                <Border.Styles>
-                    <Style Selector="Border">
-                        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
-                    </Style>
-                    <Style Selector="Border.IsForeground">
-                        <Setter Property="Background" Value="{StaticResource ColorIsForeground}" />
-                    </Style>
-                    <Style Selector="Border.IsPlaying">
-                        <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
-                    </Style>
-                </Border.Styles>
 
                 <Button
                     Name="ExecuteButton"
@@ -224,7 +197,7 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     FontSize="{StaticResource FontSizeState}"
-                                    FontStyle="Italic"
+                                    FontWeight="{StaticResource FontWeightTitle}"
                                     IsActive="{Binding IsRenaming}"
                                     MaxLength="{x:Static assets:Constants.NameMaxLength}"
                                     Text="{Binding Name}" />
@@ -241,6 +214,7 @@
                                     VerticalAlignment="Top"
                                     Focusable="False"
                                     FontSize="{StaticResource FontSizeState}"
+                                    FontWeight="{StaticResource FontWeightLabel}"
                                     Text="{Binding Remaining}" />
                             </Viewbox>
                         </Grid>
@@ -269,13 +243,14 @@
                 </Button>
             </Border>
 
+            <!-- Bottom row: previous, stack, next -->
             <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2" />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 

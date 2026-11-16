@@ -22,12 +22,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-            
-            <Thickness x:Key="InnerMargin">2,1,2,1</Thickness>
-            <Thickness x:Key="RendererMargin">1</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
-    
+
     <UserControl.Styles>
         <mat:MaterialIconStyles />
     </UserControl.Styles>
@@ -74,44 +71,29 @@
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
+            <!-- Clock -->
             <Border
                 Grid.Column="0"
-                Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                BorderBrush="{StaticResource ColorBackground}"
-                BorderThickness="{StaticResource DisplayBorderThickness}"
-                CornerRadius="{StaticResource DisplayCornerRadius}">
+                Classes="DisplayField">
 
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FontSize="{StaticResource FontSizeContentSub}"
-                    FontWeight="Bold"
+                    FontWeight="{StaticResource FontWeightTitle}"
                     Text="{Binding Clock}" />
             </Border>
 
+            <!-- Track info -->
             <Border
                 Grid.Column="1"
-                Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                BorderThickness="{StaticResource DisplayBorderThickness}"
-                Classes.IsEnding="{Binding IsEnding}"
+                Classes="DisplayField"
                 Classes.IsPlaying="{Binding IsPlaying}"
-                CornerRadius="{StaticResource DisplayCornerRadius}">
-
-                <Border.Styles>
-                    <Style Selector="Border.IsPlaying">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
-                    </Style>
-                    <Style Selector="Border.IsEnding">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
-                    </Style>
-                    <Style Selector="Border">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
-                    </Style>
-                </Border.Styles>
+                Classes.IsEnding="{Binding IsEnding}">
 
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -137,27 +119,14 @@
                 </Grid>
             </Border>
 
+            <!-- Waveform -->
             <Border
                 Grid.Column="2"
-                Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                BorderThickness="{StaticResource DisplayBorderThickness}"
-                Classes.IsEnding="{Binding IsEnding}"
+                Classes="DisplayField"
                 Classes.IsPlaying="{Binding IsPlaying}"
-                CornerRadius="{StaticResource DisplayCornerRadius}">
-
-                <Border.Styles>
-                    <Style Selector="Border.IsPlaying">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
-                    </Style>
-                    <Style Selector="Border.IsEnding">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
-                    </Style>
-                    <Style Selector="Border">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
-                    </Style>
-                </Border.Styles>
+                Classes.IsEnding="{Binding IsEnding}">
 
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -176,7 +145,7 @@
                         Color="{StaticResource ColorIsEnding}" />
 
                     <ct:WaveRenderer
-                        Margin="{StaticResource RendererMargin}"
+                        Margin="{StaticResource InnerMargin}"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Stretch"
                         Bitmap="{Binding Bitmap}"
@@ -185,27 +154,14 @@
                 </Grid>
             </Border>
 
+            <!-- Remaining time -->
             <Border
                 Grid.Column="3"
-                Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                BorderThickness="{StaticResource DisplayBorderThickness}"
-                Classes.IsEnding="{Binding IsEnding}"
+                Classes="DisplayField"
                 Classes.IsPlaying="{Binding IsPlaying}"
-                CornerRadius="{StaticResource DisplayCornerRadius}">
-
-                <Border.Styles>
-                    <Style Selector="Border.IsPlaying">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
-                    </Style>
-                    <Style Selector="Border.IsEnding">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
-                    </Style>
-                    <Style Selector="Border">
-                        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
-                    </Style>
-                </Border.Styles>
+                Classes.IsEnding="{Binding IsEnding}">
 
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -227,6 +183,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource FontSizeContentSub}"
+                        FontWeight="{StaticResource FontWeightTitle}"
                         Text="{Binding Remaining}" />
                 </Grid>
             </Border>

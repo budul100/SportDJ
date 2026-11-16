@@ -22,11 +22,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude  Source="avares://Commons/Assets/Ressources.axaml" />
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <Thickness x:Key="InnerMargin">2</Thickness>
-            <Thickness x:Key="ComboBoxBorder">1</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -40,6 +37,7 @@
 
     <DockPanel IsEnabled="{Binding IsActive}" LastChildFill="True">
 
+        <!-- Output device -->
         <DockPanel
             Margin="{StaticResource ContentMargin}"
             DockPanel.Dock="Top"
@@ -48,8 +46,8 @@
 
             <Button
                 Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
+                Classes="Tool"
                 Command="{Binding UpdateDevicesCommand}"
                 DockPanel.Dock="Right"
                 Focusable="False">
@@ -59,36 +57,37 @@
                     Kind="Reload" />
             </Button>
 
-            <StackPanel Margin="{StaticResource InnerMargin}" DockPanel.Dock="Left">
+            <StackPanel
+                Margin="{StaticResource InnerMargin}"
+                DockPanel.Dock="Left"
+                Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock
-                    Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    FontSize="{StaticResource FontSizeSettings}"
+                    Classes="Caption"
                     Text="Output device" />
 
                 <ComboBox
                     HorizontalAlignment="Stretch"
                     Focusable="False"
-                    BorderThickness="{StaticResource ComboBoxBorder}"
                     ItemsSource="{Binding Devices}"
                     SelectedItem="{Binding Device}"
                     Classes.error="{Binding Device, Converter={x:Static ObjectConverters.IsNull}}">
 
                     <ComboBox.Styles>
                         <Style Selector="ComboBox.error">
-                            <Setter Property="BorderBrush" Value="Red"/>
+                            <Setter Property="BorderBrush" Value="Red" />
                         </Style>
                     </ComboBox.Styles>
 
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="rec:Device">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Name}"/>
-                                <TextBlock Text=" ("/>
-                                <TextBlock Text="{Binding Type, Converter={StaticResource CapabilityTypeConverter}}"/>
-                                <TextBlock Text=")"/>
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Classes="Caption"
+                                    Text="{Binding Type, Converter={StaticResource CapabilityTypeConverter}}" />
                             </StackPanel>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -98,6 +97,7 @@
             </StackPanel>
         </DockPanel>
 
+        <!-- Midi controller -->
         <DockPanel
             Margin="{StaticResource ContentMargin}"
             DockPanel.Dock="Top"
@@ -106,8 +106,8 @@
 
             <Button
                 Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
+                Classes="Tool"
                 Command="{Binding UpdateControllersCommand}"
                 DockPanel.Dock="Right"
                 Focusable="False">
@@ -117,27 +117,25 @@
                     Kind="Reload" />
             </Button>
 
-            <StackPanel Margin="{StaticResource InnerMargin}" DockPanel.Dock="Left">
+            <StackPanel
+                Margin="{StaticResource InnerMargin}"
+                DockPanel.Dock="Left"
+                Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock
-                    Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Stretch"
-                    FontSize="{StaticResource FontSizeSettings}"
+                    Classes="Caption"
                     Text="Midi controller" />
 
                 <ComboBox
                     HorizontalAlignment="Stretch"
                     Focusable="False"
-                    BorderThickness="{StaticResource ComboBoxBorder}"
                     ItemsSource="{Binding Controllers}"
                     SelectedItem="{Binding Controller}">
 
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="rec:Controller">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Name}"/>
-                            </StackPanel>
+                            <TextBlock Text="{Binding Name}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
 
@@ -146,6 +144,7 @@
             </StackPanel>
         </DockPanel>
 
+        <!-- Load / save settings -->
         <Grid
             Margin="{StaticResource ContentMargin}"
             ColumnDefinitions="*,*"
@@ -185,6 +184,7 @@
             DockPanel.Dock="Bottom"
             Focusable="False" />
 
+        <!-- Volumes -->
         <Grid Margin="{StaticResource ContentMargin}" DockPanel.Dock="Top">
 
             <Grid.ColumnDefinitions>
@@ -194,7 +194,7 @@
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
@@ -203,8 +203,9 @@
                 Grid.Column="0"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeSettings}"
+                Classes="Caption"
+                TextAlignment="Center"
+                TextWrapping="Wrap"
                 Text="Volume" />
 
             <Slider
@@ -226,8 +227,9 @@
                 Grid.Column="1"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeSettings}"
+                Classes="Caption"
+                TextAlignment="Center"
+                TextWrapping="Wrap"
                 Text="Background" />
 
             <Slider
@@ -249,8 +251,9 @@
                 Grid.Column="2"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeSettings}"
+                Classes="Caption"
+                TextAlignment="Center"
+                TextWrapping="Wrap"
                 Text="External apps" />
 
             <Slider

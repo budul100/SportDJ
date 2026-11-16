@@ -21,8 +21,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <Thickness x:Key="InnerMargin">2</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -43,8 +41,8 @@
 
             <Button
                 Margin="{StaticResource InnerMargin}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
+                VerticalAlignment="Center"
+                Classes="Tool"
                 Command="{Binding ClearCommand}"
                 DockPanel.Dock="Right"
                 Focusable="False">
@@ -55,9 +53,9 @@
             </Button>
 
             <TextBox
-                Height="{StaticResource TextBoxHeight}"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
                 AcceptsReturn="False"
                 DockPanel.Dock="Left"
                 Focusable="False"
@@ -65,7 +63,9 @@
                 PlaceholderText="Search track" />
         </DockPanel>
 
-        <ListBox ItemsSource="{Binding Entries}">
+        <ListBox
+            Margin="{StaticResource ContentMargin}"
+            ItemsSource="{Binding Entries}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="models:Entry">
                     <ct:EntryView Entry="{Binding}" />

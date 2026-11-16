@@ -1,0 +1,162 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Central control styles of the application. Include once in App.axaml, after the theme:
+        <StyleInclude Source="avares://Commons/Assets/Styles.axaml" />
+
+        Avalonia has no style specificity: for the same property the style declared last wins.
+        Therefore every block below lists the default first and the state variants after it.
+    -->
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!-- ===== Standard controls ===== -->
+
+    <Style Selector=":is(Button)">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeState}" />
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
+        <Setter Property="MinHeight" Value="{StaticResource ControlHeight}" />
+    </Style>
+
+    <Style Selector="ListBoxItem">
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+
+    <Style Selector="ContextMenu">
+        <Setter Property="CornerRadius" Value="{StaticResource OverlayCornerRadius}" />
+    </Style>
+
+    <Style Selector="MenuItem">
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSmall}" />
+    </Style>
+
+    <!-- ===== Buttons ===== -->
+
+    <!-- Square icon button, as high as a text input, e.g. next to a TextBox or ComboBox -->
+    <Style Selector="Button.Tool">
+        <Setter Property="Width" Value="{StaticResource ControlHeight}" />
+        <Setter Property="Height" Value="{StaticResource ControlHeight}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- Button whose content is a Border.StateSurface: the surface fills the whole button -->
+    <Style Selector="Button.Surface">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- ===== Surfaces ===== -->
+
+    <!-- On/off surface inside a button (loop, monitoring, microphone, pause) -->
+    <Style Selector="Border.StateSurface">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+    <Style Selector="Border.StateSurface.Filled">
+        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
+    </Style>
+    <Style Selector="Border.StateSurface.IsActive">
+        <Setter Property="Background" Value="{StaticResource ColorBackgroundToggle}" />
+    </Style>
+
+    <!-- Outer frame of a player: shows the active state with its border -->
+    <Style Selector="Border.PlayerCard">
+        <Setter Property="BorderThickness" Value="{StaticResource PlayerBorderThickness}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="{StaticResource PlayerCornerRadius}" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.15" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Border.PlayerCard.IsActive">
+        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+    </Style>
+
+    <!-- Main surface of a player: shows the foreground and playing state -->
+    <Style Selector="Border.PlayerSurface">
+        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.15" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Border.PlayerSurface.IsForeground">
+        <Setter Property="Background" Value="{StaticResource ColorIsForeground}" />
+    </Style>
+    <Style Selector="Border.PlayerSurface.IsPlaying">
+        <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+    </Style>
+
+    <!-- Header of a tab -->
+    <Style Selector="Border.TabHeader">
+        <Setter Property="Background" Value="{StaticResource ColorBackground}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
+    </Style>
+
+    <!-- Field of the display bar: the border shows the playing and ending state, ending wins -->
+    <Style Selector="Border.DisplayField">
+        <Setter Property="Margin" Value="{StaticResource InnerMargin}" />
+        <Setter Property="BorderThickness" Value="{StaticResource DisplayBorderThickness}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ColorBackground}" />
+        <Setter Property="CornerRadius" Value="{StaticResource DisplayCornerRadius}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="Border.DisplayField.IsPlaying">
+        <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
+    </Style>
+    <Style Selector="Border.DisplayField.IsEnding">
+        <Setter Property="BorderBrush" Value="{StaticResource ColorIsEnding}" />
+    </Style>
+
+    <!-- Badge which shows an assigned key -->
+    <Style Selector="Border.KeyBadge">
+        <Setter Property="Background" Value="{StaticResource KeyBackgroundColor}" />
+        <Setter Property="BorderBrush" Value="{StaticResource KeyBorderColor}" />
+        <Setter Property="BorderThickness" Value="{StaticResource KeyBorderThickness}" />
+        <Setter Property="CornerRadius" Value="{StaticResource KeyCornerRadius}" />
+        <Setter Property="Padding" Value="{StaticResource KeyPadding}" />
+    </Style>
+    <Style Selector="Border.KeyBadge TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightTitle}" />
+    </Style>
+
+    <!-- ===== Text ===== -->
+
+    <!-- Small label above an input -->
+    <Style Selector="TextBlock.Caption">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSettings}" />
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
+        <Setter Property="Opacity" Value="0.7" />
+    </Style>
+</Styles>

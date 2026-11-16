@@ -16,10 +16,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude  Source="avares://Commons/Assets/Ressources.axaml" />
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <Thickness x:Key="InnerMargin">2</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -28,16 +26,15 @@
     </UserControl.Styles>
 
     <StackPanel
-        IsEnabled="{Binding IsActive}">
+        Margin="{StaticResource ContentMargin}"
+        IsEnabled="{Binding IsActive}"
+        Spacing="{StaticResource SpacingMedium}">
 
-        <StackPanel
-            Margin="{StaticResource InnerMargin}">
+        <StackPanel Spacing="{StaticResource SpacingSmall}">
 
             <TextBlock
-                Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Stretch"
-                FontSize="{StaticResource FontSizeSettings}"
+                Classes="Caption"
                 Text="Player name" />
 
             <TextBox
@@ -48,33 +45,31 @@
 
         </StackPanel>
 
-        <CheckBox
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Stretch"
-            IsTabStop="False"
-            Content="Is foreground player"
-            IsChecked="{Binding IsForeground}" />
+        <StackPanel Spacing="{StaticResource SpacingSmall}">
 
-        <CheckBox
-            Margin="{StaticResource InnerMargin}"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Stretch"
-            IsTabStop="False"
-            Content="Reset player at start"
-            IsChecked="{Binding IsReset}" />
+            <CheckBox
+                HorizontalAlignment="Left"
+                IsTabStop="False"
+                Content="Is foreground player"
+                IsChecked="{Binding IsForeground}" />
+
+            <CheckBox
+                HorizontalAlignment="Left"
+                IsTabStop="False"
+                Content="Reset player at start"
+                IsChecked="{Binding IsReset}" />
+
+        </StackPanel>
 
         <StackPanel
-            Orientation="Horizontal"
-            Margin="{StaticResource InnerMargin}"
             HorizontalAlignment="Left"
-            Spacing="8">
+            Orientation="Horizontal"
+            Spacing="{StaticResource SpacingMedium}">
 
             <Button Content="Register" Command="{Binding RegisterCommand}" />
             <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
 
         </StackPanel>
-
 
     </StackPanel>
 

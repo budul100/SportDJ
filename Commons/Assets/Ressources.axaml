@@ -3,14 +3,48 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:co="using:SportDJ.Commons.Converters">
 
+    <!--
+        Central design tokens of the application.
+        Rules: gaps are multiples of 2, corner radii follow the three step scale below,
+        font sizes follow the type scale below. Control styles live in Styles.axaml.
+    -->
+
+    <!-- ===== Behaviour (unchanged) ===== -->
+
     <x:Double x:Key="SplashViewSize">500</x:Double>
     <x:TimeSpan x:Key="TogglePressDuration">0:0:0.500</x:TimeSpan>
 
+    <!-- ===== Spacing ===== -->
+
+    <!-- Outer gutter of a panel or a cell -->
     <Thickness x:Key="ContentMargin">4</Thickness>
+    <!-- Inner gutter between elements inside a cell (2 + 2 = 4 between two neighbours) -->
+    <Thickness x:Key="InnerMargin">2</Thickness>
+
+    <x:Double x:Key="SpacingSmall">4</x:Double>
+    <x:Double x:Key="SpacingMedium">8</x:Double>
+
+    <!-- ===== Corner radii ===== -->
+
+    <CornerRadius x:Key="RadiusSmall">4</CornerRadius>
+    <CornerRadius x:Key="RadiusMedium">6</CornerRadius>
+    <CornerRadius x:Key="RadiusLarge">10</CornerRadius>
+
+    <!-- Same keys as the Fluent theme uses, so every standard control follows the scale -->
+    <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+    <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+
+    <!-- ===== Sizes ===== -->
+
+    <x:Double x:Key="ControlHeight">32</x:Double>
 
     <x:Double x:Key="MediumIconSize">20</x:Double>
     <x:Double x:Key="LargeIconSize">30</x:Double>
+
+    <!-- Legacy, kept because shared controls might still use it -->
     <x:Double x:Key="TextBoxHeight">20</x:Double>
+
+    <!-- ===== Colors (unchanged) ===== -->
 
     <Color x:Key="ColorBackground">#333333</Color>
     <Color x:Key="ColorBackgroundToggle">DodgerBlue</Color>
@@ -20,26 +54,38 @@
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
 
+    <!-- ===== Type scale: 11 / 14 / 16 / 20 ===== -->
+
+    <x:Double x:Key="FontSizeSettings">11</x:Double>
+    <x:Double x:Key="FontSizeState">14</x:Double>
+    <x:Double x:Key="FontSizeContentSub">16</x:Double>
     <x:Double x:Key="FontSizeContentMain">20</x:Double>
-    <x:Double x:Key="FontSizeContentSub">15</x:Double>
-    <x:Double x:Key="FontSizeState">15</x:Double>
-    <x:Double x:Key="FontSizeSettings">10</x:Double>
+
+    <FontWeight x:Key="FontWeightLabel">Medium</FontWeight>
+    <FontWeight x:Key="FontWeightTitle">SemiBold</FontWeight>
+
+    <!-- ===== Key badge ===== -->
 
     <Color x:Key="KeyBackgroundColor">DimGray</Color>
     <Color x:Key="KeyBorderColor">LightGray</Color>
     <Thickness x:Key="KeyBorderThickness">1</Thickness>
-    <CornerRadius x:Key="KeyCornerRadius">0</CornerRadius>
-    <Thickness x:Key="KeyPadding">5,0,5,0</Thickness>
-    <Thickness x:Key="KeyMargin">5</Thickness>
+    <CornerRadius x:Key="KeyCornerRadius">4</CornerRadius>
+    <Thickness x:Key="KeyPadding">6,1,6,1</Thickness>
+    <Thickness x:Key="KeyMargin">4</Thickness>
 
+    <!-- ===== Player card ===== -->
+
+    <!-- Outer radius 10 = inner radius 6 + gap 4 (border 2 + inner margin 2), so the corners stay concentric -->
     <Thickness x:Key="PlayerBorderThickness">2</Thickness>
-    <CornerRadius x:Key="PlayerCornerRadius">2</CornerRadius>
+    <CornerRadius x:Key="PlayerCornerRadius">10</CornerRadius>
     <x:Double x:Key="PlayerIconSize">30</x:Double>
 
-    <Thickness x:Key="GroupTabMargin">30,10,30,10</Thickness>
+    <Thickness x:Key="GroupTabMargin">16,6,16,6</Thickness>
+
+    <!-- ===== Display bar ===== -->
 
     <Thickness x:Key="DisplayBorderThickness">2</Thickness>
-    <CornerRadius x:Key="DisplayCornerRadius">4</CornerRadius>
+    <CornerRadius x:Key="DisplayCornerRadius">6</CornerRadius>
 
     <x:Double x:Key="DisplayOpacityPlaying">0.3</x:Double>
     <x:Double x:Key="DisplayOpacityEndingMin">0.2</x:Double>
@@ -47,12 +93,18 @@
     <x:Double x:Key="DisplayFlashingDurationMilliSecs">750</x:Double>
     <x:Double x:Key="DisplayIconSize">30</x:Double>
 
+    <!-- ===== Tracks ===== -->
+
     <x:Double x:Key="TrackOpacityPlayed">0.5</x:Double>
-    <x:Double x:Key="TrackFontSize">15</x:Double>
+    <x:Double x:Key="TrackFontSize">14</x:Double>
     <FontStyle x:Key="TrackFontStylePlayed">Italic</FontStyle>
     <FontWeight x:Key="TrackFontWeightSelected">Bold</FontWeight>
 
-    <x:Double x:Key="MenuIconSize">30</x:Double>
+    <!-- ===== Menus ===== -->
+
+    <x:Double x:Key="MenuIconSize">20</x:Double>
+
+    <!-- ===== Converters ===== -->
 
     <co:BoolToGridSizeAutoConverter x:Key="BoolToGridSizeAutoConverter" />
     <co:BoolToGridSizeStarConverter x:Key="BoolToGridSizeStarConverter" />
