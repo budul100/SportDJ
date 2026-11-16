@@ -42,6 +42,7 @@ public class PointerCaptureBehavior
     #region Private Fields
 
     private const int HoldDurationDefault = 400;
+
     private DispatcherTimer holdTimer;
     private bool isHolding;
     private bool wasPressed;
