@@ -50,6 +50,12 @@ public class App
     {
         AvaloniaXamlLoader.Load(this);
 
+        // The previewer only needs the styles, not the module graph
+        if (Design.IsDesignMode)
+        {
+            return;
+        }
+
         base.Initialize();
     }
 
