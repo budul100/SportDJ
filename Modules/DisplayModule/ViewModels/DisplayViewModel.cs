@@ -57,7 +57,7 @@ public class DisplayViewModel
             executeMethod: ShowSettings);
 
         mixerService = containerProvider?.Resolve<IMixerService>(
-            name: nameof(MixerType.Background));
+            name: nameof(MixerType.Base));
 
         eventAggregator?.GetEvent<MixerUpdatedEvent>().Subscribe(
             action: _ => OnMixerUpdated(),

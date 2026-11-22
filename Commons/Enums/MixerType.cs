@@ -2,9 +2,9 @@
 
 public enum MixerType
 {
-    Background,
+    Base,
 
-    Foreground,
+    Overlay,
 
     //PFL,
 }

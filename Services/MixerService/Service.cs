@@ -213,7 +213,7 @@ public class Service
 
     public void Pause()
     {
-        var useFilterEffect = Type == MixerType.Background;
+        var useFilterEffect = Type == MixerType.Base;
 
         signalServices.OnEach(s => s?.Pause(useFilterEffect));
     }

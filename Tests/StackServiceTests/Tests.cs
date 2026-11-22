@@ -104,7 +104,7 @@ public class Tests
         player = new Player
         {
             Name = "TestPlayer",
-            IsForeground = false,
+            IsOverlay = false,
             ResetPosition = true,
             Paths = [@"..\..\..\Samples"]
         };

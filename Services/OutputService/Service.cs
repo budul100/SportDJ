@@ -31,16 +31,17 @@ public class Service
     private readonly IDeviceService deviceService;
     private readonly IEventAggregator eventAggregator;
     private readonly HashSet<IMixerService> mixersAll = [];
-    private readonly HashSet<IMixerService> mixersForeground = [];
+    private readonly HashSet<IMixerService> mixersOverlay = [];
     private readonly IStorageService<Session> sessionService;
     private readonly IStorageService<Set> settingsService;
 
-    private MixingProvider backgroundProvider;
-    private FadingProvider fadingProvider;
-    private MixingProvider foregroundProvider;
     private bool isDisposed;
     private IEnumerable<IMonitorService> monitorServices;
     private Output outputOptions;
+
+    private MixingProvider providerBase;
+    private FadingProvider providerFading;
+    private MixingProvider providerOverlay;
 
     #endregion Private Fields
 
@@ -133,17 +134,17 @@ public class Service
 
     #region Public Methods
 
-    public void Add(IMixerService mixerService, bool onForeground)
+    public void Add(IMixerService mixerService, bool isOverlay)
     {
-        if (onForeground)
+        if (isOverlay)
         {
-            mixersForeground.Add(mixerService);
+            mixersOverlay.Add(mixerService);
 
-            foregroundProvider.Add(mixerService.Output);
+            providerOverlay.Add(mixerService.Output);
         }
         else
         {
-            backgroundProvider.Add(mixerService.Output);
+            providerBase.Add(mixerService.Output);
         }
 
         mixersAll.Add(mixerService);
@@ -183,7 +184,7 @@ public class Service
             var volumeExternals = deviceService.Volume * outputOptions.VolumePercentageExternals
                 / (float)Constants.OptionsPercentageMax;
 
-            fadingProvider.Fade(
+            providerFading.Fade(
                 volumeTarget: volumeBackground,
                 milliSeconds: fadeMilliseconds);
 
@@ -206,7 +207,7 @@ public class Service
         {
             var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-            fadingProvider.FadeIn(
+            providerFading.FadeIn(
                 milliSeconds: fadeMilliseconds);
 
             InvokeOnMonitors(s => s.Raise(
@@ -267,7 +268,7 @@ public class Service
 
                 mixersAll.OnEach(p => p.End());
 
-                mixersForeground.Clear();
+                mixersOverlay.Clear();
                 mixersAll.Clear();
 
                 cancellationTokenSource?.Cancel();
@@ -301,15 +302,15 @@ public class Service
         mixersAll.OnEach(m => m.Pause());
         deviceService?.Stop();
 
-        if (fadingProvider != default)
+        if (providerFading != default)
         {
-            fadingProvider.FadingStartedEvent -= OnFadingStarted;
-            fadingProvider.FadingEndedEvent -= OnFadingEnded;
+            providerFading.FadingStartedEvent -= OnFadingStarted;
+            providerFading.FadingEndedEvent -= OnFadingEnded;
         }
 
-        foregroundProvider?.Dispose();
-        fadingProvider?.Dispose();
-        backgroundProvider?.Dispose();
+        providerOverlay?.Dispose();
+        providerFading?.Dispose();
+        providerBase?.Dispose();
     }
 
     private Output GetOptions(OutputType type)
@@ -354,25 +355,25 @@ public class Service
 
     private void InitializeProviders()
     {
-        backgroundProvider = new MixingProvider(deviceService.WaveFormat);
+        providerBase = new MixingProvider(deviceService.WaveFormat);
 
-        fadingProvider = new FadingProvider(
-            sourceProvider: backgroundProvider,
+        providerFading = new FadingProvider(
+            sourceProvider: providerBase,
             volume: Constants.VolumeMax);
 
-        fadingProvider.FadingStartedEvent += OnFadingStarted;
-        fadingProvider.FadingEndedEvent += OnFadingEnded;
+        providerFading.FadingStartedEvent += OnFadingStarted;
+        providerFading.FadingEndedEvent += OnFadingEnded;
 
-        foregroundProvider = new MixingProvider(deviceService.WaveFormat);
-        foregroundProvider.Add(fadingProvider);
+        providerOverlay = new MixingProvider(deviceService.WaveFormat);
+        providerOverlay.Add(providerFading);
 
         deviceService.Initialize(
-            provider: foregroundProvider,
+            provider: providerOverlay,
             volume: outputOptions.Volume);
 
         mixersAll.OnEach(mixer => Add(
             mixerService: mixer,
-            onForeground: mixersForeground.Contains(mixer)));
+            isOverlay: mixersOverlay.Contains(mixer)));
 
         Task.Run(
             action: deviceService.Play,
@@ -410,7 +411,7 @@ public class Service
 
     private void OnMixerEnded(IMixerService mixerService)
     {
-        mixersForeground.Remove(mixerService);
+        mixersOverlay.Remove(mixerService);
 
         mixersAll.Remove(mixerService);
     }
@@ -424,7 +425,7 @@ public class Service
             eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
         }
 
-        if (mixersForeground.Contains(mixerService))
+        if (mixersOverlay.Contains(mixerService))
         {
             Lower();
         }
@@ -438,7 +439,7 @@ public class Service
     {
         var isPlaying = mixersAll.Any(p => p.IsPlaying);
 
-        if (!isPlaying || mixersForeground.Contains(mixerService))
+        if (!isPlaying || mixersOverlay.Contains(mixerService))
         {
             Raise();
         }

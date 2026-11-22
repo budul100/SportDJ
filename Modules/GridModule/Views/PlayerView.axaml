@@ -129,7 +129,7 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Classes="PlayerSurface"
-                Classes.IsForeground="{Binding IsForeground}"
+                Classes.IsOverlay="{Binding IsOverlay}"
                 Classes.IsPlaying="{Binding IsPlaying}">
 
                 <Button

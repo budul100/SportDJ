@@ -75,7 +75,7 @@ public class MainViewModel
         ClosePanelRightCommand = new DelegateCommand(() => ClosePanel(PanelType.Right));
 
         backgroundMixer = containerProvider?.Resolve<IMixerService>(
-            name: nameof(MixerType.Background));
+            name: nameof(MixerType.Base));
 
         eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
             action: _ => InitializeSession(),
@@ -400,7 +400,7 @@ public class MainViewModel
         panelService.Deactivate(type);
     }
 
-    private void InitializeMixer(OutputType outputType, MixerType mixerType, bool onForeground)
+    private void InitializeMixer(OutputType outputType, MixerType mixerType, bool isOverlay)
     {
         var outputService = containerProvider.Resolve<IOutputService>(
             name: outputType.ToString());
@@ -415,11 +415,11 @@ public class MainViewModel
                 mixerService.Initialize(
                     type: mixerType,
                     waveFormat: outputService.WaveFormat,
-                    signalsCanOverlap: onForeground);
+                    signalsCanOverlap: isOverlay);
 
                 outputService.Add(
                     mixerService: mixerService,
-                    onForeground: onForeground);
+                    isOverlay: isOverlay);
             }
         }
     }
@@ -447,20 +447,20 @@ public class MainViewModel
 
         InitializeMixer(
             outputType: OutputType.Live,
-            mixerType: MixerType.Background,
-            onForeground: false);
+            mixerType: MixerType.Base,
+            isOverlay: false);
 
         InitializeMixer(
             outputType: OutputType.Live,
-            mixerType: MixerType.Foreground,
-            onForeground: true);
+            mixerType: MixerType.Overlay,
+            isOverlay: true);
 
         //InitializeOutput(
         //    type: OutputType.PFL);
         //InitializeMixer(
         //    outputType: OutputType.PFL,
         //    mixerType: MixerType.PFL,
-        //    onForeground: true);
+        //    isOverlay: true);
         UpdateLayout();
         UpdateTitle();
     }

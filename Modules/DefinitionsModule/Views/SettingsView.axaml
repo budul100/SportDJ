@@ -50,8 +50,8 @@
             <CheckBox
                 HorizontalAlignment="Left"
                 IsTabStop="False"
-                Content="Is foreground player"
-                IsChecked="{Binding IsForeground}" />
+                Content="Is overlay signal"
+                IsChecked="{Binding IsOverlay}" />
 
             <CheckBox
                 HorizontalAlignment="Left"

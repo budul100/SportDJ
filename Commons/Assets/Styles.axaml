@@ -3,11 +3,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Central control styles of the application. Include once in App.axaml, after the theme:
-        <StyleInclude Source="avares://Commons/Assets/Styles.axaml" />
+    Central control styles of the application. Include once in App.axaml, after the theme:
+    <StyleInclude Source="avares://Commons/Assets/Styles.axaml" />
 
-        Avalonia has no style specificity: for the same property the style declared last wins.
-        Therefore every block below lists the default first and the state variants after it.
+    Avalonia has no style specificity: for the same property the style declared last wins.
+    Therefore every block below lists the default first and the state variants after it.
     -->
 
     <Styles.Resources>
@@ -98,7 +98,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
     </Style>
 
-    <!-- Main surface of a player: shows the foreground and playing state -->
+    <!-- Main surface of a player: shows the overlay and playing state -->
     <Style Selector="Border.PlayerSurface">
         <Setter Property="Background" Value="{StaticResource ColorBackground}" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
@@ -109,8 +109,8 @@
             </Transitions>
         </Setter>
     </Style>
-    <Style Selector="Border.PlayerSurface.IsForeground">
-        <Setter Property="Background" Value="{StaticResource ColorIsForeground}" />
+    <Style Selector="Border.PlayerSurface.IsOverlay">
+        <Setter Property="Background" Value="{StaticResource ColorIsOverlay}" />
     </Style>
     <Style Selector="Border.PlayerSurface.IsPlaying">
         <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />

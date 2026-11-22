@@ -41,22 +41,22 @@ public class SettingsViewModel
 
     public bool IsActive => player != default;
 
-    public bool IsForeground
+    public bool IsOverlay
     {
-        get => player?.IsForeground == true;
+        get => player?.IsOverlay == true;
 
         set
         {
             if (player?.PlayerService != default
-                && value != player.PlayerService.IsForeground)
+                && value != player.PlayerService.IsOverlay)
             {
-                player.PlayerService.IsForeground = value;
+                player.PlayerService.IsOverlay = value;
 
                 settingsService.Save();
 
                 eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
 
-                RaisePropertyChanged(nameof(IsForeground));
+                RaisePropertyChanged(nameof(IsOverlay));
             }
         }
     }
@@ -119,7 +119,7 @@ public class SettingsViewModel
 
             // The bindings still show the values of the previous player otherwise
             RaisePropertyChanged(nameof(IsActive));
-            RaisePropertyChanged(nameof(IsForeground));
+            RaisePropertyChanged(nameof(IsOverlay));
             RaisePropertyChanged(nameof(IsReset));
             RaisePropertyChanged(nameof(Name));
         }

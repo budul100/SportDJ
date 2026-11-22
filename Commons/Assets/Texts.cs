@@ -27,7 +27,7 @@ public static class Texts
     public const string KeyUnhookHeader = "Clear key hook";
 
     public const string PlayerEditHeader = "Edit player";
-    public const string PlayerOnForegroundHeader = "On foreground";
+    public const string PlayerOverlayHeader = "On overlay";
     public const string PlayerRenameHeader = "Rename player";
     public const string PlayerResetHeader = "Reset player";
     public const string PlayerResetMessage = "Shall the player be reset?";

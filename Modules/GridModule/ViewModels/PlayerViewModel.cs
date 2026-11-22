@@ -145,17 +145,17 @@ public class PlayerViewModel
 
     public bool IsEnding => playerService?.IsEnding == true;
 
-    public bool IsForeground
+    public bool IsOverlay
     {
-        get { return playerService?.IsForeground == true; }
+        get { return playerService?.IsOverlay == true; }
         set
         {
             if (playerService != default
-                && value != playerService.IsForeground)
+                && value != playerService.IsOverlay)
             {
-                playerService.IsForeground = value;
+                playerService.IsOverlay = value;
 
-                RaisePropertyChanged(nameof(IsForeground));
+                RaisePropertyChanged(nameof(IsOverlay));
             }
         }
     }
@@ -362,10 +362,10 @@ public class PlayerViewModel
             yield return new SeparatorViewModel();
 
             yield return new MenuViewModel(
-                header: Texts.PlayerOnForegroundHeader,
-                executeCallback: () => IsForeground = !IsForeground,
+                header: Texts.PlayerOverlayHeader,
+                executeCallback: () => IsOverlay = !IsOverlay,
                 closeCallback: CloseMenu,
-                isCheckedGetter: () => IsForeground,
+                isCheckedGetter: () => IsOverlay,
                 icon: MaterialIconKind.ChevronUpBoxOutline);
 
             yield return new MenuViewModel(
@@ -452,7 +452,7 @@ public class PlayerViewModel
         RaisePropertyChanged(nameof(HasStack));
 
         RaisePropertyChanged(nameof(Name));
-        RaisePropertyChanged(nameof(IsForeground));
+        RaisePropertyChanged(nameof(IsOverlay));
         RaisePropertyChanged(nameof(ResetPosition));
 
         ExecuteCommand.RaiseCanExecuteChanged();

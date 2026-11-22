@@ -43,7 +43,7 @@ public class ControllerViewModel
         this.monitorServices = monitoringServices;
 
         mixerService = containerProvider?.Resolve<IMixerService>(
-            name: nameof(MixerType.Background));
+            name: nameof(MixerType.Base));
 
         outputLiveService = containerProvider?.Resolve<IOutputService>(
             name: nameof(OutputType.Live));

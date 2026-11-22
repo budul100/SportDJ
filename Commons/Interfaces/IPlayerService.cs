@@ -27,7 +27,7 @@ public interface IPlayerService
 
     bool IsEnding { get; }
 
-    bool IsForeground { get; set; }
+    bool IsOverlay { get; set; }
 
     bool IsPlaying { get; }
 

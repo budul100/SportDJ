@@ -32,7 +32,7 @@ public interface IOutputService
 
     #region Public Methods
 
-    void Add(IMixerService mixerService, bool onForeground);
+    void Add(IMixerService mixerService, bool isOverlay);
 
     void Initialize(OutputType type);
 

@@ -49,7 +49,7 @@
     <Color x:Key="ColorBackground">#333333</Color>
     <Color x:Key="ColorBackgroundToggle">DodgerBlue</Color>
     <Color x:Key="ColorIsChecked">RoyalBlue</Color>
-    <Color x:Key="ColorIsForeground">DarkSlateGray</Color>
+    <Color x:Key="ColorIsOverlay">DarkSlateGray</Color>
     <Color x:Key="ColorIsSelected">RoyalBlue</Color>
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>

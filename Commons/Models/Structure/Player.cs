@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
@@ -14,11 +17,19 @@ public class Player
     [XmlIgnore]
     public override int Columns => 1;
 
-    [XmlAttribute]
-    public bool IsForeground { get; set; }
+    [Obsolete("Use IsOverlay instead.")]
+    [XmlAttribute(AttributeName = "IsForeground")]
+    public bool IsForeground
+    {
+        get => default;
+        set => IsOverlay = value;
+    }
 
     [XmlAttribute]
     public bool IsLoop { get; set; }
+
+    [XmlAttribute]
+    public bool IsOverlay { get; set; }
 
     [XmlElement(Order = 0)]
     public Key Key { get; set; }
@@ -46,4 +57,11 @@ public class Player
     public IStackService StackService { get; set; }
 
     #endregion Public Properties
+
+    #region Public Methods
+
+    [SuppressMessage("Performance", "CA1822", Justification = "XmlSerializer convention.")]
+    public bool ShouldSerializeIsForeground() => false;
+
+    #endregion Public Methods
 }

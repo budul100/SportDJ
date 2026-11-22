@@ -100,7 +100,7 @@ public class Service
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
             filter: s => signalService == s
-                && mixerType == MixerType.Background);
+                && mixerType == MixerType.Base);
 
         eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
             action: _ => InitializeSignal(),
@@ -141,16 +141,16 @@ public class Service
 
     public bool IsEnding => signalService?.IsEnding == true;
 
-    public bool IsForeground
+    public bool IsOverlay
     {
-        get => player?.IsForeground == true;
+        get => player?.IsOverlay == true;
 
         set
         {
             if (player != default
-                && player.IsForeground != value) //&& mixerType != MixerType.PFL)
+                && player.IsOverlay != value) //&& mixerType != MixerType.PFL)
             {
-                player.IsForeground = value;
+                player.IsOverlay = value;
 
                 settingsService.Save();
 
@@ -355,9 +355,9 @@ public class Service
     {
         if (stackService.Track != default)
         {
-            mixerType = player.IsForeground
-                ? MixerType.Foreground
-                : MixerType.Background;
+            mixerType = player.IsOverlay
+                ? MixerType.Overlay
+                : MixerType.Base;
 
             var mixerService = containerProvider?.Resolve<IMixerService>(
                 name: mixerType.ToString());
@@ -420,7 +420,7 @@ public class Service
         if (signalService == this.signalService
             && (signalService.State == StateType.None
             || signalService.IsOverNextThreshold
-            || IsForeground))
+            || IsOverlay))
         {
             signalService.End();
         }
