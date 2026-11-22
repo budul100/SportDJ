@@ -11,7 +11,6 @@
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:SportDJ.Commons.Models.Contents"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
     xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     vml:ViewModelLocator.AutoWireViewModel="True"

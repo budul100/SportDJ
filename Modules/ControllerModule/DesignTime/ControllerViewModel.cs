@@ -6,7 +6,7 @@ public class ControllerViewModel
     #region Public Constructors
 
     public ControllerViewModel()
-        : base(regionManager: default, containerProvider: default, eventAggregator: default,
+        : base(containerProvider: default, eventAggregator: default,
                settingsService: default, monitoringServices: default)
     { }
 

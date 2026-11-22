@@ -11,11 +11,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rec="using:SportDJ.Commons.Models.Records"
     xmlns:pgc="clr-namespace:Avalonia.PropertyGrid.Controls;assembly=Avalonia.PropertyGrid"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.Modules.SettingsModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     d:DesignHeight="500"
     d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    vml:ViewModelLocator.AutoWireViewModel="True"
     x:DataType="vm:SettingsViewModel"
     mc:Ignorable="d">
 

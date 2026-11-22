@@ -1,6 +1,6 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
-using Prism.DryIoc;
 
 namespace SportDJ.Shareds.ViewModelLocator;
 
@@ -23,6 +23,15 @@ public static class ViewModelLocator
     }
 
     #endregion Private Constructors
+
+    #region Public Properties
+
+    /// <summary>
+    /// Creates the view model instance for a view model type, set once at application startup.
+    /// </summary>
+    public static Func<Type, object> Resolver { get; set; }
+
+    #endregion Public Properties
 
     #region Public Methods
 
@@ -67,10 +76,9 @@ public static class ViewModelLocator
                 throwOnError: false);
 
             if (viewModelType != default
-                && Application.Current is PrismApplication prismApp)
+                && Resolver != default)
             {
-                var viewModel = prismApp.Container.Resolve(viewModelType);
-                control.DataContext = viewModel;
+                control.DataContext = Resolver(viewModelType);
             }
         }
     }

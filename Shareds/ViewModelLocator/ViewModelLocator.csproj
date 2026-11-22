@@ -7,7 +7,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="12.1.6" />
-		<PackageReference Include="Prism.DryIoc.Avalonia" Version="9.0.537.11321" />
 	</ItemGroup>
 
 </Project>

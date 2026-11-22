@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
 
 namespace SportDJ.App.Views;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using NAudio.Midi;
-using Prism.Events;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Settings;

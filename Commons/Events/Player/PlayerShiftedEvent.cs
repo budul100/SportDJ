@@ -1,4 +1,4 @@
-﻿using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 
 namespace SportDJ.Commons.Events.Player;
 

@@ -2,19 +2,21 @@
     x:Class="SportDJ.App.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cv="using:SportDJ.Modules.ControllerModule.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:en="using:SportDJ.Commons.Enums"
+    xmlns:dv="using:SportDJ.Modules.DisplayModule.Views"
+    xmlns:gv="using:SportDJ.Modules.GridModule.Views"
     xmlns:i="using:Avalonia.Xaml.Interactivity"
     xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.App.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     Title="{Binding Title}"
     Width="{Binding Width, Mode=TwoWay}"
     Height="{Binding Height, Mode=TwoWay}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    vml:ViewModelLocator.AutoWireViewModel="True"
     x:DataType="vm:MainViewModel"
     Icon="/Assets/SportDJ.png"
     WindowState="{Binding WindowState, Mode=TwoWay}"
@@ -66,15 +68,11 @@
             <ColumnDefinition Width="{Binding PanelRightWidth, Converter={StaticResource DoubleToGridPixelConverter}, Mode=TwoWay}" MinWidth="0" />
         </Grid.ColumnDefinitions>
 
-        <!-- Display Region -->
-        <ContentControl
+        <!-- Display -->
+        <dv:DisplayView
             Grid.Row="0"
             Grid.Column="0"
-            Grid.ColumnSpan="7">
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.DisplayRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
+            Grid.ColumnSpan="7" />
 
         <!-- Panel Top -->
         <ContentControl
@@ -147,14 +145,10 @@
             </i:Interaction.Behaviors>
         </GridSplitter>
 
-        <!-- Main Region -->
-        <ContentControl
+        <!-- Player Canvas -->
+        <gv:CanvasView
             Grid.Row="3"
-            Grid.Column="2">
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.PlayerRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
+            Grid.Column="2" />
 
         <!-- Panel Right Splitter -->
         <GridSplitter
@@ -202,15 +196,11 @@
             Grid.ColumnSpan="7"
             Content="{Binding PanelBottom}" />
 
-        <!-- Controller Region -->
-        <ContentControl
+        <!-- Controller -->
+        <cv:ControllerView
             Grid.Row="6"
             Grid.Column="0"
-            Grid.ColumnSpan="7">
-            <prism:RegionManager.RegionName>
-                <Binding Converter="{StaticResource EnumToStringConverter}" Source="{x:Static en:RegionType.ControllerRegion}" />
-            </prism:RegionManager.RegionName>
-        </ContentControl>
+            Grid.ColumnSpan="7" />
 
     </Grid>
 </Window>

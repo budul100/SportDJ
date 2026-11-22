@@ -1,15 +1,14 @@
 using System.Collections.ObjectModel;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Navigation.Regions;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Prism;
+using SportDJ.Commons.Ioc;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 
 public class CanvasViewModel
-    : RegionViewModelBase
+    : BindableBase
 {
     #region Private Fields
 
@@ -22,9 +21,8 @@ public class CanvasViewModel
 
     #region Public Constructors
 
-    public CanvasViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+    public CanvasViewModel(IContainerProvider containerProvider,
         IEventAggregator eventAggregator, IGridService gridService)
-        : base(regionManager)
     {
         this.containerProvider = containerProvider;
         this.gridService = gridService;

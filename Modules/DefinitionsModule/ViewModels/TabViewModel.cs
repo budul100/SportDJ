@@ -1,4 +1,4 @@
-﻿using Prism.Mvvm;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels;
 

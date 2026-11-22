@@ -4,12 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
     xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     d:DesignHeight="300"
     d:DesignWidth="500"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    vml:ViewModelLocator.AutoWireViewModel="True"
     x:DataType="vm:CanvasViewModel"
     mc:Ignorable="d">
 

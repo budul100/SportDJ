@@ -10,11 +10,11 @@
     xmlns:local="using:SportDJ.Modules.ControllerModule.Behaviors"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.Modules.ControllerModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     d:DesignHeight="50"
     d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    vml:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     x:DataType="vm:ControllerViewModel"
     x:CompileBindings="True">

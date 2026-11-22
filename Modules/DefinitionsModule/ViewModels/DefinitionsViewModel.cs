@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Prism.Events;
-using Prism.Mvvm;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels;
 

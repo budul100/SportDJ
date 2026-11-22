@@ -9,7 +9,7 @@ public class SearchViewModel
     #region Public Constructors
 
     public SearchViewModel()
-        : base(default)
+        : base()
     {
         var random = new Random();
 

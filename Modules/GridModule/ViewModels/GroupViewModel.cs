@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
-using Prism.Events;
-using Prism.Ioc;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Modules.GridModule.ViewModels;

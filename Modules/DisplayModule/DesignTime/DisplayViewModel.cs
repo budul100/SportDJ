@@ -10,7 +10,7 @@ public class DisplayViewModel
     #region Public Constructors
 
     public DisplayViewModel()
-        : base(regionManager: default, containerProvider: default, eventAggregator: default,
+        : base(containerProvider: default, eventAggregator: default,
               panelService: default, settingsService: default, sessionService: default)
     {
         Content = "Example - Example";

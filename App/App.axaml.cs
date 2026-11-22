@@ -7,26 +7,27 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Prism.DryIoc;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Modularity;
+using SportDJ.App.Ioc;
 using SportDJ.App.ViewModels;
 using SportDJ.App.Views;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.OutputService;
 using SportDJ.Shareds.SampleProviders.Abstractions;
+using SportDJ.Shareds.ViewModelLocator;
 
 namespace SportDJ.App;
 
 public class App
-    : PrismApplication
+    : Application
 {
     #region Private Fields
 
+    private IContainerProvider container;
     private IClassicDesktopStyleApplicationLifetime desktop;
     private MainView mainWindow;
     private SplashView splashWindow;
@@ -56,26 +57,37 @@ public class App
             return;
         }
 
-        base.Initialize();
+        container = CreateContainer();
+
+        // Views get their view models from the container, so this has to be set before the first view is created
+        ViewModelLocator.Resolver = type => container.Resolve(type);
+
+        mainWindow = !IsSingleViewLifetime
+            ? container.Resolve<MainView>()
+            : default; // For Linux Framebuffer or DRM: container.Resolve<MainControl>();
+
+        Modules.DefinitionsModule.Module.Initialize(container);
+        Modules.SettingsModule.Module.Initialize(container);
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
         desktop = ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
 
-        if (desktop != default)
+        if (desktop != default
+            && container != default)
         {
             desktop.Startup += OnStartup;
 
             if (!Debugger.IsAttached)
             {
-                splashWindow = Container.Resolve<SplashView>();
+                splashWindow = container.Resolve<SplashView>();
 
                 desktop.MainWindow = splashWindow;
                 splashWindow.Show();
             }
 
-            var dispatcherService = Container.Resolve<IDispatcherService>();
+            var dispatcherService = container.Resolve<IDispatcherService>();
             Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
         }
 
@@ -84,75 +96,64 @@ public class App
 
     #endregion Public Methods
 
-    #region Protected Methods
+    #region Private Methods
 
-    protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
+    private static IContainerProvider CreateContainer()
     {
-        moduleCatalog.AddModule<Modules.GridModule.Module>(
-            name: nameof(Modules.GridModule));
-        moduleCatalog.AddModule<Modules.DisplayModule.Module>(
-            name: nameof(Modules.DisplayModule));
-        moduleCatalog.AddModule<Modules.ControllerModule.Module>(
-            name: nameof(Modules.ControllerModule));
-        moduleCatalog.AddModule<Modules.DefinitionsModule.Module>(
-            name: nameof(Modules.DefinitionsModule));
-        moduleCatalog.AddModule<Modules.SettingsModule.Module>(
-            name: nameof(Modules.SettingsModule));
-        moduleCatalog.AddModule<Modules.SearchModule.Module>(
-            name: nameof(Modules.SearchModule));
-    }
+        var registry = new ContainerRegistry();
 
-    protected override AvaloniaObject CreateShell()
-    {
-        mainWindow = !IsSingleViewLifetime
-            ? Container.Resolve<MainView>()
-            : default; // For Linux Framebuffer or DRM: Container.Resolve<MainControl>();
+        registry.RegisterSingleton<IEventAggregator, EventAggregator>();
 
-        return mainWindow;
-    }
+        registry.RegisterSingleton<MainViewModel>();
 
-    protected override void RegisterTypes(IContainerRegistry containerRegistry)
-    {
-        containerRegistry.RegisterSingleton<MainViewModel>();
+        registry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
+        registry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
+        registry.RegisterSingleton<IPanelService, Services.PanelService.Service>();
+        registry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
+        registry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
+        registry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
+        registry.RegisterSingleton<IGridService, Services.GridService.Service>();
+        registry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
 
-        containerRegistry.RegisterSingleton<IDialogService, Services.DialogService.Service>();
-        containerRegistry.RegisterSingleton<IDispatcherService, Services.DispatcherService.Service>();
-        containerRegistry.RegisterSingleton<IPanelService, Services.PanelService.Service>();
-        containerRegistry.RegisterSingleton<IStorageService<Set>, Services.StorageService.Service<Set>>();
-        containerRegistry.RegisterSingleton<IStorageService<Session>, Services.StorageService.Service<Session>>();
-        containerRegistry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
-        containerRegistry.RegisterSingleton<IGridService, Services.GridService.Service>();
-        containerRegistry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
-
-        containerRegistry.Register<IPlayerService, Services.PlayerService.Service>();
-        containerRegistry.Register<IStackService, Services.StackService.Service>();
+        registry.Register<IPlayerService, Services.PlayerService.Service>();
+        registry.Register<IStackService, Services.StackService.Service>();
 
         RegisterTypes<MixerType>(
-            containerRegistry: containerRegistry,
+            registry: registry,
             from: typeof(IMixerService),
             to: typeof(Services.MixerService.Service));
 
         RegisterTypes<OutputType>(
-            containerRegistry: containerRegistry,
+            registry: registry,
             from: typeof(IOutputService),
             to: typeof(Service));
 
-        containerRegistry.Register<IDeviceService, Services.DeviceService.Windows.Service>();
-        containerRegistry.Register<ISignalService, Services.SignalService.Windows.Service>();
+        registry.Register<IDeviceService, Services.DeviceService.Windows.Service>();
+        registry.Register<ISignalService, Services.SignalService.Windows.Service>();
 
-        containerRegistry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
+        registry.Register<ISourceProvider, Shareds.SampleProviders.Windows.SourceProvider>();
 
-        containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>(
-            name: typeof(Services.MonitorService.Windows.Service).FullName);
-        containerRegistry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>(
-            name: typeof(Services.MonitorService.Mixxx.Service).FullName);
+        // Not named, so all of them are injected as IEnumerable<IMonitorService>
+        registry.RegisterSingleton<IMonitorService, Services.MonitorService.Windows.Service>();
+        registry.RegisterSingleton<IMonitorService, Services.MonitorService.Mixxx.Service>();
+
+        RegisterDefinitionsModule(registry);
+
+        return registry.Build();
     }
 
-    #endregion Protected Methods
+    private static void RegisterDefinitionsModule(ContainerRegistry registry)
+    {
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.DefinitionsView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.DefinitionsViewModel>();
 
-    #region Private Methods
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.SettingsView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.SettingsViewModel>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.StackView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.StackViewModel>();
+    }
 
-    private static void RegisterTypes<TEnum>(IContainerRegistry containerRegistry, Type from, Type to)
+    private static void RegisterTypes<TEnum>(ContainerRegistry registry, Type from, Type to)
         where TEnum : struct, Enum
     {
         var names = Enum.GetValues<TEnum>()
@@ -160,9 +161,9 @@ public class App
 
         foreach (var name in names)
         {
-            containerRegistry.RegisterSingleton(
-                from: from,
-                to: to,
+            registry.RegisterSingleton(
+                service: from,
+                implementation: to,
                 name: name);
         }
     }
@@ -179,7 +180,7 @@ public class App
                 ? commandLinePath
                 : default;
 
-            var mainViewModel = Container.Resolve<MainViewModel>();
+            var mainViewModel = container.Resolve<MainViewModel>();
             mainViewModel.Initialize(settingsPath);
 
             desktop.MainWindow = mainWindow;
@@ -187,14 +188,14 @@ public class App
             var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
             var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
 
-            var dialogService = Container.Resolve<IDialogService>();
+            var dialogService = container.Resolve<IDialogService>();
             dialogService.Initialize(
                 window: mainWindow,
                 iconUri: iconUri);
 
             splashWindow?.Close();
 
-            var eventAggregator = Container.Resolve<IEventAggregator>();
+            var eventAggregator = container.Resolve<IEventAggregator>();
             eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
         catch (TaskCanceledException)

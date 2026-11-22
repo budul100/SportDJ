@@ -1,24 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
-using DryIoc.ImTools;
 using MsBox.Avalonia.Enums;
-using Prism.Events;
-using Prism.Ioc;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
@@ -364,9 +362,14 @@ public class Service
 
             if (mixerService.IsInitialized)
             {
-                signalServices
+                var silentServices = signalServices
                     .Where(s => s.IsSilent)
-                    .OnEach(s => s.End());
+                    .ToArray();
+
+                foreach (var silentService in silentServices)
+                {
+                    silentService.End();
+                }
 
                 signalService = mixerService?.Add(stackService.Track);
 

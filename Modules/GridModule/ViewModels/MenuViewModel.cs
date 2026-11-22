@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Material.Icons;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Mvvm;
+using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 

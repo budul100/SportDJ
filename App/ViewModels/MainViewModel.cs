@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,19 +7,18 @@ using System.Text;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia.Enums;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Settings;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.App.ViewModels;
 

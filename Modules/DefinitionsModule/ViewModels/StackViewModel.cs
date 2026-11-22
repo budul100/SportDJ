@@ -2,13 +2,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
-using Prism.Commands;
-using Prism.Events;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels;
 

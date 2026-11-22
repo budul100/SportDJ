@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Navigation.Regions;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Settings;
@@ -13,13 +10,14 @@ using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Prism;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.ControllerModule.ViewModels;
 
 public class ControllerViewModel
-    : RegionViewModelBase
+    : BindableBase
 {
     #region Private Fields
 
@@ -35,10 +33,9 @@ public class ControllerViewModel
 
     #region Public Constructors
 
-    public ControllerViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+    public ControllerViewModel(IContainerProvider containerProvider,
         IEventAggregator eventAggregator,
         IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
-        : base(regionManager)
     {
         this.monitorServices = monitoringServices;
 

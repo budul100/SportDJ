@@ -1,6 +1,6 @@
-﻿using System.Linq;
+using System.Linq;
 using Moq;
-using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;

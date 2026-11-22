@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
-using Prism.Events;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Interfaces;
 

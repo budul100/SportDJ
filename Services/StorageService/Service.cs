@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 

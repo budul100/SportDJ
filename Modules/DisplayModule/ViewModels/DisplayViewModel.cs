@@ -2,24 +2,22 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Navigation.Regions;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Settings;
-using SportDJ.Commons.Prism;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.DisplayModule.ViewModels;
 
 public class DisplayViewModel
-    : RegionViewModelBase, IDisposable
+    : BindableBase, IDisposable
 {
     #region Private Fields
 
@@ -43,10 +41,9 @@ public class DisplayViewModel
 
     #region Public Constructors
 
-    public DisplayViewModel(IRegionManager regionManager, IContainerProvider containerProvider,
+    public DisplayViewModel(IContainerProvider containerProvider,
         IEventAggregator eventAggregator, IPanelService panelService, IStorageService<Set> settingsService,
         IStorageService<Session> sessionService)
-        : base(regionManager)
     {
         this.eventAggregator = eventAggregator;
         this.panelService = panelService;

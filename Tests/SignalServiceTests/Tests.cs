@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using Moq;
 using NAudio.Wave;
-using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;

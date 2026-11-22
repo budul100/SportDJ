@@ -1,10 +1,10 @@
-using Prism.Commands;
-using Prism.Events;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.DefinitionsModule.ViewModels;
 

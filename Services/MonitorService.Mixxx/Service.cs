@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NAudio.Midi;
-using Prism.Events;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;

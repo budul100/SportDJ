@@ -2,18 +2,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media.Imaging;
 using Material.Icons;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Ioc;
-using Prism.Mvvm;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 

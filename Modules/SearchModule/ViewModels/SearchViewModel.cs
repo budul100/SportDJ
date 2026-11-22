@@ -1,13 +1,11 @@
 using System.Collections.ObjectModel;
-using Prism.Commands;
-using Prism.Navigation.Regions;
 using SportDJ.Commons.Models.Contents;
-using SportDJ.Commons.Prism;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.SearchModule.ViewModels;
 
 public class SearchViewModel
-    : RegionViewModelBase
+    : BindableBase
 {
     #region Private Fields
 
@@ -17,8 +15,7 @@ public class SearchViewModel
 
     #region Public Constructors
 
-    public SearchViewModel(IRegionManager regionManager)
-        : base(regionManager)
+    public SearchViewModel()
     {
         ClearCommand = new DelegateCommand(
             executeMethod: () => Search = string.Empty,

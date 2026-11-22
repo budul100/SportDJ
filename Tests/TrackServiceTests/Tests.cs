@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Moq;
-using Prism.Events;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Track;

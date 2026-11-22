@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -7,9 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using ATL.AudioData;
 using ATL.Playlist;
-using Prism.Events;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Contents;
@@ -348,4 +348,3 @@ public class Service
 
     #endregion Private Methods
 }
-

@@ -1,6 +1,6 @@
-﻿using System;
-using Prism.Events;
+using System;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 
 namespace SportDJ.Commons.Events.Panel;
 

@@ -1,18 +1,16 @@
-﻿using Prism.Ioc;
-using Prism.Modularity;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Ioc;
 using SportDJ.Modules.DefinitionsModule.ViewModels;
 using SportDJ.Modules.DefinitionsModule.Views;
 
 namespace SportDJ.Modules.DefinitionsModule;
 
-public class Module()
-    : IModule
+public static class Module
 {
     #region Public Methods
 
-    public void OnInitialized(IContainerProvider containerProvider)
+    public static void Initialize(IContainerProvider containerProvider)
     {
         var definitionsViewModel = containerProvider.Resolve<DefinitionsViewModel>();
 
@@ -28,20 +26,6 @@ public class Module()
             type: PanelType.Left,
             view: definitionsView,
             action: definitionsViewModel.Activate<IStackService>);
-    }
-
-    public void RegisterTypes(IContainerRegistry containerRegistry)
-    {
-        containerRegistry.RegisterSingleton<DefinitionsView>();
-        containerRegistry.RegisterSingleton<DefinitionsViewModel>();
-
-        containerRegistry.RegisterSingleton<SettingsView>();
-        containerRegistry.RegisterSingleton<SettingsViewModel>();
-        containerRegistry.RegisterSingleton<StackView>();
-        containerRegistry.RegisterSingleton<StackViewModel>();
-
-        containerRegistry.RegisterForNavigation<DefinitionsView>(
-            name: typeof(DefinitionsView).FullName);
     }
 
     #endregion Public Methods

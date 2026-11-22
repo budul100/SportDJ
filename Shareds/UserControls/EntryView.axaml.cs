@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Prism.Events;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Entry;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Models.Contents;

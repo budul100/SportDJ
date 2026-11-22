@@ -6,12 +6,10 @@
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:gd="using:AvaloniaGridDefinitionBehavoir"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
     xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
     d:DesignHeight="300"
     d:DesignWidth="300"
-    prism:ViewModelLocator.AutoWireViewModel="False"
     x:DataType="vm:GridViewModel"
     mc:Ignorable="d">
 

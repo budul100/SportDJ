@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DryIoc.ImTools;
 using NAudio.CoreAudioApi;
-using Prism.Events;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Volume;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Records;

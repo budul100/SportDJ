@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Material.Icons;
-using Prism.Ioc;
-using Prism.Mvvm;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
+using SportDJ.Commons.Mvvm;
 
 namespace SportDJ.Modules.GridModule.ViewModels;
 

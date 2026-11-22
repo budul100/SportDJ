@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Prism.Events;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Entry;
 
 namespace SportDJ.Modules.GridModule.ViewModels;

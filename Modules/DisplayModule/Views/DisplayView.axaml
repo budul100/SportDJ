@@ -9,11 +9,11 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:prism="http://prismlibrary.com/"
     xmlns:vm="using:SportDJ.Modules.DisplayModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
     d:DesignHeight="50"
     d:DesignWidth="600"
-    prism:ViewModelLocator.AutoWireViewModel="True"
+    vml:ViewModelLocator.AutoWireViewModel="True"
     x:DataType="vm:DisplayViewModel"
     mc:Ignorable="d">
 
