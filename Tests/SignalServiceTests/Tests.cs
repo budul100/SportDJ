@@ -24,7 +24,9 @@ public class Tests
 
     // A read must stay far below the blocking time of the subscriber
     private const int MaxReadMilliseconds = 100;
+
     private const int ReadCount = 20;
+
     // Simulated duration of a slow track selection (loading and decoding the next file)
     private const int SelectNextBlockMilliseconds = 300;
 
@@ -65,9 +67,10 @@ public class Tests
 
         try
         {
+            var publisherThreadId = -1;
+
             var eventAggregator = new EventAggregator();
             using var published = new ManualResetEventSlim();
-            var publisherThreadId = -1;
 
             eventAggregator.GetEvent<SignalNextEvent>().Subscribe(
                 action: _ =>
@@ -81,8 +84,16 @@ public class Tests
 
             ReadOnAudioThread(service, out var audioThreadId);
 
-            Assert.True(published.Wait(TimeSpan.FromSeconds(5)), "SignalNextEvent was never published.");
-            Assert.NotEqual(audioThreadId, publisherThreadId);
+            var condition = published.Wait(
+                timeout: TimeSpan.FromSeconds(5),
+                cancellationToken: TestContext.Current.CancellationToken);
+            Assert.True(
+                condition: condition,
+                userMessage: "SignalNextEvent was never published.");
+
+            Assert.NotEqual(
+                expected: audioThreadId,
+                actual: publisherThreadId);
         }
         finally
         {
