@@ -47,13 +47,17 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Top row: PFL, key, settings -->
+            <!--
+                Top row: PFL, key, settings.
+                The gaps are Auto columns with a 4 px wide Border, which is only visible together with its neighbour.
+                Fixed 4 px columns would also keep their width if the neighbour is hidden and push the buttons inwards.
+            -->
             <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -61,7 +65,8 @@
                     Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Focusable="False">
+                    Focusable="False"
+                    IsVisible="{Binding HasPFL}">
 
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
@@ -75,6 +80,12 @@
                     </Viewbox>
 
                 </ToggleButton>
+
+                <!-- Gap after PFL -->
+                <Border
+                    Grid.Column="1"
+                    Width="{StaticResource SpacingSmall}"
+                    IsVisible="{Binding HasPFL}" />
 
                 <Border
                     Grid.Column="2"
@@ -99,6 +110,12 @@
                     </Viewbox>
 
                 </Border>
+
+                <!-- Gap after key -->
+                <Border
+                    Grid.Column="3"
+                    Width="{StaticResource SpacingSmall}"
+                    IsVisible="{Binding HasKey}" />
 
                 <ToggleButton
                     Grid.Column="4"
@@ -243,14 +260,17 @@
                 </Button>
             </Border>
 
-            <!-- Bottom row: previous, stack, next -->
+            <!--
+                Bottom row: previous, stack, next.
+                Same principle as in the top row: the gaps only take space together with the outer buttons.
+            -->
             <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
                 </Grid.ColumnDefinitions>
 
@@ -259,7 +279,8 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackBackwardCommand}"
-                    Focusable="False">
+                    Focusable="False"
+                    IsVisible="{Binding HasStack}">
 
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
@@ -273,6 +294,11 @@
                     </Viewbox>
 
                 </Button>
+
+                <Border
+                    Grid.Column="1"
+                    Width="{StaticResource SpacingSmall}"
+                    IsVisible="{Binding HasStack}" />
 
                 <ToggleButton
                     Grid.Column="2"
@@ -295,12 +321,18 @@
 
                 </ToggleButton>
 
+                <Border
+                    Grid.Column="3"
+                    Width="{StaticResource SpacingSmall}"
+                    IsVisible="{Binding HasStack}" />
+
                 <Button
                     Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackForwardCommand}"
-                    Focusable="False">
+                    Focusable="False"
+                    IsVisible="{Binding HasStack}">
 
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"

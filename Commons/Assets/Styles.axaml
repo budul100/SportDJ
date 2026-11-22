@@ -33,7 +33,22 @@
         <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
     </Style>
 
+    <!--
+        The Fluent theme insets the content of a TabControl by 12 px on each side.
+        Nested groups would therefore be narrower than their neighbours, so the padding is removed:
+        the content of a tab then uses exactly the cell of its group.
+    -->
+    <Style Selector="TabControl">
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!--
+        The Fluent theme spaces tab headers by 24 px. Here the header keeps the same distance to the cell
+        as the surface of a player (8 = ContentMargin 4 + PlayerBorderThickness 2 + InnerMargin 2):
+        8 to the left (also acts as gap between two headers) and 8 to the top.
+    -->
     <Style Selector="TabItem">
+        <Setter Property="Margin" Value="8,8,0,0" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeState}" />
         <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}" />

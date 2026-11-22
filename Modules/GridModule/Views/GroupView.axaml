@@ -28,8 +28,12 @@
         <dt:GroupViewModel />
     </Design.DataContext>
 
+    <!--
+        No margin here: the cell of the group must be exactly as large as the cell of a player,
+        so the nested players keep the same distance to their neighbours.
+        The inset of the tab headers is defined in Styles.axaml (TabItem).
+    -->
     <TabControl
-        Margin="{StaticResource ContentMargin}"
         Focusable="False"
         ItemsSource="{Binding Tabs}"
         SelectedItem="{Binding Selected}">
