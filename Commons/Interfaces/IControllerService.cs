@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +21,11 @@ public interface IControllerService
     #region Public Methods
 
     public void Colorize(Key key, int colorValue);
+
+    /// <summary>
+    /// Lights the key in the given color, as far as the profile of the controller defines it.
+    /// </summary>
+    void Colorize(Key key, PlayerColorType colorType);
 
     Task<Key> ListenAsync(CancellationToken cancellationToken);
 

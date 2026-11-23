@@ -33,6 +33,7 @@ public class Service
     private readonly IEnumerable<Profile> profiles;
     private readonly IStorageService<Session> sessionService;
 
+    private IReadOnlyDictionary<PlayerColorType, int> colors = new Dictionary<PlayerColorType, int>();
     private bool isDisposed;
     private TaskCompletionSource<Key> listenerTcs;
     private MidiIn midiIn;
@@ -106,6 +107,20 @@ public class Service
                     midiOut.Send(ccMessage);
                     break;
             }
+        }
+    }
+
+    public void Colorize(Key key, PlayerColorType colorType)
+    {
+        // Controllers without a profile or without this color keep their LEDs untouched
+        if (key.Channel > 0
+            && colors.TryGetValue(
+                key: colorType,
+                value: out var colorValue))
+        {
+            Colorize(
+                key: key,
+                colorValue: colorValue);
         }
     }
 
@@ -309,6 +324,7 @@ public class Service
         }
         finally
         {
+            colors = new Dictionary<PlayerColorType, int>();
             sysExInit = default;
             sysExFinal = default;
 
@@ -415,6 +431,11 @@ public class Service
                 {
                     sysExInit = profile.InitSysEx?.Parse();
                     sysExFinal = profile.FinalSysEx?.Parse();
+
+                    colors = profile.Colors?
+                        .GroupBy(c => c.Name)
+                        .ToDictionary(g => g.Key, g => g.Last().Value)
+                        ?? new Dictionary<PlayerColorType, int>();
                 }
 
                 midiIn = new MidiIn(controller.IndexIn);

@@ -4,6 +4,18 @@
 			<ProductNameIncluded>.*Launchpad.*</ProductNameIncluded>
 			<ProductNameExcluded>.*DAW.*</ProductNameExcluded>
 		</Match>
+		<!--
+			Colors of the keys (value = velocity of the Note On, which lights the key).
+			Launchpad Mk1 and Mini Mk1: value = 16 * green (0..3) + red (0..3) + 12 (flags: normal).
+			Values are not verified on the devices. Colors without an entry do not light the key.
+		-->
+		<Colors>
+			<Color name="None" value="12" />
+			<Color name="Red" value="15" />
+			<Color name="Orange" value="31" />
+			<Color name="Yellow" value="62" />
+			<Color name="Green" value="60" />
+		</Colors>
 		<InitSysEx>F0 00 20 29 02 08 0E 01 F7</InitSysEx>
 		<FinalSysEx>F0 00 20 29 02 08 0E 00 F7</FinalSysEx>
 	</Profile>

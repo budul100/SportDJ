@@ -11,6 +11,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Player;
@@ -74,6 +75,12 @@ public class Service
             keepSubscriberReferenceAlive: true,
             filter: _ => player != default
                 && this.keyListenService?.IsListening(player) == true);
+
+        // The controller may be connected after the keys were registered
+        eventAggregator?.GetEvent<ControllerUpdatedEvent>().Subscribe(
+            action: ApplyLed,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true);
 
         eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
             action: SetStartLocation,
@@ -150,6 +157,8 @@ public class Service
                 player.Color = value;
 
                 settingsService.Save();
+
+                ApplyLed();
 
                 UpdateContent();
             }
@@ -368,6 +377,8 @@ public class Service
                 cancellationToken: source.Token);
 
             // The old key must not trigger this player anymore
+            ClearLed();
+
             controllerService.Unregister(player.Key);
 
             player.Key = key;
@@ -441,6 +452,8 @@ public class Service
 
     public void Unregister()
     {
+        ClearLed();
+
         controllerService.Unregister(player.Key);
 
         player.Key = default;
@@ -476,6 +489,16 @@ public class Service
 
     #region Private Methods
 
+    private void ApplyLed()
+    {
+        if (player?.Key.Channel > 0)
+        {
+            controllerService.Colorize(
+                key: player.Key,
+                colorType: player.Color);
+        }
+    }
+
     private void CancelMidi()
     {
         try
@@ -485,6 +508,16 @@ public class Service
         catch (ObjectDisposedException)
         {
             // The listener has already finished
+        }
+    }
+
+    private void ClearLed()
+    {
+        if (player?.Key.Channel > 0)
+        {
+            controllerService.Colorize(
+                key: player.Key,
+                colorType: PlayerColorType.None);
         }
     }
 
@@ -616,6 +649,8 @@ public class Service
             key: player.Key,
             strokeType: StrokeType.Down,
             action: Execute);
+
+        ApplyLed();
     }
 
     private void SetStartLocation()
