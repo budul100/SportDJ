@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
@@ -19,16 +19,28 @@ internal static class GroupExtensions
                 paramName: nameof(orientation));
         }
 
-        var result = group.GetGrid();
-
-        var index = (anchor?.Group.Grids.IndexOf(anchor)) ?? 0;
+        var index = 0;
 
         if (anchor != default)
         {
-            index = orientation == OrientationType.Right
-                ? index + 1
-                : index - 1;
+            index = group.Grids.IndexOf(anchor);
+
+            if (index < 0)
+            {
+                throw new ArgumentException(
+                    message: "The anchor tab is not part of the group.",
+                    paramName: nameof(anchor));
+            }
+
+            // Inserting at the anchor's index places the new tab directly left of it,
+            // one position further places it directly right of it.
+            if (orientation == OrientationType.Right)
+            {
+                index++;
+            }
         }
+
+        var result = group.GetGrid();
 
         if (index >= group.Grids.Count)
         {
@@ -53,6 +65,8 @@ internal static class GroupExtensions
                 .SelectMany(g => g.Cells)
                 .Where(c => c != default).ToArray();
 
+            group.Grid.Cells.Remove(group);
+
             foreach (var cell in cells)
             {
                 cell.Column = group.Column;
@@ -60,7 +74,6 @@ internal static class GroupExtensions
                 cell.Grid = group.Grid;
 
                 group.Grid.Cells.Add(cell);
-                group.Grid.Cells.Remove(group);
             }
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Assets;
@@ -15,6 +16,16 @@ namespace SportDJ.Services.GridService;
 public class Service
     : IGridService
 {
+    #region Public Fields
+
+    /// <summary>
+    /// Maximum number of columns, rows and tabs. Operations that would grow a grid beyond
+    /// this limit are ignored and leave the grid unchanged.
+    /// </summary>
+    public const int MaxCount = 256;
+
+    #endregion Public Fields
+
     #region Private Fields
 
     private readonly IDialogService dialogService;
@@ -49,29 +60,29 @@ public class Service
 
     public void AddGrid(Grid grid, OrientationType orientation)
     {
-        grid.Group.Add(
-            anchor: grid,
-            orientation: orientation);
-
-        Update();
+        if (grid?.Group != default)
+        {
+            Apply(() => grid.Group.Add(
+                anchor: grid,
+                orientation: orientation));
+        }
     }
 
     public void AddPlayer(Cell cell, OrientationType orientation)
     {
-        cell.Grid.Add(
-            anchor: cell,
-            orientation: orientation);
-
-        Update();
+        if (cell?.Grid != default)
+        {
+            Apply(() => cell.Grid.Add(
+                anchor: cell,
+                orientation: orientation));
+        }
     }
 
     public void MoveCell(Cell cell, OrientationType orientation)
     {
         if (cell != default)
         {
-            cell.Move(orientation);
-
-            Update();
+            Apply(() => cell.Move(orientation));
         }
     }
 
@@ -79,15 +90,13 @@ public class Service
     {
         if (grid != default)
         {
-            grid.Move(orientation);
-
-            Update();
+            Apply(() => grid.Move(orientation));
         }
     }
 
     public async Task RemoveCellAsync(Cell cell)
     {
-        if (cell != default)
+        if (cell?.Grid != default)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Texts.CellRemoveMessage,
@@ -95,16 +104,14 @@ public class Service
 
             if (result == ButtonResult.Yes)
             {
-                cell.Grid.Cells.Remove(cell);
-
-                Update();
+                Apply(() => cell.Grid.Cells.Remove(cell));
             }
         }
     }
 
     public async Task RemoveGridAsync(Grid grid)
     {
-        if (grid != default)
+        if (grid?.Group != default)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Texts.TabRemoveMessage,
@@ -112,10 +119,7 @@ public class Service
 
             if (result == ButtonResult.Yes)
             {
-                var index = grid.Group.Grids.IndexOf(grid);
-                grid.Group.Grids.RemoveAt(index);
-
-                Update();
+                Apply(() => grid.Group.Grids.Remove(grid));
             }
         }
     }
@@ -133,9 +137,7 @@ public class Service
 
                 if (result == ButtonResult.Yes)
                 {
-                    player.ToGroup();
-
-                    Update();
+                    Apply(player.ToGroup);
                 }
             }
             else if (cell is Group group)
@@ -146,9 +148,7 @@ public class Service
 
                 if (result == ButtonResult.Yes)
                 {
-                    group.ToPlayer();
-
-                    Update();
+                    Apply(group.ToPlayer);
                 }
             }
         }
@@ -157,6 +157,52 @@ public class Service
     #endregion Public Methods
 
     #region Private Methods
+
+    // A dimension only counts as exceeded if it is above the limit and has grown,
+    // so that already oversized settings stay editable.
+    private static bool IsLimitExceeded((int Columns, int Rows, int Tabs) before, (int Columns, int Rows, int Tabs) after)
+    {
+        return (after.Columns > MaxCount && after.Columns > before.Columns)
+            || (after.Rows > MaxCount && after.Rows > before.Rows)
+            || (after.Tabs > MaxCount && after.Tabs > before.Tabs);
+    }
+
+    // Runs the change, tidies the grid and checks the limits. The change is undone
+    // if it throws or if it grows the grid beyond MaxCount.
+    private void Apply(Action change)
+    {
+        if (Grid == default)
+        {
+            return;
+        }
+
+        var sizeBefore = Grid.Measure();
+        var snapshot = new Snapshot(Grid);
+
+        try
+        {
+            change();
+
+            Grid.Tidy();
+        }
+        catch
+        {
+            snapshot.Restore();
+
+            throw;
+        }
+
+        if (IsLimitExceeded(sizeBefore, Grid.Measure()))
+        {
+            snapshot.Restore();
+        }
+        else
+        {
+            Persist();
+        }
+
+        eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
+    }
 
     private void Initialize()
     {
@@ -167,18 +213,16 @@ public class Service
 
         Grid.Initialize();
 
-        Update();
+        Persist();
+
+        eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
     }
 
-    private void Update()
+    private void Persist()
     {
-        Grid.Tidy();
-
         settingsService.Contents.Grid = Grid;
 
         settingsService.Save();
-
-        eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
     }
 
     #endregion Private Methods

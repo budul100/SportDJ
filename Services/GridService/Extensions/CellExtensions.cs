@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
 
@@ -18,9 +18,8 @@ internal static class CellExtensions
 
                 var moversRight = cell.Grid.Cells
                     .Where(c => c != cell
-                        && c.Row <= cell.Row
-                        && c.Row + c.Rows >= cell.Row
-                        && c.Column == cell.Column).ToArray();
+                        && c.Column == cell.Column
+                        && Overlaps(c.Row, c.Rows, cell.Row, cell.Rows)).ToArray();
 
                 foreach (var mover in moversRight)
                 {
@@ -35,9 +34,8 @@ internal static class CellExtensions
 
                 var moversLeft = cell.Grid.Cells
                     .Where(c => c != cell
-                        && c.Row <= cell.Row
-                        && c.Row + c.Rows >= cell.Row
-                        && c.Column + c.Columns - 1 == cell.Column).ToArray();
+                        && c.Column + c.Columns - 1 == cell.Column
+                        && Overlaps(c.Row, c.Rows, cell.Row, cell.Rows)).ToArray();
 
                 foreach (var mover in moversLeft)
                 {
@@ -52,9 +50,8 @@ internal static class CellExtensions
 
                 var moversBottom = cell.Grid.Cells
                     .Where(c => c != cell
-                        && c.Column <= cell.Column
-                        && c.Column + c.Columns >= cell.Column
-                        && c.Row == cell.Row).ToArray();
+                        && c.Row == cell.Row
+                        && Overlaps(c.Column, c.Columns, cell.Column, cell.Columns)).ToArray();
 
                 foreach (var mover in moversBottom)
                 {
@@ -69,9 +66,8 @@ internal static class CellExtensions
 
                 var moversTop = cell.Grid.Cells
                     .Where(c => c != cell
-                        && c.Column <= cell.Column
-                        && c.Column + c.Columns >= cell.Column
-                        && c.Row + c.Rows - 1 == cell.Row).ToArray();
+                        && c.Row + c.Rows - 1 == cell.Row
+                        && Overlaps(c.Column, c.Columns, cell.Column, cell.Columns)).ToArray();
 
                 foreach (var mover in moversTop)
                 {
@@ -83,4 +79,16 @@ internal static class CellExtensions
     }
 
     #endregion Public Methods
+
+    #region Private Methods
+
+    // Two half-open ranges [start, start + length) overlap if each one starts before the other one ends.
+    // Ranges that merely touch (e.g. [0, 1) and [1, 2)) do not overlap.
+    private static bool Overlaps(int startA, int lengthA, int startB, int lengthB)
+    {
+        return startA < startB + lengthB
+            && startB < startA + lengthA;
+    }
+
+    #endregion Private Methods
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
@@ -43,6 +43,31 @@ internal static class GridExtensions
                 }
             }
         }
+    }
+
+    // Returns the maximum number of columns, rows and tabs found in the grid and all of its nested tabs.
+    // Expects a grid that has been tidied before, as it relies on the Columns and Rows of the grids.
+    public static (int Columns, int Rows, int Tabs) Measure(this Grid grid)
+    {
+        var columns = grid.Columns;
+        var rows = grid.Rows;
+        var tabs = 0;
+
+        foreach (var group in grid.Cells.OfType<Group>())
+        {
+            tabs = Math.Max(tabs, group.Grids.Count);
+
+            foreach (var groupGrid in group.Grids)
+            {
+                var (Columns, Rows, Tabs) = groupGrid.Measure();
+
+                columns = Math.Max(columns, Columns);
+                rows = Math.Max(rows, Rows);
+                tabs = Math.Max(tabs, Tabs);
+            }
+        }
+
+        return (columns, rows, tabs);
     }
 
     public static void Move(this Grid grid, OrientationType orientation)
@@ -107,32 +132,7 @@ internal static class GridExtensions
                 group.Rows = (group.Grids?.Count > 0) ? group.Grids.Max(g => g.Rows) : 0;
             }
 
-            foreach (var cell in grid.Cells)
-            {
-                var innerColumns = grid.Cells
-                    .Where(c => c != cell
-                        && c.Column >= cell.Column
-                        && c.Column < cell.Column + cell.Columns
-                        && c.Row < cell.Row + cell.Rows
-                        && c.Row >= cell.Row).ToArray();
-
-                foreach (var innerColumn in innerColumns)
-                {
-                    innerColumn.Column = cell.Column + cell.Columns;
-                }
-
-                var innerRows = grid.Cells
-                    .Where(c => c != cell
-                        && c.Row >= cell.Row
-                        && c.Row < cell.Row + cell.Rows
-                        && c.Column < cell.Column + cell.Columns
-                        && c.Column >= cell.Column).ToArray();
-
-                foreach (var innerRow in innerRows)
-                {
-                    innerRow.Row = cell.Row + cell.Rows;
-                }
-            }
+            grid.ResolveOverlaps();
 
             var rowMin = grid.Cells.Min(c => c.Row);
 
@@ -197,6 +197,41 @@ internal static class GridExtensions
         } while (relevants.Contains(result));
 
         return result;
+    }
+
+    // Pushes overlapping cells to the right of the cell they overlap. Of two overlapping cells the one that comes
+    // later (by row, then column) is pushed, cells starting at the same position are pushed in list order.
+    // As a pushed cell can land on a cell that has already been handled, this is repeated until the layout is stable.
+    private static void ResolveOverlaps(this Grid grid)
+    {
+        var cells = grid.Cells.ToArray();
+
+        var maxPasses = (cells.Length * cells.Length) + 1;
+        var moved = true;
+
+        for (var pass = 0; moved && pass < maxPasses; pass++)
+        {
+            moved = false;
+
+            foreach (var cell in cells)
+            {
+                var inners = cells
+                    .Where(c => c != cell
+                        && c.Column < cell.Column + cell.Columns
+                        && cell.Column < c.Column + c.Columns
+                        && c.Row < cell.Row + cell.Rows
+                        && cell.Row < c.Row + c.Rows
+                        && (c.Row > cell.Row
+                            || (c.Row == cell.Row && c.Column >= cell.Column))).ToArray();
+
+                foreach (var inner in inners)
+                {
+                    inner.Column = cell.Column + cell.Columns;
+
+                    moved = true;
+                }
+            }
+        }
     }
 
     #endregion Private Methods
