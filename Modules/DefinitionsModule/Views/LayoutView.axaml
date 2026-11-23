@@ -1,0 +1,182 @@
+<UserControl
+    x:Class="SportDJ.Modules.DefinitionsModule.Views.LayoutView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:SportDJ.Commons.Enums"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:SportDJ.Modules.DefinitionsModule.Views"
+    xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
+    vml:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:LayoutViewModel"
+    d:DesignHeight="500"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel
+            Margin="{StaticResource ContentMargin}"
+            IsEnabled="{Binding IsActive}"
+            Spacing="{StaticResource SpacingMedium}">
+
+            <!-- Position of the selected player or group -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Position" />
+                <Separator />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+
+                    <StackPanel Spacing="{StaticResource SpacingSmall}">
+                        <TextBlock Classes="Caption" Text="Add player" />
+                        <views:DirectionCross CenterKind="Plus" Command="{Binding AddCellCommand}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="{StaticResource SpacingSmall}">
+                        <TextBlock Classes="Caption" Text="Move" />
+                        <views:DirectionCross CenterKind="ArrowAll" Command="{Binding MoveCellCommand}" />
+                    </StackPanel>
+
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+
+                    <Button
+                        Command="{Binding SwapCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Swap player and group">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="SwapHorizontal" />
+                    </Button>
+
+                    <Button
+                        Command="{Binding RemoveCellCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Remove">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Delete" />
+                    </Button>
+
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Tab of a group, only if the pane was opened from a tab -->
+            <StackPanel IsVisible="{Binding IsTab}" Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Tab" />
+                <Separator />
+
+                <TextBlock Classes="Caption" Text="Name" />
+
+                <TextBox
+                    HorizontalAlignment="Stretch"
+                    IsTabStop="False"
+                    KeyDown="OnNameKeyDown"
+                    MaxLength="{Binding MaxLengthName}"
+                    Text="{Binding TabName, Mode=TwoWay}" />
+
+                <TextBlock Classes="Caption" Text="Key" />
+
+                <TextBlock Text="{Binding KeyText}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+
+                    <Button
+                        Click="OnListenClick"
+                        Command="{Binding ListenKeyCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Assign key">
+                        <Panel>
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding !IsListeningKey}"
+                                Kind="KeyboardOutline" />
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding IsListeningKey}"
+                                Kind="Close" />
+                        </Panel>
+                    </Button>
+
+                    <Button
+                        Command="{Binding ClearKeyCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Clear key">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="KeyboardOffOutline" />
+                    </Button>
+
+                </StackPanel>
+
+                <TextBlock Classes="Caption" Text="Add tab" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Command="{Binding AddTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Left}"
+                        Focusable="False">
+                        <StackPanel Orientation="Horizontal">
+                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
+                            <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Command="{Binding AddTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Right}"
+                        Focusable="False">
+                        <StackPanel Orientation="Horizontal">
+                            <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
+                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <TextBlock Classes="Caption" Text="Move tab" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Command="{Binding MoveTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Left}"
+                        Focusable="False">
+                        <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
+                    </Button>
+                    <Button
+                        Command="{Binding MoveTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Right}"
+                        Focusable="False">
+                        <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
+                    </Button>
+                    <Button
+                        Command="{Binding RemoveTabCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Remove tab">
+                        <mat:MaterialIcon Width="18" Height="18" Kind="Delete" />
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

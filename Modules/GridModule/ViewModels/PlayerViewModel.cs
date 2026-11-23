@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
@@ -107,6 +106,11 @@ public class PlayerViewModel
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true));
 
+        AddSubscription(eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
+            action: _ => { IsSettingsVisible = false; IsStackVisible = false; },
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true));
+
         AddSubscription(eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
             action: t => UpdatePanelButtons(),
             threadOption: ThreadOption.PublisherThread,
@@ -166,12 +170,12 @@ public class PlayerViewModel
 
     public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
-    // Idle background of the player surface
-    public IBrush SurfaceBrush => (playerService?.Color ?? default).GetBrush();
-
     public DelegateCommand ShowSettingsCommand { get; }
 
     public DelegateCommand ShowStackCommand { get; }
+
+    // Idle background of the player surface
+    public IBrush SurfaceBrush => (playerService?.Color ?? default).GetBrush();
 
     public DelegateCommand TrackBackwardCommand { get; }
 
@@ -190,16 +194,6 @@ public class PlayerViewModel
 
         base.Dispose(
             isDisposing: isDisposing);
-    }
-
-    protected override IEnumerable<BindableBase> GetElementMenus()
-    {
-        var gridMenus = GetGridMenus().ToArray();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.GridEditHeader}...",
-            menuItems: gridMenus,
-            closeCallback: CloseMenu);
     }
 
     protected override void Initialize()

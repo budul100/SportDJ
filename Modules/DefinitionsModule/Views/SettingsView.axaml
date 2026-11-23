@@ -125,12 +125,30 @@
                     <Button
                         Click="OnListenClick"
                         Command="{Binding ListenKeyboardCommand}"
-                        Content="{Binding KeyboardButtonText}"
-                        Focusable="False" />
+                        Focusable="False"
+                        ToolTip.Tip="Assign key">
+                        <Panel>
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding !IsListeningKeyboard}"
+                                Kind="KeyboardOutline" />
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding IsListeningKeyboard}"
+                                Kind="Close" />
+                        </Panel>
+                    </Button>
                     <Button
                         Command="{Binding ClearKeyboardCommand}"
-                        Content="Clear"
-                        Focusable="False" />
+                        Focusable="False"
+                        ToolTip.Tip="Clear key">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="KeyboardOffOutline" />
+                    </Button>
                 </StackPanel>
 
             </StackPanel>
@@ -151,12 +169,30 @@
                 <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
                     <Button
                         Command="{Binding ListenMidiCommand}"
-                        Content="{Binding MidiButtonText}"
-                        Focusable="False" />
+                        Focusable="False"
+                        ToolTip.Tip="Assign MIDI key">
+                        <Panel>
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding !IsListeningMidi}"
+                                Kind="Piano" />
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding IsListeningMidi}"
+                                Kind="Close" />
+                        </Panel>
+                    </Button>
                     <Button
                         Command="{Binding ClearMidiCommand}"
-                        Content="Clear"
-                        Focusable="False" />
+                        Focusable="False"
+                        ToolTip.Tip="Clear MIDI key">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Close" />
+                    </Button>
                 </StackPanel>
 
             </StackPanel>

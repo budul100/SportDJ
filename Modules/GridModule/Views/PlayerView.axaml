@@ -8,7 +8,6 @@
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
     xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:v="using:SportDJ.Modules.GridModule.Views"
     xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
     d:DesignHeight="150"
     d:DesignWidth="150"
@@ -165,23 +164,6 @@
                     Background="Transparent"
                     Command="{Binding ExecuteCommand}"
                     Focusable="False">
-
-                    <Button.ContextMenu>
-                        <ContextMenu
-                            Closed="OnContextMenuClosed"
-                            ItemsSource="{Binding Menus}"
-                            Opened="OnContextMenuOpened">
-
-                            <ContextMenu.DataTemplates>
-                                <DataTemplate x:DataType="vm:MenuViewModel">
-                                    <v:MenuView />
-                                </DataTemplate>
-                                <DataTemplate x:DataType="vm:SeparatorViewModel">
-                                    <Separator />
-                                </DataTemplate>
-                            </ContextMenu.DataTemplates>
-                        </ContextMenu>
-                    </Button.ContextMenu>
 
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <Grid.RowDefinitions>

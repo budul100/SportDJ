@@ -27,7 +27,7 @@ public class SettingsViewModel
 
     #region Public Constructors
 
-    public SettingsViewModel(IEventAggregator eventAggregator, IKeyListenService keyListenService)
+    public SettingsViewModel(IEventAggregator eventAggregator, IKeyboardService keyListenService)
     {
         Colors = Enum.GetValues<PlayerColorType>()
             .Select(c => new ColorOptionViewModel(c)).ToArray();
@@ -96,10 +96,6 @@ public class SettingsViewModel
         }
     }
 
-    public string KeyboardButtonText => IsListeningKeyboard
-        ? "Cancel"
-        : "Assign";
-
     public string KeyboardText => IsListeningKeyboard
         ? KeyboardHint
         : Service?.KeyCode.GetKey() ?? NoKey;
@@ -107,10 +103,6 @@ public class SettingsViewModel
     public DelegateCommand ListenKeyboardCommand { get; }
 
     public DelegateCommand ListenMidiCommand { get; }
-
-    public string MidiButtonText => IsListeningMidi
-        ? "Cancel"
-        : "Assign";
 
     public string MidiText => IsListeningMidi
         ? MidiHint
@@ -182,9 +174,7 @@ public class SettingsViewModel
         RaisePropertyChanged(nameof(IsListeningMidi));
         RaisePropertyChanged(nameof(IsOverlay));
         RaisePropertyChanged(nameof(IsReset));
-        RaisePropertyChanged(nameof(KeyboardButtonText));
         RaisePropertyChanged(nameof(KeyboardText));
-        RaisePropertyChanged(nameof(MidiButtonText));
         RaisePropertyChanged(nameof(MidiText));
         RaisePropertyChanged(nameof(Name));
 

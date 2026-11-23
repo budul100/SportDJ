@@ -434,8 +434,7 @@ public class Service
 
                     colors = profile.Colors?
                         .GroupBy(c => c.Name)
-                        .ToDictionary(g => g.Key, g => g.Last().Value)
-                        ?? new Dictionary<PlayerColorType, int>();
+                        .ToDictionary(g => g.Key, g => g.Last().Value) ?? [];
                 }
 
                 midiIn = new MidiIn(controller.IndexIn);

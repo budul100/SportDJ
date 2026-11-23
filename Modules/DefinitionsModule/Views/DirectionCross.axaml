@@ -1,0 +1,94 @@
+<UserControl
+    x:Class="SportDJ.Modules.DefinitionsModule.Views.DirectionCross"
+    x:Name="Root"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:SportDJ.Commons.Enums"
+    xmlns:local="using:SportDJ.Modules.DefinitionsModule.Views"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="120"
+    d:DesignWidth="120"
+    x:DataType="local:DirectionCross"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+
+        <Style Selector="Button.Direction">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </UserControl.Styles>
+
+    <!-- The four buttons form a cross around the center, which only shows the meaning of the cross -->
+    <Grid
+        Width="108"
+        Height="108"
+        ColumnDefinitions="*,*,*"
+        RowDefinitions="*,*,*">
+
+        <Button
+            Grid.Row="0"
+            Grid.Column="1"
+            Classes="Direction"
+            Command="{Binding #Root.Command}"
+            CommandParameter="{x:Static enums:OrientationType.Top}"
+            Focusable="False">
+            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowUp" />
+        </Button>
+
+        <Button
+            Grid.Row="1"
+            Grid.Column="0"
+            Classes="Direction"
+            Command="{Binding #Root.Command}"
+            CommandParameter="{x:Static enums:OrientationType.Left}"
+            Focusable="False">
+            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
+        </Button>
+
+        <mat:MaterialIcon
+            Grid.Row="1"
+            Grid.Column="1"
+            Width="18"
+            Height="18"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Kind="{Binding #Root.CenterKind}"
+            Opacity="0.7" />
+
+        <Button
+            Grid.Row="1"
+            Grid.Column="2"
+            Classes="Direction"
+            Command="{Binding #Root.Command}"
+            CommandParameter="{x:Static enums:OrientationType.Right}"
+            Focusable="False">
+            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
+        </Button>
+
+        <Button
+            Grid.Row="2"
+            Grid.Column="1"
+            Classes="Direction"
+            Command="{Binding #Root.Command}"
+            CommandParameter="{x:Static enums:OrientationType.Bottom}"
+            Focusable="False">
+            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowDown" />
+        </Button>
+    </Grid>
+</UserControl>

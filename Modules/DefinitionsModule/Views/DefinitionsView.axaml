@@ -37,6 +37,10 @@
                             <views:StackView/>
                         </DataTemplate>
 
+                        <DataTemplate DataType="{x:Type vm:LayoutViewModel}">
+                            <views:LayoutView/>
+                        </DataTemplate>
+
                     </ContentControl.DataTemplates>
                 </ContentControl>
             </DataTemplate>

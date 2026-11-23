@@ -131,15 +131,8 @@ public class GroupViewModel
 
     private void OnKeyPressed(string keyCode)
     {
-        // The key assignment is started in the menu of a tab, so the tab has to receive the key
-        var listeningTab = Tabs
-            .FirstOrDefault(t => t.IsListening);
-
-        if (listeningTab != default)
-        {
-            listeningTab.ReceiveKey(keyCode);
-        }
-        else if (!IsAnyListening)
+        // While anything waits for a key to be assigned, the key must not select a tab
+        if (!IsAnyListening)
         {
             SelectTab(keyCode);
         }

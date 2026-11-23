@@ -48,8 +48,6 @@
 
     <Color x:Key="ColorBackground">#333333</Color>
     <Color x:Key="ColorBackgroundToggle">DodgerBlue</Color>
-    <Color x:Key="ColorIsChecked">RoyalBlue</Color>
-    <Color x:Key="ColorIsOverlay">DarkSlateGray</Color>
     <Color x:Key="ColorIsSelected">RoyalBlue</Color>
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
@@ -99,10 +97,6 @@
     <x:Double x:Key="TrackFontSize">14</x:Double>
     <FontStyle x:Key="TrackFontStylePlayed">Italic</FontStyle>
     <FontWeight x:Key="TrackFontWeightSelected">Bold</FontWeight>
-
-    <!-- ===== Menus ===== -->
-
-    <x:Double x:Key="MenuIconSize">20</x:Double>
 
     <!-- ===== Converters ===== -->
 

@@ -6,7 +6,7 @@ namespace SportDJ.Commons.Interfaces;
 /// Holds the owner which currently waits for a keyboard key to be assigned.
 /// Only one owner can listen at a time.
 /// </summary>
-public interface IKeyListenService
+public interface IKeyboardService
 {
     #region Public Events
 

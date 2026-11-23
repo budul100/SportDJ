@@ -5,6 +5,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
+using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -29,19 +30,32 @@ public class Service
     #region Private Fields
 
     private readonly IDialogService dialogService;
+    private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
+    private readonly IKeyboardService keyListenService;
     private readonly IStorageService<Set> settingsService;
+
+    private Grid listeningGrid;
 
     #endregion Private Fields
 
     #region Public Constructors
 
     public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-        IDialogService dialogService)
+        IDialogService dialogService, IKeyboardService keyListenService, IDispatcherService dispatcherService)
     {
+        this.dispatcherService = dispatcherService;
+        this.keyListenService = keyListenService;
         this.eventAggregator = eventAggregator;
         this.settingsService = settingsService;
         this.dialogService = dialogService;
+
+        // Only the tab which waits for an assignment takes the key
+        eventAggregator.GetEvent<KeyPressedEvent>().Subscribe(
+            action: OnKeyPressed,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true,
+            filter: _ => IsListening(listeningGrid));
 
         eventAggregator.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
             action: Initialize,
@@ -75,6 +89,46 @@ public class Service
             Apply(() => cell.Grid.Add(
                 anchor: cell,
                 orientation: orientation));
+        }
+    }
+
+    public void CancelListening()
+    {
+        var grid = listeningGrid;
+
+        if (grid != default)
+        {
+            listeningGrid = default;
+
+            keyListenService.End(grid);
+
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
+    }
+
+    public bool IsListening(Grid grid)
+    {
+        return grid != default
+            && keyListenService.IsListening(grid);
+    }
+
+    public void ListenKey(Grid grid)
+    {
+        if (grid != default)
+        {
+            var previous = listeningGrid;
+
+            listeningGrid = grid;
+
+            keyListenService.Begin(grid);
+
+            if (previous != default
+                && previous != grid)
+            {
+                eventAggregator.GetEvent<TabUpdatedEvent>().Publish(previous);
+            }
+
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
         }
     }
 
@@ -122,6 +176,36 @@ public class Service
                 Apply(() => grid.Group.Grids.Remove(grid));
             }
         }
+    }
+
+    public void SetKeyCode(Grid grid, string keyCode)
+    {
+        if (grid != default
+            && grid.KeyCode != keyCode)
+        {
+            grid.KeyCode = keyCode;
+
+            Persist();
+
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
+    }
+
+    public void SetName(Grid grid, string name)
+    {
+        var trimmed = name?.Trim();
+
+        if (grid != default
+            && !string.IsNullOrWhiteSpace(trimmed)
+            && grid.Name != trimmed)
+        {
+            grid.Name = trimmed;
+
+            Persist();
+        }
+
+        // Also notify for invalid input, so the UI falls back to the stored name
+        eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
     }
 
     public async Task SwapAsync<T>(T cell)
@@ -201,6 +285,8 @@ public class Service
             Persist();
         }
 
+        CancelListening();
+
         eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
     }
 
@@ -215,7 +301,21 @@ public class Service
 
         Persist();
 
+        CancelListening();
+
         eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
+    }
+
+    private void OnKeyPressed(string keyCode)
+    {
+        var grid = listeningGrid;
+
+        SetKeyCode(
+            grid: grid,
+            keyCode: keyCode);
+
+        // Ends later, so other receivers of this key press still see the listening state
+        dispatcherService.Post(CancelListening);
     }
 
     private void Persist()

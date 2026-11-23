@@ -6,6 +6,7 @@
     xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.GridModule.DesignTime"
+    xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:SportDJ.Modules.GridModule.Views"
     xmlns:vm="using:SportDJ.Modules.GridModule.ViewModels"
@@ -21,6 +22,10 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
 
     <Design.DataContext>
         <dt:GroupViewModel />
@@ -47,27 +52,11 @@
                     IsTabStop="False"
                     Focusable="False">
 
-                    <Border.ContextMenu>
-                        <ContextMenu
-                            Closed="OnContextMenuClosed"
-                            ItemsSource="{Binding Menus}"
-                            Opened="OnContextMenuOpened">
-
-                            <ContextMenu.DataTemplates>
-                                <DataTemplate x:DataType="vm:MenuViewModel">
-                                    <v:MenuView />
-                                </DataTemplate>
-                                <DataTemplate x:DataType="vm:SeparatorViewModel">
-                                    <Separator />
-                                </DataTemplate>
-                            </ContextMenu.DataTemplates>
-                        </ContextMenu>
-                    </Border.ContextMenu>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <Viewbox
@@ -103,6 +92,21 @@
                                     Text="{Binding Key}" />
                             </Border>
                         </Viewbox>
+
+                        <!-- Opens the layout pane of this tab -->
+                        <Button
+                            Grid.Column="2"
+                            Margin="{StaticResource KeyMargin}"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Command="{Binding ShowLayoutCommand}"
+                            Focusable="False"
+                            ToolTip.Tip="Layout">
+                            <mat:MaterialIcon
+                                Width="{StaticResource FontSizeState}"
+                                Height="{StaticResource FontSizeState}"
+                                Kind="Build" />
+                        </Button>
                     </Grid>
                 </Border>
             </DataTemplate>

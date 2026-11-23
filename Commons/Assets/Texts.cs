@@ -15,17 +15,6 @@ public static class Texts
     public const string CellSwapHeader = "Swap element";
     public const string CellSwapPlayerMessage = "Shall the player swapped into a group?";
 
-    public const string GridAddHeader = "Add player to";
-    public const string GridEditHeader = "Edit grid";
-    public const string GridMoveHeader = "Move element to";
-
-    public const string GroupAddHeader = "Add tab to";
-    public const string GroupEditHeader = "Edit tabs";
-    public const string GroupMoveHeader = "Move tab to";
-
-    public const string KeyListenHeader = "Listen for key";
-    public const string KeyUnhookHeader = "Clear key hook";
-
     public const string PlayerClearHeader = "Clear player";
     public const string PlayerClearMessage = "Shall all files of the player be removed?";
     public const string PlayerSelectionFileHeader = "Select file";
@@ -40,10 +29,8 @@ public static class Texts
     public const string StackShuffleHeader = "Shuffle tracks";
     public const string StackShuffleMessage = "Shall the player tracks be shuffled?";
 
-    public const string TabEditHeader = "Edit tab";
     public const string TabRemoveHeader = "Remove tab";
     public const string TabRemoveMessage = "Shall the tab be removed?";
-    public const string TabRenameHeader = "Rename tab";
 
     #endregion Public Fields
 }

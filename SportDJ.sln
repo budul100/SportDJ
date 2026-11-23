@@ -89,6 +89,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "App\App.csproj", "{5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commons", "Commons\Commons.csproj", "{62B5CA81-F3A5-45B2-A72C-52AAB264829A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyboardService", "Services\KeyboardService\KeyboardService.csproj", "{D9BDDE4A-5475-4923-84C0-BCBF6408FF49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -239,6 +241,10 @@ Global
 		{62B5CA81-F3A5-45B2-A72C-52AAB264829A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62B5CA81-F3A5-45B2-A72C-52AAB264829A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62B5CA81-F3A5-45B2-A72C-52AAB264829A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9BDDE4A-5475-4923-84C0-BCBF6408FF49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9BDDE4A-5475-4923-84C0-BCBF6408FF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9BDDE4A-5475-4923-84C0-BCBF6408FF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9BDDE4A-5475-4923-84C0-BCBF6408FF49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -279,6 +285,7 @@ Global
 		{7439D868-AFE0-E5BB-ACA5-E72687649735} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 		{BE76A95D-3B8D-4364-860A-EDED1CCB5031} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
 		{CD12ABCD-9986-4885-96DC-B6F5A7B05123} = {0DA6D9CB-3F83-4EF8-9612-C8F9DF26B8E8}
+		{D9BDDE4A-5475-4923-84C0-BCBF6408FF49} = {E76B23EF-AB70-4CD9-BC07-44D1EED74641}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F022BF7-2888-4903-B9FE-CD78CD954D19}

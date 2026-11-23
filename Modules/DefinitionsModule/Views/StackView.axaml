@@ -56,7 +56,8 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Command="{Binding ResetCommand}"
-                Focusable="False">
+                Focusable="False"
+                ToolTip.Tip="Reset played">
                 <mat:MaterialIcon
                     Width="{StaticResource MediumIconSize}"
                     Height="{StaticResource MediumIconSize}"
@@ -68,7 +69,8 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Command="{Binding ShuffleCommand}"
-                Focusable="False">
+                Focusable="False"
+                ToolTip.Tip="Shuffle">
                 <mat:MaterialIcon
                     Width="{StaticResource MediumIconSize}"
                     Height="{StaticResource MediumIconSize}"
@@ -85,26 +87,41 @@
                 Grid.Column="0"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
+                VerticalAlignment="Stretch"
                 Command="{Binding LoadFilesCommand}"
-                Content="Files..."
-                Focusable="False" />
+                Focusable="False"
+                ToolTip.Tip="Add files">
+                <mat:MaterialIcon
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
+                    Kind="FileMultipleOutline" />
+            </Button>
             <Button
                 Grid.Column="1"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
+                VerticalAlignment="Stretch"
                 Command="{Binding LoadFolderCommand}"
-                Content="Folder..."
-                Focusable="False" />
+                Focusable="False"
+                ToolTip.Tip="Add folder">
+                <mat:MaterialIcon
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
+                    Kind="FolderMultipleOutline" />
+            </Button>
             <Button
                 Grid.Column="2"
                 Margin="{StaticResource InnerMargin}"
                 HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
+                VerticalAlignment="Stretch"
                 Command="{Binding ClearCommand}"
-                Content="Clear"
-                Focusable="False" />
+                Focusable="False"
+                ToolTip.Tip="Clear player">
+                <mat:MaterialIcon
+                    Width="{StaticResource MediumIconSize}"
+                    Height="{StaticResource MediumIconSize}"
+                    Kind="CloseCircleOutline" />
+            </Button>
         </Grid>
 
         <ListBox

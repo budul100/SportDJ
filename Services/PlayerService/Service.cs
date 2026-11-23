@@ -36,7 +36,7 @@ public class Service
     private readonly IControllerService controllerService;
     private readonly IDialogService dialogService;
     private readonly IEventAggregator eventAggregator;
-    private readonly IKeyListenService keyListenService;
+    private readonly IKeyboardService keyListenService;
     private readonly IStorageService<Set> settingsService;
     private readonly HashSet<ISignalService> signalServices = [];
     private readonly IStackService stackService;
@@ -57,7 +57,7 @@ public class Service
 
     public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
         IStackService stackService, ITrackService trackService, IControllerService controllerService,
-        IDialogService dialogService, IStorageService<Set> settingsService, IKeyListenService keyListenService)
+        IDialogService dialogService, IStorageService<Set> settingsService, IKeyboardService keyListenService)
     {
         this.containerProvider = containerProvider;
         this.eventAggregator = eventAggregator;
@@ -181,6 +181,11 @@ public class Service
 
     public bool IsEnding => signalService?.IsEnding == true;
 
+    public bool IsListeningKeyboard => player != default
+        && keyListenService?.IsListening(player) == true;
+
+    public bool IsListeningMidi => isListeningMidi;
+
     public bool IsOverlay
     {
         get => player?.IsOverlay == true;
@@ -200,11 +205,6 @@ public class Service
             }
         }
     }
-
-    public bool IsListeningKeyboard => player != default
-        && keyListenService?.IsListening(player) == true;
-
-    public bool IsListeningMidi => isListeningMidi;
 
     public bool IsPlaying => signalService?.IsPlaying == true;
 

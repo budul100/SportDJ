@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Output;
@@ -24,18 +21,15 @@ public abstract class CellViewModel
     protected readonly IContainerProvider containerProvider;
     protected readonly IDialogService dialogService;
     protected readonly IEventAggregator eventAggregator;
-    protected readonly IGridService gridService;
 
-    protected Action listenChecker;
     protected IOutputService outputServiceLive;
 
     #endregion Protected Fields
 
     #region Private Fields
 
-    private readonly object element;
     private readonly IKeyable keyable;
-    private readonly IKeyListenService keyListenService;
+    private readonly IKeyboardService keyListenService;
     private readonly INameable nameable;
     private readonly IStorageService<Set> settingsService;
     private readonly List<SubscriptionToken> subscriptions = [];
@@ -51,7 +45,6 @@ public abstract class CellViewModel
     protected CellViewModel(IContainerProvider containerProvider, object element)
     {
         this.containerProvider = containerProvider;
-        this.element = element;
 
         cell = element is Grid grid
             ? grid.Group
@@ -63,8 +56,7 @@ public abstract class CellViewModel
         eventAggregator = containerProvider?.Resolve<IEventAggregator>();
         settingsService = containerProvider?.Resolve<IStorageService<Set>>();
         dialogService = containerProvider?.Resolve<IDialogService>();
-        gridService = containerProvider?.Resolve<IGridService>();
-        keyListenService = containerProvider?.Resolve<IKeyListenService>();
+        keyListenService = containerProvider?.Resolve<IKeyboardService>();
 
         AddSubscription(eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
             action: _ => UpdateOutput(),
@@ -72,14 +64,6 @@ public abstract class CellViewModel
     }
 
     #endregion Protected Constructors
-
-    #region Public Events
-
-    public event EventHandler MenuCloseEvent;
-
-    public event EventHandler MenuOpenEvent;
-
-    #endregion Public Events
 
     #region Public Properties
 
@@ -89,8 +73,6 @@ public abstract class CellViewModel
 
     public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
-    public bool IsListening => keyListenService?.IsListening(element) == true;
-
     public bool IsRenaming
     {
         get { return isRenaming; }
@@ -99,30 +81,7 @@ public abstract class CellViewModel
 
     public string Key => KeyCode?.GetKey();
 
-    public string KeyCode
-    {
-        get
-        {
-            return keyable?.KeyCode;
-        }
-
-        set
-        {
-            if (keyable != default
-                && value != keyable.KeyCode)
-            {
-                keyable.KeyCode = value;
-
-                settingsService?.Save();
-
-                RaisePropertyChanged(nameof(KeyCode));
-                RaisePropertyChanged(nameof(HasKey));
-                RaisePropertyChanged(nameof(Key));
-            }
-        }
-    }
-
-    public ObservableCollection<BindableBase> Menus { get; private set; }
+    public string KeyCode => keyable?.KeyCode;
 
     public virtual string Name
     {
@@ -179,21 +138,6 @@ public abstract class CellViewModel
 
     #endregion Public Methods
 
-    #region Protected Internal Methods
-
-    protected internal void ReceiveKey(string keyCode)
-    {
-        keyListenService?.End(element);
-
-        KeyCode = keyCode;
-
-        listenChecker?.Invoke();
-
-        CloseMenu();
-    }
-
-    #endregion Protected Internal Methods
-
     #region Protected Methods
 
     protected void AddSubscription(SubscriptionToken subscription)
@@ -204,21 +148,10 @@ public abstract class CellViewModel
         }
     }
 
-    protected void CloseMenu()
-    {
-        MenuCloseEvent?.Invoke(
-            sender: this,
-            e: default);
-
-        RaisePropertyChanged(nameof(Menus));
-    }
-
     protected virtual void Dispose(bool isDisposing)
     {
         if (isDisposing)
         {
-            keyListenService?.End(element);
-
             foreach (var subscription in subscriptions)
             {
                 subscription.Dispose();
@@ -226,78 +159,13 @@ public abstract class CellViewModel
 
             subscriptions.Clear();
 
-            DisposeMenus();
-
             cell = default;
         }
-    }
-
-    protected virtual IEnumerable<BindableBase> GetElementMenus()
-    {
-        yield break;
-    }
-
-    protected virtual IEnumerable<BindableBase> GetGridMenus()
-    {
-        var orientations = Enum.GetValues<OrientationType>();
-
-        foreach (var orientation in orientations)
-        {
-            yield return new MenuViewModel(
-                header: $"{Texts.GridAddHeader} {orientation}",
-                executeCallback: () => gridService.AddPlayer(
-                    cell: cell,
-                    orientation: orientation),
-                closeCallback: CloseMenu);
-        }
-
-        yield return new SeparatorViewModel();
-
-        foreach (var orientation in orientations)
-        {
-            yield return new MenuViewModel(
-                header: $"{Texts.GridMoveHeader} {orientation}",
-                executeCallback: () => gridService.MoveCell(
-                    cell: cell,
-                    orientation: orientation),
-                closeCallback: CloseMenu);
-        }
-
-        yield return new SeparatorViewModel();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.CellSwapHeader}...",
-            executeCallback: () => gridService.SwapAsync(cell),
-            closeCallback: CloseMenu);
-
-        yield return new MenuViewModel(
-            header: $"{Texts.CellRemoveHeader}...",
-            executeCallback: () => gridService.RemoveCellAsync(cell),
-            closeCallback: CloseMenu);
     }
 
     protected virtual void Initialize()
     {
         UpdateOutput();
-
-        // The old menu items hold event subscriptions, which have to be released
-        DisposeMenus();
-
-        Menus = new ObservableCollection<BindableBase>(GetElementMenus());
-
-        RaisePropertyChanged(nameof(Menus));
-    }
-
-    protected void ListenHook()
-    {
-        keyListenService?.Begin(element);
-    }
-
-    protected void OpenMenu()
-    {
-        MenuOpenEvent?.Invoke(
-            sender: this,
-            e: default);
     }
 
     protected virtual void UpdateOutput()
@@ -307,19 +175,4 @@ public abstract class CellViewModel
     }
 
     #endregion Protected Methods
-
-    #region Private Methods
-
-    private void DisposeMenus()
-    {
-        if (Menus != default)
-        {
-            foreach (var menu in Menus.OfType<IDisposable>().ToArray())
-            {
-                menu.Dispose();
-            }
-        }
-    }
-
-    #endregion Private Methods
 }

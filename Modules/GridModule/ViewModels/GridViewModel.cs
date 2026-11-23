@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Material.Icons;
-using SportDJ.Commons.Assets;
-using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Grid;
+using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Commons.Mvvm;
@@ -17,6 +16,7 @@ public class GridViewModel
     #region Private Fields
 
     private readonly Grid grid;
+    private readonly IPanelService panelService;
     private readonly GroupViewModel parent;
 
     private int columns;
@@ -32,6 +32,17 @@ public class GridViewModel
     {
         this.grid = grid;
         this.parent = parent;
+
+        panelService = containerProvider?.Resolve<IPanelService>();
+
+        ShowLayoutCommand = new DelegateCommand(
+            executeMethod: ShowLayout);
+
+        AddSubscription(eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
+            action: _ => UpdateTab(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: g => g == grid));
 
         InitializeCells(
             containerProvider: containerProvider,
@@ -71,6 +82,8 @@ public class GridViewModel
         set { SetProperty(ref rows, value); }
     }
 
+    public DelegateCommand ShowLayoutCommand { get; }
+
     #endregion Public Properties
 
     #region Protected Methods
@@ -89,93 +102,9 @@ public class GridViewModel
             isDisposing: isDisposing);
     }
 
-    protected override IEnumerable<BindableBase> GetElementMenus()
-    {
-        var gridMenus = base.GetGridMenus().ToArray();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.GridEditHeader}...",
-            menuItems: gridMenus,
-            closeCallback: CloseMenu);
-
-        var groupMenus = GetGroupMenus().ToArray();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.GroupEditHeader}...",
-            menuItems: groupMenus,
-            closeCallback: CloseMenu);
-
-        var tabMenus = GetTabMenus().ToArray();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.TabEditHeader}...",
-            menuItems: tabMenus,
-            closeCallback: CloseMenu);
-    }
-
     #endregion Protected Methods
 
     #region Private Methods
-
-    private IEnumerable<BindableBase> GetGroupMenus()
-    {
-        var orientations = Enum.GetValues<OrientationType>()
-            .Where(o => o == OrientationType.Left || o == OrientationType.Right).ToArray();
-
-        foreach (var orientation in orientations)
-        {
-            yield return new MenuViewModel(
-                header: $"{Texts.GroupAddHeader} {orientation}",
-                executeCallback: () => gridService.AddGrid(
-                    grid: grid,
-                    orientation: orientation),
-                closeCallback: CloseMenu);
-        }
-
-        yield return new SeparatorViewModel();
-
-        foreach (var orientation in orientations)
-        {
-            yield return new MenuViewModel(
-                header: $"{Texts.GroupMoveHeader} {orientation}",
-                executeCallback: () => gridService.MoveGrid(
-                    grid: grid,
-                    orientation: orientation),
-                closeCallback: CloseMenu);
-        }
-
-        yield return new SeparatorViewModel();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.TabRemoveHeader}...",
-            executeCallback: () => gridService.RemoveGridAsync(grid),
-            closeCallback: CloseMenu);
-    }
-
-    private IEnumerable<BindableBase> GetTabMenus()
-    {
-        yield return new MenuViewModel(
-            header: Texts.TabRenameHeader,
-            executeCallback: () => IsRenaming = true,
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.FormTextbox);
-
-        var listenItem = new MenuViewModel(
-            header: Texts.KeyListenHeader,
-            executeCallback: ListenHook,
-            isCheckedGetter: () => IsListening,
-            icon: MaterialIconKind.KeyboardOutline);
-
-        listenChecker = listenItem.Update;
-
-        yield return listenItem;
-
-        yield return new MenuViewModel(
-            header: Texts.KeyUnhookHeader,
-            executeCallback: () => KeyCode = default,
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.KeyboardOffOutline);
-    }
 
     private void InitializeCells(IContainerProvider containerProvider, Grid grid)
     {
@@ -228,8 +157,22 @@ public class GridViewModel
         Rows = rowsCount;
         Columns = columnsCount;
 
-        // Also an empty grid needs its menus, otherwise no first element could be added
         base.Initialize();
+    }
+
+    private void ShowLayout()
+    {
+        eventAggregator?.GetEvent<TabVisibleEvent>().Publish(grid);
+
+        panelService?.Activate<IGridService>();
+    }
+
+    private void UpdateTab()
+    {
+        RaisePropertyChanged(nameof(HasKey));
+        RaisePropertyChanged(nameof(Key));
+        RaisePropertyChanged(nameof(KeyCode));
+        RaisePropertyChanged(nameof(Name));
     }
 
     #endregion Private Methods

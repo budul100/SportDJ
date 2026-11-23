@@ -54,10 +54,15 @@ internal sealed class ServiceContext
         var dialogService = new Mock<IDialogService>();
         dialogService.SetReturnsDefault(Task.FromResult(dialogResult));
 
+        var keyListenService = new Mock<IKeyboardService>();
+        var dispatcherService = new Mock<IDispatcherService>();
+
         Service = new Services.GridService.Service(
             eventAggregator: eventAggregator.Object,
             settingsService: storage.Object,
-            dialogService: dialogService.Object);
+            dialogService: dialogService.Object,
+            keyListenService: keyListenService.Object,
+            dispatcherService: dispatcherService.Object);
 
         Reload();
     }

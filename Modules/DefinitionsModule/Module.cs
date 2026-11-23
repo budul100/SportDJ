@@ -26,6 +26,11 @@ public static class Module
             type: PanelType.Left,
             view: definitionsView,
             action: definitionsViewModel.Activate<IStackService>);
+
+        panelService?.Register<IGridService>(
+            type: PanelType.Left,
+            view: definitionsView,
+            action: definitionsViewModel.Activate<IGridService>);
     }
 
     #endregion Public Methods

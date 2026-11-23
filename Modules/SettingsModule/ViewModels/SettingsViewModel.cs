@@ -399,6 +399,8 @@ public class SettingsViewModel
             }
 
             RaisePropertyChanged(nameof(Devices));
+
+            SetDevice();
         }
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Interfaces;
@@ -15,6 +16,7 @@ public class DefinitionsViewModel
 {
     #region Private Fields
 
+    private readonly LayoutViewModel layoutViewModel;
     private readonly Dictionary<Type, TabViewModel> registrations = [];
     private readonly SettingsViewModel settingsViewModel;
     private readonly StackViewModel stackViewModel;
@@ -26,8 +28,9 @@ public class DefinitionsViewModel
     #region Public Constructors
 
     public DefinitionsViewModel(IEventAggregator eventAggregator,
-        SettingsViewModel settingsViewModel, StackViewModel stackViewModel)
+        SettingsViewModel settingsViewModel, StackViewModel stackViewModel, LayoutViewModel layoutViewModel)
     {
+        this.layoutViewModel = layoutViewModel;
         this.settingsViewModel = settingsViewModel;
         this.stackViewModel = stackViewModel;
 
@@ -41,10 +44,16 @@ public class DefinitionsViewModel
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
 
+        eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
+            action: layoutViewModel.SetTab,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
         registrations = new Dictionary<Type, TabViewModel>
         {
             { typeof(IPlayerService), settingsViewModel },
-            { typeof(IStackService), stackViewModel }
+            { typeof(IStackService), stackViewModel },
+            { typeof(IGridService), layoutViewModel }
         };
 
         Tabs = new ObservableCollection<TabViewModel>(registrations.Values);
@@ -91,6 +100,7 @@ public class DefinitionsViewModel
     {
         settingsViewModel.Set(player);
         stackViewModel.Set(player);
+        layoutViewModel.SetCell(player);
     }
 
     #endregion Private Methods

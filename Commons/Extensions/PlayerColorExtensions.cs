@@ -7,11 +7,11 @@ public static class PlayerColorExtensions
 {
     #region Private Fields
 
-    // Same as ColorBackground in Ressources.axaml
-    private static readonly Color baseColor = Color.FromRgb(0x33, 0x33, 0x33);
-
     // Share of the hue in the muted result
     private const double MixShare = 0.38;
+
+    // Same as ColorBackground in Ressources.axaml
+    private static readonly Color baseColor = Color.FromRgb(0x33, 0x33, 0x33);
 
     #endregion Private Fields
 

@@ -10,7 +10,7 @@ using Xunit;
 
 namespace SportDJ.Tests.GridServiceTests;
 
-public class Tests
+public class LoadingTests
 {
     #region Public Methods
 
@@ -43,10 +43,15 @@ public class Tests
             .Setup(x => x.GetEvent<GridUpdatedEvent>())
             .Returns(new GridUpdatedEvent());
 
+        var mockKeyListenService = new Mock<IKeyboardService>();
+        var mockDispatcherService = new Mock<IDispatcherService>();
+
         var service = new Services.GridService.Service(
             eventAggregator: mockEventAggregator.Object,
             settingsService: mockSettingsService.Object,
-            dialogService: default);
+            dialogService: default,
+            keyListenService: mockKeyListenService.Object,
+            dispatcherService: mockDispatcherService.Object);
 
         settingsLoadedEvent.Publish();
 
@@ -71,10 +76,15 @@ public class Tests
             .Setup(x => x.GetEvent<GridUpdatedEvent>())
             .Returns(new GridUpdatedEvent());
 
+        var mockKeyListenService = new Mock<IKeyboardService>();
+        var mockDispatcherService = new Mock<IDispatcherService>();
+
         var service = new Services.GridService.Service(
             eventAggregator: mockEventAggregator.Object,
             settingsService: mockSettingsService.Object,
-            dialogService: default);
+            dialogService: default,
+            keyListenService: mockKeyListenService.Object,
+            dispatcherService: mockDispatcherService.Object);
 
         settingsLoadedEvent.Publish();
 

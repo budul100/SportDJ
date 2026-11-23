@@ -120,7 +120,7 @@ public class App
         registry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
         registry.RegisterSingleton<IGridService, Services.GridService.Service>();
         registry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
-        registry.RegisterSingleton<IKeyListenService, Services.PlayerService.KeyListenService>();
+        registry.RegisterSingleton<IKeyboardService, Services.KeyboardService.Service>();
 
         registry.Register<IPlayerService, Services.PlayerService.Service>();
         registry.Register<IStackService, Services.StackService.Service>();
@@ -161,6 +161,8 @@ public class App
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.SettingsViewModel>();
         registry.RegisterSingleton<Modules.DefinitionsModule.Views.StackView>();
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.StackViewModel>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.LayoutView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.LayoutViewModel>();
     }
 
     private static void RegisterTypes<TEnum>(ContainerRegistry registry, Type from, Type to)

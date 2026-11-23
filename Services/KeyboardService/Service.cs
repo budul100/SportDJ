@@ -2,10 +2,10 @@ using System;
 using System.Threading;
 using SportDJ.Commons.Interfaces;
 
-namespace SportDJ.Services.PlayerService;
+namespace SportDJ.Services.KeyboardService;
 
-public class KeyListenService
-    : IKeyListenService
+public class Service
+    : IKeyboardService
 {
     #region Private Fields
 
@@ -17,7 +17,7 @@ public class KeyListenService
 
     #region Public Events
 
-    public event EventHandler Changed;
+    public event EventHandler Changed = delegate { };
 
     #endregion Public Events
 
