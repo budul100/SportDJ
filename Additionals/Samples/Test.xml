@@ -1,14 +1,14 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid Name="Damen">
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Gast" ResetPosition="false">
+			<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="E" Name="Gast" ResetPosition="true">
 				<Key>
 					<Type>Note</Type>
 					<Channel>10</Channel>
 					<Number>48</Number>
 				</Key>
 				<Paths>
-					<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3</Path>
+					<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\</Path>
 				</Paths>
 			</Cell>
 			<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
