@@ -106,6 +106,21 @@ public class Service
         }
     }
 
+    public async Task GroupAsync(Player player)
+    {
+        if (player != default)
+        {
+            var result = await dialogService.GetMessageBoxResultAsync(
+                contentMessage: Texts.CellGroupMessage,
+                contentTitle: Texts.CellGroupHeader);
+
+            if (result == ButtonResult.Yes)
+            {
+                Apply(player.ToGroup);
+            }
+        }
+    }
+
     public bool IsListening(Grid grid)
     {
         return grid != default
@@ -173,7 +188,7 @@ public class Service
 
             if (result == ButtonResult.Yes)
             {
-                Apply(() => grid.Group.Grids.Remove(grid));
+                Apply(grid.Dissolve);
             }
         }
     }
@@ -206,36 +221,6 @@ public class Service
 
         // Also notify for invalid input, so the UI falls back to the stored name
         eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
-    }
-
-    public async Task SwapAsync<T>(T cell)
-        where T : Cell
-    {
-        if (cell != default)
-        {
-            if (cell is Player player)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.CellSwapPlayerMessage,
-                    contentTitle: Texts.CellSwapHeader);
-
-                if (result == ButtonResult.Yes)
-                {
-                    Apply(player.ToGroup);
-                }
-            }
-            else if (cell is Group group)
-            {
-                var result = await dialogService.GetMessageBoxResultAsync(
-                    contentMessage: Texts.CellSwapGroupMessage,
-                    contentTitle: Texts.CellSwapHeader);
-
-                if (result == ButtonResult.Yes)
-                {
-                    Apply(group.ToPlayer);
-                }
-            }
-        }
     }
 
     #endregion Public Methods

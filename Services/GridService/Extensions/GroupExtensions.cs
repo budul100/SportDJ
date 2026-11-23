@@ -57,27 +57,6 @@ internal static class GroupExtensions
         return result;
     }
 
-    public static void ToPlayer(this Group group)
-    {
-        if (group?.Grids.Count > 0)
-        {
-            var cells = group.Grids
-                .SelectMany(g => g.Cells)
-                .Where(c => c != default).ToArray();
-
-            group.Grid.Cells.Remove(group);
-
-            foreach (var cell in cells)
-            {
-                cell.Column = group.Column;
-                cell.Row = group.Row;
-                cell.Grid = group.Grid;
-
-                group.Grid.Cells.Add(cell);
-            }
-        }
-    }
-
     #endregion Public Methods
 
     #region Private Methods

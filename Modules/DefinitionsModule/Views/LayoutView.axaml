@@ -118,8 +118,8 @@
 
             </StackPanel>
 
-            <!-- Group: switches between a player and the group -->
-            <StackPanel Spacing="{StaticResource SpacingSmall}">
+            <!-- Group: puts the player into a new group, only for players -->
+            <StackPanel IsVisible="{Binding IsPlayer}" Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="Group" />
                 <Separator />
@@ -127,16 +127,16 @@
                 <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
 
                     <Button
-                        Command="{Binding SwapCommand}"
+                        Command="{Binding GroupCommand}"
                         Focusable="False"
-                        ToolTip.Tip="Swap player and group">
+                        ToolTip.Tip="Put player into a new group">
                         <mat:MaterialIcon
                             Width="{StaticResource MediumIconSize}"
                             Height="{StaticResource MediumIconSize}"
                             Kind="Tab" />
                     </Button>
 
-                    <!-- Shows the group, which the cell is or belongs to, empty without a group -->
+                    <!-- Shows the group, which the player belongs to, hidden without a group -->
                     <TextBlock
                         VerticalAlignment="Center"
                         Classes="Caption"

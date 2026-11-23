@@ -9,11 +9,10 @@ public static class Texts
 
     public const string AppName = nameof(SportDJ);
 
+    public const string CellGroupHeader = "Group player";
+    public const string CellGroupMessage = "Shall the player be put into a new group?";
     public const string CellRemoveHeader = "Remove element";
     public const string CellRemoveMessage = "Shall the element be removed?";
-    public const string CellSwapGroupMessage = "Shall the group swapped into a player?";
-    public const string CellSwapHeader = "Swap element";
-    public const string CellSwapPlayerMessage = "Shall the player swapped into a group?";
 
     public const string PlayerClearHeader = "Clear player";
     public const string PlayerClearMessage = "Shall all files of the player be removed?";
@@ -30,7 +29,7 @@ public static class Texts
     public const string StackShuffleMessage = "Shall the player tracks be shuffled?";
 
     public const string TabRemoveHeader = "Remove tab";
-    public const string TabRemoveMessage = "Shall the tab be removed?";
+    public const string TabRemoveMessage = "Shall the tab be removed? Its players move to the level above.";
 
     #endregion Public Fields
 }

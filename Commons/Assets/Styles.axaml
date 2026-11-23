@@ -44,11 +44,11 @@
 
     <!--
         The Fluent theme spaces tab headers by 24 px. Here the header keeps the same distance to the cell
-        as the surface of a player (8 = ContentMargin 4 + PlayerBorderThickness 2 + InnerMargin 2):
-        8 to the left (also acts as gap between two headers) and 8 to the top.
+        as the surface of a player (7 = ContentMargin 4 + PlayerBorderThickness 2 + PlayerInnerMargin 1):
+        7 to the left (also acts as gap between two headers) and 7 to the top.
     -->
     <Style Selector="TabItem">
-        <Setter Property="Margin" Value="8,8,0,0" />
+        <Setter Property="Margin" Value="7,7,0,0" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeState}" />
         <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
         <Setter Property="MinHeight" Value="{StaticResource ControlHeight}" />

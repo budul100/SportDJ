@@ -57,20 +57,21 @@
             </Grid.RowDefinitions>
 
             <!--
-                Top row: three equally wide parts, so the row looks the same with and without PFL or key.
-                Left the PFL button (placeholder, disabled until PFL is available), in the middle the key on
-                its badge background, right the settings button.
-                The badge stays visible without a key, so the row never looks gappy.
+                Top row: PFL (placeholder, disabled until PFL is available), key, settings.
+                PFL and settings are equally wide, the key only takes the width of its badge, as in the tab header.
+                Without a key the middle column is gone, so the two buttons share the row.
+                The gaps are margins (1 px each side), so they only exist together with their neighbours.
             -->
-            <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}" ColumnSpacing="{StaticResource SpacingSmall}">
+            <Grid Grid.Row="0" Margin="{StaticResource PlayerInnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <ToggleButton
                     Grid.Column="0"
+                    Margin="0,0,1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False"
@@ -89,16 +90,19 @@
 
                 </ToggleButton>
 
-                <!-- Always visible, the key is shown only if one is assigned -->
+                <!-- Only shown if a key is assigned -->
                 <ct:KeyDisplay
                     Grid.Column="1"
-                    HorizontalAlignment="Stretch"
+                    Margin="1,0,1,0"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Stretch"
                     FontSize="{StaticResource FontSizeContentMain}"
+                    IsVisible="{Binding HasKey}"
                     KeyCode="{Binding KeyCode}" />
 
                 <ToggleButton
                     Grid.Column="2"
+                    Margin="1,0,0,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Classes="SettingsToggle"
@@ -122,7 +126,7 @@
             <!-- Main surface -->
             <Border
                 Grid.Row="1"
-                Margin="{StaticResource InnerMargin}"
+                Margin="{StaticResource PlayerInnerMargin}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Classes="PlayerSurface"
@@ -239,7 +243,7 @@
             -->
             <Grid
                 Grid.Row="2"
-                Margin="{StaticResource InnerMargin}"
+                Margin="{StaticResource PlayerInnerMargin}"
                 ColumnSpacing="{StaticResource SpacingSmall}">
 
                 <Grid.ColumnDefinitions>

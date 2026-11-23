@@ -20,6 +20,8 @@ public interface IGridService
 
     void CancelListening();
 
+    Task GroupAsync(Player player);
+
     bool IsListening(Grid grid);
 
     void ListenKey(Grid grid);
@@ -35,9 +37,6 @@ public interface IGridService
     void SetKeyCode(Grid grid, string keyCode);
 
     void SetName(Grid grid, string name);
-
-    Task SwapAsync<T>(T cell)
-        where T : Cell;
 
     #endregion Public Methods
 }

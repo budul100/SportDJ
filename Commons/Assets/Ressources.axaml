@@ -78,6 +78,8 @@
 
     <!-- Outer radius 10 = inner radius 6 + gap 4 (border 2 + inner margin 2), so the corners stay concentric -->
     <Thickness x:Key="PlayerBorderThickness">2</Thickness>
+    <!-- Distance of the elements inside of a player (rows and buttons), half of it at each element -->
+    <Thickness x:Key="PlayerInnerMargin">1</Thickness>
     <CornerRadius x:Key="PlayerCornerRadius">10</CornerRadius>
     <x:Double x:Key="PlayerIconSize">30</x:Double>
 

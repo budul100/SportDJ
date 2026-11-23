@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Models.Structure;
@@ -59,7 +60,7 @@ public class RemoveTests
     }
 
     [Fact]
-    public async Task RemoveGridAsync_Confirmed_RemovesTab()
+    public async Task RemoveGridAsync_Confirmed_MovesPlayersToTheLevelAbove()
     {
         var group = CreateGroup(
             0,
@@ -72,7 +73,11 @@ public class RemoveTests
         await context.Service.RemoveGridAsync(group.Grids[0]);
 
         Assert.Equal(["Tab 2"], TabNames(group));
+        Assert.Equal(["A"], context.Grid.Cells.OfType<Player>().Select(p => p.Name).ToArray());
+        Assert.All(context.Grid.Cells, c => Assert.Same(context.Grid, c.Grid));
         Assert.Equal(1, context.SaveCount);
+
+        AssertNoOverlaps(context.Grid);
     }
 
     [Fact]
@@ -90,6 +95,25 @@ public class RemoveTests
         await context.Service.RemoveGridAsync(foreign);
 
         Assert.Equal(["Tab 1"], TabNames(group));
+    }
+
+    [Fact]
+    public async Task RemoveGridAsync_LastTab_DissolvesGroup()
+    {
+        var group = CreateGroup(
+            1,
+            0,
+            CreateTab("Tab 1", CreatePlayer("PA", 0, 0), CreatePlayer("PB", 1, 0)));
+
+        var context = new ServiceContext(CreateGrid(CreatePlayer("P0", 0, 0), group));
+
+        await context.Service.RemoveGridAsync(group.Grids[0]);
+
+        Assert.Empty(context.Grid.Cells.OfType<Group>());
+        Assert.Equal(["P0", "PA", "PB"], Names(context.Grid));
+        Assert.All(context.Grid.Cells, c => Assert.Same(context.Grid, c.Grid));
+
+        AssertNoOverlaps(context.Grid);
     }
 
     [Fact]

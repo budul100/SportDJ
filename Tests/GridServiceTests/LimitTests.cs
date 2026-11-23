@@ -197,7 +197,7 @@ public class LimitTests
     }
 
     [Fact]
-    public async Task SwapAsync_GroupToPlayer_BeyondMaxColumns_KeepsGroup()
+    public async Task RemoveGridAsync_BeyondMaxColumns_KeepsTab()
     {
         var group = CreateGroup(
             0,
@@ -208,7 +208,7 @@ public class LimitTests
         var context = new ServiceContext(CreateGrid(group));
         var before = Describe(context.Grid);
 
-        await context.Service.SwapAsync(group);
+        await context.Service.RemoveGridAsync(group.Grids[0]);
 
         Assert.Same(group, context.Grid.Cells.Single());
         Assert.Equal(before, Describe(context.Grid));

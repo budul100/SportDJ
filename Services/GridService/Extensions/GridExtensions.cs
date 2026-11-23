@@ -24,6 +24,39 @@ internal static class GridExtensions
         return result;
     }
 
+    /// <summary>
+    /// Removes the tab and moves its cells into the grid of its group, to the place of the group.
+    /// The group disappears together with its last tab.
+    /// </summary>
+    public static void Dissolve(this Grid tab)
+    {
+        var group = tab?.Group;
+        var parent = group?.Grid;
+
+        if (parent != default)
+        {
+            var cells = tab.Cells
+                .Where(c => c != default).ToArray();
+
+            group.Grids.Remove(tab);
+
+            // Overlaps with cells of the parent are resolved when the grid is tidied
+            foreach (var cell in cells)
+            {
+                cell.Column += group.Column;
+                cell.Row += group.Row;
+                cell.Grid = parent;
+
+                parent.Cells.Add(cell);
+            }
+
+            if (group.Grids.Count == 0)
+            {
+                parent.Cells.Remove(group);
+            }
+        }
+    }
+
     public static void Initialize(this Grid grid)
     {
         if (grid?.Cells?.Count > 0)

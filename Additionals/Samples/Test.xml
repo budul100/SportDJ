@@ -15,19 +15,21 @@
 				<Grids>
 					<Grid KeyCode="F" Name="Tab 1">
 						<Cells>
-							<Cell xsi:type="Player" Column="0" Row="0" Color="Pink" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
+							<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="J" Name="Player 1" ResetPosition="false">
 								<Key>
 									<Type>Note</Type>
 									<Channel>0</Channel>
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
+									<Path>..\..\..\..\..\Music\SportDJ\Besonderes\Gegner\_Shorts - Sing Mei Sachse.mp3</Path>
+									<Path>..\..\..\..\..\Music\SportDJ\Besonderes\Gegner\Gegner - Dummer Sack.mp3</Path>
+									<Path>..\..\..\..\..\Music\SportDJ\Besonderes\Gegner\Throttle - Hit the Road Jack.mp3</Path>
 								</Paths>
 							</Cell>
 						</Cells>
 					</Grid>
-					<Grid KeyCode="D" Name="Tab 2">
+					<Grid KeyCode="G" Name="Tab 2">
 						<Cells>
 							<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" Name="Player 1" ResetPosition="false">
 								<Key>

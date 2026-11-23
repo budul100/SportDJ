@@ -36,8 +36,8 @@ public class LayoutViewModel
         MoveCellCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.MoveCell(cell, o));
 
-        SwapCommand = new DelegateCommand(
-            executeMethod: async () => await SwapAsync());
+        GroupCommand = new DelegateCommand(
+            executeMethod: async () => await GroupAsync());
 
         AddTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.AddGrid(tab, o));
@@ -61,15 +61,16 @@ public class LayoutViewModel
 
     public DelegateCommand<OrientationType> AddTabCommand { get; }
 
+    public DelegateCommand GroupCommand { get; }
+
     /// <summary>
-    /// Names of the tabs of the group, which the cell is (a group) or belongs to (a player in a tab), otherwise empty.
+    /// Names of the tabs of the group the player belongs to, empty for a player outside of a group.
     /// </summary>
     public string GroupText
     {
         get
         {
-            var group = cell as Group
-                ?? cell?.Grid?.Group;
+            var group = (cell as Player)?.Grid?.Group;
 
             return group == default
                 ? default
@@ -83,13 +84,14 @@ public class LayoutViewModel
 
     public bool IsActive => cell != default;
 
+    // A group is created from a player, groups are dissolved by removing their tabs
+    public bool IsPlayer => cell is Player;
+
     public bool IsTab => tab != default;
 
     public DelegateCommand<OrientationType> MoveCellCommand { get; }
 
     public DelegateCommand<OrientationType> MoveTabCommand { get; }
-
-    public DelegateCommand SwapCommand { get; }
 
     public override string Title => Titel;
 
@@ -152,21 +154,22 @@ public class LayoutViewModel
 
     #region Private Methods
 
+    private async Task GroupAsync()
+    {
+        if (gridService != default
+            && cell is Player player)
+        {
+            await gridService.GroupAsync(player);
+        }
+    }
+
     private void Refresh()
     {
         RaisePropertyChanged(nameof(GroupText));
         RaisePropertyChanged(nameof(HasGroup));
         RaisePropertyChanged(nameof(IsActive));
+        RaisePropertyChanged(nameof(IsPlayer));
         RaisePropertyChanged(nameof(IsTab));
-    }
-
-    private async Task SwapAsync()
-    {
-        if (gridService != default
-            && cell != default)
-        {
-            await gridService.SwapAsync(cell);
-        }
     }
 
     #endregion Private Methods
