@@ -241,10 +241,7 @@
                 Left previous, in the middle the search (placeholder, disabled until it exists), right next.
                 Previous and next are only shown if the stack has more than one sample, otherwise the search takes the whole width.
             -->
-            <Grid
-                Grid.Row="2"
-                Margin="{StaticResource PlayerInnerMargin}"
-                ColumnSpacing="{StaticResource SpacingSmall}">
+            <Grid Grid.Row="2" Margin="{StaticResource PlayerInnerMargin}">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -254,6 +251,7 @@
 
                 <Button
                     Grid.Column="0"
+                    Margin="0,0,1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackBackwardCommand}"
@@ -277,6 +275,7 @@
                 <Button
                     Grid.Column="1"
                     Grid.ColumnSpan="1"
+                    Margin="1,0,1,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False"
@@ -320,6 +319,7 @@
 
                 <Button
                     Grid.Column="2"
+                    Margin="1,0,0,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackForwardCommand}"

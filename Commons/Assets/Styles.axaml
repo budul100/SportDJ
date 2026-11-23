@@ -34,18 +34,18 @@
     </Style>
 
     <!--
-    The Fluent theme insets the content of a TabControl by 12 px on each side.
-    Nested groups would therefore be narrower than their neighbours, so the padding is removed:
-    the content of a tab then uses exactly the cell of its group.
+        The Fluent theme insets the content of a TabControl by 12 px on each side.
+        Nested groups would therefore be narrower than their neighbours, so the padding is removed:
+        the content of a tab then uses exactly the cell of its group.
     -->
     <Style Selector="TabControl">
         <Setter Property="Padding" Value="0" />
     </Style>
 
     <!--
-    The Fluent theme spaces tab headers by 24 px. Here the header keeps the same distance to the cell
-    as the surface of a player (7 = ContentMargin 4 + PlayerBorderThickness 2 + PlayerInnerMargin 1):
-    7 to the left (also acts as gap between two headers) and 7 to the top.
+        The Fluent theme spaces tab headers by 24 px. Here the header keeps the same distance to the cell
+        as the surface of a player (7 = ContentMargin 4 + PlayerBorderThickness 2 + PlayerInnerMargin 1):
+        7 to the left (also acts as gap between two headers) and 7 to the top.
     -->
     <Style Selector="TabItem">
         <Setter Property="Margin" Value="7,7,0,0" />
@@ -181,8 +181,8 @@
     </Style>
 
     <!--
-    Active state of the settings button of a tab (the pane shows its settings): same blue as a checked ToggleButton.
-    The hover and pressed states of the Fluent template have to be overridden too, otherwise the blue vanishes while the mouse is over the button.
+        Active state of the settings button of a tab (the pane shows its settings): same blue as a checked ToggleButton.
+        The hover and pressed states of the Fluent template have to be overridden too, otherwise the blue vanishes while the mouse is over the button.
     -->
     <Style Selector="Button.SettingsToggle.Active /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundChecked}" />
