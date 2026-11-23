@@ -250,12 +250,27 @@ public class Service
 
     public async Task RegisterAsync()
     {
-        player.Key = await controllerService.ListenAsync(
-            cancellationToken: tokenSource.Token);
+        try
+        {
+            var key = await controllerService.ListenAsync(
+                cancellationToken: tokenSource.Token);
 
-        settingsService.Save();
+            // The old key must not trigger this player anymore
+            controllerService.Unregister(player.Key);
 
-        eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+            player.Key = key;
+
+            // Without this the learned key only works after the next restart (InitializePlayer)
+            RegisterKey();
+
+            settingsService.Save();
+
+            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
+        }
+        catch (OperationCanceledException)
+        {
+            // Listening was replaced by another player or the service was disposed
+        }
     }
 
     public async Task SetFileAsync()
@@ -433,6 +448,12 @@ public class Service
 
     private void RegisterKey()
     {
+        // Unassigned players carry the default key, which must not be registered
+        if (player.Key == default)
+        {
+            return;
+        }
+
         controllerService.Register(
             key: player.Key,
             strokeType: StrokeType.Down,
