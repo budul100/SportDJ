@@ -1,8 +1,5 @@
 using System.Threading.Tasks;
-using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
-using SportDJ.Commons.Events.Aggregation;
-using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
@@ -15,8 +12,6 @@ public class LayoutViewModel
 {
     #region Private Fields
 
-    private const string KeyboardHint = "Press a key...";
-    private const string NoKey = "None";
     private const string Titel = "Layout";
 
     private readonly IGridService gridService;
@@ -28,8 +23,7 @@ public class LayoutViewModel
 
     #region Public Constructors
 
-    public LayoutViewModel(IEventAggregator eventAggregator, IGridService gridService,
-        IKeyboardService keyListenService)
+    public LayoutViewModel(IGridService gridService)
     {
         this.gridService = gridService;
 
@@ -48,63 +42,25 @@ public class LayoutViewModel
         MoveTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.MoveGrid(tab, o));
 
-        RemoveTabCommand = new DelegateCommand(
-            executeMethod: async () => await RemoveTabAsync());
-
-        ListenKeyCommand = new DelegateCommand(ToggleKey);
-        ClearKeyCommand = new DelegateCommand(ClearKey);
-
-        eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
-            action: _ => Refresh(),
-            threadOption: ThreadOption.UIThread,
-            keepSubscriberReferenceAlive: true,
-            filter: g => tab != default
-                && tab == g);
-
-        if (keyListenService != default)
-        {
-            keyListenService.Changed += (_, _) => Refresh();
-        }
     }
 
     #endregion Public Constructors
 
     #region Public Properties
 
-    public static int MaxLengthName => Constants.NameMaxLength;
-
     public DelegateCommand<OrientationType> AddCellCommand { get; }
 
     public DelegateCommand<OrientationType> AddTabCommand { get; }
 
-    public DelegateCommand ClearKeyCommand { get; }
-
     public bool IsActive => cell != default;
 
-    public bool IsListeningKey => gridService?.IsListening(tab) == true;
-
     public bool IsTab => tab != default;
-
-    public string KeyText => IsListeningKey
-        ? KeyboardHint
-        : tab?.KeyCode.GetKey() ?? NoKey;
-
-    public DelegateCommand ListenKeyCommand { get; }
 
     public DelegateCommand<OrientationType> MoveCellCommand { get; }
 
     public DelegateCommand<OrientationType> MoveTabCommand { get; }
 
-    public DelegateCommand RemoveTabCommand { get; }
-
     public DelegateCommand SwapCommand { get; }
-
-    public string TabName
-    {
-        get => tab?.Name;
-
-        set => gridService?.SetName(tab, value);
-    }
 
     public override string Title => Titel;
 
@@ -148,7 +104,8 @@ public class LayoutViewModel
     // The whole grid is rebuilt after each change, so they might not exist anymore.
     public void Validate()
     {
-        if (tab?.Group?.Grids?.Contains(tab) != true)
+        if (tab != default
+            && !tab.IsAttached())
         {
             tab = default;
         }
@@ -166,27 +123,10 @@ public class LayoutViewModel
 
     #region Private Methods
 
-    private void ClearKey()
-    {
-        gridService?.SetKeyCode(tab, default);
-    }
-
     private void Refresh()
     {
         RaisePropertyChanged(nameof(IsActive));
-        RaisePropertyChanged(nameof(IsListeningKey));
         RaisePropertyChanged(nameof(IsTab));
-        RaisePropertyChanged(nameof(KeyText));
-        RaisePropertyChanged(nameof(TabName));
-    }
-
-    private async Task RemoveTabAsync()
-    {
-        if (gridService != default
-            && tab != default)
-        {
-            await gridService.RemoveGridAsync(tab);
-        }
     }
 
     private async Task SwapAsync()
@@ -195,18 +135,6 @@ public class LayoutViewModel
             && cell != default)
         {
             await gridService.SwapAsync(cell);
-        }
-    }
-
-    private void ToggleKey()
-    {
-        if (gridService?.IsListening(tab) == true)
-        {
-            gridService.CancelListening();
-        }
-        else
-        {
-            gridService?.ListenKey(tab);
         }
     }
 

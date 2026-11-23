@@ -1,0 +1,47 @@
+<UserControl
+    x:Class="SportDJ.Shareds.UserControls.KeyDisplay"
+    x:Name="Root"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:SportDJ.Shareds.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="40"
+    d:DesignWidth="80"
+    x:DataType="local:KeyDisplay"
+    mc:Ignorable="d">
+
+    <!--
+        Shows an assigned keyboard key. The looks of KeyBadge and its Numpad variant are defined in Styles.axaml.
+        Keys of the numeric keypad get a small keypad symbol in front of the key,
+        so they cannot be mistaken for the key of the main block.
+    -->
+    <Border
+        Classes="KeyBadge"
+        Classes.Numpad="{Binding #Root.IsNumpad}"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        ToolTip.Tip="{Binding #Root.Description}">
+
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="4">
+
+            <!-- Keypad symbol: 3 x 3 dots, as high as the text -->
+            <Viewbox
+                Height="{Binding #Root.FontSize}"
+                VerticalAlignment="Center"
+                IsVisible="{Binding #Root.IsNumpad}"
+                Stretch="Uniform">
+                <Path
+                    Data="M0,0H2V2H0Z M3,0H5V2H3Z M6,0H8V2H6Z M0,3H2V5H0Z M3,3H5V5H3Z M6,3H8V5H6Z M0,6H2V8H0Z M3,6H5V8H3Z M6,6H8V8H6Z"
+                    Fill="{Binding #Root.Foreground}" />
+            </Viewbox>
+
+            <TextBlock Text="{Binding #Root.Text}" />
+
+        </StackPanel>
+    </Border>
+</UserControl>

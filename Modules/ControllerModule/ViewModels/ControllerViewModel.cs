@@ -160,9 +160,9 @@ public class ControllerViewModel
         set => SetProperty(ref isVolumePressed, value);
     }
 
-    public string KeyPauseOutput => options?.KeyCodeOutputPause.GetKey();
+    public string KeyCodePauseOutput => options?.KeyCodeOutputPause;
 
-    public string KeyTalkVolume => options?.KeyCodeVolumeTalk.GetKey();
+    public string KeyCodeTalkVolume => options?.KeyCodeVolumeTalk;
 
     public DelegateCommand LoopCommand { get; }
 
@@ -294,10 +294,10 @@ public class ControllerViewModel
 
     private void UpdateOptions()
     {
-        RaisePropertyChanged(nameof(KeyPauseOutput));
+        RaisePropertyChanged(nameof(KeyCodePauseOutput));
         RaisePropertyChanged(nameof(HasKeyPauseOutput));
 
-        RaisePropertyChanged(nameof(KeyTalkVolume));
+        RaisePropertyChanged(nameof(KeyCodeTalkVolume));
         RaisePropertyChanged(nameof(HasKeyTalkVolume));
     }
 

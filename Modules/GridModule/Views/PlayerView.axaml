@@ -57,16 +57,14 @@
             </Grid.RowDefinitions>
 
             <!--
-                Top row: PFL, key, settings.
-                The gaps are Auto columns with a 4 px wide Border, which is only visible together with its neighbour.
-                Fixed 4 px columns would also keep their width if the neighbour is hidden and push the buttons inwards.
+                Top row: three equally wide parts, so the row looks the same with and without PFL or key.
+                Left the PFL button, in the middle the key on its badge background, right the settings button.
+                The badge stays visible without a key, so the row never looks gappy.
             -->
-            <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}">
+            <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}" ColumnSpacing="{StaticResource SpacingSmall}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding HasPFL, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -90,47 +88,19 @@
 
                 </ToggleButton>
 
-                <!-- Gap after PFL -->
-                <Border
+                <!-- Always visible, the key is shown only if one is assigned -->
+                <ct:KeyDisplay
                     Grid.Column="1"
-                    Width="{StaticResource SpacingSmall}"
-                    IsVisible="{Binding HasPFL}" />
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    FontSize="{StaticResource FontSizeContentMain}"
+                    KeyCode="{Binding KeyCode}" />
 
-                <Border
+                <ToggleButton
                     Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Classes="KeyBadge"
-                    IsVisible="{Binding HasKey}">
-
-                    <Viewbox
-                        MaxWidth="{StaticResource LargeIconSize}"
-                        MaxHeight="{StaticResource LargeIconSize}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Stretch="Uniform"
-                        StretchDirection="Both">
-
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeContentMain}"
-                            Text="{Binding Key}" />
-                    </Viewbox>
-
-                </Border>
-
-                <!-- Gap after key -->
-                <Border
-                    Grid.Column="3"
-                    Width="{StaticResource SpacingSmall}"
-                    IsVisible="{Binding HasKey}" />
-
-                <ToggleButton
-                    Grid.Column="4"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Focusable="False"
+                    Classes="SettingsToggle"
                     IsChecked="{Binding IsSettingsVisible, Mode=OneWay}"
                     Command="{Binding ShowSettingsCommand}">
 

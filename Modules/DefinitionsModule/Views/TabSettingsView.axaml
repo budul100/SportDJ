@@ -1,0 +1,128 @@
+<UserControl
+    x:Class="SportDJ.Modules.DefinitionsModule.Views.TabSettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
+    vml:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:TabSettingsViewModel"
+    d:DesignHeight="500"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel
+            Margin="{StaticResource ContentMargin}"
+            IsEnabled="{Binding IsActive}"
+            Spacing="{StaticResource SpacingMedium}">
+
+            <!-- General -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="General" />
+                <Separator />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Name" />
+
+                <TextBox
+                    HorizontalAlignment="Stretch"
+                    IsTabStop="False"
+                    KeyDown="OnNameKeyDown"
+                    MaxLength="{Binding MaxLengthName}"
+                    Text="{Binding Name, Mode=TwoWay}" />
+
+            </StackPanel>
+
+            <!-- Keyboard -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Keyboard" />
+                <Separator />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Key" />
+
+                <ct:KeyDisplay
+                    HorizontalAlignment="Left"
+                    FontSize="{StaticResource FontSizeContentSub}"
+                    IsVisible="{Binding HasKey}"
+                    KeyCode="{Binding KeyCode}" />
+
+                <TextBlock IsVisible="{Binding !HasKey}" Text="{Binding KeyboardText}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Click="OnListenClick"
+                        Command="{Binding ListenKeyboardCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Assign key">
+                        <Panel>
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding !IsListeningKeyboard}"
+                                Kind="KeyboardOutline" />
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                IsVisible="{Binding IsListeningKeyboard}"
+                                Kind="Close" />
+                        </Panel>
+                    </Button>
+                    <Button
+                        Command="{Binding ClearKeyboardCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Clear key">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="KeyboardOffOutline" />
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- Remove -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Remove" />
+                <Separator />
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Command="{Binding RemoveCommand}"
+                    Focusable="False"
+                    ToolTip.Tip="Remove tab">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

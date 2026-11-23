@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Panel;
@@ -20,11 +20,16 @@ public class DefinitionsViewModel
     private readonly IEventAggregator eventAggregator;
     private readonly LayoutViewModel layoutViewModel;
     private readonly IPanelService panelService;
+    private readonly TabViewModel[] playerTabs;
     private readonly Dictionary<Type, TabViewModel> registrations = [];
     private readonly SettingsViewModel settingsViewModel;
     private readonly StackViewModel stackViewModel;
+    private readonly TabSettingsViewModel tabSettingsViewModel;
+    private readonly TabViewModel[] tabTabs;
 
     private TabViewModel active;
+    private bool isTab;
+    private TabViewModel[] tabs;
 
     #endregion Private Fields
 
@@ -32,7 +37,8 @@ public class DefinitionsViewModel
 
     public DefinitionsViewModel(IEventAggregator eventAggregator, IPanelService panelService,
         IDispatcherService dispatcherService,
-        SettingsViewModel settingsViewModel, StackViewModel stackViewModel, LayoutViewModel layoutViewModel)
+        SettingsViewModel settingsViewModel, StackViewModel stackViewModel, LayoutViewModel layoutViewModel,
+        TabSettingsViewModel tabSettingsViewModel)
     {
         this.dispatcherService = dispatcherService;
         this.eventAggregator = eventAggregator;
@@ -40,6 +46,7 @@ public class DefinitionsViewModel
         this.panelService = panelService;
         this.settingsViewModel = settingsViewModel;
         this.stackViewModel = stackViewModel;
+        this.tabSettingsViewModel = tabSettingsViewModel;
 
         CloseCommand = new DelegateCommand(
             executeMethod: Close);
@@ -66,22 +73,29 @@ public class DefinitionsViewModel
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
 
-        // The player and the grid tabs have no own pane, the tab is chosen by the activation
+        // Only the content has a pane of its own, otherwise the tab which was shown last is kept
         registrations = new Dictionary<Type, TabViewModel>
         {
-            { typeof(IStackService), stackViewModel },
-            { typeof(IGridService), layoutViewModel }
+            { typeof(IStackService), stackViewModel }
         };
 
         // Fixed order: content, settings, layout
-        Tabs = new ObservableCollection<TabViewModel>(
+        playerTabs =
         [
             stackViewModel,
             settingsViewModel,
             layoutViewModel
-        ]);
+        ];
 
-        Active = Tabs[0];
+        // A tab of a group has no content
+        tabTabs =
+        [
+            tabSettingsViewModel,
+            layoutViewModel
+        ];
+
+        tabs = playerTabs;
+        active = playerTabs[0];
     }
 
     #endregion Public Constructors
@@ -96,7 +110,7 @@ public class DefinitionsViewModel
 
     public DelegateCommand CloseCommand { get; }
 
-    public ObservableCollection<TabViewModel> Tabs { get; }
+    public TabViewModel[] Tabs => tabs;
 
     #endregion Public Properties
 
@@ -107,7 +121,8 @@ public class DefinitionsViewModel
     {
         if (registrations.TryGetValue(
             key: typeof(TService),
-            value: out var registration))
+            value: out var registration)
+            && !isTab)
         {
             Active = registration;
         }
@@ -120,6 +135,7 @@ public class DefinitionsViewModel
     private void CancelListening()
     {
         settingsViewModel.Cancel();
+        tabSettingsViewModel.Cancel();
         layoutViewModel.Cancel();
     }
 
@@ -142,6 +158,10 @@ public class DefinitionsViewModel
         // Closing publishes no player
         if (player != default)
         {
+            SetMode(false);
+
+            tabSettingsViewModel.Set(default);
+
             settingsViewModel.Set(player);
             stackViewModel.Set(player);
             layoutViewModel.SetCell(player);
@@ -150,19 +170,53 @@ public class DefinitionsViewModel
 
     private void SetTab(Grid tab)
     {
-        // A tab has neither content nor player settings
-        settingsViewModel.Set(default);
-        stackViewModel.Set(default);
+        // Closing publishes no tab
+        if (tab != default)
+        {
+            SetMode(true);
 
-        layoutViewModel.SetTab(tab);
+            // A tab has neither content nor player settings
+            settingsViewModel.Set(default);
+            stackViewModel.Set(default);
+
+            tabSettingsViewModel.Set(tab);
+            layoutViewModel.SetTab(tab);
+        }
+    }
+
+    // Switches between the tabs of a player and the tabs of a group tab, the shown tab is kept if possible
+    private void SetMode(bool isTab)
+    {
+        if (this.isTab != isTab)
+        {
+            this.isTab = isTab;
+
+            tabs = isTab
+                ? tabTabs
+                : playerTabs;
+
+            RaisePropertyChanged(nameof(Tabs));
+        }
+
+        if (!tabs.Contains(active))
+        {
+            Active = tabs[0];
+        }
+        else
+        {
+            // The selection of the control was reset by the new items
+            RaisePropertyChanged(nameof(Active));
+        }
     }
 
     private void Validate()
     {
         settingsViewModel.Validate();
+        tabSettingsViewModel.Validate();
         layoutViewModel.Validate();
 
         var player = settingsViewModel.Current;
+        var tab = tabSettingsViewModel.Current;
 
         if (player == default)
         {
@@ -170,15 +224,28 @@ public class DefinitionsViewModel
         }
 
         if (player == default
+            && tab == default
             && !layoutViewModel.IsActive)
         {
             Close();
         }
-        else if (player != default
-            && panelService?.IsVisible<IPlayerService>() == true)
+        else if (isTab
+            && tab == default)
         {
-            // The players are created anew, so they have to learn again that their pane is open
-            dispatcherService?.Post(() => eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(player));
+            // The tab was removed
+            Close();
+        }
+        else if (panelService?.IsVisible<IPlayerService>() == true)
+        {
+            // The players and tabs are created anew, so they have to learn again that their pane is open
+            if (player != default)
+            {
+                dispatcherService?.Post(() => eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(player));
+            }
+            else if (tab != default)
+            {
+                dispatcherService?.Post(() => eventAggregator?.GetEvent<TabVisibleEvent>().Publish(tab));
+            }
         }
     }
 

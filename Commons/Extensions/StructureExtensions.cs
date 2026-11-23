@@ -26,5 +26,17 @@ public static class StructureExtensions
             || (group.Grids.Contains(grid) && group.IsAttached());
     }
 
+    /// <summary>
+    /// Checks if the tab is still part of the grid tree, including its group and all parents of the group.
+    /// </summary>
+    public static bool IsAttached(this Grid grid)
+    {
+        var group = grid?.Group;
+
+        return group != default
+            && group.Grids.Contains(grid)
+            && group.IsAttached();
+    }
+
     #endregion Public Methods
 }

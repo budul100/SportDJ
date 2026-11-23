@@ -86,22 +86,20 @@
                             Stretch="Uniform"
                             StretchDirection="DownOnly">
 
-                            <Border Classes="KeyBadge">
-                                <TextBlock
-                                    FontSize="{StaticResource FontSizeState}"
-                                    Text="{Binding Key}" />
-                            </Border>
+                            <ct:KeyDisplay
+                                FontSize="{StaticResource FontSizeState}"
+                                KeyCode="{Binding KeyCode}" />
                         </Viewbox>
 
-                        <!-- Opens the layout pane of this tab -->
+                        <!-- Opens and closes the pane of this tab, same button as at a player -->
+                        <!-- A Button with an Active class: the state comes only from the view model, a ToggleButton would toggle itself -->
                         <Button
                             Grid.Column="2"
                             Margin="{StaticResource KeyMargin}"
-                            Padding="2"
                             VerticalAlignment="Center"
-                            Command="{Binding ShowLayoutCommand}"
-                            Focusable="False"
-                            ToolTip.Tip="Layout">
+                            Classes="SettingsToggle Compact"
+                            Classes.Active="{Binding IsSettingsVisible}"
+                            Command="{Binding ShowSettingsCommand}">
                             <mat:MaterialIcon
                                 Width="{StaticResource FontSizeState}"
                                 Height="{StaticResource FontSizeState}"

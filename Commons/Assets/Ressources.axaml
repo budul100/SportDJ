@@ -71,6 +71,9 @@
     <Thickness x:Key="KeyPadding">6,1,6,1</Thickness>
     <Thickness x:Key="KeyMargin">4</Thickness>
 
+    <!-- Keys of the numeric keypad keep the badge, but get another background and the keypad symbol -->
+    <Color x:Key="KeyNumpadBackgroundColor">#3E5C76</Color>
+
     <!-- ===== Player card ===== -->
 
     <!-- Outer radius 10 = inner radius 6 + gap 4 (border 2 + inner margin 2), so the corners stay concentric -->

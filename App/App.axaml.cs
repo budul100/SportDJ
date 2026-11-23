@@ -159,6 +159,8 @@ public class App
 
         registry.RegisterSingleton<Modules.DefinitionsModule.Views.SettingsView>();
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.SettingsViewModel>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.TabSettingsView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.TabSettingsViewModel>();
         registry.RegisterSingleton<Modules.DefinitionsModule.Views.StackView>();
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.StackViewModel>();
         registry.RegisterSingleton<Modules.DefinitionsModule.Views.LayoutView>();

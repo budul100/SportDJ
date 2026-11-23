@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
+using SportDJ.Commons.Events.Panel;
+using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
@@ -21,6 +23,7 @@ public class GridViewModel
 
     private int columns;
     private bool isSelected;
+    private bool isSettingsVisible;
     private int rows;
 
     #endregion Private Fields
@@ -35,14 +38,30 @@ public class GridViewModel
 
         panelService = containerProvider?.Resolve<IPanelService>();
 
-        ShowLayoutCommand = new DelegateCommand(
-            executeMethod: ShowLayout);
+        ShowSettingsCommand = new DelegateCommand(
+            executeMethod: ShowSettings);
 
         AddSubscription(eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => UpdateTab(),
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true,
             filter: g => g == grid));
+
+        // The pane of the definitions shows one element at a time
+        AddSubscription(eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
+            action: g => IsSettingsVisible = g == grid,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true));
+
+        AddSubscription(eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+            action: _ => IsSettingsVisible = false,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true));
+
+        AddSubscription(eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+            action: _ => UpdatePanelButtons(),
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true));
 
         InitializeCells(
             containerProvider: containerProvider,
@@ -73,6 +92,12 @@ public class GridViewModel
         }
     }
 
+    public bool IsSettingsVisible
+    {
+        get => isSettingsVisible;
+        set => SetProperty(ref isSettingsVisible, value);
+    }
+
     public bool IsVisible => IsSelected
         && parent?.IsVisible != false;
 
@@ -82,7 +107,7 @@ public class GridViewModel
         set { SetProperty(ref rows, value); }
     }
 
-    public DelegateCommand ShowLayoutCommand { get; }
+    public DelegateCommand ShowSettingsCommand { get; }
 
     #endregion Public Properties
 
@@ -160,11 +185,27 @@ public class GridViewModel
         base.Initialize();
     }
 
-    private void ShowLayout()
+    // One pane for all definitions, the same button opens and closes it like at a player
+    private void ShowSettings()
     {
-        eventAggregator?.GetEvent<TabVisibleEvent>().Publish(grid);
+        if (IsSettingsVisible)
+        {
+            panelService?.Deactivate<IGridService>();
+        }
+        else
+        {
+            eventAggregator?.GetEvent<TabVisibleEvent>().Publish(grid);
 
-        panelService?.Activate<IGridService>();
+            panelService?.Activate<IGridService>();
+        }
+    }
+
+    private void UpdatePanelButtons()
+    {
+        if (panelService?.IsVisible<IPlayerService>() != true)
+        {
+            IsSettingsVisible = false;
+        }
     }
 
     private void UpdateTab()

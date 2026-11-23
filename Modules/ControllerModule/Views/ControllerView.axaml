@@ -2,6 +2,7 @@
     x:Class="SportDJ.Modules.ControllerModule.Views.ControllerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dt="using:SportDJ.Modules.ControllerModule.DesignTime"
     xmlns:en="using:SportDJ.Commons.Enums"
@@ -120,17 +121,14 @@
                         Height="{StaticResource LargeIconSize}"
                         Kind="Microphone" />
 
-                    <Border
+                    <ct:KeyDisplay
                         Grid.Column="1"
                         Margin="{StaticResource KeyMargin}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Classes="KeyBadge"
-                        IsVisible="{Binding HasKeyTalkVolume}">
-                        <TextBlock
-                            FontSize="{StaticResource FontSizeContentMain}"
-                            Text="{Binding KeyTalkVolume}" />
-                    </Border>
+                        FontSize="{StaticResource FontSizeContentMain}"
+                        IsVisible="{Binding HasKeyTalkVolume}"
+                        KeyCode="{Binding KeyCodeTalkVolume}" />
                 </Grid>
             </Border>
         </Button>
@@ -163,17 +161,14 @@
                         Height="{StaticResource LargeIconSize}"
                         Kind="PauseCircle" />
 
-                    <Border
+                    <ct:KeyDisplay
                         Grid.Column="1"
                         Margin="{StaticResource KeyMargin}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Classes="KeyBadge"
-                        IsVisible="{Binding HasKeyPauseOutput}">
-                        <TextBlock
-                            FontSize="{StaticResource FontSizeContentMain}"
-                            Text="{Binding KeyPauseOutput}" />
-                    </Border>
+                        FontSize="{StaticResource FontSizeContentMain}"
+                        IsVisible="{Binding HasKeyPauseOutput}"
+                        KeyCode="{Binding KeyCodePauseOutput}" />
                 </Grid>
             </Border>
         </Button>

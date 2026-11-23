@@ -107,9 +107,14 @@ public class SettingsViewModel
         }
     }
 
+    public bool HasKey => !IsListeningKeyboard
+        && !string.IsNullOrWhiteSpace(KeyCode);
+
     public string KeyboardText => IsListeningKeyboard
         ? KeyboardHint
-        : Service?.KeyCode.GetKey() ?? NoKey;
+        : NoKey;
+
+    public string KeyCode => Service?.KeyCode;
 
     public DelegateCommand ListenKeyboardCommand { get; }
 
@@ -197,12 +202,14 @@ public class SettingsViewModel
     private void Refresh()
     {
         // The bindings still show the values of the previous player otherwise
+        RaisePropertyChanged(nameof(HasKey));
         RaisePropertyChanged(nameof(IsActive));
         RaisePropertyChanged(nameof(IsListeningKeyboard));
         RaisePropertyChanged(nameof(IsListeningMidi));
         RaisePropertyChanged(nameof(IsOverlay));
         RaisePropertyChanged(nameof(IsReset));
         RaisePropertyChanged(nameof(KeyboardText));
+        RaisePropertyChanged(nameof(KeyCode));
         RaisePropertyChanged(nameof(MidiText));
         RaisePropertyChanged(nameof(Name));
 
