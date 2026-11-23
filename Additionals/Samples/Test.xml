@@ -15,7 +15,7 @@
 				<Grids>
 					<Grid KeyCode="F" Name="Tab 1">
 						<Cells>
-							<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="J" Name="Player 1" ResetPosition="false">
+							<Cell xsi:type="Player" Column="0" Row="0" Color="Pink" IsLoop="false" IsOverlay="false" KeyCode="J" Name="Player 1" ResetPosition="false">
 								<Key>
 									<Type>Note</Type>
 									<Channel>0</Channel>
