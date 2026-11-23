@@ -124,16 +124,27 @@
                 <TextBlock Classes="Section" Text="Group" />
                 <Separator />
 
-                <Button
-                    HorizontalAlignment="Left"
-                    Command="{Binding SwapCommand}"
-                    Focusable="False"
-                    ToolTip.Tip="Swap player and group">
-                    <mat:MaterialIcon
-                        Width="{StaticResource MediumIconSize}"
-                        Height="{StaticResource MediumIconSize}"
-                        Kind="Tab" />
-                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+
+                    <Button
+                        Command="{Binding SwapCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Swap player and group">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Tab" />
+                    </Button>
+
+                    <!-- Shows the group, which the cell is or belongs to, empty without a group -->
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Classes="Caption"
+                        IsVisible="{Binding HasGroup}"
+                        Text="{Binding GroupText, StringFormat='Group: {0}'}"
+                        TextTrimming="CharacterEllipsis" />
+
+                </StackPanel>
 
             </StackPanel>
         </StackPanel>

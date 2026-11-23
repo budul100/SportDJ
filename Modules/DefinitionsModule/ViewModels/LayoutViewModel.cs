@@ -1,5 +1,8 @@
+using System.Linq;
 using System.Threading.Tasks;
 using SportDJ.Commons.Enums;
+using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Structure;
@@ -23,7 +26,7 @@ public class LayoutViewModel
 
     #region Public Constructors
 
-    public LayoutViewModel(IGridService gridService)
+    public LayoutViewModel(IEventAggregator eventAggregator, IGridService gridService)
     {
         this.gridService = gridService;
 
@@ -42,6 +45,12 @@ public class LayoutViewModel
         MoveTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.MoveGrid(tab, o));
 
+        // The names of the tabs are shown next to the group button
+        eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
+            action: _ => Refresh(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
     }
 
     #endregion Public Constructors
@@ -51,6 +60,26 @@ public class LayoutViewModel
     public DelegateCommand<OrientationType> AddCellCommand { get; }
 
     public DelegateCommand<OrientationType> AddTabCommand { get; }
+
+    /// <summary>
+    /// Names of the tabs of the group, which the cell is (a group) or belongs to (a player in a tab), otherwise empty.
+    /// </summary>
+    public string GroupText
+    {
+        get
+        {
+            var group = cell as Group
+                ?? cell?.Grid?.Group;
+
+            return group == default
+                ? default
+                : string.Join(
+                    separator: ", ",
+                    values: group.Grids.Select(g => g.Name));
+        }
+    }
+
+    public bool HasGroup => !string.IsNullOrEmpty(GroupText);
 
     public bool IsActive => cell != default;
 
@@ -125,6 +154,8 @@ public class LayoutViewModel
 
     private void Refresh()
     {
+        RaisePropertyChanged(nameof(GroupText));
+        RaisePropertyChanged(nameof(HasGroup));
         RaisePropertyChanged(nameof(IsActive));
         RaisePropertyChanged(nameof(IsTab));
     }

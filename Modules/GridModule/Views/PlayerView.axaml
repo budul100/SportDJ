@@ -58,7 +58,8 @@
 
             <!--
                 Top row: three equally wide parts, so the row looks the same with and without PFL or key.
-                Left the PFL button, in the middle the key on its badge background, right the settings button.
+                Left the PFL button (placeholder, disabled until PFL is available), in the middle the key on
+                its badge background, right the settings button.
                 The badge stays visible without a key, so the row never looks gappy.
             -->
             <Grid Grid.Row="0" Margin="{StaticResource InnerMargin}" ColumnSpacing="{StaticResource SpacingSmall}">
@@ -73,7 +74,7 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Focusable="False"
-                    IsVisible="{Binding HasPFL}">
+                    IsEnabled="{Binding HasPFL}">
 
                     <Viewbox
                         MaxWidth="{StaticResource LargeIconSize}"
@@ -232,14 +233,18 @@
             </Border>
 
             <!--
-                Bottom row: previous, next.
-                The gap only takes space together with the buttons.
+                Bottom row: three equally wide parts, like the top row.
+                Left previous, in the middle the search (placeholder, disabled until it exists), right next.
+                Previous and next are only shown if the stack has more than one sample, otherwise the search takes the whole width.
             -->
-            <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
+            <Grid
+                Grid.Row="2"
+                Margin="{StaticResource InnerMargin}"
+                ColumnSpacing="{StaticResource SpacingSmall}">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -264,10 +269,50 @@
 
                 </Button>
 
-                <Border
+                <!-- Placeholder for the search: in the middle with previous and next, over the whole width without them -->
+                <Button
                     Grid.Column="1"
-                    Width="{StaticResource SpacingSmall}"
-                    IsVisible="{Binding HasStack}" />
+                    Grid.ColumnSpan="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Focusable="False"
+                    IsEnabled="False"
+                    IsVisible="{Binding HasStack}">
+
+                    <Viewbox
+                        MaxWidth="{StaticResource LargeIconSize}"
+                        MaxHeight="{StaticResource LargeIconSize}"
+                        Stretch="Uniform"
+                        StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
+                            Kind="Magnify" />
+                    </Viewbox>
+
+                </Button>
+
+                <Button
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Focusable="False"
+                    IsEnabled="False"
+                    IsVisible="{Binding !HasStack}">
+
+                    <Viewbox
+                        MaxWidth="{StaticResource LargeIconSize}"
+                        MaxHeight="{StaticResource LargeIconSize}"
+                        Stretch="Uniform"
+                        StretchDirection="Both">
+                        <mat:MaterialIcon
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
+                            Kind="Magnify" />
+                    </Viewbox>
+
+                </Button>
 
                 <Button
                     Grid.Column="2"

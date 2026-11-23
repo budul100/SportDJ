@@ -75,6 +75,9 @@ public class SettingsViewModel
 
     public Player Current => player;
 
+    public bool HasKey => !IsListeningKeyboard
+        && !string.IsNullOrWhiteSpace(KeyCode);
+
     public bool IsActive => player != default;
 
     public bool IsListeningKeyboard => Service?.IsListeningKeyboard == true;
@@ -106,9 +109,6 @@ public class SettingsViewModel
             }
         }
     }
-
-    public bool HasKey => !IsListeningKeyboard
-        && !string.IsNullOrWhiteSpace(KeyCode);
 
     public string KeyboardText => IsListeningKeyboard
         ? KeyboardHint

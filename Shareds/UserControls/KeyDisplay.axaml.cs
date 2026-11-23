@@ -7,12 +7,6 @@ namespace SportDJ.Shareds.UserControls;
 public partial class KeyDisplay
     : UserControl
 {
-    #region Private Fields
-
-    private const string DescriptionNumpad = "Numeric keypad";
-
-    #endregion Private Fields
-
     #region Public Fields
 
     public static readonly StyledProperty<string> DescriptionProperty = AvaloniaProperty.Register<KeyDisplay, string>(
@@ -28,6 +22,12 @@ public partial class KeyDisplay
         name: nameof(Text));
 
     #endregion Public Fields
+
+    #region Private Fields
+
+    private const string DescriptionNumpad = "Numeric keypad";
+
+    #endregion Private Fields
 
     #region Public Constructors
 

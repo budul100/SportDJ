@@ -153,6 +153,31 @@ public class DefinitionsViewModel
         panelService?.Deactivate<IPlayerService>();
     }
 
+    // Switches between the tabs of a player and the tabs of a group tab, the shown tab is kept if possible
+    private void SetMode(bool isTab)
+    {
+        if (this.isTab != isTab)
+        {
+            this.isTab = isTab;
+
+            tabs = isTab
+                ? tabTabs
+                : playerTabs;
+
+            RaisePropertyChanged(nameof(Tabs));
+        }
+
+        if (!tabs.Contains(active))
+        {
+            Active = tabs[0];
+        }
+        else
+        {
+            // The selection of the control was reset by the new items
+            RaisePropertyChanged(nameof(Active));
+        }
+    }
+
     private void SetPlayer(Player player)
     {
         // Closing publishes no player
@@ -181,31 +206,6 @@ public class DefinitionsViewModel
 
             tabSettingsViewModel.Set(tab);
             layoutViewModel.SetTab(tab);
-        }
-    }
-
-    // Switches between the tabs of a player and the tabs of a group tab, the shown tab is kept if possible
-    private void SetMode(bool isTab)
-    {
-        if (this.isTab != isTab)
-        {
-            this.isTab = isTab;
-
-            tabs = isTab
-                ? tabTabs
-                : playerTabs;
-
-            RaisePropertyChanged(nameof(Tabs));
-        }
-
-        if (!tabs.Contains(active))
-        {
-            Active = tabs[0];
-        }
-        else
-        {
-            // The selection of the control was reset by the new items
-            RaisePropertyChanged(nameof(Active));
         }
     }
 
