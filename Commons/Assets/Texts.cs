@@ -1,4 +1,4 @@
-﻿namespace SportDJ.Commons.Assets;
+namespace SportDJ.Commons.Assets;
 
 public static class Texts
 {
@@ -26,12 +26,8 @@ public static class Texts
     public const string KeyListenHeader = "Listen for key";
     public const string KeyUnhookHeader = "Clear key hook";
 
-    public const string PlayerEditHeader = "Edit player";
-    public const string PlayerOverlayHeader = "On overlay";
-    public const string PlayerRenameHeader = "Rename player";
-    public const string PlayerResetHeader = "Reset player";
-    public const string PlayerResetMessage = "Shall the player be reset?";
-    public const string PlayerResetPosition = "Reset position";
+    public const string PlayerClearHeader = "Clear player";
+    public const string PlayerClearMessage = "Shall all files of the player be removed?";
     public const string PlayerSelectionFileHeader = "Select file";
     public const string PlayerSelectionFolderHeader = "Select folder";
 

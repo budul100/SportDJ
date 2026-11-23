@@ -174,4 +174,10 @@
         <Setter Property="FontWeight" Value="{StaticResource FontWeightLabel}" />
         <Setter Property="Opacity" Value="0.7" />
     </Style>
+
+    <!-- Heading of a settings section -->
+    <Style Selector="TextBlock.Section">
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSettings}" />
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightTitle}" />
+    </Style>
 </Styles>

@@ -36,10 +36,11 @@ public partial class MainView
 
     private bool HasTarget()
     {
+        // Only controls which consume typed keys block the hotkeys, otherwise a focused
+        // button or check box would silently disable them until the next click elsewhere
         var focusedElement = FocusManager.GetFocusedElement();
 
-        return focusedElement != default
-            && focusedElement?.GetType() != typeof(TabItem);
+        return focusedElement is TextBox or ComboBox;
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)

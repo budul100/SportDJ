@@ -120,6 +120,7 @@ public class App
         registry.RegisterSingleton<ITrackService, Services.TrackService.Service>();
         registry.RegisterSingleton<IGridService, Services.GridService.Service>();
         registry.RegisterSingleton<IControllerService, Services.ControllerService.Service>();
+        registry.RegisterSingleton<IKeyListenService, Services.PlayerService.KeyListenService>();
 
         registry.Register<IPlayerService, Services.PlayerService.Service>();
         registry.Register<IStackService, Services.StackService.Service>();

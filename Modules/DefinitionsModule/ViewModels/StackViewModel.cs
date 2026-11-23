@@ -40,6 +40,15 @@ public class StackViewModel
         SelectCommand = new DelegateCommand<Entry>(e => player?.StackService?.Select(e));
         ResetCommand = new DelegateCommand(() => player?.StackService?.Reset());
 
+        ClearCommand = new DelegateCommand(
+            executeMethod: async () => await ClearAsync());
+
+        LoadFilesCommand = new DelegateCommand(
+            executeMethod: async () => await LoadFilesAsync());
+
+        LoadFolderCommand = new DelegateCommand(
+            executeMethod: async () => await LoadFolderAsync());
+
         ShuffleCommand = new DelegateCommand(
             executeMethod: async () => await ShuffleAsync(),
             canExecuteMethod: () => Entries?.Count > 1);
@@ -59,6 +68,8 @@ public class StackViewModel
         get => autoScroll;
         set => SetProperty(ref autoScroll, value);
     }
+
+    public DelegateCommand ClearCommand { get; }
 
     public ObservableCollection<Entry> Entries { get; private set; } = [];
 
@@ -90,6 +101,10 @@ public class StackViewModel
 
     public IEventAggregator EventAggregator { get; }
 
+    public DelegateCommand LoadFilesCommand { get; }
+
+    public DelegateCommand LoadFolderCommand { get; }
+
     public DelegateCommand ResetCommand { get; }
 
     public DelegateCommand<Entry> SelectCommand { get; }
@@ -116,6 +131,30 @@ public class StackViewModel
     #endregion Public Methods
 
     #region Private Methods
+
+    private async Task ClearAsync()
+    {
+        if (player?.PlayerService != default)
+        {
+            await player.PlayerService.ClearAsync();
+        }
+    }
+
+    private async Task LoadFilesAsync()
+    {
+        if (player?.PlayerService != default)
+        {
+            await player.PlayerService.SetFileAsync();
+        }
+    }
+
+    private async Task LoadFolderAsync()
+    {
+        if (player?.PlayerService != default)
+        {
+            await player.PlayerService.SetFolderAsync();
+        }
+    }
 
     private async Task ShuffleAsync()
     {

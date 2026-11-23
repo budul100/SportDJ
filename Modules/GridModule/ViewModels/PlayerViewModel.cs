@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Media.Imaging;
-using Material.Icons;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Hook;
@@ -87,13 +86,14 @@ public class PlayerViewModel
             keepSubscriberReferenceAlive: true,
             filter: o => outputServiceLive == o));
 
-        // While any cell waits for a key to be assigned, only this cell must react
+        // While anything waits for a key to be assigned, the key must not trigger a player
         AddSubscription(eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
-            action: OnKeyPressed,
+            action: _ => ExecuteAvailable(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
             filter: k => parent?.IsVisible == true
-                && (IsListening || (!IsAnyListening && k == player.KeyCode))));
+                && !IsAnyListening
+                && k == player.KeyCode));
 
         AddSubscription(eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
             action: p => { IsSettingsVisible = p == player; IsStackVisible = false; },
@@ -144,20 +144,7 @@ public class PlayerViewModel
 
     public bool IsEnding => playerService?.IsEnding == true;
 
-    public bool IsOverlay
-    {
-        get { return playerService?.IsOverlay == true; }
-        set
-        {
-            if (playerService != default
-                && value != playerService.IsOverlay)
-            {
-                playerService.IsOverlay = value;
-
-                RaisePropertyChanged(nameof(IsOverlay));
-            }
-        }
-    }
+    public bool IsOverlay => playerService?.IsOverlay == true;
 
     public virtual bool IsPlaying => playerService?.IsPlaying == true;
 
@@ -176,21 +163,6 @@ public class PlayerViewModel
     public double? Progress => playerService?.Progress;
 
     public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
-
-    public bool ResetPosition
-    {
-        get { return playerService?.ResetPosition == true; }
-        set
-        {
-            if (playerService != default
-                && value != playerService.ResetPosition)
-            {
-                playerService.ResetPosition = value;
-
-                RaisePropertyChanged(nameof(ResetPosition));
-            }
-        }
-    }
 
     public DelegateCommand ShowSettingsCommand { get; }
 
@@ -223,38 +195,6 @@ public class PlayerViewModel
             header: $"{Texts.GridEditHeader}...",
             menuItems: gridMenus,
             closeCallback: CloseMenu);
-
-        var playerMenus = GetPlayerMenus().ToArray();
-
-        yield return new MenuViewModel(
-            header: $"{Texts.PlayerEditHeader}...",
-            menuItems: playerMenus,
-            closeCallback: CloseMenu);
-
-        if (playerService?.HasPaths == true)
-        {
-            // Sorted by the same text, which is used to build the group headers
-            var menuItems = GetMenuTracks()
-                .OrderBy(m => m.Entry.Track?.Info).ToArray();
-
-            if (menuItems.Length > 1)
-            {
-                yield return new SeparatorViewModel();
-
-                var groupsSize = (menuItems.Length / ((menuItems.Length / Constants.MenuGroupBaseSize) + 1)) + 1;
-
-                var groups = menuItems
-                    .Chunk(groupsSize).ToArray();
-
-                foreach (var group in groups)
-                {
-                    yield return new TrackGroupMenuViewModel(
-                        eventAggregator: eventAggregator,
-                        menuItems: group,
-                        closeCallback: CloseMenu);
-                }
-            }
-        }
     }
 
     protected override void Initialize()
@@ -279,120 +219,30 @@ public class PlayerViewModel
 
     #region Private Methods
 
-    private void ExecutePlayer()
+    private void ExecuteAvailable()
     {
         if (IsRenaming)
         {
             IsRenaming = false;
         }
-        else
+        else if (playerService?.IsAvailable == true)
         {
-            if (playerService?.IsAvailable == true)
-            {
-                playerService.Execute();
-            }
-            else
-            {
-                OpenMenu();
-            }
+            playerService.Execute();
         }
     }
 
-    private IEnumerable<TrackMenuViewModel> GetMenuTracks()
+    private void ExecutePlayer()
     {
-        if (playerService?.Entries?.Any() == true)
+        // A click on a player without playable content leads to its stack pane
+        if (!IsRenaming
+            && playerService?.IsAvailable != true
+            && !IsStackVisible)
         {
-            foreach (var entry in playerService.Entries)
-            {
-                yield return new TrackMenuViewModel(
-                    eventAggregator: eventAggregator,
-                    entry: entry,
-                    closeCallback: CloseMenu);
-            }
-        }
-    }
-
-    private IEnumerable<BindableBase> GetPlayerMenus()
-    {
-        yield return new MenuViewModel(
-            header: $"{Texts.PlayerSelectionFileHeader}...",
-            executeCallback: () => playerService?.SetFileAsync(),
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.FileMultipleOutline);
-
-        yield return new MenuViewModel(
-            header: $"{Texts.PlayerSelectionFolderHeader}...",
-            executeCallback: () => playerService?.SetFolderAsync(),
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.FolderMultipleOutline);
-
-        yield return new MenuViewModel(
-            header: Texts.PlayerResetHeader,
-            executeCallback: () => playerService.ClearAsync(),
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.CloseCircleOutline);
-
-        yield return new SeparatorViewModel();
-
-        yield return new MenuViewModel(
-            header: Texts.PlayerRenameHeader,
-            executeCallback: RenamePlayer,
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.FormTextbox);
-
-        var listenItem = new MenuViewModel(
-            header: Texts.KeyListenHeader,
-            executeCallback: ListenHook,
-            isCheckedGetter: () => IsListening,
-            icon: MaterialIconKind.KeyboardOutline);
-
-        listenChecker = listenItem.Update;
-
-        yield return listenItem;
-
-        yield return new MenuViewModel(
-            header: Texts.KeyUnhookHeader,
-            executeCallback: () => KeyCode = default,
-            closeCallback: CloseMenu,
-            icon: MaterialIconKind.KeyboardOffOutline);
-
-        if (playerService?.HasPaths == true)
-        {
-            yield return new SeparatorViewModel();
-
-            yield return new MenuViewModel(
-                header: Texts.PlayerOverlayHeader,
-                executeCallback: () => IsOverlay = !IsOverlay,
-                closeCallback: CloseMenu,
-                isCheckedGetter: () => IsOverlay,
-                icon: MaterialIconKind.ChevronUpBoxOutline);
-
-            yield return new MenuViewModel(
-                header: Texts.PlayerResetPosition,
-                executeCallback: () => ResetPosition = !ResetPosition,
-                closeCallback: CloseMenu,
-                isCheckedGetter: () => ResetPosition,
-                icon: MaterialIconKind.FileRestoreOutline);
-        }
-    }
-
-    private void OnKeyPressed(string keyCode)
-    {
-        if (IsListening)
-        {
-            ReceiveKey(keyCode);
+            ShowStack();
         }
         else
         {
-            ExecutePlayer();
-        }
-    }
-
-    private void RenamePlayer()
-    {
-        if (playerService?.IsActive != true)
-        {
-            IsRenaming = true;
+            ExecuteAvailable();
         }
     }
 
@@ -452,7 +302,8 @@ public class PlayerViewModel
 
         RaisePropertyChanged(nameof(Name));
         RaisePropertyChanged(nameof(IsOverlay));
-        RaisePropertyChanged(nameof(ResetPosition));
+        RaisePropertyChanged(nameof(Key));
+        RaisePropertyChanged(nameof(KeyCode));
 
         ExecuteCommand.RaiseCanExecuteChanged();
 

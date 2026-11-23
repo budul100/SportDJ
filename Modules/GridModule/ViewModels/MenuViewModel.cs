@@ -20,9 +20,6 @@ public class MenuViewModel
     private string header;
     private bool isChecked;
     private bool isDisposed;
-    private bool isPlayed;
-    private bool isSelected;
-    private MenuViewModel selected;
 
     #endregion Private Fields
 
@@ -47,8 +44,6 @@ public class MenuViewModel
         : this(header: header, executeCallback: default, closeCallback: closeCallback, icon: icon)
     {
         MenuItems = menuItems?.ToArray();
-
-        UpdateSelection();
     }
 
     #endregion Public Constructors
@@ -76,25 +71,7 @@ public class MenuViewModel
         set { SetProperty(ref isChecked, value); }
     }
 
-    public bool IsPlayed
-    {
-        get { return isPlayed; }
-        set { SetProperty(ref isPlayed, value); }
-    }
-
-    public bool IsSelected
-    {
-        get { return isSelected; }
-        set { SetProperty(ref isSelected, value); }
-    }
-
     public IReadOnlyList<BindableBase> MenuItems { get; }
-
-    public MenuViewModel Selected
-    {
-        get { return selected; }
-        private set { SetProperty(ref selected, value); }
-    }
 
     #endregion Public Properties
 
@@ -153,14 +130,6 @@ public class MenuViewModel
                 }
             }
         }
-    }
-
-    protected void UpdateSelection()
-    {
-        Selected = MenuItems?.OfType<TrackMenuViewModel>()
-            .FirstOrDefault(m => m.Entry?.IsSelected == true);
-
-        IsSelected = Selected != default;
     }
 
     #endregion Protected Methods

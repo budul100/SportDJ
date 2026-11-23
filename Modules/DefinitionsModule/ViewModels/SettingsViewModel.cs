@@ -1,8 +1,9 @@
+using System;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Player;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
-using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Commons.Mvvm;
 
@@ -13,10 +14,10 @@ public class SettingsViewModel
 {
     #region Private Fields
 
+    private const string KeyboardHint = "Press a key...";
+    private const string MidiHint = "Press a MIDI key...";
+    private const string NoKey = "None";
     private const string Titel = "Settings";
-
-    private readonly IEventAggregator eventAggregator;
-    private readonly IStorageService<Set> settingsService;
 
     private Player player;
 
@@ -24,13 +25,24 @@ public class SettingsViewModel
 
     #region Public Constructors
 
-    public SettingsViewModel(IEventAggregator eventAggregator, IStorageService<Set> settingsService)
+    public SettingsViewModel(IEventAggregator eventAggregator, IKeyListenService keyListenService)
     {
-        this.eventAggregator = eventAggregator;
-        this.settingsService = settingsService;
+        ListenKeyboardCommand = new DelegateCommand(ToggleKeyboard);
+        ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
+        ListenMidiCommand = new DelegateCommand(ToggleMidi);
+        ClearMidiCommand = new DelegateCommand(ClearMidi);
 
-        RegisterCommand = new DelegateCommand(RegisterPlayer);
-        UnregisterCommand = new DelegateCommand(UnegisterPlayer);
+        eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
+            action: _ => Refresh(),
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true,
+            filter: p => player != default
+                && player == p);
+
+        if (keyListenService != default)
+        {
+            keyListenService.Changed += (_, _) => Refresh();
+        }
     }
 
     #endregion Public Constructors
@@ -39,74 +51,84 @@ public class SettingsViewModel
 
     public static int MaxLengthName => Constants.NameMaxLength;
 
+    public DelegateCommand ClearKeyboardCommand { get; }
+
+    public DelegateCommand ClearMidiCommand { get; }
+
     public bool IsActive => player != default;
+
+    public bool IsListeningKeyboard => Service?.IsListeningKeyboard == true;
+
+    public bool IsListeningMidi => Service?.IsListeningMidi == true;
 
     public bool IsOverlay
     {
-        get => player?.IsOverlay == true;
+        get => Service?.IsOverlay == true;
 
         set
         {
-            if (player?.PlayerService != default
-                && value != player.PlayerService.IsOverlay)
+            if (Service != default)
             {
-                player.PlayerService.IsOverlay = value;
-
-                settingsService.Save();
-
-                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
-
-                RaisePropertyChanged(nameof(IsOverlay));
+                Service.IsOverlay = value;
             }
         }
     }
 
     public bool IsReset
     {
-        get => player?.ResetPosition == true;
+        get => Service?.ResetPosition == true;
 
         set
         {
-            if (player?.PlayerService != default
-                && value != player.PlayerService.ResetPosition)
+            if (Service != default)
             {
-                player.PlayerService.ResetPosition = value;
-
-                settingsService.Save();
-
-                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
-
-                RaisePropertyChanged(nameof(IsReset));
+                Service.ResetPosition = value;
             }
         }
     }
+
+    public string KeyboardButtonText => IsListeningKeyboard
+        ? "Cancel"
+        : "Assign";
+
+    public string KeyboardText => IsListeningKeyboard
+        ? KeyboardHint
+        : Service?.KeyCode.GetKey() ?? NoKey;
+
+    public DelegateCommand ListenKeyboardCommand { get; }
+
+    public DelegateCommand ListenMidiCommand { get; }
+
+    public string MidiButtonText => IsListeningMidi
+        ? "Cancel"
+        : "Assign";
+
+    public string MidiText => IsListeningMidi
+        ? MidiHint
+        : Service?.Key.GetText() ?? NoKey;
 
     public string Name
     {
-        get => player?.Name;
+        get => Service?.Name;
+
         set
         {
-            if (player != default
-                && value != player.Name)
+            if (Service != default)
             {
-                player.Name = value;
-
-                settingsService.Save();
-
-                eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
-
-                RaisePropertyChanged(nameof(Name));
+                Service.Name = value;
             }
         }
     }
 
-    public DelegateCommand RegisterCommand { get; private set; }
-
     public override string Title => Titel;
 
-    public DelegateCommand UnregisterCommand { get; private set; }
-
     #endregion Public Properties
+
+    #region Private Properties
+
+    private IPlayerService Service => player?.PlayerService;
+
+    #endregion Private Properties
 
     #region Public Methods
 
@@ -115,13 +137,12 @@ public class SettingsViewModel
         if (player != default
             && this.player != player)
         {
+            // Pending assignments belong to the previous player
+            Service?.CancelListening();
+
             this.player = player;
 
-            // The bindings still show the values of the previous player otherwise
-            RaisePropertyChanged(nameof(IsActive));
-            RaisePropertyChanged(nameof(IsOverlay));
-            RaisePropertyChanged(nameof(IsReset));
-            RaisePropertyChanged(nameof(Name));
+            Refresh();
         }
     }
 
@@ -129,17 +150,56 @@ public class SettingsViewModel
 
     #region Private Methods
 
-    private void RegisterPlayer()
+    private void ClearKeyboard()
     {
-        if (player?.PlayerService != default)
+        if (Service != default)
         {
-            _ = player.PlayerService.RegisterAsync();
+            Service.KeyCode = default;
         }
     }
 
-    private void UnegisterPlayer()
+    private void ClearMidi()
     {
-        player?.PlayerService?.Unregister();
+        Service?.Unregister();
+    }
+
+    private void Refresh()
+    {
+        // The bindings still show the values of the previous player otherwise
+        RaisePropertyChanged(nameof(IsActive));
+        RaisePropertyChanged(nameof(IsListeningKeyboard));
+        RaisePropertyChanged(nameof(IsListeningMidi));
+        RaisePropertyChanged(nameof(IsOverlay));
+        RaisePropertyChanged(nameof(IsReset));
+        RaisePropertyChanged(nameof(KeyboardButtonText));
+        RaisePropertyChanged(nameof(KeyboardText));
+        RaisePropertyChanged(nameof(MidiButtonText));
+        RaisePropertyChanged(nameof(MidiText));
+        RaisePropertyChanged(nameof(Name));
+    }
+
+    private void ToggleKeyboard()
+    {
+        if (Service?.IsListeningKeyboard == true)
+        {
+            Service.CancelListening();
+        }
+        else
+        {
+            Service?.ListenKeyboard();
+        }
+    }
+
+    private void ToggleMidi()
+    {
+        if (Service?.IsListeningMidi == true)
+        {
+            Service.CancelListening();
+        }
+        else if (Service != default)
+        {
+            _ = Service.RegisterAsync();
+        }
     }
 
     #endregion Private Methods

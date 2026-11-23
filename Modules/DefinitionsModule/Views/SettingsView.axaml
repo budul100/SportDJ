@@ -25,52 +25,106 @@
         <mat:MaterialIconStyles />
     </UserControl.Styles>
 
-    <StackPanel
-        Margin="{StaticResource ContentMargin}"
-        IsEnabled="{Binding IsActive}"
-        Spacing="{StaticResource SpacingMedium}">
-
-        <StackPanel Spacing="{StaticResource SpacingSmall}">
-
-            <TextBlock
-                HorizontalAlignment="Left"
-                Classes="Caption"
-                Text="Player name" />
-
-            <TextBox
-                HorizontalAlignment="Stretch"
-                IsTabStop="False"
-                MaxLength="{Binding MaxLengthName}"
-                Text="{Binding Name, Mode=TwoWay}" />
-
-        </StackPanel>
-
-        <StackPanel Spacing="{StaticResource SpacingSmall}">
-
-            <CheckBox
-                HorizontalAlignment="Left"
-                IsTabStop="False"
-                Content="Is overlay signal"
-                IsChecked="{Binding IsOverlay}" />
-
-            <CheckBox
-                HorizontalAlignment="Left"
-                IsTabStop="False"
-                Content="Reset player at start"
-                IsChecked="{Binding IsReset}" />
-
-        </StackPanel>
-
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel
-            HorizontalAlignment="Left"
-            Orientation="Horizontal"
+            Margin="{StaticResource ContentMargin}"
+            IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <Button Content="Register" Command="{Binding RegisterCommand}" />
-            <Button Content="Unregister" Command="{Binding UnregisterCommand}" />
+            <!-- General -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="General" />
+                <Separator />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Name" />
+
+                <TextBox
+                    HorizontalAlignment="Stretch"
+                    IsTabStop="False"
+                    KeyDown="OnNameKeyDown"
+                    MaxLength="{Binding MaxLengthName}"
+                    Text="{Binding Name, Mode=TwoWay}" />
+
+            </StackPanel>
+
+            <!-- Playback -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Playback" />
+                <Separator />
+
+                <CheckBox
+                    HorizontalAlignment="Left"
+                    Content="Is overlay signal"
+                    IsChecked="{Binding IsOverlay}"
+                    IsTabStop="False" />
+
+                <CheckBox
+                    HorizontalAlignment="Left"
+                    Content="Reset player at start"
+                    IsChecked="{Binding IsReset}"
+                    IsTabStop="False" />
+
+            </StackPanel>
+
+            <!-- Keyboard -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Keyboard" />
+                <Separator />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Key" />
+
+                <TextBlock Text="{Binding KeyboardText}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Click="OnListenClick"
+                        Command="{Binding ListenKeyboardCommand}"
+                        Content="{Binding KeyboardButtonText}"
+                        Focusable="False" />
+                    <Button
+                        Command="{Binding ClearKeyboardCommand}"
+                        Content="Clear"
+                        Focusable="False" />
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- MIDI -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="MIDI" />
+                <Separator />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Key" />
+
+                <TextBlock Text="{Binding MidiText}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Command="{Binding ListenMidiCommand}"
+                        Content="{Binding MidiButtonText}"
+                        Focusable="False" />
+                    <Button
+                        Command="{Binding ClearMidiCommand}"
+                        Content="Clear"
+                        Focusable="False" />
+                </StackPanel>
+
+            </StackPanel>
 
         </StackPanel>
-
-    </StackPanel>
+    </ScrollViewer>
 
 </UserControl>

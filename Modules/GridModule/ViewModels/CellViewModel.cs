@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
@@ -34,12 +33,9 @@ public abstract class CellViewModel
 
     #region Private Fields
 
-    // All cells which currently wait for a key to be assigned. Shared, so that
-    // other cells do not react on the key which is meant to be assigned.
-    private static readonly HashSet<CellViewModel> listeningCells = [];
-    private static readonly Lock listeningLock = new();
-
+    private readonly object element;
     private readonly IKeyable keyable;
+    private readonly IKeyListenService keyListenService;
     private readonly INameable nameable;
     private readonly IStorageService<Set> settingsService;
     private readonly List<SubscriptionToken> subscriptions = [];
@@ -55,6 +51,7 @@ public abstract class CellViewModel
     protected CellViewModel(IContainerProvider containerProvider, object element)
     {
         this.containerProvider = containerProvider;
+        this.element = element;
 
         cell = element is Grid grid
             ? grid.Group
@@ -67,6 +64,7 @@ public abstract class CellViewModel
         settingsService = containerProvider?.Resolve<IStorageService<Set>>();
         dialogService = containerProvider?.Resolve<IDialogService>();
         gridService = containerProvider?.Resolve<IGridService>();
+        keyListenService = containerProvider?.Resolve<IKeyListenService>();
 
         AddSubscription(eventAggregator?.GetEvent<OutputUpdatedEvent>().Subscribe(
             action: _ => UpdateOutput(),
@@ -91,16 +89,7 @@ public abstract class CellViewModel
 
     public bool HasKey => !string.IsNullOrWhiteSpace(Key);
 
-    public bool IsListening
-    {
-        get
-        {
-            lock (listeningLock)
-            {
-                return listeningCells.Contains(this);
-            }
-        }
-    }
+    public bool IsListening => keyListenService?.IsListening(element) == true;
 
     public bool IsRenaming
     {
@@ -167,16 +156,8 @@ public abstract class CellViewModel
 
     #region Protected Properties
 
-    protected static bool IsAnyListening
-    {
-        get
-        {
-            lock (listeningLock)
-            {
-                return listeningCells.Count > 0;
-            }
-        }
-    }
+    // While any owner waits for a key to be assigned, others must not react on it
+    protected bool IsAnyListening => keyListenService?.IsAny == true;
 
     #endregion Protected Properties
 
@@ -202,10 +183,7 @@ public abstract class CellViewModel
 
     protected internal void ReceiveKey(string keyCode)
     {
-        lock (listeningLock)
-        {
-            listeningCells.Remove(this);
-        }
+        keyListenService?.End(element);
 
         KeyCode = keyCode;
 
@@ -239,10 +217,7 @@ public abstract class CellViewModel
     {
         if (isDisposing)
         {
-            lock (listeningLock)
-            {
-                listeningCells.Remove(this);
-            }
+            keyListenService?.End(element);
 
             foreach (var subscription in subscriptions)
             {
@@ -315,10 +290,7 @@ public abstract class CellViewModel
 
     protected void ListenHook()
     {
-        lock (listeningLock)
-        {
-            listeningCells.Add(this);
-        }
+        keyListenService?.Begin(element);
     }
 
     protected void OpenMenu()

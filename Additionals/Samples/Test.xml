@@ -1,7 +1,7 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid Name="Damen">
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="E" Name="Gast" ResetPosition="true">
+			<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" Name="Gast" ResetPosition="true">
 				<Key>
 					<Type>Note</Type>
 					<Channel>10</Channel>

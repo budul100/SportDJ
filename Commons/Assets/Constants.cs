@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 
 namespace SportDJ.Commons.Assets;
 
@@ -19,9 +19,6 @@ public static class Constants
     public const int IndexAudioSessionMin = 0;
 
     public const int IsEndingSeconds = 10;
-
-    public const int MenuGroupBaseSize = 20;
-    public const int MenuGroupTextLength = 10;
 
     public const int MidiDelayStopDecks = 100;
 

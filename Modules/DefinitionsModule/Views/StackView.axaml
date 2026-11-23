@@ -76,6 +76,37 @@
             </Button>
         </Grid>
 
+        <!-- Declared before the list, otherwise the last child fill would swallow the dock -->
+        <Grid
+            Margin="{StaticResource InnerMargin}"
+            ColumnDefinitions="*,*,*"
+            DockPanel.Dock="Bottom">
+            <Button
+                Grid.Column="0"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Command="{Binding LoadFilesCommand}"
+                Content="Files..."
+                Focusable="False" />
+            <Button
+                Grid.Column="1"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Command="{Binding LoadFolderCommand}"
+                Content="Folder..."
+                Focusable="False" />
+            <Button
+                Grid.Column="2"
+                Margin="{StaticResource InnerMargin}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Command="{Binding ClearCommand}"
+                Content="Clear"
+                Focusable="False" />
+        </Grid>
+
         <ListBox
             Margin="{StaticResource InnerMargin}"
             ItemsSource="{Binding Entries}"

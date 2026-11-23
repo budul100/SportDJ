@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
+using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Mixer;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Signal;
@@ -18,6 +20,7 @@ using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 
@@ -32,6 +35,7 @@ public class Service
     private readonly IControllerService controllerService;
     private readonly IDialogService dialogService;
     private readonly IEventAggregator eventAggregator;
+    private readonly IKeyListenService keyListenService;
     private readonly IStorageService<Set> settingsService;
     private readonly HashSet<ISignalService> signalServices = [];
     private readonly IStackService stackService;
@@ -39,6 +43,8 @@ public class Service
     private readonly ITrackService trackService;
 
     private bool isDisposed;
+    private bool isListeningMidi;
+    private CancellationTokenSource midiSource;
     private MixerType mixerType;
     private Player player;
     private ISignalService signalService;
@@ -50,7 +56,7 @@ public class Service
 
     public Service(IContainerProvider containerProvider, IEventAggregator eventAggregator,
         IStackService stackService, ITrackService trackService, IControllerService controllerService,
-        IDialogService dialogService, IStorageService<Set> settingsService)
+        IDialogService dialogService, IStorageService<Set> settingsService, IKeyListenService keyListenService)
     {
         this.containerProvider = containerProvider;
         this.eventAggregator = eventAggregator;
@@ -59,6 +65,15 @@ public class Service
         this.dialogService = dialogService;
         this.settingsService = settingsService;
         this.stackService = stackService;
+        this.keyListenService = keyListenService;
+
+        // Only this player takes the key, while it waits for an assignment
+        eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+            action: OnKeyPressed,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true,
+            filter: _ => player != default
+                && this.keyListenService?.IsListening(player) == true);
 
         eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
             action: SetStartLocation,
@@ -139,6 +154,11 @@ public class Service
 
     public bool IsEnding => signalService?.IsEnding == true;
 
+    public bool IsListeningKeyboard => player != default
+        && keyListenService?.IsListening(player) == true;
+
+    public bool IsListeningMidi => isListeningMidi;
+
     public bool IsOverlay
     {
         get => player?.IsOverlay == true;
@@ -153,11 +173,55 @@ public class Service
                 settingsService.Save();
 
                 InitializeSignal();
+
+                UpdateContent();
             }
         }
     }
 
     public bool IsPlaying => signalService?.IsPlaying == true;
+
+    public Key Key => player?.Key ?? default;
+
+    public string KeyCode
+    {
+        get => player?.KeyCode;
+
+        set
+        {
+            if (player != default
+                && player.KeyCode != value)
+            {
+                player.KeyCode = value;
+
+                settingsService.Save();
+
+                UpdateContent();
+            }
+        }
+    }
+
+    public string Name
+    {
+        get => player?.Name;
+
+        set
+        {
+            var trimmed = value?.Trim();
+
+            if (player != default
+                && !string.IsNullOrWhiteSpace(trimmed)
+                && player.Name != trimmed)
+            {
+                player.Name = trimmed;
+
+                settingsService.Save();
+            }
+
+            // Also notify for invalid input, so the UI falls back to the stored name
+            UpdateContent();
+        }
+    }
 
     public double? Progress { get; private set; }
 
@@ -175,6 +239,8 @@ public class Service
                 player.ResetPosition = value;
 
                 settingsService.Save();
+
+                UpdateContent();
             }
         }
     }
@@ -185,13 +251,20 @@ public class Service
 
     #region Public Methods
 
+    public void CancelListening()
+    {
+        CancelMidi();
+
+        EndKeyboardListening();
+    }
+
     public async Task ClearAsync()
     {
         if (HasPaths)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Texts.PlayerResetMessage,
-                contentTitle: Texts.PlayerResetHeader,
+                contentMessage: Texts.PlayerClearMessage,
+                contentTitle: Texts.PlayerClearHeader,
                 buttonDefinitions: ButtonEnum.YesNo,
                 enterDefaultButton: ClickEnum.No);
 
@@ -238,6 +311,18 @@ public class Service
         InitializePlayer();
     }
 
+    public void ListenKeyboard()
+    {
+        if (player != default)
+        {
+            CancelMidi();
+
+            keyListenService?.Begin(player);
+
+            UpdateContent();
+        }
+    }
+
     public void Next()
     {
         stackService.Next();
@@ -250,10 +335,19 @@ public class Service
 
     public async Task RegisterAsync()
     {
+        CancelListening();
+
+        var source = CancellationTokenSource.CreateLinkedTokenSource(tokenSource.Token);
+
+        midiSource = source;
+        isListeningMidi = true;
+
+        UpdateContent();
+
         try
         {
             var key = await controllerService.ListenAsync(
-                cancellationToken: tokenSource.Token);
+                cancellationToken: source.Token);
 
             // The old key must not trigger this player anymore
             controllerService.Unregister(player.Key);
@@ -264,12 +358,26 @@ public class Service
             RegisterKey();
 
             settingsService.Save();
-
-            eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
         }
         catch (OperationCanceledException)
         {
-            // Listening was replaced by another player or the service was disposed
+            // Listening was replaced by another player, cancelled or the service was disposed
+        }
+        finally
+        {
+            // A replaced listener must not reset the state of its successor
+            if (ReferenceEquals(midiSource, source))
+            {
+                midiSource = default;
+                isListeningMidi = false;
+            }
+
+            source.Dispose();
+
+            if (!isDisposed)
+            {
+                UpdateContent();
+            }
         }
     }
 
@@ -334,6 +442,8 @@ public class Service
         {
             if (isDisposing)
             {
+                keyListenService?.End(player);
+
                 tokenSource?.Cancel();
                 tokenSource?.Dispose();
 
@@ -347,6 +457,28 @@ public class Service
     #endregion Protected Methods
 
     #region Private Methods
+
+    private void CancelMidi()
+    {
+        try
+        {
+            midiSource?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // The listener has already finished
+        }
+    }
+
+    private void EndKeyboardListening()
+    {
+        if (IsListeningKeyboard)
+        {
+            keyListenService.End(player);
+
+            UpdateContent();
+        }
+    }
 
     private void InitializePlayer()
     {
@@ -395,6 +527,14 @@ public class Service
         }
 
         trackService?.Update(stackService.Track);
+    }
+
+    private void OnKeyPressed(string keyCode)
+    {
+        KeyCode = keyCode;
+
+        // Ends later, so other receivers of this key press still see the listening state
+        Dispatcher.UIThread.Post(EndKeyboardListening);
     }
 
     private void OnSignalEnded(ISignalService signalService)

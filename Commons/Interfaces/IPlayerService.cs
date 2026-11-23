@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SportDJ.Commons.Models.Contents;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Commons.Interfaces;
@@ -27,9 +28,19 @@ public interface IPlayerService
 
     bool IsEnding { get; }
 
+    bool IsListeningKeyboard { get; }
+
+    bool IsListeningMidi { get; }
+
     bool IsOverlay { get; set; }
 
     bool IsPlaying { get; }
+
+    Key Key { get; }
+
+    string KeyCode { get; set; }
+
+    string Name { get; set; }
 
     double? Progress { get; }
 
@@ -43,11 +54,15 @@ public interface IPlayerService
 
     #region Public Methods
 
+    void CancelListening();
+
     Task ClearAsync();
 
     void Execute();
 
     void Initialize(Player player);
+
+    void ListenKeyboard();
 
     void Next();
 
