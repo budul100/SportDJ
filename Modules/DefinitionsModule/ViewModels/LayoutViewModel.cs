@@ -42,9 +42,6 @@ public class LayoutViewModel
         SwapCommand = new DelegateCommand(
             executeMethod: async () => await SwapAsync());
 
-        RemoveCellCommand = new DelegateCommand(
-            executeMethod: async () => await RemoveCellAsync());
-
         AddTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.AddGrid(tab, o));
 
@@ -56,12 +53,6 @@ public class LayoutViewModel
 
         ListenKeyCommand = new DelegateCommand(ToggleKey);
         ClearKeyCommand = new DelegateCommand(ClearKey);
-
-        // The whole grid is rebuilt after each change, so the targets might not exist anymore
-        eventAggregator?.GetEvent<GridUpdatedEvent>().Subscribe(
-            action: Validate,
-            threadOption: ThreadOption.UIThread,
-            keepSubscriberReferenceAlive: true);
 
         eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => Refresh(),
@@ -104,8 +95,6 @@ public class LayoutViewModel
 
     public DelegateCommand<OrientationType> MoveTabCommand { get; }
 
-    public DelegateCommand RemoveCellCommand { get; }
-
     public DelegateCommand RemoveTabCommand { get; }
 
     public DelegateCommand SwapCommand { get; }
@@ -122,6 +111,12 @@ public class LayoutViewModel
     #endregion Public Properties
 
     #region Public Methods
+
+    // Pending assignments are dropped, e.g. if the pane gets closed
+    public void Cancel()
+    {
+        gridService?.CancelListening();
+    }
 
     public void SetCell(Cell cell)
     {
@@ -149,6 +144,24 @@ public class LayoutViewModel
         }
     }
 
+    // Drops the targets, which are not part of the grid anymore.
+    // The whole grid is rebuilt after each change, so they might not exist anymore.
+    public void Validate()
+    {
+        if (tab?.Group?.Grids?.Contains(tab) != true)
+        {
+            tab = default;
+        }
+
+        if (!cell.IsAttached())
+        {
+            cell = default;
+            tab = default;
+        }
+
+        Refresh();
+    }
+
     #endregion Public Methods
 
     #region Private Methods
@@ -167,25 +180,12 @@ public class LayoutViewModel
         RaisePropertyChanged(nameof(TabName));
     }
 
-    private async Task RemoveCellAsync()
-    {
-        if (gridService != default
-            && cell != default)
-        {
-            await gridService.RemoveCellAsync(cell);
-
-            Validate();
-        }
-    }
-
     private async Task RemoveTabAsync()
     {
         if (gridService != default
             && tab != default)
         {
             await gridService.RemoveGridAsync(tab);
-
-            Validate();
         }
     }
 
@@ -195,8 +195,6 @@ public class LayoutViewModel
             && cell != default)
         {
             await gridService.SwapAsync(cell);
-
-            Validate();
         }
     }
 
@@ -210,26 +208,6 @@ public class LayoutViewModel
         {
             gridService?.ListenKey(tab);
         }
-    }
-
-    // Drops the targets, which are not part of the grid anymore
-    private void Validate()
-    {
-        var isCellAttached = cell?.Grid?.Cells?.Contains(cell) == true;
-        var isTabAttached = tab?.Group?.Grids?.Contains(tab) == true;
-
-        if (!isTabAttached)
-        {
-            tab = default;
-        }
-
-        if (!isCellAttached)
-        {
-            cell = default;
-            tab = default;
-        }
-
-        Refresh();
     }
 
     #endregion Private Methods

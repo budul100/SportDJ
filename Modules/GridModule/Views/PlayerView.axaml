@@ -262,17 +262,15 @@
             </Border>
 
             <!--
-                Bottom row: previous, stack, next.
-                Same principle as in the top row: the gaps only take space together with the outer buttons.
+                Bottom row: previous, next.
+                The gap only takes space together with the buttons.
             -->
             <Grid Grid.Row="2" Margin="{StaticResource InnerMargin}">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="{Binding HasStack, Converter={StaticResource BoolToGridSizeStarConverter}}" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Button
@@ -301,34 +299,8 @@
                     Width="{StaticResource SpacingSmall}"
                     IsVisible="{Binding HasStack}" />
 
-                <ToggleButton
-                    Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    IsChecked="{Binding IsStackVisible, Mode=OneWay}"
-                    Command="{Binding ShowStackCommand}"
-                    Focusable="False">
-
-                    <Viewbox
-                        MaxWidth="{StaticResource LargeIconSize}"
-                        MaxHeight="{StaticResource LargeIconSize}"
-                        Stretch="Uniform"
-                        StretchDirection="Both">
-                        <mat:MaterialIcon
-                            Width="{StaticResource PlayerIconSize}"
-                            Height="{StaticResource PlayerIconSize}"
-                            Kind="ListBox" />
-                    </Viewbox>
-
-                </ToggleButton>
-
-                <Border
-                    Grid.Column="3"
-                    Width="{StaticResource SpacingSmall}"
-                    IsVisible="{Binding HasStack}" />
-
                 <Button
-                    Grid.Column="4"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Command="{Binding TrackForwardCommand}"

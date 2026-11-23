@@ -11,15 +11,35 @@
 					<Path>..\..\..\..\..\Music\SportDJ\Beginn\Misc\</Path>
 				</Paths>
 			</Cell>
-			<Cell xsi:type="Player" Column="0" Row="1" Color="Pink" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
-				<Key>
-					<Type>Note</Type>
-					<Channel>0</Channel>
-					<Number>0</Number>
-				</Key>
-				<Paths>
-					<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
-				</Paths>
+			<Cell xsi:type="Group" Column="0" Row="1">
+				<Grids>
+					<Grid KeyCode="F" Name="Tab 1">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" Color="Pink" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
+								<Key>
+									<Type>Note</Type>
+									<Channel>0</Channel>
+									<Number>0</Number>
+								</Key>
+								<Paths>
+									<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
+								</Paths>
+							</Cell>
+						</Cells>
+					</Grid>
+					<Grid KeyCode="D" Name="Tab 2">
+						<Cells>
+							<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" Name="Player 1" ResetPosition="false">
+								<Key>
+									<Type>Note</Type>
+									<Channel>0</Channel>
+									<Number>0</Number>
+								</Key>
+								<Paths />
+							</Cell>
+						</Cells>
+					</Grid>
+				</Grids>
 			</Cell>
 		</Cells>
 	</Grid>

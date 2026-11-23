@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mat="using:Material.Icons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:SportDJ.Modules.DefinitionsModule.Views"
     xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
@@ -13,38 +14,70 @@
     d:DesignWidth="300"
     mc:Ignorable="d">
 
-    <TabControl
-        ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding Active}"
-        MinHeight="200">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
-        <TabControl.ItemTemplate>
-            <DataTemplate x:DataType="vm:TabViewModel">
-                <TextBlock Text="{Binding Title}"/>
-            </DataTemplate>
-        </TabControl.ItemTemplate>
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
 
-        <TabControl.ContentTemplate>
-            <DataTemplate x:DataType="vm:TabViewModel">
-                <ContentControl Content="{Binding}">
-                    <ContentControl.DataTemplates>
+    <Panel>
 
-                        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-                            <views:SettingsView/>
-                        </DataTemplate>
+        <TabControl
+            ItemsSource="{Binding Tabs}"
+            SelectedItem="{Binding Active}"
+            MinHeight="200">
 
-                        <DataTemplate DataType="{x:Type vm:StackViewModel}">
-                            <views:StackView/>
-                        </DataTemplate>
+            <TabControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:TabViewModel">
+                    <TextBlock Text="{Binding Title}"/>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
 
-                        <DataTemplate DataType="{x:Type vm:LayoutViewModel}">
-                            <views:LayoutView/>
-                        </DataTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate x:DataType="vm:TabViewModel">
+                    <ContentControl Content="{Binding}">
+                        <ContentControl.DataTemplates>
 
-                    </ContentControl.DataTemplates>
-                </ContentControl>
-            </DataTemplate>
-        </TabControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                                <views:SettingsView/>
+                            </DataTemplate>
 
-    </TabControl>
+                            <DataTemplate DataType="{x:Type vm:StackViewModel}">
+                                <views:StackView/>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type vm:LayoutViewModel}">
+                                <views:LayoutView/>
+                            </DataTemplate>
+
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+
+        </TabControl>
+
+        <!-- Sits in the line of the tab headers, which are aligned to the left -->
+        <Button
+            Margin="{StaticResource InnerMargin}"
+            Padding="4"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Background="Transparent"
+            Command="{Binding CloseCommand}"
+            Focusable="False"
+            ToolTip.Tip="Close">
+            <mat:MaterialIcon
+                Width="{StaticResource MediumIconSize}"
+                Height="{StaticResource MediumIconSize}"
+                Kind="Close" />
+        </Button>
+
+    </Panel>
 </UserControl>

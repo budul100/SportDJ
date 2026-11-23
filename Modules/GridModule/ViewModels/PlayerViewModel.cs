@@ -7,7 +7,6 @@ using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
-using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
@@ -26,7 +25,6 @@ public class PlayerViewModel
     private readonly IPlayerService playerService;
 
     private bool isSettingsVisible;
-    private bool isStackVisible;
 
     #endregion Private Fields
 
@@ -53,9 +51,6 @@ public class PlayerViewModel
 
         ShowSettingsCommand = new DelegateCommand(
             executeMethod: ShowSettings);
-
-        ShowStackCommand = new DelegateCommand(
-            executeMethod: ShowStack);
 
         AddSubscription(eventAggregator?.GetEvent<PlayerInitializedEvent>().Subscribe(
             action: _ => Initialize(),
@@ -97,17 +92,12 @@ public class PlayerViewModel
                 && k == player.KeyCode));
 
         AddSubscription(eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
-            action: p => { IsSettingsVisible = p == player; IsStackVisible = false; },
-            threadOption: ThreadOption.PublisherThread,
-            keepSubscriberReferenceAlive: true));
-
-        AddSubscription(eventAggregator?.GetEvent<StackVisibleEvent>().Subscribe(
-            action: p => { IsSettingsVisible = false; IsStackVisible = p == player; },
+            action: p => IsSettingsVisible = p == player,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true));
 
         AddSubscription(eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
-            action: _ => { IsSettingsVisible = false; IsStackVisible = false; },
+            action: _ => IsSettingsVisible = false,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true));
 
@@ -160,19 +150,11 @@ public class PlayerViewModel
         set => SetProperty(ref isSettingsVisible, value);
     }
 
-    public bool IsStackVisible
-    {
-        get => isStackVisible;
-        set => SetProperty(ref isStackVisible, value);
-    }
-
     public double? Progress => playerService?.Progress;
 
     public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
     public DelegateCommand ShowSettingsCommand { get; }
-
-    public DelegateCommand ShowStackCommand { get; }
 
     // Idle background of the player surface
     public IBrush SurfaceBrush => (playerService?.Color ?? default).GetBrush();
@@ -232,12 +214,11 @@ public class PlayerViewModel
 
     private void ExecutePlayer()
     {
-        // A click on a player without playable content leads to its stack pane
+        // A click on a player without playable content leads to its content
         if (!IsRenaming
-            && playerService?.IsAvailable != true
-            && !IsStackVisible)
+            && playerService?.IsAvailable != true)
         {
-            ShowStack();
+            ShowContent();
         }
         else
         {
@@ -245,6 +226,18 @@ public class PlayerViewModel
         }
     }
 
+    private void ShowContent()
+    {
+        if (player.PlayerService != default)
+        {
+            eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(
+                payload: player);
+
+            panelService.Activate<IStackService>();
+        }
+    }
+
+    // One pane for all definitions, it keeps the tab which was shown last
     private void ShowSettings()
     {
         if (IsSettingsVisible || player.PlayerService == default)
@@ -260,24 +253,6 @@ public class PlayerViewModel
                 payload: player);
 
             panelService.Activate<IPlayerService>();
-        }
-    }
-
-    private void ShowStack()
-    {
-        if (IsStackVisible || player.StackService == default)
-        {
-            panelService.Deactivate<IStackService>();
-
-            eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
-                payload: default);
-        }
-        else
-        {
-            eventAggregator?.GetEvent<StackVisibleEvent>().Publish(
-                payload: player);
-
-            panelService.Activate<IStackService>();
         }
     }
 
@@ -309,7 +284,6 @@ public class PlayerViewModel
 
         TrackBackwardCommand.RaiseCanExecuteChanged();
         TrackForwardCommand.RaiseCanExecuteChanged();
-        ShowStackCommand.RaiseCanExecuteChanged();
     }
 
     private void UpdateDuration()
@@ -323,11 +297,6 @@ public class PlayerViewModel
         if (!panelService.IsVisible<IPlayerService>())
         {
             IsSettingsVisible = false;
-        }
-
-        if (!panelService.IsVisible<IStackService>())
-        {
-            IsStackVisible = false;
         }
     }
 

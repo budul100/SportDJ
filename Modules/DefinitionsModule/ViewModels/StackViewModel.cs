@@ -101,6 +101,8 @@ public class StackViewModel
 
     public IEventAggregator EventAggregator { get; }
 
+    public bool IsActive => player != default;
+
     public DelegateCommand LoadFilesCommand { get; }
 
     public DelegateCommand LoadFolderCommand { get; }
@@ -119,10 +121,11 @@ public class StackViewModel
 
     public void Set(Player player)
     {
-        if (player != default
-            && this.player != player)
+        if (this.player != player)
         {
             this.player = player;
+
+            RaisePropertyChanged(nameof(IsActive));
 
             UpdateEntries();
         }

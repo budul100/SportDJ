@@ -33,49 +33,49 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- Position of the selected player or group -->
+            <!-- Add -->
             <StackPanel Spacing="{StaticResource SpacingSmall}">
 
-                <TextBlock Classes="Section" Text="Position" />
+                <TextBlock Classes="Section" Text="Add player" />
                 <Separator />
 
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                <views:DirectionCross
+                    HorizontalAlignment="Left"
+                    CenterKind="Plus"
+                    Command="{Binding AddCellCommand}" />
 
-                    <StackPanel Spacing="{StaticResource SpacingSmall}">
-                        <TextBlock Classes="Caption" Text="Add player" />
-                        <views:DirectionCross CenterKind="Plus" Command="{Binding AddCellCommand}" />
-                    </StackPanel>
+            </StackPanel>
 
-                    <StackPanel Spacing="{StaticResource SpacingSmall}">
-                        <TextBlock Classes="Caption" Text="Move" />
-                        <views:DirectionCross CenterKind="ArrowAll" Command="{Binding MoveCellCommand}" />
-                    </StackPanel>
+            <!-- Move -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
 
-                </StackPanel>
+                <TextBlock Classes="Section" Text="Move" />
+                <Separator />
 
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                <views:DirectionCross
+                    HorizontalAlignment="Left"
+                    CenterKind="ArrowAll"
+                    Command="{Binding MoveCellCommand}" />
 
-                    <Button
-                        Command="{Binding SwapCommand}"
-                        Focusable="False"
-                        ToolTip.Tip="Swap player and group">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="SwapHorizontal" />
-                    </Button>
+            </StackPanel>
 
-                    <Button
-                        Command="{Binding RemoveCellCommand}"
-                        Focusable="False"
-                        ToolTip.Tip="Remove">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="Delete" />
-                    </Button>
+            <!-- Swap -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
 
-                </StackPanel>
+                <TextBlock Classes="Section" Text="Swap" />
+                <Separator />
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Command="{Binding SwapCommand}"
+                    Focusable="False"
+                    ToolTip.Tip="Swap player and group">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Tab" />
+                </Button>
+
             </StackPanel>
 
             <!-- Tab of a group, only if the pane was opened from a tab -->

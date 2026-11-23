@@ -197,6 +197,25 @@
 
             </StackPanel>
 
+            <!-- Remove -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Remove" />
+                <Separator />
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Command="{Binding RemoveCommand}"
+                    Focusable="False"
+                    ToolTip.Tip="Remove player">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+            </StackPanel>
+
         </StackPanel>
     </ScrollViewer>
 

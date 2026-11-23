@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
@@ -21,14 +22,19 @@ public class SettingsViewModel
     private const string NoKey = "None";
     private const string Titel = "Settings";
 
+    private readonly IGridService gridService;
+
     private Player player;
 
     #endregion Private Fields
 
     #region Public Constructors
 
-    public SettingsViewModel(IEventAggregator eventAggregator, IKeyboardService keyListenService)
+    public SettingsViewModel(IEventAggregator eventAggregator, IGridService gridService,
+        IKeyboardService keyListenService)
     {
+        this.gridService = gridService;
+
         Colors = Enum.GetValues<PlayerColorType>()
             .Select(c => new ColorOptionViewModel(c)).ToArray();
 
@@ -38,6 +44,9 @@ public class SettingsViewModel
         ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
         ListenMidiCommand = new DelegateCommand(ToggleMidi);
         ClearMidiCommand = new DelegateCommand(ClearMidi);
+
+        RemoveCommand = new DelegateCommand(
+            executeMethod: async () => await RemoveAsync());
 
         eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
             action: _ => Refresh(),
@@ -63,6 +72,8 @@ public class SettingsViewModel
     public DelegateCommand ClearMidiCommand { get; }
 
     public ColorOptionViewModel[] Colors { get; }
+
+    public Player Current => player;
 
     public bool IsActive => player != default;
 
@@ -121,6 +132,8 @@ public class SettingsViewModel
         }
     }
 
+    public DelegateCommand RemoveCommand { get; }
+
     public DelegateCommand<PlayerColorType> SelectColorCommand { get; }
 
     public override string Title => Titel;
@@ -135,10 +148,15 @@ public class SettingsViewModel
 
     #region Public Methods
 
+    // Pending assignments are dropped, e.g. if the pane gets closed
+    public void Cancel()
+    {
+        Service?.CancelListening();
+    }
+
     public void Set(Player player)
     {
-        if (player != default
-            && this.player != player)
+        if (this.player != player)
         {
             // Pending assignments belong to the previous player
             Service?.CancelListening();
@@ -146,6 +164,16 @@ public class SettingsViewModel
             this.player = player;
 
             Refresh();
+        }
+    }
+
+    // Drops the player, if it is not part of the grid anymore
+    public void Validate()
+    {
+        if (player != default
+            && !player.IsAttached())
+        {
+            Set(default);
         }
     }
 
@@ -183,6 +211,16 @@ public class SettingsViewModel
         foreach (var option in Colors)
         {
             option.IsSelected = option.ColorType == color;
+        }
+    }
+
+    private async Task RemoveAsync()
+    {
+        // The pane closes itself, as soon as the grid reports the removal
+        if (gridService != default
+            && player != default)
+        {
+            await gridService.RemoveCellAsync(player);
         }
     }
 

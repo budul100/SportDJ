@@ -44,7 +44,10 @@
         <dt:StackViewModel />
     </Design.DataContext>
 
-    <DockPanel Margin="{StaticResource ContentMargin}" LastChildFill="True">
+    <DockPanel
+        Margin="{StaticResource ContentMargin}"
+        IsEnabled="{Binding IsActive}"
+        LastChildFill="True">
 
         <Grid
             Margin="{StaticResource InnerMargin}"
