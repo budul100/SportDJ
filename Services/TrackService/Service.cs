@@ -258,7 +258,11 @@ public class Service
     {
         if (track?.IsRendered == false)
         {
+            var start = System.Diagnostics.Stopwatch.GetTimestamp();
+
             track.Render();
+
+            System.Diagnostics.Trace.WriteLine($"[Wave] Rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
 
             if (track.Bitmap != default)
             {

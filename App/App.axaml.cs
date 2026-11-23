@@ -2,11 +2,13 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using SportDJ.App.Ioc;
 using SportDJ.App.ViewModels;
 using SportDJ.App.Views;
@@ -27,10 +29,12 @@ public class App
 {
     #region Private Fields
 
+    private readonly Stopwatch startupWatch = new();
+
     private IContainerProvider container;
     private IClassicDesktopStyleApplicationLifetime desktop;
+
     private MainView mainWindow;
-    private SplashView splashWindow;
 
     #endregion Private Fields
 
@@ -49,6 +53,8 @@ public class App
 
     public override void Initialize()
     {
+        startupWatch.Start();
+
         AvaloniaXamlLoader.Load(this);
 
         // The previewer only needs the styles, not the module graph
@@ -57,7 +63,11 @@ public class App
             return;
         }
 
+        LogStartup("XAML loaded");
+
         container = CreateContainer();
+
+        LogStartup("Container built");
 
         // Views get their view models from the container, so this has to be set before the first view is created
         ViewModelLocator.Resolver = type => container.Resolve(type);
@@ -66,8 +76,12 @@ public class App
             ? container.Resolve<MainView>()
             : default; // For Linux Framebuffer or DRM: container.Resolve<MainControl>();
 
+        LogStartup("MainView created");
+
         Modules.DefinitionsModule.Module.Initialize(container);
         Modules.SettingsModule.Module.Initialize(container);
+
+        LogStartup("Modules initialized");
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -78,14 +92,6 @@ public class App
             && container != default)
         {
             desktop.Startup += OnStartup;
-
-            if (!Debugger.IsAttached)
-            {
-                splashWindow = container.Resolve<SplashView>();
-
-                desktop.MainWindow = splashWindow;
-                splashWindow.Show();
-            }
 
             var dispatcherService = container.Resolve<IDispatcherService>();
             Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
@@ -139,6 +145,9 @@ public class App
 
         RegisterDefinitionsModule(registry);
 
+        // One instance, created at startup (see the settings module), the lazily created view picks it up
+        registry.RegisterSingleton<Modules.SettingsModule.ViewModels.SettingsViewModel>();
+
         return registry.Build();
     }
 
@@ -183,7 +192,14 @@ public class App
             var mainViewModel = container.Resolve<MainViewModel>();
             mainViewModel.Initialize(settingsPath);
 
+            LogStartup("MainViewModel initialized");
+
             desktop.MainWindow = mainWindow;
+
+            // Without Prism nobody shows the shell, so this has to happen explicitly
+            mainWindow.Show();
+
+            LogStartup("Main window shown");
 
             var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
             var iconUri = $"avares://{assemblyName}/Assets/{assemblyName}.png";
@@ -193,17 +209,26 @@ public class App
                 window: mainWindow,
                 iconUri: iconUri);
 
-            splashWindow?.Close();
-
             var eventAggregator = container.Resolve<IEventAggregator>();
             eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
         catch (TaskCanceledException)
         {
             desktop.MainWindow = default;
-
-            splashWindow?.Close();
         }
+        catch (Exception exception)
+        {
+            // Otherwise the exception disappears silently in the Task.Run and the app just shows nothing
+            var capturedException = ExceptionDispatchInfo.Capture(exception);
+
+            Dispatcher.UIThread.Post(() => capturedException.Throw());
+        }
+    }
+
+    private void LogStartup(string phase)
+    {
+        // Trace (not Debug) also works in release builds, e.g. with DebugView
+        Trace.WriteLine($"[Startup] {startupWatch.ElapsedMilliseconds,6} ms  {phase}");
     }
 
     private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)

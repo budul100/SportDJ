@@ -1,7 +1,7 @@
 {
   "profiles": {
-    "App": {
-      "commandName": "Project",
+    "App (with empty settings)": {
+      "commandName": "Project"
     },
     "App (with full settings)": {
       "commandName": "Project",

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -97,9 +97,9 @@ internal static class TrackExtensions
                         track.IsRendered = true;
                     }
                 }
-                catch
+                catch (Exception exception)
                 {
-                    //System.Diagnostics.Debug.WriteLine($"Render Error: {ex.Message}");
+                    System.Diagnostics.Trace.WriteLine($"[Wave] Render failed for {track.Path}: {exception}");
                 }
             }
 

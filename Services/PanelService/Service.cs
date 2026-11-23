@@ -33,7 +33,7 @@ public class Service(IEventAggregator eventAggregator)
             key: serviceType,
             value: out var registration))
         {
-            activeViews[registration.Type] = registration.View;
+            activeViews[registration.Type] = registration.GetView();
 
             SetVisibility(
                 type: registration.Type,
@@ -119,9 +119,17 @@ public class Service(IEventAggregator eventAggregator)
     public void Register<TService>(PanelType type, Control view, Action action = default)
     {
         registrations[typeof(TService)] = new Registration(
-            Type: type,
-            View: view,
-            Action: action);
+            type: type,
+            viewFactory: () => view,
+            action: action);
+    }
+
+    public void Register<TService>(PanelType type, Func<Control> viewFactory, Action action = default)
+    {
+        registrations[typeof(TService)] = new Registration(
+            type: type,
+            viewFactory: viewFactory,
+            action: action);
     }
 
     #endregion Public Methods
@@ -151,10 +159,4 @@ public class Service(IEventAggregator eventAggregator)
     }
 
     #endregion Private Methods
-
-    #region Private Classes
-
-    private sealed record Registration(PanelType Type, Control View, Action Action);
-
-    #endregion Private Classes
 }

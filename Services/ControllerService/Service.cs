@@ -315,7 +315,12 @@ public class Service
     {
         var name = sessionService?.Contents?.ControllerName;
 
-        Set(name);
+        try
+        {
+            Set(name);
+        }
+        catch (Exception)
+        { }
     }
 
     private void OnKeyPressed(Key key, StrokeType type)

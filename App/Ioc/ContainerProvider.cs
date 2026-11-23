@@ -23,7 +23,9 @@ public class ContainerProvider(ContainerRegistry registry)
     public object GetService(Type serviceType)
     {
         return registry.Transients.TryGetValue(serviceType, out var implementationType)
-            ? ActivatorUtilities.CreateInstance(this, implementationType)
+            ? ConstructionTracer.Create(
+                type: implementationType,
+                factory: () => ActivatorUtilities.CreateInstance(this, implementationType))
             : serviceProvider.GetService(serviceType);
     }
 
@@ -40,7 +42,9 @@ public class ContainerProvider(ContainerRegistry registry)
             && type.IsClass
             && !type.IsAbstract)
         {
-            result = ActivatorUtilities.CreateInstance(this, type);
+            result = ConstructionTracer.Create(
+                type: type,
+                factory: () => ActivatorUtilities.CreateInstance(this, type));
         }
 
         return result

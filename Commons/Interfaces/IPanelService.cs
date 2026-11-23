@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using SportDJ.Commons.Enums;
 
@@ -21,6 +21,11 @@ public interface IPanelService
     bool IsVisible<TService>();
 
     void Register<TService>(PanelType type, Control view, Action action = default);
+
+    /// <summary>
+    /// Registers a view which is created on first activation, so expensive views do not delay the startup.
+    /// </summary>
+    void Register<TService>(PanelType type, Func<Control> viewFactory, Action action = default);
 
     #endregion Public Methods
 }

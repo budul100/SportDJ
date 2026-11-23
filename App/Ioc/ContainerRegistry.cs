@@ -39,20 +39,23 @@ public class ContainerRegistry
         Transients[typeof(TService)] = typeof(TImplementation);
 
         // Also known to the service provider, so singletons can get it injected
-        services.AddTransient<TService, TImplementation>();
+        services.AddTransient<TService>(
+            provider => (TImplementation)Create(provider, typeof(TImplementation)));
     }
 
     public void RegisterSingleton<TService>()
         where TService : class
     {
-        services.AddSingleton<TService>();
+        services.AddSingleton<TService>(
+            provider => (TService)Create(provider, typeof(TService)));
     }
 
     public void RegisterSingleton<TService, TImplementation>()
         where TService : class
         where TImplementation : class, TService
     {
-        services.AddSingleton<TService, TImplementation>();
+        services.AddSingleton<TService>(
+            provider => (TImplementation)Create(provider, typeof(TImplementation)));
     }
 
     public void RegisterSingleton(Type service, Type implementation, string name)
@@ -60,7 +63,7 @@ public class ContainerRegistry
         services.AddKeyedSingleton(
             serviceType: service,
             serviceKey: name,
-            implementationType: implementation);
+            implementationFactory: (provider, _) => Create(provider, implementation));
     }
 
     public void RegisterSingleton<TService>(TService instance)
@@ -70,4 +73,15 @@ public class ContainerRegistry
     }
 
     #endregion Public Methods
+
+    #region Private Methods
+
+    private static object Create(IServiceProvider provider, Type implementation)
+    {
+        return ConstructionTracer.Create(
+            type: implementation,
+            factory: () => ActivatorUtilities.CreateInstance(provider, implementation));
+    }
+
+    #endregion Private Methods
 }
