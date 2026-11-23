@@ -1,7 +1,7 @@
 ﻿<Set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<Grid Name="Damen">
 		<Cells>
-			<Cell xsi:type="Player" Column="0" Row="0" IsForeground="false" IsLoop="false" KeyCode="NumPad4" Name="Gast" ResetPosition="false">
+			<Cell xsi:type="Player" Column="0" Row="0" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Gast" ResetPosition="false">
 				<Key>
 					<Type>Note</Type>
 					<Channel>10</Channel>
@@ -11,7 +11,7 @@
 					<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3</Path>
 				</Paths>
 			</Cell>
-			<Cell xsi:type="Player" Column="2" Row="1" IsForeground="true" IsLoop="false" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
+			<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
 				<Key>
 					<Type>Note</Type>
 					<Channel>0</Channel>
