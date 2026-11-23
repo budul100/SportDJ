@@ -369,7 +369,8 @@ public class SettingsViewModel
         Device = Devices?
             .SingleOrDefault(d => d.Name == outputService?.Device?.Name);
 
-        if (Device == default)
+        if (Device == default
+            && Devices?.Any() == true)
         {
             panelService.Activate<IStorageService<Session>>();
         }
