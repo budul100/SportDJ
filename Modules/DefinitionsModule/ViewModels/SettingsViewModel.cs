@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using SportDJ.Commons.Assets;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Extensions;
@@ -27,6 +29,11 @@ public class SettingsViewModel
 
     public SettingsViewModel(IEventAggregator eventAggregator, IKeyListenService keyListenService)
     {
+        Colors = Enum.GetValues<PlayerColorType>()
+            .Select(c => new ColorOptionViewModel(c)).ToArray();
+
+        SelectColorCommand = new DelegateCommand<PlayerColorType>(SelectColor);
+
         ListenKeyboardCommand = new DelegateCommand(ToggleKeyboard);
         ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
         ListenMidiCommand = new DelegateCommand(ToggleMidi);
@@ -54,6 +61,8 @@ public class SettingsViewModel
     public DelegateCommand ClearKeyboardCommand { get; }
 
     public DelegateCommand ClearMidiCommand { get; }
+
+    public ColorOptionViewModel[] Colors { get; }
 
     public bool IsActive => player != default;
 
@@ -120,6 +129,8 @@ public class SettingsViewModel
         }
     }
 
+    public DelegateCommand<PlayerColorType> SelectColorCommand { get; }
+
     public override string Title => Titel;
 
     #endregion Public Properties
@@ -176,6 +187,21 @@ public class SettingsViewModel
         RaisePropertyChanged(nameof(MidiButtonText));
         RaisePropertyChanged(nameof(MidiText));
         RaisePropertyChanged(nameof(Name));
+
+        var color = Service?.Color ?? default;
+
+        foreach (var option in Colors)
+        {
+            option.IsSelected = option.ColorType == color;
+        }
+    }
+
+    private void SelectColor(PlayerColorType colorType)
+    {
+        if (Service != default)
+        {
+            Service.Color = colorType;
+        }
     }
 
     private void ToggleKeyboard()

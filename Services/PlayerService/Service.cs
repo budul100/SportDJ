@@ -138,6 +138,24 @@ public class Service
 
     #region Public Properties
 
+    public PlayerColorType Color
+    {
+        get => player?.Color ?? default;
+
+        set
+        {
+            if (player != default
+                && player.Color != value)
+            {
+                player.Color = value;
+
+                settingsService.Save();
+
+                UpdateContent();
+            }
+        }
+    }
+
     public IEnumerable<Entry> Entries => stackService.Entries;
 
     public bool HasPaths => player?.Paths?.Count > 0;
@@ -153,11 +171,6 @@ public class Service
     public bool IsAvailable => signalService?.Track != default;
 
     public bool IsEnding => signalService?.IsEnding == true;
-
-    public bool IsListeningKeyboard => player != default
-        && keyListenService?.IsListening(player) == true;
-
-    public bool IsListeningMidi => isListeningMidi;
 
     public bool IsOverlay
     {
@@ -178,6 +191,11 @@ public class Service
             }
         }
     }
+
+    public bool IsListeningKeyboard => player != default
+        && keyListenService?.IsListening(player) == true;
+
+    public bool IsListeningMidi => isListeningMidi;
 
     public bool IsPlaying => signalService?.IsPlaying == true;
 

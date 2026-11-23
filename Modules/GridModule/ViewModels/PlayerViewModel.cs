@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
@@ -8,6 +9,7 @@ using SportDJ.Commons.Events.Output;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Stack;
+using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
@@ -164,6 +166,9 @@ public class PlayerViewModel
 
     public virtual string Remaining => playerService?.Remaining?.ToString(Constants.FormatDuration);
 
+    // Idle background of the player surface
+    public IBrush SurfaceBrush => (playerService?.Color ?? default).GetBrush();
+
     public DelegateCommand ShowSettingsCommand { get; }
 
     public DelegateCommand ShowStackCommand { get; }
@@ -302,6 +307,7 @@ public class PlayerViewModel
 
         RaisePropertyChanged(nameof(Name));
         RaisePropertyChanged(nameof(IsOverlay));
+        RaisePropertyChanged(nameof(SurfaceBrush));
         RaisePropertyChanged(nameof(Key));
         RaisePropertyChanged(nameof(KeyCode));
 

@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Interfaces;
 using SportDJ.Commons.Models.Records;
@@ -12,6 +14,10 @@ public class Player
     : Cell, INameable, IKeyable
 {
     #region Public Properties
+
+    [DefaultValue(PlayerColorType.None)]
+    [XmlAttribute]
+    public PlayerColorType Color { get; set; }
 
     [XmlIgnore]
     public override int Columns => 1;

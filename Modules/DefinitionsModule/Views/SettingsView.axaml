@@ -23,6 +23,18 @@
 
     <UserControl.Styles>
         <mat:MaterialIconStyles />
+
+        <Style Selector="Button.Swatch">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.Swatch.IsSelected">
+            <Setter Property="BorderBrush" Value="White" />
+        </Style>
     </UserControl.Styles>
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -48,6 +60,31 @@
                     KeyDown="OnNameKeyDown"
                     MaxLength="{Binding MaxLengthName}"
                     Text="{Binding Name, Mode=TwoWay}" />
+
+                <TextBlock
+                    HorizontalAlignment="Left"
+                    Classes="Caption"
+                    Text="Color" />
+
+                <ItemsControl ItemsSource="{Binding Colors}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ColorOptionViewModel">
+                            <Button
+                                Background="{Binding Brush}"
+                                Classes="Swatch"
+                                Classes.IsSelected="{Binding IsSelected}"
+                                Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).SelectColorCommand}"
+                                CommandParameter="{Binding ColorType}"
+                                Focusable="False"
+                                ToolTip.Tip="{Binding Name}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
             </StackPanel>
 

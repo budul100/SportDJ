@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Structure;
@@ -11,6 +12,8 @@ public interface IPlayerService
     : IDisposable
 {
     #region Public Properties
+
+    PlayerColorType Color { get; set; }
 
     IEnumerable<Entry> Entries { get; }
 

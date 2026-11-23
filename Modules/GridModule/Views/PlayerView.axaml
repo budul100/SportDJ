@@ -25,6 +25,18 @@
 
     <UserControl.Styles>
         <mat:MaterialIconStyles />
+
+        <!--
+            The player color is the idle background. It is set as style (not as local value),
+            so the playing state can still override it. Playing is repeated after the color,
+            because the last matching style wins.
+        -->
+        <Style Selector="Border.PlayerSurface" x:DataType="vm:PlayerViewModel">
+            <Setter Property="Background" Value="{Binding SurfaceBrush}" />
+        </Style>
+        <Style Selector="Border.PlayerSurface.IsPlaying">
+            <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
+        </Style>
     </UserControl.Styles>
 
     <Design.DataContext>
@@ -144,7 +156,6 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Classes="PlayerSurface"
-                Classes.IsOverlay="{Binding IsOverlay}"
                 Classes.IsPlaying="{Binding IsPlaying}">
 
                 <Button
@@ -224,13 +235,23 @@
                                 VerticalAlignment="Center"
                                 Stretch="Uniform"
                                 StretchDirection="DownOnly">
-                                <TextBlock
+                                <StackPanel
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
-                                    Focusable="False"
-                                    FontSize="{StaticResource FontSizeState}"
-                                    FontWeight="{StaticResource FontWeightLabel}"
-                                    Text="{Binding Remaining}" />
+                                    Orientation="Horizontal"
+                                    Spacing="2">
+                                    <mat:MaterialIcon
+                                        Width="{StaticResource FontSizeState}"
+                                        Height="{StaticResource FontSizeState}"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding IsOverlay}"
+                                        Kind="ChevronUpBoxOutline" />
+                                    <TextBlock
+                                        Focusable="False"
+                                        FontSize="{StaticResource FontSizeState}"
+                                        FontWeight="{StaticResource FontWeightLabel}"
+                                        Text="{Binding Remaining}" />
+                                </StackPanel>
                             </Viewbox>
                         </Grid>
 
