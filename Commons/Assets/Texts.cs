@@ -13,6 +13,7 @@ public static class Texts
     public const string CellGroupMessage = "Shall the player be put into a new group?";
     public const string CellRemoveHeader = "Remove element";
     public const string CellRemoveMessage = "Shall the element be removed?";
+    public const string CellRemoveTabMessage = "Shall the element be removed? It is the last player of its tab, so the tab is removed as well.";
 
     public const string PlayerClearHeader = "Clear player";
     public const string PlayerClearMessage = "Shall all files of the player be removed?";

@@ -16,11 +16,13 @@ public class LayoutViewModel
 {
     #region Private Fields
 
+    private const string NewGroupText = "New group";
     private const string Titel = "Layout";
 
     private readonly IGridService gridService;
 
     private Cell cell;
+    private bool resetPending;
     private GroupOption selectedTarget;
     private Grid tab;
 
@@ -38,8 +40,8 @@ public class LayoutViewModel
         MoveCellCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.MoveCell(cell, o));
 
-        GroupCommand = new DelegateCommand(
-            executeMethod: async () => await GroupAsync());
+        ConfirmGroupCommand = new DelegateCommand(
+            executeMethod: async () => await ConfirmGroupAsync());
 
         AddTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.AddGrid(tab, o));
@@ -53,12 +55,7 @@ public class LayoutViewModel
         RemoveTabCommand = new DelegateCommand(
             executeMethod: async () => await RemoveTabAsync());
 
-        MoveIntoGroupCommand = new DelegateCommand(MoveIntoGroup);
-
-        MoveOutOfGroupCommand = new DelegateCommand(
-            executeMethod: () => gridService?.MoveOutOfGroup(tab));
-
-        // The names of the tabs are shown next to the group button
+        // The names of the tabs are shown in the selection of the groups
         eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => Refresh(),
             threadOption: ThreadOption.UIThread,
@@ -73,37 +70,37 @@ public class LayoutViewModel
 
     public DelegateCommand<OrientationType> AddTabCommand { get; }
 
-    // A player, which is the only cell of its grid, cannot leave it
-    public bool CanMoveIntoGroup => SelectedTarget != default
-        && (tab != default
-            || (cell is Player player && player.Grid?.Cells?.Count > 1));
-
-    // The last tab of a group cannot be removed, the group would be empty
-    // A tab can only leave its group if the group keeps another tab
-    public bool CanMoveOutOfGroup => tab?.Group?.Grids?.Count > 1;
-
-    public bool CanRemoveTab => tab?.Group?.Grids?.Count > 1;
-
-    public DelegateCommand GroupCommand { get; }
-
-    /// <summary>
-    /// Names of the tabs of the group the player belongs to, empty for a player outside of a group.
-    /// </summary>
-    public string GroupText
+    // New group or move into the selected group is only offered if it changes something
+    public bool CanConfirmGroup
     {
         get
         {
-            var group = (cell as Player)?.Grid?.Group;
+            if (selectedTarget == default)
+            {
+                return false;
+            }
 
-            return group == default
-                ? default
-                : string.Join(
-                    separator: ", ",
-                    values: group.Grids.Select(g => g.Name));
+            if (tab != default)
+            {
+                // A tab, which is alone in its group, is in a group of its own already
+                return selectedTarget.IsNew
+                    ? tab.Group?.Grids?.Count > 1
+                    : selectedTarget.Group != tab.Group;
+            }
+
+            if (cell is Player player)
+            {
+                // The only player of the root grid cannot leave it, the grid would be empty
+                return selectedTarget.IsNew
+                    || (selectedTarget.Group != player.Grid?.Group
+                        && (player.Grid?.Cells?.Count > 1 || player.Grid?.Group != default));
+            }
+
+            return false;
         }
     }
 
-    public bool HasGroup => !string.IsNullOrEmpty(GroupText);
+    public DelegateCommand ConfirmGroupCommand { get; }
 
     public bool IsActive => cell != default;
 
@@ -114,16 +111,12 @@ public class LayoutViewModel
 
     public DelegateCommand<OrientationType> MoveCellCommand { get; }
 
-    public DelegateCommand MoveIntoGroupCommand { get; }
-
-    public DelegateCommand MoveOutOfGroupCommand { get; }
-
     public DelegateCommand<OrientationType> MoveTabCommand { get; }
 
     // Removes the player, only for players
     public DelegateCommand RemoveCellCommand { get; }
 
-    // Removes the tab with its players, only for tabs
+    // Removes the tab with all of its players, only for tabs
     public DelegateCommand RemoveTabCommand { get; }
 
     public GroupOption SelectedTarget
@@ -132,19 +125,30 @@ public class LayoutViewModel
 
         set
         {
-            if (SetProperty(ref selectedTarget, value))
+            // The selection control resets its selection, while the items are exchanged
+            if ((value != default || Targets.Length == 0)
+                && SetProperty(ref selectedTarget, value))
             {
-                RaisePropertyChanged(nameof(CanMoveIntoGroup));
+                RaisePropertyChanged(nameof(CanConfirmGroup));
             }
         }
     }
 
-    // The groups, which the player or tab can be moved into
+    // The groups in the tree and as last entry the new group
     public GroupOption[] Targets { get; private set; } = [];
 
     public override string Title => Titel;
 
     #endregion Public Properties
+
+    #region Private Properties
+
+    // The group of the tab or of the tab of the player, empty for a player outside of a group
+    private Group CurrentGroup => tab != default
+        ? tab.Group
+        : (cell as Player)?.Grid?.Group;
+
+    #endregion Private Properties
 
     #region Public Methods
 
@@ -163,7 +167,7 @@ public class LayoutViewModel
             this.cell = cell;
             tab = default;
 
-            Refresh();
+            Refresh(reset: true);
         }
     }
 
@@ -176,7 +180,7 @@ public class LayoutViewModel
             this.tab = tab;
             cell = tab.Group;
 
-            Refresh();
+            Refresh(reset: true);
         }
     }
 
@@ -208,100 +212,123 @@ public class LayoutViewModel
 
     #region Private Methods
 
-    private static void CollectGroups(Grid grid, Grid excluded, Group own, List<GroupOption> result)
+    private static void CollectGroups(Grid grid, Grid excluded, List<GroupOption> result)
     {
         foreach (var group in grid.Cells.OfType<Group>())
         {
-            if (group != own)
-            {
-                var text = string.Join(
-                    separator: ", ",
-                    values: group.Grids.Select(g => g.Name));
+            var text = string.Join(
+                separator: ", ",
+                values: group.Grids.Select(g => g.Name));
 
-                // Groups with the same tabs are numbered, so they can be told apart
-                var count = result.Count(o => o.Text == text || o.Text.StartsWith($"{text} ("));
+            // Groups with the same tabs are numbered, so they can be told apart
+            var count = result.Count(o => o.Text == text || o.Text.StartsWith($"{text} ("));
 
-                result.Add(new GroupOption(
-                    Group: group,
-                    Text: count > 0
-                        ? $"{text} ({count + 1})"
-                        : text));
-            }
+            result.Add(new GroupOption(
+                Group: group,
+                Text: count > 0
+                    ? $"{text} ({count + 1})"
+                    : text));
 
             foreach (var groupTab in group.Grids.Where(g => g != excluded))
             {
                 CollectGroups(
                     grid: groupTab,
                     excluded: excluded,
-                    own: own,
                     result: result);
             }
         }
     }
 
-    private async Task GroupAsync()
+    private async Task ConfirmGroupAsync()
     {
+        var target = selectedTarget;
+
         if (gridService != default
-            && cell is Player player)
+            && target != default)
         {
-            await gridService.GroupAsync(player);
-        }
-    }
+            // The selection shows the current group again, as soon as the grid reports the change
+            resetPending = true;
 
-    private void MoveIntoGroup()
-    {
-        var group = SelectedTarget?.Group;
-
-        if (group != default)
-        {
             if (tab != default)
             {
-                gridService?.MoveIntoGroup(tab, group);
+                if (target.IsNew)
+                {
+                    gridService.MoveOutOfGroup(tab);
+                }
+                else
+                {
+                    gridService.MoveIntoGroup(tab, target.Group);
+                }
             }
             else if (cell is Player player)
             {
-                gridService?.MoveIntoGroup(player, group);
+                if (target.IsNew)
+                {
+                    await gridService.GroupAsync(player);
+                }
+                else
+                {
+                    gridService.MoveIntoGroup(player, target.Group);
+                }
             }
         }
     }
 
-    private void Refresh()
+    private void Refresh(bool reset = false)
     {
-        RefreshTargets();
+        RefreshTargets(reset || resetPending);
 
-        RaisePropertyChanged(nameof(CanMoveIntoGroup));
-        RaisePropertyChanged(nameof(CanMoveOutOfGroup));
-        RaisePropertyChanged(nameof(CanRemoveTab));
-        RaisePropertyChanged(nameof(GroupText));
-        RaisePropertyChanged(nameof(HasGroup));
+        resetPending = false;
+
+        RaisePropertyChanged(nameof(CanConfirmGroup));
         RaisePropertyChanged(nameof(IsActive));
         RaisePropertyChanged(nameof(IsPlayer));
         RaisePropertyChanged(nameof(IsTab));
     }
 
-    private void RefreshTargets()
+    private void RefreshTargets(bool reset)
     {
         var result = new List<GroupOption>();
 
         if (gridService?.Grid != default
             && cell != default)
         {
-            // A tab neither moves into its own group nor into a group, which it contains itself
+            // A tab does not move into a group, which it contains itself
             CollectGroups(
                 grid: gridService.Grid,
                 excluded: tab,
-                own: tab?.Group,
                 result: result);
+
+            result.Add(new GroupOption(
+                Group: default,
+                Text: NewGroupText));
         }
 
-        Targets = [.. result];
+        var targets = result.ToArray();
 
-        // The selection stays, if its group is still a target
-        selectedTarget = Targets
-            .FirstOrDefault(t => t.Group == selectedTarget?.Group)
-            ?? Targets.FirstOrDefault();
+        var selection = default(GroupOption);
+
+        if (!reset
+            && selectedTarget != default)
+        {
+            selection = targets
+                .FirstOrDefault(t => t.IsNew == selectedTarget.IsNew
+                    && t.Group == selectedTarget.Group);
+        }
+
+        // Without a choice the current group is shown, outside of a group the new one
+        selection ??= targets
+            .FirstOrDefault(t => !t.IsNew
+                && t.Group == CurrentGroup)
+            ?? targets.LastOrDefault();
+
+        Targets = targets;
 
         RaisePropertyChanged(nameof(Targets));
+
+        // The control has reset its selection by the new items
+        selectedTarget = selection;
+
         RaisePropertyChanged(nameof(SelectedTarget));
     }
 

@@ -9,19 +9,28 @@ internal static class PlayerExtensions
 
     /// <summary>
     /// Puts the player into a new tab at the end of the group.
+    /// The old tab of the player is dissolved, if it has no other cells.
     /// </summary>
     public static Grid MoveToGroup(this Player player, Group group)
     {
+        var source = player.Grid;
+
         var tab = group.Add(
             anchor: group.Grids.LastOrDefault());
 
-        player.Grid.Cells.Remove(player);
+        source.Cells.Remove(player);
 
         player.Column = 0;
         player.Row = 0;
         player.Grid = tab;
 
         tab.Cells.Add(player);
+
+        if (source.Cells.Count == 0
+            && source.Group != default)
+        {
+            source.Remove();
+        }
 
         return tab;
     }

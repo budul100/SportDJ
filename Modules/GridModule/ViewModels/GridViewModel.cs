@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Panel;
@@ -254,6 +255,9 @@ public class GridViewModel
         }
         else
         {
+            // The tab, whose settings are shown, is the selected one as well
+            Reveal();
+
             eventAggregator?.GetEvent<TabVisibleEvent>().Publish(grid);
 
             panelService?.Activate<IGridService>();

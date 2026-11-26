@@ -33,50 +33,14 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- Order: group, move tab, move, remove, add tab, add player. The tab parts are only shown if the pane was opened from a tab of a group -->
+            <!-- Order: group, move tab, move, add tab, add player, remove. The tab parts are only shown if the pane was opened from a tab of a group -->
 
-            <!-- Group: a player gets its own group, players and tabs move into other groups, tabs leave their group -->
+            <!-- Group: shows the current group, the player or tab moves into another group or into a new one -->
             <StackPanel Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="Group" />
                 <Separator />
 
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
-
-                    <Button
-                        Command="{Binding GroupCommand}"
-                        Focusable="False"
-                        IsVisible="{Binding IsPlayer}"
-                        ToolTip.Tip="Put player into a new group">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="Tab" />
-                    </Button>
-
-                    <Button
-                        Command="{Binding MoveOutOfGroupCommand}"
-                        Focusable="False"
-                        IsEnabled="{Binding CanMoveOutOfGroup}"
-                        IsVisible="{Binding IsTab}"
-                        ToolTip.Tip="Move tab out of its group into a group of its own">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="Logout" />
-                    </Button>
-
-                    <!-- Shows the group, which the player belongs to, hidden without a group -->
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Classes="Caption"
-                        IsVisible="{Binding HasGroup}"
-                        Text="{Binding GroupText, StringFormat='Group: {0}'}"
-                        TextTrimming="CharacterEllipsis" />
-
-                </StackPanel>
-
-                <!-- The target group, the player or tab is moved into -->
                 <Grid ColumnDefinitions="*,Auto">
 
                     <ComboBox
@@ -96,14 +60,14 @@
 
                     <Button
                         Grid.Column="1"
-                        Command="{Binding MoveIntoGroupCommand}"
+                        Command="{Binding ConfirmGroupCommand}"
                         Focusable="False"
-                        IsEnabled="{Binding CanMoveIntoGroup}"
-                        ToolTip.Tip="Move into the selected group">
+                        IsEnabled="{Binding CanConfirmGroup}"
+                        ToolTip.Tip="Move into the selected group or create a new group">
                         <mat:MaterialIcon
                             Width="{StaticResource MediumIconSize}"
                             Height="{StaticResource MediumIconSize}"
-                            Kind="Login" />
+                            Kind="Check" />
                     </Button>
 
                 </Grid>
@@ -145,41 +109,6 @@
                     HorizontalAlignment="Left"
                     CenterKind="ArrowAll"
                     Command="{Binding MoveCellCommand}" />
-
-            </StackPanel>
-
-            <!-- Remove: the player or the tab with its players, whatever the pane was opened from. Dark red, on the left edge -->
-            <StackPanel Spacing="{StaticResource SpacingSmall}">
-
-                <TextBlock Classes="Section" Text="Remove" />
-                <Separator />
-
-                <Button
-                    HorizontalAlignment="Left"
-                    Classes="Danger"
-                    Command="{Binding RemoveCellCommand}"
-                    Focusable="False"
-                    IsVisible="{Binding IsPlayer}"
-                    ToolTip.Tip="Remove player">
-                    <mat:MaterialIcon
-                        Width="{StaticResource MediumIconSize}"
-                        Height="{StaticResource MediumIconSize}"
-                        Kind="Delete" />
-                </Button>
-
-                <Button
-                    HorizontalAlignment="Left"
-                    Classes="Danger"
-                    Command="{Binding RemoveTabCommand}"
-                    Focusable="False"
-                    IsEnabled="{Binding CanRemoveTab}"
-                    IsVisible="{Binding IsTab}"
-                    ToolTip.Tip="Remove tab with its players">
-                    <mat:MaterialIcon
-                        Width="{StaticResource MediumIconSize}"
-                        Height="{StaticResource MediumIconSize}"
-                        Kind="Delete" />
-                </Button>
 
             </StackPanel>
 
@@ -227,6 +156,39 @@
 
             </StackPanel>
 
+            <!-- Remove: the player or the tab with its players, whatever the pane was opened from. Dark red, on the left edge -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Remove" />
+                <Separator />
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Classes="Danger"
+                    Command="{Binding RemoveCellCommand}"
+                    Focusable="False"
+                    IsVisible="{Binding IsPlayer}"
+                    ToolTip.Tip="Remove player">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Classes="Danger"
+                    Command="{Binding RemoveTabCommand}"
+                    Focusable="False"
+                    IsVisible="{Binding IsTab}"
+                    ToolTip.Tip="Remove tab with all of its players">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

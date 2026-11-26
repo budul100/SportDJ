@@ -38,7 +38,7 @@ public class Service
     private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
-    private readonly Lock lockKeys = new();
+    private readonly object lockKeys = new();
     private readonly HashSet<Key> registeredKeys = [];
     private readonly IStorageService<Set> settingsService;
 
@@ -227,8 +227,10 @@ public class Service
 
     public void MoveIntoGroup(Player player, Group group)
     {
-        // A player, which is the only cell of its grid, cannot leave it, the grid would be empty
-        if (player?.Grid?.Cells?.Count > 1
+        // The only player of the root grid cannot leave it, the grid would be empty.
+        // The only player of a tab can, the tab is dissolved then.
+        if (player?.Grid != default
+            && (player.Grid.Cells.Count > 1 || player.Grid.Group != default)
             && group != default)
         {
             var moved = default(Grid);
@@ -256,20 +258,22 @@ public class Service
         if (cell?.Grid != default)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
-                contentMessage: Texts.CellRemoveMessage,
+                contentMessage: IsLastOfTab(cell)
+                    ? Texts.CellRemoveTabMessage
+                    : Texts.CellRemoveMessage,
                 contentTitle: Texts.CellRemoveHeader);
 
             if (result == ButtonResult.Yes)
             {
-                Apply(() => cell.Grid.Cells.Remove(cell));
+                Apply(() => RemoveCell(cell));
             }
         }
     }
 
     public async Task RemoveGridAsync(Grid grid)
     {
-        // The last tab of a group cannot be removed, the group would be empty
-        if (grid?.Group?.Grids?.Count > 1)
+        // The group disappears together with its last tab
+        if (grid?.Group != default)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Texts.TabRemoveMessage,
@@ -317,6 +321,13 @@ public class Service
 
     #region Private Methods
 
+    // The last cell of a tab takes its tab with it
+    private static bool IsLastOfTab(Cell cell)
+    {
+        return cell.Grid.Group != default
+            && cell.Grid.Cells.Count == 1;
+    }
+
     // A dimension only counts as exceeded if it is above the limit and has grown,
     // so that already oversized settings stay editable.
     private static bool IsLimitExceeded((int Columns, int Rows, int Tabs) before, (int Columns, int Rows, int Tabs) after)
@@ -324,6 +335,18 @@ public class Service
         return (after.Columns > MaxCount && after.Columns > before.Columns)
             || (after.Rows > MaxCount && after.Rows > before.Rows)
             || (after.Tabs > MaxCount && after.Tabs > before.Tabs);
+    }
+
+    private static void RemoveCell(Cell cell)
+    {
+        if (IsLastOfTab(cell))
+        {
+            cell.Grid.Remove();
+        }
+        else
+        {
+            cell.Grid.Cells.Remove(cell);
+        }
     }
 
     // Runs the change, tidies the grid and checks the limits. The change is undone

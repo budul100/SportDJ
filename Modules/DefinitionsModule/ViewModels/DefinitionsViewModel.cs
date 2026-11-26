@@ -202,6 +202,21 @@ public class DefinitionsViewModel
         }
     }
 
+    private void PublishVisible()
+    {
+        var player = settingsViewModel.Current;
+        var tab = tabSettingsViewModel.Current;
+
+        if (player != default)
+        {
+            eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(player);
+        }
+        else if (tab != default)
+        {
+            eventAggregator?.GetEvent<TabVisibleEvent>().Publish(tab);
+        }
+    }
+
     private void SetController()
     {
         SetMode(false, true);
@@ -309,15 +324,10 @@ public class DefinitionsViewModel
         }
         else if (panelService?.IsVisible<IPlayerService>() == true)
         {
-            // The players and tabs are created anew, so they have to learn again that their pane is open
-            if (player != default)
-            {
-                dispatcherService?.Post(() => eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(player));
-            }
-            else if (tab != default)
-            {
-                dispatcherService?.Post(() => eventAggregator?.GetEvent<TabVisibleEvent>().Publish(tab));
-            }
+            // The players and tabs are created anew, so they have to learn again that their pane is open.
+            // The shown element is determined when the post runs, as a new player or tab might have been
+            // selected in the meantime, which must not be reverted to the previous one.
+            dispatcherService?.Post(PublishVisible);
         }
     }
 
