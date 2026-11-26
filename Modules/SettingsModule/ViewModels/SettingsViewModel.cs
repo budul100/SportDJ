@@ -270,6 +270,33 @@ public class SettingsViewModel
 
     #region Private Methods
 
+    private async Task<bool> ConfirmOverwriteAsync(string path, bool isCurrentFileExcepted)
+    {
+        if (!File.Exists(path))
+        {
+            return true;
+        }
+
+        var fullPath = Path.GetFullPath(path);
+
+        if (isCurrentFileExcepted
+            && string.Equals(
+                a: fullPath,
+                b: settingsService.Path,
+                comparisonType: StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var result = await dialogService.GetMessageBoxResultAsync(
+            contentMessage: string.Format(Texts.SettingsOverwriteMessage, fullPath),
+            contentTitle: Texts.SettingsOverwriteHeader,
+            buttonDefinitions: ButtonEnum.YesNo,
+            enterDefaultButton: ClickEnum.No);
+
+        return result == ButtonResult.Yes;
+    }
+
     // The output service has already enumerated the devices while it was created, so they are only taken over here.
     // The controllers are enumerated in the background, the UI stays usable meanwhile.
     private async Task InitializeSettingsAsync()
@@ -323,11 +350,13 @@ public class SettingsViewModel
                 title: Texts.SettingsNewHeader,
                 defaultExtension: Constants.SettingsExtension,
                 fileTypeChoices: fileTypeFilter,
-                showOverwritePrompt: true,
+                showOverwritePrompt: false,
                 suggestedFileName: Defaults.FileNameSettings,
                 suggestedStartLocation: startLocation);
 
-            if (file != default)
+            // Here even the current file is asked for, because it would be emptied
+            if (file != default
+                && await ConfirmOverwriteAsync(file.Path.LocalPath, isCurrentFileExcepted: false))
             {
                 var path = file.Path.LocalPath;
 
@@ -375,11 +404,13 @@ public class SettingsViewModel
             title: Texts.SettingsSaveHeader,
             defaultExtension: Constants.SettingsExtension,
             fileTypeChoices: fileTypeFilter,
-            showOverwritePrompt: true,
+            showOverwritePrompt: false,
             suggestedFileName: fileName,
             suggestedStartLocation: startLocation);
 
-        if (path != default)
+        // The file in use is overwritten without asking, every other existing file only after a confirmation
+        if (path != default
+            && await ConfirmOverwriteAsync(path.Path.LocalPath, isCurrentFileExcepted: true))
         {
             sessionService.Contents.SettingsPath = path.Path.LocalPath;
 

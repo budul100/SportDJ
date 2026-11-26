@@ -160,14 +160,23 @@ public class Service<T>(IEventAggregator eventAggregator)
             : default;
     }
 
+    // Makes the path relative to the new folder and normalizes it. On another drive it stays absolute.
     private static string RebasePath(string path, string oldFolder, string newFolder)
     {
-        return !string.IsNullOrWhiteSpace(path)
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return path;
+        }
+
+        var resolved = ResolvePath(
+            path: path,
+            folder: oldFolder);
+
+        // Without a known base folder a relative path cannot be converted
+        return System.IO.Path.IsPathRooted(resolved)
             ? System.IO.Path.GetRelativePath(
                 relativeTo: newFolder,
-                path: ResolvePath(
-                    path: path,
-                    folder: oldFolder))
+                path: resolved)
             : path;
     }
 
@@ -229,21 +238,21 @@ public class Service<T>(IEventAggregator eventAggregator)
         return result;
     }
 
+    // Returns true if the settings file moves to another folder, which has to be undone if saving fails
     private bool RebasePaths(string oldFolder, string newFolder)
     {
         var result = false;
 
         if (Contents is IPathHolder holder
-            && !string.IsNullOrWhiteSpace(oldFolder)
-            && !string.IsNullOrWhiteSpace(newFolder)
-            && !string.Equals(
-                a: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(oldFolder)),
-                b: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(newFolder)),
-                comparisonType: StringComparison.OrdinalIgnoreCase))
+            && !string.IsNullOrWhiteSpace(newFolder))
         {
             holder.ConvertPaths(p => RebasePath(p, oldFolder, newFolder));
 
-            result = true;
+            result = !string.IsNullOrWhiteSpace(oldFolder)
+                && !string.Equals(
+                    a: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(oldFolder)),
+                    b: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(newFolder)),
+                    comparisonType: StringComparison.OrdinalIgnoreCase);
         }
 
         return result;
@@ -262,7 +271,7 @@ public class Service<T>(IEventAggregator eventAggregator)
             Directory.CreateDirectory(folderPath);
         }
 
-        // The stored paths are relative to the settings file, so they follow it to the new folder
+        // The paths are always stored normalized and relative to the settings file, they follow it to a new folder
         var previousFolder = GetFolder(Path);
 
         var isRebased = RebasePaths(

@@ -20,7 +20,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Sky News Theme.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Sky News Theme.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="0" IsLoop="false" IsOverlay="false" KeyCode="NumPad9" Name="Referees" ResetPosition="false">
@@ -30,7 +30,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Law &amp; Order.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Law &amp; Order.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Gast" ResetPosition="false">
@@ -40,7 +40,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2017 - Gast.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad5" Name="Heim" ResetPosition="true">
@@ -50,8 +50,8 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2024 - Heim1.mp3</Path>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2024 - Heim2.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2024 - Heim1.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\Start - Intro Damen 2024 - Heim2.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad6" Name="Warten" ResetPosition="true">
@@ -61,7 +61,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Start_Damen.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Start_Damen.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad1" Name="Einlauf" ResetPosition="false">
@@ -71,7 +71,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - 300 Violin Orchestra.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\Start - 300 Violin Orchestra.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad2" Name="Start" ResetPosition="false">
@@ -81,7 +81,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Damen\Start - Get Up!.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Damen\Start - Get Up!.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
@@ -91,7 +91,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
 								</Paths>
 							</Cell>
 						</Cells>
@@ -113,7 +113,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Home With a Vengeance.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Start - Home With a Vengeance.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="0" IsLoop="false" IsOverlay="false" KeyCode="NumPad9" Name="Referees" ResetPosition="false">
@@ -123,7 +123,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Law &amp; Order.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Law &amp; Order.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Gast" ResetPosition="false">
@@ -133,7 +133,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2025 - Gast.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2025 - Gast.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad5" Name="Heim" ResetPosition="true">
@@ -143,8 +143,8 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2024 - Heim1.mp3</Path>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2024 - Heim2.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2024 - Heim1.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Start - Intro Herren 2024 - Heim2.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad6" Name="Warten" ResetPosition="true">
@@ -154,7 +154,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Start_Herren.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Start_Herren.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad1" Name="Einlauf" ResetPosition="false">
@@ -164,7 +164,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Start - Run Boy Run - Kurz.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Start - Run Boy Run - Kurz.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad2" Name="Start" ResetPosition="false">
@@ -174,7 +174,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Start - Herren\Will.i.am, J Balvin - Let's Go.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Start - Herren\Will.i.am, J Balvin - Let's Go.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" IsLoop="false" IsOverlay="true" KeyCode="NumPad3" Name="Warten" ResetPosition="false">
@@ -184,7 +184,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Beginn\Effekt - Are You Ready.mp3</Path>
 								</Paths>
 							</Cell>
 						</Cells>
@@ -198,7 +198,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_TO-Normal.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_TO-Normal.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="0" IsLoop="false" IsOverlay="false" KeyCode="NumPadMultiply" Name="TO Knapp" ResetPosition="false">
@@ -208,7 +208,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_TO-Knapp.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_TO-Knapp.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="0" IsLoop="false" IsOverlay="false" Name="Sonstiges" ResetPosition="false">
@@ -232,7 +232,7 @@
 													<Number>0</Number>
 												</Key>
 												<Paths>
-													<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Tor - The Concert.mp3</Path>
+													<Path>..\..\..\..\..\SportDJ\Spiel_Tor\Tor - The Concert.mp3</Path>
 												</Paths>
 											</Cell>
 										</Cells>
@@ -246,7 +246,7 @@
 													<Number>0</Number>
 												</Key>
 												<Paths>
-													<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3</Path>
+													<Path>..\..\..\..\..\SportDJ\Spiel_Tor\Tor - Zombie Nation.mp3</Path>
 												</Paths>
 											</Cell>
 										</Cells>
@@ -260,7 +260,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Tor\Effekt - 3 Points.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="true" KeyCode="NumPad9" Name="Ende" ResetPosition="false">
@@ -270,7 +270,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Anheizen" ResetPosition="false">
@@ -280,7 +280,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Anheizen.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Anheizen.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="2" IsLoop="false" IsOverlay="true" KeyCode="NumPad5" Name="Team" ResetPosition="false">
@@ -290,7 +290,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Team.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Team.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad6" Name="Gegner" ResetPosition="false">
@@ -300,7 +300,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Gegner.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Gegner.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="3" IsLoop="false" IsOverlay="false" KeyCode="NumPad1" Name="Attacke" ResetPosition="false">
@@ -310,7 +310,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Angriff.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Angriff.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="3" IsLoop="false" IsOverlay="false" KeyCode="NumPad2" Name="Klatschen Kurz" ResetPosition="false">
@@ -320,7 +320,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Klatschen-Kurz.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="3" IsLoop="false" IsOverlay="false" KeyCode="NumPad3" Name="Klatschen Lang" ResetPosition="false">
@@ -330,7 +330,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Spiel_Klatschen-Lang.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Spiel_Klatschen-Lang.m3u</Path>
 								</Paths>
 							</Cell>
 						</Cells>
@@ -344,7 +344,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Besonderes\Sirene\Sirene - Basketball Buzzer.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad4" Name="Gewonnen" ResetPosition="true">
@@ -354,7 +354,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Ende_Gewonnen.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Ende_Gewonnen.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="1" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad5" Name="Unentschieden" ResetPosition="true">
@@ -364,7 +364,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Ende\Maxine Nightingale - Right Back Where We Started From.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="1" IsLoop="false" IsOverlay="false" KeyCode="NumPad6" Name="Verloren" ResetPosition="true">
@@ -374,7 +374,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Ende_Verloren.m3u</Path>
+									<Path>..\..\..\..\..\SportDJ\Ende_Verloren.m3u</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="0" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad1" Name="Sonstiges" ResetPosition="false">
@@ -392,7 +392,7 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\..\Music\SportDJ\Besonderes\_Hintergrundmusik\Michael Jackson - Don't Stop 'Til You Get Enough.mp3</Path>
+									<Path>..\..\..\..\..\Music\SportDJ\Besonderes\_Hintergrundmusik\Michael Jackson - Don't Stop 'Til You Get Enough.mp3</Path>
 								</Paths>
 							</Cell>
 							<Cell xsi:type="Player" Column="2" Row="2" IsLoop="false" IsOverlay="false" KeyCode="NumPad3" Name="Abschied" ResetPosition="true">
@@ -402,8 +402,8 @@
 									<Number>0</Number>
 								</Key>
 								<Paths>
-									<Path>C:\Users\mgr\SportDJ\Ende\Willie Nelson - The Party's Over.mp3</Path>
-									<Path>C:\Users\mgr\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Ende\Willie Nelson - The Party's Over.mp3</Path>
+									<Path>..\..\..\..\..\SportDJ\Ende\Wayne Newton - Danke Schoen.mp3</Path>
 								</Paths>
 							</Cell>
 						</Cells>
