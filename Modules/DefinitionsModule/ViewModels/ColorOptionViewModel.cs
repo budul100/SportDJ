@@ -26,7 +26,7 @@ public class ColorOptionViewModel(PlayerColorType colorType)
         set => SetProperty(ref isSelected, value);
     }
 
-    public string Name => colorType.ToString();
+    public string Name => ColorType.ToString();
 
     #endregion Public Properties
 }

@@ -187,6 +187,9 @@ public class SettingsViewModel
         set { SetProperty(ref devicesNotAvailable, value); }
     }
 
+    public bool IsActive => Options != default
+        && panelService.IsVisible<IStorageService<Session>>();
+
     public bool IsControllersLoading
     {
         get { return isControllersLoading; }
@@ -198,9 +201,6 @@ public class SettingsViewModel
         get { return isDevicesLoading; }
         private set { SetProperty(ref isDevicesLoading, value); }
     }
-
-    public bool IsActive => Options != default
-        && panelService.IsVisible<IStorageService<Session>>();
 
     public Options Options => settingsService?.Contents?.Options;
 
