@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using SportDJ.Commons.Assets;
@@ -30,7 +31,7 @@ public sealed class FileLog
         new UnboundedChannelOptions { SingleReader = true });
 
     private readonly List<LogEntry> entries = [];
-    private readonly object entriesLock = new();
+    private readonly Lock entriesLock = new();
     private readonly string folder;
     private readonly Task writer;
 

@@ -38,7 +38,7 @@ public class Service
     private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
-    private readonly object lockKeys = new();
+    private readonly Lock lockKeys = new();
     private readonly HashSet<Key> registeredKeys = [];
     private readonly IStorageService<Set> settingsService;
 

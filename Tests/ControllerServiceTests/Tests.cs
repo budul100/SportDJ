@@ -1,4 +1,3 @@
-using System.Linq;
 using Moq;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Device;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Panel;
