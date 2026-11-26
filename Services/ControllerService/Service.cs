@@ -31,14 +31,18 @@ public class Service
 
     private readonly IEventAggregator eventAggregator;
     private readonly ConcurrentDictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
-    private readonly IEnumerable<Profile> profiles;
+    private readonly Task initialUpdate;
     private readonly IStorageService<Session> sessionService;
 
     private IReadOnlyDictionary<PlayerColorType, int> colors = new Dictionary<PlayerColorType, int>();
+    private const int InitialUpdateWaitSeconds = 15;
+
+    private IEnumerable<Controller> controllers = [];
     private bool isDisposed;
     private TaskCompletionSource<Key> listenerTcs;
     private MidiIn midiIn;
     private MidiOut midiOut;
+    private IEnumerable<Profile> profiles = [];
     private byte[] sysExFinal;
     private byte[] sysExInit;
 
@@ -59,9 +63,8 @@ public class Service
             action: InitializeController,
             keepSubscriberReferenceAlive: true);
 
-        profiles = GetProfiles().ToArray();
-
-        Update();
+        // Reading the profiles and listing the MIDI devices takes a while, so it runs while the windows are created
+        initialUpdate = Task.Run(UpdateInitially);
     }
 
     #endregion Public Constructors
@@ -70,7 +73,15 @@ public class Service
 
     public Controller Controller { get; private set; }
 
-    public IEnumerable<Controller> Controllers { get; private set; } = [];
+    public IEnumerable<Controller> Controllers
+    {
+        get
+        {
+            WaitForInitialUpdate();
+
+            return controllers;
+        }
+    }
 
     public bool IsActive => midiIn != default;
 
@@ -204,9 +215,9 @@ public class Service
 
     public void Update()
     {
-        Controllers = GetControllers().ToArray();
+        WaitForInitialUpdate();
 
-        eventAggregator?.GetEvent<ControllersUpdatedEvent>().Publish();
+        UpdateControllers();
     }
 
     #endregion Public Methods
@@ -351,6 +362,36 @@ public class Service
         catch (Exception exception)
         {
             Log.Warning($"Opening the controller '{name}' failed.", exception);
+        }
+    }
+
+    private void UpdateControllers()
+    {
+        controllers = GetControllers().ToArray();
+
+        eventAggregator?.GetEvent<ControllersUpdatedEvent>().Publish();
+    }
+
+    private void UpdateInitially()
+    {
+        try
+        {
+            profiles = GetProfiles().ToArray();
+
+            UpdateControllers();
+        }
+        catch (Exception exception)
+        {
+            Log.Error("Listing the controllers failed.", exception);
+        }
+    }
+
+    private void WaitForInitialUpdate()
+    {
+        if (initialUpdate?.IsCompleted == false
+            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
+        {
+            Log.Warning("Listing the controllers takes longer than expected.");
         }
     }
 

@@ -15,6 +15,7 @@ using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Core;
@@ -30,11 +31,14 @@ public class Service
     private readonly IContainerProvider containerProvider;
     private readonly IDeviceService deviceService;
     private readonly IEventAggregator eventAggregator;
+    private readonly Task initialUpdate;
     private readonly Lock lockMixers = new();
     private readonly HashSet<IMixerService> mixersAll = [];
     private readonly HashSet<IMixerService> mixersOverlay = [];
     private readonly IStorageService<Session> sessionService;
     private readonly IStorageService<Set> settingsService;
+
+    private const int InitialUpdateWaitSeconds = 15;
 
     private bool isDisposed;
     private IEnumerable<IMonitorService> monitorServices;
@@ -88,16 +92,33 @@ public class Service
             keepSubscriberReferenceAlive: true,
             filter: IsKnownMixer);
 
-        Update();
+        // Listing the audio devices takes a while (ASIO drivers), so it runs while the windows are created
+        initialUpdate = Task.Run(UpdateInitially);
     }
 
     #endregion Public Constructors
 
     #region Public Properties
 
-    public Device Device => deviceService?.Device;
+    public Device Device
+    {
+        get
+        {
+            WaitForInitialUpdate();
 
-    public IEnumerable<Device> Devices => deviceService?.Devices;
+            return deviceService?.Device;
+        }
+    }
+
+    public IEnumerable<Device> Devices
+    {
+        get
+        {
+            WaitForInitialUpdate();
+
+            return deviceService?.Devices;
+        }
+    }
 
     public bool IsActive => deviceService?.IsActive == true;
 
@@ -147,13 +168,14 @@ public class Service
             mixersAll.Add(mixerService);
         }
 
+        // Without a device there are no providers, the mixer is added when the device is opened
         if (isOverlay)
         {
-            providerOverlay.Add(mixerService.Output);
+            providerOverlay?.Add(mixerService.Output);
         }
         else
         {
-            providerBase.Add(mixerService.Output);
+            providerBase?.Add(mixerService.Output);
         }
     }
 
@@ -191,7 +213,7 @@ public class Service
             var volumeExternals = deviceService.Volume * outputOptions.VolumePercentageExternals
                 / (float)Constants.OptionsPercentageMax;
 
-            providerFading.Fade(
+            providerFading?.Fade(
                 volumeTarget: volumeBackground,
                 milliSeconds: fadeMilliseconds);
 
@@ -214,7 +236,7 @@ public class Service
         {
             var fadeMilliseconds = settingsService.Contents.Options.FadeOnLowerMilliseconds;
 
-            providerFading.FadeIn(
+            providerFading?.FadeIn(
                 milliSeconds: fadeMilliseconds);
 
             InvokeOnMonitors(s => s.Raise(
@@ -258,6 +280,8 @@ public class Service
 
     public void Update()
     {
+        WaitForInitialUpdate();
+
         deviceService?.Update();
     }
 
@@ -321,6 +345,11 @@ public class Service
         providerOverlay?.Dispose();
         providerFading?.Dispose();
         providerBase?.Dispose();
+
+        // A disposed provider must not be used or disposed a second time
+        providerOverlay = default;
+        providerFading = default;
+        providerBase = default;
     }
 
     private IMixerService[] GetMixers()
@@ -437,6 +466,27 @@ public class Service
 
         InvokeOnMonitors(s => s.Mute(
             milliSeconds: fadeMilliseconds));
+    }
+
+    private void UpdateInitially()
+    {
+        try
+        {
+            deviceService?.Update();
+        }
+        catch (Exception exception)
+        {
+            Log.Error("Listing the audio devices failed.", exception);
+        }
+    }
+
+    private void WaitForInitialUpdate()
+    {
+        if (initialUpdate?.IsCompleted == false
+            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
+        {
+            Log.Warning("Listing the audio devices takes longer than expected.");
+        }
     }
 
     private void OnFadingEnded(object sender, EventArgs e)

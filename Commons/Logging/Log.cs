@@ -60,7 +60,8 @@ public static class Log
     // Most services are called Service, so their folder tells more: .../PlayerService/Service.cs gives PlayerService
     private static string GetSource(string file)
     {
-        var name = Path.GetFileNameWithoutExtension(file);
+        // App.axaml.cs gives App, not App.axaml
+        var name = Path.GetFileName(file).Split('.')[0];
 
         if (name == ServiceFileName)
         {

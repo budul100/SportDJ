@@ -210,7 +210,7 @@ public class Service
                 if (File.Exists(relevant)
                     && formatsPlaylist.Any(f => f.IsValidExtension(Path.GetExtension(relevant))))
                 {
-                    filePaths = playlistIOFactory.GetPlaylistIO(relevant).FilePaths;
+                    filePaths = GetPlaylistFiles(relevant);
                 }
                 else if (Directory.Exists(relevant))
                 {
@@ -230,6 +230,32 @@ public class Service
                 }
             }
         }
+    }
+
+    // Relative entries of a playlist are relative to the playlist, missing ones are logged and skipped
+    private IEnumerable<string> GetPlaylistFiles(string playlistPath)
+    {
+        var folder = Path.GetDirectoryName(Path.GetFullPath(playlistPath));
+        var result = new List<string>();
+
+        foreach (var entry in playlistIOFactory.GetPlaylistIO(playlistPath).FilePaths)
+        {
+            var path = !string.IsNullOrWhiteSpace(entry) && !Path.IsPathRooted(entry)
+                ? Path.GetFullPath(Path.Combine(folder, entry))
+                : entry;
+
+            if (File.Exists(path)
+                || Directory.Exists(path))
+            {
+                result.Add(path);
+            }
+            else
+            {
+                Log.Warning($"The entry '{entry}' of the playlist '{playlistPath}' does not exist.");
+            }
+        }
+
+        return result;
     }
 
     private Track GetTrack(string path)
@@ -262,6 +288,23 @@ public class Service
         }
 
         return result;
+    }
+
+    private void RenderTrack(Track track)
+    {
+        if (track?.IsRendered == false)
+        {
+            var start = System.Diagnostics.Stopwatch.GetTimestamp();
+
+            track.Render();
+
+            Log.Debug($"Wave rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
+
+            if (track.Bitmap != default)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
+        }
     }
 
     // Takes the most important queued track, the order of the branches is the priority
@@ -301,23 +344,6 @@ public class Service
             && otherTrims.TryDequeue(out Track otherTrim))
         {
             TrimTrack(otherTrim);
-        }
-    }
-
-    private void RenderTrack(Track track)
-    {
-        if (track?.IsRendered == false)
-        {
-            var start = System.Diagnostics.Stopwatch.GetTimestamp();
-
-            track.Render();
-
-            Log.Debug($"Wave rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
-
-            if (track.Bitmap != default)
-            {
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-            }
         }
     }
 

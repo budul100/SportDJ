@@ -141,11 +141,8 @@
         <Setter Property="BorderThickness" Value="{StaticResource PlayerBorderThickness}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="CornerRadius" Value="{StaticResource PlayerCornerRadius}" />
-        <Setter Property="Transitions">
-            <Transitions>
-                <BrushTransition Property="BorderBrush" Duration="0:0:0.15" />
-            </Transitions>
-        </Setter>
+        <!-- No BrushTransition on BorderBrush: together with the bound classes the player changes while its content updates, Avalonia
+             subscribes the transition twice ("The observable can only be subscribed once") -->
     </Style>
     <Style Selector="Border.PlayerCard.IsActive">
         <Setter Property="BorderBrush" Value="{StaticResource ColorIsPlaying}" />
@@ -174,11 +171,7 @@
         <Setter Property="Background" Value="{StaticResource ColorBackground}" />
         <Setter Property="CornerRadius" Value="{StaticResource RadiusMedium}" />
         <Setter Property="ClipToBounds" Value="True" />
-        <Setter Property="Transitions">
-            <Transitions>
-                <BrushTransition Property="Background" Duration="0:0:0.15" />
-            </Transitions>
-        </Setter>
+        <!-- No transition here either, see Border.PlayerCard -->
     </Style>
     <Style Selector="Border.PlayerSurface.IsPlaying">
         <Setter Property="Background" Value="{StaticResource ColorIsPlaying}" />
