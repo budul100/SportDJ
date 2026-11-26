@@ -21,6 +21,9 @@ public class Service(IEventAggregator eventAggregator)
 {
     #region Private Fields
 
+    // Tried in this order, after the wanted sample rate and the default one
+    private static readonly int[] SampleRatesAsio = [44100, 48000, 96000, 88200, 192000, 176400, 32000];
+
     private bool isDisposed;
     private IWavePlayer player;
 
@@ -62,59 +65,74 @@ public class Service(IEventAggregator eventAggregator)
             obj: this);
     }
 
-    public void Initialize(ISampleProvider provider, float volume)
+    public bool Initialize(ISampleProvider provider, float volume)
     {
-        if (Device != default)
+        if (Device == default)
         {
-            try
+            return false;
+        }
+
+        var newPlayer = default(IWavePlayer);
+
+        try
+        {
+            var outputProvider = provider;
+
+            switch (Device.Type)
             {
-                var outputProvider = provider;
+                case DeviceType.Asio:
+                    {
+                        var asioOut = ExecuteOnSTAThread(() => new AsioOut(Device.Name))
+                            ?? throw new InvalidOperationException($"The ASIO driver '{Device.Name}' cannot be opened.");
 
-                switch (Device.Type)
-                {
-                    case DeviceType.Asio:
+                        newPlayer = asioOut;
 
-                        var asioOut = ExecuteOnSTAThread(() => new AsioOut(Device.Name));
-
-                        if (!asioOut.IsSampleRateSupported(outputProvider.WaveFormat.SampleRate))
-                        {
-                            outputProvider = new WdlResamplingSampleProvider(
-                                source: provider,
-                                newSampleRate: Constants.SampleRateDefaultAsio);
-                        }
-
-                        player = asioOut;
-                        break;
-
-                    case DeviceType.Wasapi:
-
-                        if (Device.Number.HasValue)
-                        {
-                            player = new WaveOut
-                            {
-                                DeviceNumber = Device.Number.Value
-                            };
-                        }
+                        outputProvider = GetAsioProvider(
+                            asioOut: asioOut,
+                            deviceName: Device.Name,
+                            provider: provider);
 
                         break;
-                }
+                    }
 
-                if (player != default)
-                {
-                    var playerProvider = new SampleToWaveProvider(outputProvider);
+                case DeviceType.Wasapi:
 
-                    player.PlaybackStopped += OnPlaybackStopped;
-                    player.Init(playerProvider);
+                    if (Device.Number.HasValue)
+                    {
+                        newPlayer = new WaveOut
+                        {
+                            DeviceNumber = Device.Number.Value
+                        };
+                    }
 
-                    Volume = volume;
-                }
+                    break;
             }
-            catch (Exception exception)
+
+            if (newPlayer == default)
             {
-                Log.Error($"Initializing the device '{Device?.Name}' failed.", exception);
-
-                Debugger.Break();
+                throw new InvalidOperationException($"There is no player for the device '{Device.Name}'.");
             }
+
+            newPlayer.Init(new SampleToWaveProvider(outputProvider));
+            newPlayer.PlaybackStopped += OnPlaybackStopped;
+
+            // Only a player which is initialized is taken over, otherwise Play() would start a driver without buffers
+            player = newPlayer;
+
+            Volume = volume;
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Initializing the device '{Device?.Name}' failed.", exception);
+
+            DisposePlayer(newPlayer);
+
+            // A device which cannot be used must not stay selected
+            CloseDevice();
+
+            return false;
         }
     }
 
@@ -178,6 +196,19 @@ public class Service(IEventAggregator eventAggregator)
 
     #region Private Methods
 
+    private static void DisposePlayer(IWavePlayer wavePlayer)
+    {
+        try
+        {
+            wavePlayer?.Dispose();
+        }
+        catch (Exception exception)
+        {
+            // A driver which failed to initialize often fails here as well
+            Log.Debug($"Releasing the player failed: {exception.Message}");
+        }
+    }
+
     private static T ExecuteOnSTAThread<T>(Func<T> function)
     {
         T result = default;
@@ -201,6 +232,45 @@ public class Service(IEventAggregator eventAggregator)
         staThread.Join();
 
         return result;
+    }
+
+    // The provider is resampled, if the driver does not support its sample rate
+    private static ISampleProvider GetAsioProvider(AsioOut asioOut, string deviceName, ISampleProvider provider)
+    {
+        var sampleRate = GetAsioSampleRate(
+            asioOut: asioOut,
+            deviceName: deviceName,
+            sampleRateWanted: provider.WaveFormat.SampleRate);
+
+        if (sampleRate == provider.WaveFormat.SampleRate)
+        {
+            return provider;
+        }
+
+        return new WdlResamplingSampleProvider(
+            source: provider,
+            newSampleRate: sampleRate);
+    }
+
+    // The driver decides, so the default sample rate is no guarantee either
+    private static int GetAsioSampleRate(AsioOut asioOut, string deviceName, int sampleRateWanted)
+    {
+        var candidates = new[] { sampleRateWanted, Constants.SampleRateDefaultAsio }
+            .Concat(SampleRatesAsio)
+            .Distinct().ToArray();
+
+        var supporteds = candidates
+            .Where(asioOut.IsSampleRateSupported).ToArray();
+
+        Log.Debug($"The ASIO driver '{deviceName}' supports the sample rates: {string.Join(", ", supporteds)}");
+
+        if (supporteds.Length == 0)
+        {
+            throw new NotSupportedException(
+                $"The ASIO driver '{deviceName}' supports none of the sample rates {string.Join(", ", candidates)}.");
+        }
+
+        return supporteds[0];
     }
 
     private void CloseDevice()

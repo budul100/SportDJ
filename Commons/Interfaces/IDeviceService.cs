@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using NAudio.Wave;
 using SportDJ.Commons.Models.Records;
@@ -24,7 +24,11 @@ public interface IDeviceService
 
     #region Public Methods
 
-    void Initialize(ISampleProvider provider, float volume);
+    /// <summary>
+    /// Opens the selected device for the given provider. Returns false, if the device cannot be used.
+    /// In this case no device is selected anymore.
+    /// </summary>
+    bool Initialize(ISampleProvider provider, float volume);
 
     void Play();
 

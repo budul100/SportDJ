@@ -332,7 +332,8 @@ public class Service
             {
                 signalService.Pause();
             }
-            else if (signalService.State != StateType.Stop)
+            else if (signalService.State != StateType.Stop
+                && IsOutputActive())
             {
                 signalService.Start();
             }
@@ -654,6 +655,15 @@ public class Service
 
             UpdateContent();
         }
+    }
+
+    // Without an open device nobody reads the signal, so it would hang in the playing state
+    private bool IsOutputActive()
+    {
+        var outputService = containerProvider?.Resolve<IOutputService>(
+            name: nameof(OutputType.Live));
+
+        return outputService?.IsActive == true;
     }
 
     // Used as event filter, which runs on the thread of the publisher

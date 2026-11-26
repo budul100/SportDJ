@@ -253,26 +253,36 @@ public class Service
         {
             var device = Device;
 
-            deviceService.Set(
-                name: deviceName,
+            var failedNames = new HashSet<string>();
+
+            var isOpened = OpenDevice(
+                deviceName: deviceName,
                 sampleRate: sampleRate,
-                takeDefaultIfMissing: takeDefaultIfMissing);
+                takeDefaultIfMissing: takeDefaultIfMissing,
+                failedNames: failedNames);
 
-            if (Device != device)
+            // If the default is not usable, the other devices are tried one after the other
+            while (!isOpened && takeDefaultIfMissing)
             {
-                CloseOutput();
+                var candidate = Devices?
+                    .FirstOrDefault(d => !failedNames.Contains(d.Name));
 
-                if (deviceService.Device != default)
+                if (candidate == default)
                 {
-                    InitializeProviders();
-                    InitializeMonitors();
-
-                    outputOptions.DeviceName = deviceService.Device.Name;
-                    outputOptions.SampleRate = sampleRate;
-
-                    sessionService.Save();
+                    break;
                 }
 
+                isOpened = OpenDevice(
+                    deviceName: candidate.Name,
+                    sampleRate: sampleRate,
+                    takeDefaultIfMissing: false,
+                    failedNames: failedNames);
+            }
+
+            // Also published after a failure, so the UI does not wait for a device which will not come
+            if (Device != device
+                || !isOpened)
+            {
                 eventAggregator.GetEvent<OutputUpdatedEvent>().Publish(this);
             }
         }
@@ -406,7 +416,7 @@ public class Service
             takeDefaultIfMissing: takeDefaultIfMissing);
     }
 
-    private void InitializeProviders()
+    private bool InitializeProviders()
     {
         providerBase = new MixingProvider(deviceService.WaveFormat);
 
@@ -420,9 +430,17 @@ public class Service
         providerOverlay = new MixingProvider(deviceService.WaveFormat);
         providerOverlay.Add(providerFading);
 
-        deviceService.Initialize(
+        var isInitialized = deviceService.Initialize(
             provider: providerOverlay,
             volume: outputOptions.Volume);
+
+        // Without a running device nobody reads the providers, so fades and signals would never end
+        if (!isInitialized)
+        {
+            CloseOutput();
+
+            return false;
+        }
 
         GetMixers().OnEach(mixer => Add(
             mixerService: mixer,
@@ -431,6 +449,8 @@ public class Service
         Task.Run(
             action: deviceService.Play,
             cancellationToken: cancellationTokenSource.Token);
+
+        return true;
     }
 
     private void InvokeOnMonitors(Action<IMonitorService> action)
@@ -522,6 +542,47 @@ public class Service
 
             eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
         }
+    }
+
+    // Returns true, if the device is open afterwards. A device which could not be initialized is added to the failed names.
+    private bool OpenDevice(string deviceName, int sampleRate, bool takeDefaultIfMissing, HashSet<string> failedNames)
+    {
+        var previous = deviceService.Device;
+
+        deviceService.Set(
+            name: deviceName,
+            sampleRate: sampleRate,
+            takeDefaultIfMissing: takeDefaultIfMissing);
+
+        var current = deviceService.Device;
+
+        if (current == previous)
+        {
+            return current != default;
+        }
+
+        CloseOutput();
+
+        if (current == default)
+        {
+            return false;
+        }
+
+        if (!InitializeProviders())
+        {
+            failedNames.Add(current.Name);
+
+            return false;
+        }
+
+        InitializeMonitors();
+
+        outputOptions.DeviceName = current.Name;
+        outputOptions.SampleRate = sampleRate;
+
+        sessionService.Save();
+
+        return true;
     }
 
     private void UpdateInitially()
