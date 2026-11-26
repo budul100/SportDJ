@@ -101,7 +101,7 @@ public class DisplayViewModel
     }
 
     // An instance property, because the change is raised by the instance
-    public string Clock => DateTime.Now.ToString(Constants.FormatClock);
+    public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
 
     public string Content
     {
@@ -210,7 +210,7 @@ public class DisplayViewModel
             Interval = TimeSpan.FromSeconds(1)
         };
 
-        result.Tick += (s, e) => RaisePropertyChanged(nameof(Clock));
+        result.Tick += (s, e) => RaisePropertyChanged(nameof(ViewModels.DisplayViewModel.Clock));
 
         return result;
     }

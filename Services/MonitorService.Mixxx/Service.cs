@@ -78,10 +78,13 @@ public class Service
     {
         if (IsActive)
         {
+            // A running fade is replaced by the new one
+            cancellationTokenSource?.Cancel();
+
             cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = cancellationTokenSource.Token;
 
-            Task.Run(() => MuteMixxx(
+            _ = Task.Run(() => MuteMixxx(
                 milliSeconds: milliSeconds,
                 cancellationToken: cancellationToken));
         }
@@ -145,7 +148,8 @@ public class Service
         { }
     }
 
-    private async void MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
+    // A task instead of async void, so exceptions cannot crash the application
+    private async Task MuteMixxx(int? milliSeconds, CancellationToken cancellationToken)
     {
         if (IsReady)
         {
@@ -153,7 +157,8 @@ public class Service
             {
                 using var midiOut = new MidiOut(midiIndex.Value);
 
-                if (milliSeconds <= Constants.MidiVolumeMax)
+                if (milliSeconds is null
+                    || milliSeconds <= Constants.MidiVolumeMax)
                 {
                     midiOut.VolumeMute();
                 }
@@ -171,6 +176,14 @@ public class Service
                 midiOut.VolumeSetDefault();
 
                 Type = VolumeType.None;
+            }
+            catch (OperationCanceledException)
+            {
+                // Replaced by a newer fade or disposed
+            }
+            catch (Exception)
+            {
+                // TODO: Log exception, the MIDI device might have been removed
             }
             finally
             {

@@ -248,20 +248,21 @@ internal static class GridExtensions
 
             foreach (var cell in cells)
             {
-                var inners = cells
-                    .Where(c => c != cell
-                        && c.Column < cell.Column + cell.Columns
-                        && cell.Column < c.Column + c.Columns
-                        && c.Row < cell.Row + cell.Rows
-                        && cell.Row < c.Row + c.Rows
-                        && (c.Row > cell.Row
-                            || (c.Row == cell.Row && c.Column >= cell.Column))).ToArray();
-
-                foreach (var inner in inners)
+                // Only the cell itself is compared, so pushing another cell does not change the checks for this cell
+                foreach (var inner in cells)
                 {
-                    inner.Column = cell.Column + cell.Columns;
+                    if (inner != cell
+                        && inner.Column < cell.Column + cell.Columns
+                        && cell.Column < inner.Column + inner.Columns
+                        && inner.Row < cell.Row + cell.Rows
+                        && cell.Row < inner.Row + inner.Rows
+                        && (inner.Row > cell.Row
+                            || (inner.Row == cell.Row && inner.Column >= cell.Column)))
+                    {
+                        inner.Column = cell.Column + cell.Columns;
 
-                    moved = true;
+                        moved = true;
+                    }
                 }
             }
         }

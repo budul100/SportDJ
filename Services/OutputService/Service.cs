@@ -30,6 +30,7 @@ public class Service
     private readonly IContainerProvider containerProvider;
     private readonly IDeviceService deviceService;
     private readonly IEventAggregator eventAggregator;
+    private readonly Lock lockMixers = new();
     private readonly HashSet<IMixerService> mixersAll = [];
     private readonly HashSet<IMixerService> mixersOverlay = [];
     private readonly IStorageService<Session> sessionService;
@@ -73,19 +74,19 @@ public class Service
             action: OnMixerStarted,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: mixersAll.Contains);
+            filter: IsKnownMixer);
 
         eventAggregator.GetEvent<MixerStoppedEvent>().Subscribe(
             action: OnMixerStopped,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: mixersAll.Contains);
+            filter: IsKnownMixer);
 
         eventAggregator.GetEvent<MixerEndedEvent>().Subscribe(
             action: OnMixerEnded,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: mixersAll.Contains);
+            filter: IsKnownMixer);
 
         Update();
     }
@@ -136,18 +137,24 @@ public class Service
 
     public void Add(IMixerService mixerService, bool isOverlay)
     {
+        lock (lockMixers)
+        {
+            if (isOverlay)
+            {
+                mixersOverlay.Add(mixerService);
+            }
+
+            mixersAll.Add(mixerService);
+        }
+
         if (isOverlay)
         {
-            mixersOverlay.Add(mixerService);
-
             providerOverlay.Add(mixerService.Output);
         }
         else
         {
             providerBase.Add(mixerService.Output);
         }
-
-        mixersAll.Add(mixerService);
     }
 
     public void Dispose()
@@ -196,7 +203,7 @@ public class Service
 
     public void Pause()
     {
-        mixersAll.OnEach(p => p.Pause());
+        GetMixers().OnEach(p => p.Pause());
 
         MuteExternals();
     }
@@ -266,10 +273,13 @@ public class Service
             {
                 CloseOutput();
 
-                mixersAll.OnEach(p => p.End());
+                GetMixers().OnEach(p => p.End());
 
-                mixersOverlay.Clear();
-                mixersAll.Clear();
+                lock (lockMixers)
+                {
+                    mixersOverlay.Clear();
+                    mixersAll.Clear();
+                }
 
                 cancellationTokenSource?.Cancel();
 
@@ -299,7 +309,7 @@ public class Service
 
     private void CloseOutput()
     {
-        mixersAll.OnEach(m => m.Pause());
+        GetMixers().OnEach(m => m.Pause());
         deviceService?.Stop();
 
         if (providerFading != default)
@@ -377,13 +387,37 @@ public class Service
             provider: providerOverlay,
             volume: outputOptions.Volume);
 
-        mixersAll.OnEach(mixer => Add(
+        GetMixers().OnEach(mixer => Add(
             mixerService: mixer,
-            isOverlay: mixersOverlay.Contains(mixer)));
+            isOverlay: IsOverlayMixer(mixer)));
 
         Task.Run(
             action: deviceService.Play,
             cancellationToken: cancellationTokenSource.Token);
+    }
+
+    private IMixerService[] GetMixers()
+    {
+        lock (lockMixers)
+        {
+            return [.. mixersAll];
+        }
+    }
+
+    private bool IsKnownMixer(IMixerService mixerService)
+    {
+        lock (lockMixers)
+        {
+            return mixersAll.Contains(mixerService);
+        }
+    }
+
+    private bool IsOverlayMixer(IMixerService mixerService)
+    {
+        lock (lockMixers)
+        {
+            return mixersOverlay.Contains(mixerService);
+        }
     }
 
     private void InvokeOnMonitors(Action<IMonitorService> action)
@@ -417,9 +451,12 @@ public class Service
 
     private void OnMixerEnded(IMixerService mixerService)
     {
-        mixersOverlay.Remove(mixerService);
+        lock (lockMixers)
+        {
+            mixersOverlay.Remove(mixerService);
 
-        mixersAll.Remove(mixerService);
+            mixersAll.Remove(mixerService);
+        }
     }
 
     private void OnMixerStarted(IMixerService mixerService)
@@ -431,7 +468,7 @@ public class Service
             eventAggregator.GetEvent<OutputStartedEvent>().Publish(this);
         }
 
-        if (mixersOverlay.Contains(mixerService))
+        if (IsOverlayMixer(mixerService))
         {
             Lower();
         }
@@ -443,9 +480,9 @@ public class Service
 
     private void OnMixerStopped(IMixerService mixerService)
     {
-        var isPlaying = mixersAll.Any(p => p.IsPlaying);
+        var isPlaying = GetMixers().Any(p => p.IsPlaying);
 
-        if (!isPlaying || mixersOverlay.Contains(mixerService))
+        if (!isPlaying || IsOverlayMixer(mixerService))
         {
             Raise();
         }

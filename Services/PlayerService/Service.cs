@@ -38,6 +38,7 @@ public class Service
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
     private readonly IStorageService<Set> settingsService;
+    private readonly Lock lockSignalServices = new();
     private readonly HashSet<ISignalService> signalServices = [];
     private readonly IStackService stackService;
     private readonly CancellationTokenSource tokenSource = new();
@@ -83,7 +84,7 @@ public class Service
             keepSubscriberReferenceAlive: true);
 
         eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
-            action: SetStartLocation,
+            action: () => _ = SetStartLocationAsync(),
             keepSubscriberReferenceAlive: true);
 
         eventAggregator?.GetEvent<MixerInitializedEvent>().Subscribe(
@@ -107,13 +108,13 @@ public class Service
             action: OnSignalStopped,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: signalServices.Contains);
+            filter: IsOwnSignal);
 
         eventAggregator?.GetEvent<SignalEndedEvent>().Subscribe(
             action: OnSignalEnded,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: signalServices.Contains);
+            filter: IsOwnSignal);
 
         eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
             action: _ => Next(),
@@ -175,7 +176,7 @@ public class Service
 
     public bool HasUnplayeds => stackService.HasUnplayeds;
 
-    public bool IsActive => signalServices?.Any(s => s.State != StateType.None) == true;
+    public bool IsActive => GetSignalServices().Any(s => s.State != StateType.None);
 
     public bool IsAvailable => signalService?.Track != default;
 
@@ -544,7 +545,24 @@ public class Service
 
         // TO DO: Push into DefinitionsModule/SettingsView
         // should be called after AppInitializedEvent
-        SetStartLocation();
+        _ = SetStartLocationAsync();
+    }
+
+    private ISignalService[] GetSignalServices()
+    {
+        lock (lockSignalServices)
+        {
+            return [.. signalServices];
+        }
+    }
+
+    // Used as event filter, which runs on the thread of the publisher
+    private bool IsOwnSignal(ISignalService signalService)
+    {
+        lock (lockSignalServices)
+        {
+            return signalServices.Contains(signalService);
+        }
     }
 
     private void InitializeSignal()
@@ -560,7 +578,7 @@ public class Service
 
             if (mixerService.IsInitialized)
             {
-                var silentServices = signalServices
+                var silentServices = GetSignalServices()
                     .Where(s => s.IsSilent)
                     .ToArray();
 
@@ -600,7 +618,10 @@ public class Service
 
             if (signalService.IsSilent)
             {
-                signalServices.Remove(signalService);
+                lock (lockSignalServices)
+                {
+                    signalServices.Remove(signalService);
+                }
 
                 signalService.Dispose();
             }
@@ -618,7 +639,10 @@ public class Service
                 stackService.Play();
             }
 
-            signalServices.Add(signalService);
+            lock (lockSignalServices)
+            {
+                signalServices.Add(signalService);
+            }
         }
 
         UpdateContent();
@@ -653,14 +677,22 @@ public class Service
         ApplyLed();
     }
 
-    private void SetStartLocation()
+    private async Task SetStartLocationAsync()
     {
         var paths = player?.Paths?
             .Select(settingsService.GetPathFull).ToArray();
 
         if (paths?.Length > 0)
         {
-            Task.Run(async () => startLocation = await dialogService.GetFolderAsync(paths));
+            // The storage provider belongs to the UI thread, so no Task.Run here
+            try
+            {
+                startLocation = await dialogService.GetFolderAsync(paths);
+            }
+            catch (Exception)
+            {
+                startLocation = default;
+            }
         }
     }
 

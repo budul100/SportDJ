@@ -51,7 +51,7 @@ public class Service
             action: OnSignalStarted,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: signalServices.Contains);
+            filter: IsOwnSignal);
 
         eventAggregator.GetEvent<SignalUpdatedEvent>().Subscribe(
             action: _ => OnSignalUpdated(),
@@ -69,7 +69,7 @@ public class Service
             action: OnSignalEnded,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: signalServices.Contains);
+            filter: IsOwnSignal);
     }
 
     #endregion Public Constructors
@@ -189,7 +189,7 @@ public class Service
 
     public void End()
     {
-        signalServices.OnEach(s => s?.End());
+        GetSignalServices().OnEach(s => s?.End());
     }
 
     public void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap)
@@ -215,7 +215,7 @@ public class Service
     {
         var useFilterEffect = Type == MixerType.Base;
 
-        signalServices.OnEach(s => s?.Pause(useFilterEffect));
+        GetSignalServices().OnEach(s => s?.Pause(useFilterEffect));
     }
 
     #endregion Public Methods
@@ -234,7 +234,7 @@ public class Service
 
                 mixingProvider.Dispose();
 
-                signalServices.OnEach(s => s.Dispose());
+                GetSignalServices().OnEach(s => s.Dispose());
 
                 outputProvider.Dispose();
             }
@@ -247,9 +247,36 @@ public class Service
 
     #region Private Methods
 
+    private ISignalService[] GetSignalServices()
+    {
+        lock (lockSignalServices)
+        {
+            return [.. signalServices];
+        }
+    }
+
+    // Used as event filter, which runs on the thread of the publisher
+    private bool IsOwnSignal(ISignalService signalService)
+    {
+        lock (lockSignalServices)
+        {
+            return signalServices.Contains(signalService);
+        }
+    }
+
+    private bool TryGetFadingProvider(ISignalService signalService, out FadingProvider fadingProvider)
+    {
+        lock (lockFadingProviders)
+        {
+            return fadingProviders.TryGetValue(
+                key: signalService,
+                value: out fadingProvider);
+        }
+    }
+
     private void EndMixer()
     {
-        var isPlaying = signalServices.Any(s => s.IsPlaying);
+        var isPlaying = GetSignalServices().Any(s => s.IsPlaying);
 
         if (IsPlaying && !isPlaying)
         {
@@ -264,10 +291,16 @@ public class Service
         if (sender is FadingProvider fadingProvider
             && fadingProvider.IsSilent)
         {
-            var signalService = fadingProviders
-                .SingleOrDefault(p => p.Value == fadingProvider).Key;
+            var signalService = default(ISignalService);
 
-            signalService.End();
+            lock (lockFadingProviders)
+            {
+                signalService = fadingProviders
+                    .FirstOrDefault(p => p.Value == fadingProvider).Key;
+            }
+
+            // The signal might have been removed in the meantime
+            signalService?.End();
         }
     }
 
@@ -298,15 +331,17 @@ public class Service
     {
         this.signalService = signalService;
 
-        if (fadingProviders.TryGetValue(
-            key: signalService,
-            value: out var fadingProvider))
+        if (TryGetFadingProvider(
+            signalService: signalService,
+            fadingProvider: out var fadingProvider))
         {
-            var playingServices = signalServices
+            var currents = GetSignalServices();
+
+            var playingServices = currents
                 .Where(s => s != signalService
                     && s?.IsPlaying == true).ToArray();
 
-            var pausingServices = signalServices
+            var pausingServices = currents
                 .Where(s => s != signalService
                     && s?.State == StateType.Pause).ToArray();
 
@@ -323,8 +358,15 @@ public class Service
 
             pausingServices.OnEach(s => s.End());
 
-            playingServices.OnEach(s => fadingProviders[s].FadeOut(
-                milliSeconds: fadeOutMilliSeconds));
+            // A signal might have been removed in the meantime
+            playingServices.OnEach(s =>
+            {
+                if (TryGetFadingProvider(s, out var playingProvider))
+                {
+                    playingProvider.FadeOut(
+                        milliSeconds: fadeOutMilliSeconds);
+                }
+            });
         }
 
         if (!IsPlaying)
@@ -350,16 +392,19 @@ public class Service
 
     private void RemoveSignal(ISignalService signalService)
     {
-        if (fadingProviders.TryGetValue(
-            signalService,
-            out var fadingProvider))
+        var fadingProvider = default(FadingProvider);
+        var hasFading = false;
+
+        lock (lockFadingProviders)
+        {
+            hasFading = fadingProviders.Remove(
+                key: signalService,
+                value: out fadingProvider);
+        }
+
+        if (hasFading)
         {
             fadingProvider.FadingEndedEvent -= OnFadingEnded;
-
-            lock (lockFadingProviders)
-            {
-                fadingProviders.Remove(signalService);
-            }
 
             mixingProvider.Remove(fadingProvider);
         }

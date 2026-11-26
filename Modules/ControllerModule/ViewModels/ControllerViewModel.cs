@@ -12,7 +12,6 @@ using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Volume;
-using SportDJ.Commons.Extensions;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Settings;
