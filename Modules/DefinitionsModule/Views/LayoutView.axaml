@@ -33,75 +33,30 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- Tab, only if the pane was opened from a tab of a group -->
-            <StackPanel IsVisible="{Binding IsTab}" Spacing="{StaticResource SpacingMedium}">
+            <!-- Order: move tab, move, remove, add tab, add player, group. The tab parts are only shown if the pane was opened from a tab of a group -->
 
-                <StackPanel Spacing="{StaticResource SpacingSmall}">
+            <!-- Move tab -->
+            <StackPanel IsVisible="{Binding IsTab}" Spacing="{StaticResource SpacingSmall}">
 
-                    <TextBlock Classes="Section" Text="Add tab" />
-                    <Separator />
-
-                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
-                        <Button
-                            Command="{Binding AddTabCommand}"
-                            CommandParameter="{x:Static enums:OrientationType.Left}"
-                            Focusable="False"
-                            ToolTip.Tip="Add tab to the left">
-                            <StackPanel Orientation="Horizontal">
-                                <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
-                                <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
-                            </StackPanel>
-                        </Button>
-                        <Button
-                            Command="{Binding AddTabCommand}"
-                            CommandParameter="{x:Static enums:OrientationType.Right}"
-                            Focusable="False"
-                            ToolTip.Tip="Add tab to the right">
-                            <StackPanel Orientation="Horizontal">
-                                <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
-                                <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-
-                </StackPanel>
-
-                <StackPanel Spacing="{StaticResource SpacingSmall}">
-
-                    <TextBlock Classes="Section" Text="Move tab" />
-                    <Separator />
-
-                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
-                        <Button
-                            Command="{Binding MoveTabCommand}"
-                            CommandParameter="{x:Static enums:OrientationType.Left}"
-                            Focusable="False"
-                            ToolTip.Tip="Move tab to the left">
-                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
-                        </Button>
-                        <Button
-                            Command="{Binding MoveTabCommand}"
-                            CommandParameter="{x:Static enums:OrientationType.Right}"
-                            Focusable="False"
-                            ToolTip.Tip="Move tab to the right">
-                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
-                        </Button>
-                    </StackPanel>
-
-                </StackPanel>
-
-            </StackPanel>
-
-            <!-- Add -->
-            <StackPanel Spacing="{StaticResource SpacingSmall}">
-
-                <TextBlock Classes="Section" Text="Add player" />
+                <TextBlock Classes="Section" Text="Move tab" />
                 <Separator />
 
-                <views:DirectionCross
-                    HorizontalAlignment="Left"
-                    CenterKind="Plus"
-                    Command="{Binding AddCellCommand}" />
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Command="{Binding MoveTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Left}"
+                        Focusable="False"
+                        ToolTip.Tip="Move tab to the left">
+                        <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
+                    </Button>
+                    <Button
+                        Command="{Binding MoveTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Right}"
+                        Focusable="False"
+                        ToolTip.Tip="Move tab to the right">
+                        <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
+                    </Button>
+                </StackPanel>
 
             </StackPanel>
 
@@ -115,6 +70,84 @@
                     HorizontalAlignment="Left"
                     CenterKind="ArrowAll"
                     Command="{Binding MoveCellCommand}" />
+
+            </StackPanel>
+
+            <!-- Remove: the player or the tab, whatever the pane was opened from. Dark red, on the right edge -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Remove" />
+                <Separator />
+
+                <Button
+                    HorizontalAlignment="Right"
+                    Classes="Danger"
+                    Command="{Binding RemoveCellCommand}"
+                    Focusable="False"
+                    IsVisible="{Binding IsPlayer}"
+                    ToolTip.Tip="Remove player">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+                <Button
+                    HorizontalAlignment="Right"
+                    Classes="Danger"
+                    Command="{Binding RemoveTabCommand}"
+                    Focusable="False"
+                    IsVisible="{Binding IsTab}"
+                    ToolTip.Tip="Remove tab">
+                    <mat:MaterialIcon
+                        Width="{StaticResource MediumIconSize}"
+                        Height="{StaticResource MediumIconSize}"
+                        Kind="Delete" />
+                </Button>
+
+            </StackPanel>
+
+            <!-- Add tab -->
+            <StackPanel IsVisible="{Binding IsTab}" Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Add tab" />
+                <Separator />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                    <Button
+                        Command="{Binding AddTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Left}"
+                        Focusable="False"
+                        ToolTip.Tip="Add tab to the left">
+                        <StackPanel Orientation="Horizontal">
+                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowLeft" />
+                            <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Command="{Binding AddTabCommand}"
+                        CommandParameter="{x:Static enums:OrientationType.Right}"
+                        Focusable="False"
+                        ToolTip.Tip="Add tab to the right">
+                        <StackPanel Orientation="Horizontal">
+                            <mat:MaterialIcon Width="18" Height="18" Kind="Plus" />
+                            <mat:MaterialIcon Width="18" Height="18" Kind="ArrowRight" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- Add player -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Add player" />
+                <Separator />
+
+                <views:DirectionCross
+                    HorizontalAlignment="Left"
+                    CenterKind="Plus"
+                    Command="{Binding AddCellCommand}" />
 
             </StackPanel>
 

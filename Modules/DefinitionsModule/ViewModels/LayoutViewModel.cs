@@ -45,6 +45,12 @@ public class LayoutViewModel
         MoveTabCommand = new DelegateCommand<OrientationType>(
             executeMethod: o => gridService?.MoveGrid(tab, o));
 
+        RemoveCellCommand = new DelegateCommand(
+            executeMethod: async () => await RemoveCellAsync());
+
+        RemoveTabCommand = new DelegateCommand(
+            executeMethod: async () => await RemoveTabAsync());
+
         // The names of the tabs are shown next to the group button
         eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => Refresh(),
@@ -92,6 +98,12 @@ public class LayoutViewModel
     public DelegateCommand<OrientationType> MoveCellCommand { get; }
 
     public DelegateCommand<OrientationType> MoveTabCommand { get; }
+
+    // Removes the player, only for players
+    public DelegateCommand RemoveCellCommand { get; }
+
+    // Removes the tab, only for tabs, its group disappears with the last tab
+    public DelegateCommand RemoveTabCommand { get; }
 
     public override string Title => Titel;
 
@@ -170,6 +182,25 @@ public class LayoutViewModel
         RaisePropertyChanged(nameof(IsActive));
         RaisePropertyChanged(nameof(IsPlayer));
         RaisePropertyChanged(nameof(IsTab));
+    }
+
+    private async Task RemoveCellAsync()
+    {
+        // The pane closes itself, as soon as the grid reports the removal
+        if (gridService != default
+            && cell is Player player)
+        {
+            await gridService.RemoveCellAsync(player);
+        }
+    }
+
+    private async Task RemoveTabAsync()
+    {
+        if (gridService != default
+            && tab != default)
+        {
+            await gridService.RemoveGridAsync(tab);
+        }
     }
 
     #endregion Private Methods

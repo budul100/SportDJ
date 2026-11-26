@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
@@ -22,19 +21,14 @@ public class SettingsViewModel
     private const string NoKey = "None";
     private const string Titel = "Settings";
 
-    private readonly IGridService gridService;
-
     private Player player;
 
     #endregion Private Fields
 
     #region Public Constructors
 
-    public SettingsViewModel(IEventAggregator eventAggregator, IGridService gridService,
-        IKeyboardService keyListenService)
+    public SettingsViewModel(IEventAggregator eventAggregator, IKeyboardService keyListenService)
     {
-        this.gridService = gridService;
-
         Colors = Enum.GetValues<PlayerColorType>()
             .Select(c => new ColorOptionViewModel(c)).ToArray();
 
@@ -44,9 +38,6 @@ public class SettingsViewModel
         ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
         ListenMidiCommand = new DelegateCommand(ToggleMidi);
         ClearMidiCommand = new DelegateCommand(ClearMidi);
-
-        RemoveCommand = new DelegateCommand(
-            executeMethod: async () => await RemoveAsync());
 
         eventAggregator?.GetEvent<PlayerUpdateEvent>().Subscribe(
             action: _ => Refresh(),
@@ -137,8 +128,6 @@ public class SettingsViewModel
         }
     }
 
-    public DelegateCommand RemoveCommand { get; }
-
     public DelegateCommand<PlayerColorType> SelectColorCommand { get; }
 
     public override string Title => Titel;
@@ -218,16 +207,6 @@ public class SettingsViewModel
         foreach (var option in Colors)
         {
             option.IsSelected = option.ColorType == color;
-        }
-    }
-
-    private async Task RemoveAsync()
-    {
-        // The pane closes itself, as soon as the grid reports the removal
-        if (gridService != default
-            && player != default)
-        {
-            await gridService.RemoveCellAsync(player);
         }
     }
 

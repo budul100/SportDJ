@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
@@ -33,9 +32,6 @@ public class TabSettingsViewModel
 
         ListenKeyboardCommand = new DelegateCommand(ToggleKeyboard);
         ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
-
-        RemoveCommand = new DelegateCommand(
-            executeMethod: async () => await RemoveAsync());
 
         eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => Refresh(),
@@ -81,8 +77,6 @@ public class TabSettingsViewModel
 
         set => gridService?.SetName(tab, value);
     }
-
-    public DelegateCommand RemoveCommand { get; }
 
     public override string Title => Titel;
 
@@ -137,16 +131,6 @@ public class TabSettingsViewModel
         RaisePropertyChanged(nameof(KeyboardText));
         RaisePropertyChanged(nameof(KeyCode));
         RaisePropertyChanged(nameof(Name));
-    }
-
-    private async Task RemoveAsync()
-    {
-        // The pane closes itself, as soon as the grid reports the removal
-        if (gridService != default
-            && tab != default)
-        {
-            await gridService.RemoveGridAsync(tab);
-        }
     }
 
     private void ToggleKeyboard()
