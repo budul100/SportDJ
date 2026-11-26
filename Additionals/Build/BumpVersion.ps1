@@ -15,7 +15,9 @@ if (-not (Test-Path -LiteralPath $Path)) {
 
 $bytes = [System.IO.File]::ReadAllBytes($Path)
 $hasBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
-$text = [System.Text.Encoding]::UTF8.GetString($bytes)
+# GetString keeps a BOM as a character, so it has to be skipped explicitly. Otherwise it is written twice.
+$offset = if ($hasBom) { 3 } else { 0 }
+$text = [System.Text.Encoding]::UTF8.GetString($bytes, $offset, $bytes.Length - $offset)
 
 $majorRegex = [regex]'<VersionMajor>(\d+)</VersionMajor>'
 $minorRegex = [regex]'<VersionMinor>(\d+)</VersionMinor>'

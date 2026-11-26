@@ -1,11 +1,11 @@
-﻿﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>$(WindowsTargetFramework)</TargetFramework>
 		<RootNamespace>SportDJ.App</RootNamespace>
 		<VersionMajor>2</VersionMajor>
-		<VersionMinor>1</VersionMinor>
+		<VersionMinor>0</VersionMinor>
 		<VersionBuild>0</VersionBuild>
 		<AssemblyName>SportDJ</AssemblyName>
 		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
