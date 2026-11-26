@@ -26,9 +26,8 @@ $filePatterns = @('*.tmp', '*.log', '*.cache')
 # Path segments that are never touched
 $excludedSegments = @('\.git\', '\node_modules\')
 
-$deletedFolders = 0
-$deletedFiles = 0
-$errors = 0
+# Hashtable instead of $script: variables, because the code runs inside a dynamically created scriptblock
+$stats = @{ Folders = 0; Files = 0; Errors = 0 }
 
 function Test-Excluded([string]$path) {
     $probe = $path + '\'
@@ -60,16 +59,16 @@ function Remove-Artifact([string]$path, [bool]$isFolder) {
         if ($isFolder) {
             Remove-Item -LiteralPath $long -Recurse -Force -ErrorAction Stop
             Write-Host "Deleted: $path"
-            $script:deletedFolders++
+            $stats.Folders++
         }
         else {
             Remove-Item -LiteralPath $long -Force -ErrorAction Stop
-            $script:deletedFiles++
+            $stats.Files++
         }
     }
     catch {
         Write-Host "[ERROR] $path : $($_.Exception.Message)" -ForegroundColor Red
-        $script:errors++
+        $stats.Errors++
     }
 }
 
@@ -124,8 +123,8 @@ Write-Host ''
 Write-Host '================================================'
 Write-Host 'Cleanup completed!'
 Write-Host '================================================'
-Write-Host "Deleted folders: $deletedFolders"
-Write-Host "Deleted files:   $deletedFiles"
-if ($errors -gt 0) {
-    Write-Host "Errors:          $errors" -ForegroundColor Red
+Write-Host "Deleted folders: $($stats.Folders)"
+Write-Host "Deleted files:   $($stats.Files)"
+if ($stats.Errors -gt 0) {
+    Write-Host "Errors:          $($stats.Errors)" -ForegroundColor Red
 }
