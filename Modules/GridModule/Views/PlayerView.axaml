@@ -92,13 +92,16 @@
 
                 </ToggleButton>
 
-                <!-- Keyboard key, MIDI key and overlay icon, shrunk only if the row is too small -->
-                <Viewbox
+                <!-- Keyboard key, MIDI key and overlay icon on a surface like the buttons, shrunk only if the row is too small -->
+                <Border
                     Grid.Column="1"
                     Margin="1,0,1,0"
+                    Classes="StateSurface Filled"
+                    IsVisible="{Binding HasInfo}">
+                <Viewbox
+                    Margin="4,0,4,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Stretch"
-                    IsVisible="{Binding HasInfo}"
                     Stretch="Uniform"
                     StretchDirection="DownOnly">
                     <StackPanel
@@ -142,6 +145,7 @@
                             ToolTip.Tip="Overlay signal" />
                     </StackPanel>
                 </Viewbox>
+                </Border>
 
                 <ToggleButton
                     Grid.Column="2"
