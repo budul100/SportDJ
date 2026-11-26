@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 
 namespace SportDJ.Services.StorageService;
 
@@ -224,9 +225,10 @@ public class Service<T>(IEventAggregator eventAggregator)
 
             result = true;
         }
-        catch
+        catch (Exception exception)
         {
-            // TODO: Log exception
+            Log.Error($"Loading the settings from '{fullPath}' failed.", exception);
+
             Debugger.Break();
         }
 
@@ -292,7 +294,7 @@ public class Service<T>(IEventAggregator eventAggregator)
 
             Path = fullPath;
         }
-        catch
+        catch (Exception exception)
         {
             if (isRebased)
             {
@@ -301,7 +303,8 @@ public class Service<T>(IEventAggregator eventAggregator)
                     newFolder: previousFolder);
             }
 
-            // TODO: Log exception
+            Log.Error($"Saving the settings to '{fullPath}' failed.", exception);
+
             Debugger.Break();
         }
     }

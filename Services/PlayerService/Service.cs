@@ -21,6 +21,7 @@ using SportDJ.Commons.Events.Stack;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
@@ -782,7 +783,7 @@ public class Service
             }
             catch (Exception exception)
             {
-                Trace.WriteLine($"[Player] Removing signals from the mixers failed: {exception}");
+                Log.Error("Removing the signals from the mixers failed.", exception);
             }
         }
 
@@ -809,8 +810,10 @@ public class Service
                 ? await dialogService.GetFolderAsync(paths)
                 : await dialogService.GetFolderAsync(Path.GetDirectoryName(settingsService.Path));
         }
-        catch (Exception)
+        catch (Exception exception)
         {
+            Log.Warning("Determining the start folder of the dialogs failed.", exception);
+
             startLocation = default;
         }
     }

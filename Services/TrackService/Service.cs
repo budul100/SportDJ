@@ -12,6 +12,7 @@ using SportDJ.Commons.Assets;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Track;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.TrackService.Extensions;
@@ -311,7 +312,7 @@ public class Service
 
             track.Render();
 
-            System.Diagnostics.Trace.WriteLine($"[Wave] Rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
+            Log.Debug($"Wave rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
 
             if (track.Bitmap != default)
             {
@@ -341,7 +342,7 @@ public class Service
             catch (Exception exception)
             {
                 // A failing track must not end the worker for all later tracks
-                System.Diagnostics.Trace.WriteLine($"[Track] Shaping failed: {exception}");
+                Log.Error("Shaping a track failed.", exception);
             }
         }
     }

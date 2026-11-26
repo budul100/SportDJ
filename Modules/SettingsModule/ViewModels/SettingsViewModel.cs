@@ -15,6 +15,7 @@ using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Mvvm;
@@ -503,8 +504,10 @@ public class SettingsViewModel
             startLocation = await dialogService
                 .GetFolderAsync(sessionService?.Contents?.SettingsPath);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
+            Log.Warning("Determining the start folder of the dialogs failed.", exception);
+
             startLocation = default;
         }
     }
@@ -520,9 +523,10 @@ public class SettingsViewModel
             {
                 await Task.Run(() => controllerService?.Update());
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // TODO: Log exception, the list keeps its previous content
+                // The list keeps its previous content
+                Log.Error("Updating the controllers failed.", exception);
             }
             finally
             {
@@ -543,9 +547,10 @@ public class SettingsViewModel
             {
                 await Task.Run(() => outputService?.Update());
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // TODO: Log exception, the list keeps its previous content
+                // The list keeps its previous content
+                Log.Error("Updating the audio devices failed.", exception);
             }
             finally
             {

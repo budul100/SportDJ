@@ -14,6 +14,7 @@ using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.ControllerService.Assets;
@@ -278,9 +279,10 @@ public class Service
         {
             profiles = serializer.Deserialize(file) as ControllerProfiles;
         }
-        catch
+        catch (Exception exception)
         {
-            // TODO: Log exception
+            Log.Error($"Reading the controller profiles from '{sourceFile}' failed.", exception);
+
             Debugger.Break();
         }
 
@@ -318,9 +320,9 @@ public class Service
                 midiIn = default;
             }
         }
-        catch
+        catch (Exception exception)
         {
-            // TODO: Log exception
+            Log.Error("Closing the controller failed.", exception);
         }
         finally
         {
@@ -346,8 +348,10 @@ public class Service
         {
             Set(name);
         }
-        catch (Exception)
-        { }
+        catch (Exception exception)
+        {
+            Log.Warning($"Opening the controller '{name}' failed.", exception);
+        }
     }
 
     private void OnKeyPressed(Key key, StrokeType type)
@@ -458,7 +462,7 @@ public class Service
             catch (Exception exception)
             {
                 // Most common reason: the MIDI input is already opened by another application (WinMM is exclusive)
-                Trace.WriteLine($"[Controller] Opening '{controller.Name}' failed: {exception}");
+                Log.Error($"Opening the controller '{controller.Name}' failed.", exception);
 
                 CloseController();
             }

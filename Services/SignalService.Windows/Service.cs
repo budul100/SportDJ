@@ -11,6 +11,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Contents;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Shareds.SampleProviders.Abstractions;
@@ -436,7 +437,7 @@ public class Service(IEventAggregator eventAggregator, IStorageService<Set> sett
                 catch (Exception exception)
                 {
                     // A failing handler must not stop the processing of later events
-                    Debug.WriteLine($"SignalService event failed: {exception}");
+                    Log.Error("Handling an audio event failed.", exception);
                 }
             }
         }

@@ -17,6 +17,7 @@ using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.App;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Ioc;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Services.OutputService;
 using SportDJ.Shareds.SampleProviders.Abstractions;
@@ -33,6 +34,7 @@ public class App
 
     private IContainerProvider container;
     private IClassicDesktopStyleApplicationLifetime desktop;
+    private FileLog fileLog;
 
     private MainView mainWindow;
 
@@ -56,6 +58,8 @@ public class App
         startupWatch.Start();
 
         AvaloniaXamlLoader.Load(this);
+
+        InitializeLogging();
 
         // The previewer only needs the styles, not the module graph
         if (Design.IsDesignMode)
@@ -92,6 +96,7 @@ public class App
             && container != default)
         {
             desktop.Startup += OnStartup;
+            desktop.Exit += (_, _) => fileLog?.Dispose();
 
             var dispatcherService = container.Resolve<IDispatcherService>();
             Task.Run(() => dispatcherService.InvokeAsync(InitializeApp));
@@ -109,6 +114,12 @@ public class App
         var registry = new ContainerRegistry();
 
         registry.RegisterSingleton<IEventAggregator, EventAggregator>();
+
+        // The same log, which is used by the static Log of the services
+        if (Log.Current != default)
+        {
+            registry.RegisterSingleton(Log.Current);
+        }
 
         registry.RegisterSingleton<MainViewModel>();
 
@@ -225,12 +236,16 @@ public class App
             var eventAggregator = container.Resolve<IEventAggregator>();
             eventAggregator.GetEvent<AppInitializedEvent>().Publish();
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException exception)
         {
+            Log.Warning("The start of the app was cancelled.", exception);
+
             desktop.MainWindow = default;
         }
         catch (Exception exception)
         {
+            Log.Error("The start of the app failed.", exception);
+
             // Otherwise the exception disappears silently in the Task.Run and the app just shows nothing
             var capturedException = ExceptionDispatchInfo.Capture(exception);
 
@@ -238,10 +253,38 @@ public class App
         }
     }
 
+    // The unhandled exceptions end up in the log, before the app ends or shows its error
+    private void InitializeLogging()
+    {
+        if (fileLog == default)
+        {
+            fileLog = new FileLog();
+
+            Log.Initialize(fileLog);
+
+            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+                Log.Error("Unhandled exception.", e.ExceptionObject as Exception);
+
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+            {
+                Log.Error("Unobserved exception of a task.", e.Exception);
+
+                e.SetObserved();
+            };
+
+            Dispatcher.UIThread.UnhandledException += (_, e) =>
+                Log.Error("Unhandled exception of the UI thread.", e.Exception);
+
+            Log.Information("SportDJ started.");
+        }
+    }
+
     private void LogStartup(string phase)
     {
         // Trace (not Debug) also works in release builds, e.g. with DebugView
         Trace.WriteLine($"[Startup] {startupWatch.ElapsedMilliseconds,6} ms  {phase}");
+
+        Log.Debug($"Startup {startupWatch.ElapsedMilliseconds} ms: {phase}");
     }
 
     private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)

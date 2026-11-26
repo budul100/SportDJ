@@ -2,7 +2,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="NAudio" Version="3.3.0" />
-		<PackageReference Include="z440.atl.core" Version="7.21.0" />
+		<PackageReference Include="z440.atl.core" Version="7.22.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +12,7 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using PropertyModels.Extensions;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 
 namespace SportDJ.Services.DialogService;
 
@@ -121,8 +122,10 @@ public class Service
         {
             windowIcon = GetWindowIcon(iconUri);
         }
-        catch
-        { }
+        catch (Exception exception)
+        {
+            Log.Warning("Loading the icon of the dialogs failed.", exception);
+        }
     }
 
     public async Task<IEnumerable<IStorageFile>> OpenFilePickerAsync(string title,
@@ -238,8 +241,10 @@ public class Service
                 }
             }
         }
-        catch
-        { }
+        catch (Exception exception)
+        {
+            Log.Warning($"Loading the window icon '{iconUri}' failed.", exception);
+        }
 
         return result;
     }
