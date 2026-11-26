@@ -20,6 +20,8 @@ public static class Texts
     public const string PlayerSelectionFolderHeader = "Select folder";
 
     public const string SettingsLoadHeader = "Load settings";
+    public const string SettingsNewHeader = "New session";
+    public const string SettingsNewMessage = "Shall an empty session be started? The current session stays in its file, further changes are stored in the default settings file.";
     public const string SettingsSaveHeader = "Save settings";
 
     public const string SplashCancellingMessage = "Cancelling ...";

@@ -124,6 +124,11 @@ public class PlayerViewModel
 
     public DelegateCommand ExecuteCommand { get; }
 
+    // Anything to show in the middle of the top bar: keyboard key, MIDI key, overlay
+    public bool HasInfo => HasKey || HasMidi || IsOverlay;
+
+    public bool HasMidi => !string.IsNullOrEmpty(MidiText);
+
     public bool HasPFL { get; private set; }
 
     public bool HasPFLOrKey => HasPFL || HasKey;
@@ -149,6 +154,13 @@ public class PlayerViewModel
         get => isSettingsVisible;
         set => SetProperty(ref isSettingsVisible, value);
     }
+
+    // Number of the assigned MIDI key, the complete text is the tooltip
+    public string MidiNumber => HasMidi
+        ? playerService.Key.Number.ToString()
+        : default;
+
+    public string MidiText => playerService?.Key.GetText();
 
     public double? Progress => playerService?.Progress;
 
@@ -270,6 +282,10 @@ public class PlayerViewModel
         RaisePropertyChanged(nameof(IsAvailableSelection));
 
         RaisePropertyChanged(nameof(HasKey));
+        RaisePropertyChanged(nameof(HasMidi));
+        RaisePropertyChanged(nameof(HasInfo));
+        RaisePropertyChanged(nameof(MidiNumber));
+        RaisePropertyChanged(nameof(MidiText));
         RaisePropertyChanged(nameof(HasPFL));
         RaisePropertyChanged(nameof(HasPFLOrKey));
         RaisePropertyChanged(nameof(HasStack));

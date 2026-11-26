@@ -32,7 +32,7 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- General -->
+            <!-- General: the name is on the left, the key and its buttons are on the right edge of the same row -->
             <StackPanel Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="General" />
@@ -41,65 +41,62 @@
                 <TextBlock
                     HorizontalAlignment="Left"
                     Classes="Caption"
-                    Text="Name" />
+                    Text="Name and key" />
 
-                <TextBox
-                    HorizontalAlignment="Stretch"
-                    IsTabStop="False"
-                    KeyDown="OnNameKeyDown"
-                    MaxLength="{Binding MaxLengthName}"
-                    Text="{Binding Name, Mode=TwoWay}" />
+                <Grid ColumnDefinitions="*,Auto">
 
-            </StackPanel>
+                    <TextBox
+                        Grid.Column="0"
+                        Margin="0,0,4,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        IsTabStop="False"
+                        KeyDown="OnNameKeyDown"
+                        MaxLength="{Binding MaxLengthName}"
+                        Text="{Binding Name, Mode=TwoWay}" />
 
-            <!-- Keyboard -->
-            <StackPanel Spacing="{StaticResource SpacingSmall}">
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="{StaticResource SpacingSmall}">
 
-                <TextBlock Classes="Section" Text="Keyboard" />
-                <Separator />
+                        <ct:KeyDisplay
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeState}"
+                            IsVisible="{Binding HasKey}"
+                            KeyCode="{Binding KeyCode}" />
 
-                <TextBlock
-                    HorizontalAlignment="Left"
-                    Classes="Caption"
-                    Text="Key" />
+                        <Button
+                            Click="OnListenClick"
+                            Command="{Binding ListenKeyboardCommand}"
+                            Focusable="False"
+                            ToolTip.Tip="Assign key">
+                            <Panel>
+                                <mat:MaterialIcon
+                                    Width="{StaticResource MediumIconSize}"
+                                    Height="{StaticResource MediumIconSize}"
+                                    IsVisible="{Binding !IsListeningKeyboard}"
+                                    Kind="KeyboardOutline" />
+                                <mat:MaterialIcon
+                                    Width="{StaticResource MediumIconSize}"
+                                    Height="{StaticResource MediumIconSize}"
+                                    IsVisible="{Binding IsListeningKeyboard}"
+                                    Kind="Close" />
+                            </Panel>
+                        </Button>
 
-                <ct:KeyDisplay
-                    HorizontalAlignment="Left"
-                    FontSize="{StaticResource FontSizeContentSub}"
-                    IsVisible="{Binding HasKey}"
-                    KeyCode="{Binding KeyCode}" />
-
-                <TextBlock IsVisible="{Binding !HasKey}" Text="{Binding KeyboardText}" />
-
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
-                    <Button
-                        Click="OnListenClick"
-                        Command="{Binding ListenKeyboardCommand}"
-                        Focusable="False"
-                        ToolTip.Tip="Assign key">
-                        <Panel>
+                        <Button
+                            Command="{Binding ClearKeyboardCommand}"
+                            Focusable="False"
+                            ToolTip.Tip="Clear key">
                             <mat:MaterialIcon
                                 Width="{StaticResource MediumIconSize}"
                                 Height="{StaticResource MediumIconSize}"
-                                IsVisible="{Binding !IsListeningKeyboard}"
-                                Kind="KeyboardOutline" />
-                            <mat:MaterialIcon
-                                Width="{StaticResource MediumIconSize}"
-                                Height="{StaticResource MediumIconSize}"
-                                IsVisible="{Binding IsListeningKeyboard}"
-                                Kind="Close" />
-                        </Panel>
-                    </Button>
-                    <Button
-                        Command="{Binding ClearKeyboardCommand}"
-                        Focusable="False"
-                        ToolTip.Tip="Clear key">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="KeyboardOffOutline" />
-                    </Button>
-                </StackPanel>
+                                Kind="KeyboardOffOutline" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
 
             </StackPanel>
 
@@ -109,8 +106,10 @@
                 <TextBlock Classes="Section" Text="Remove" />
                 <Separator />
 
+                <!-- Dark red, on the right edge -->
                 <Button
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Right"
+                    Classes="Danger"
                     Command="{Binding RemoveCommand}"
                     Focusable="False"
                     ToolTip.Tip="Remove tab">

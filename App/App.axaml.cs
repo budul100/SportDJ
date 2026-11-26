@@ -165,6 +165,8 @@ public class App
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.StackViewModel>();
         registry.RegisterSingleton<Modules.DefinitionsModule.Views.LayoutView>();
         registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.LayoutViewModel>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.Views.ControllerSettingsView>();
+        registry.RegisterSingleton<Modules.DefinitionsModule.ViewModels.ControllerSettingsViewModel>();
     }
 
     private static void RegisterTypes<TEnum>(ContainerRegistry registry, Type from, Type to)

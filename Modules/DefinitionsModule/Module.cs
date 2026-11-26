@@ -31,6 +31,11 @@ public static class Module
             type: PanelType.Left,
             view: definitionsView,
             action: definitionsViewModel.Activate<IGridService>);
+
+        // The tab of the controls is selected by the event of the controller view, so no action is needed
+        panelService?.Register<IControllerService>(
+            type: PanelType.Left,
+            view: definitionsView);
     }
 
     #endregion Public Methods

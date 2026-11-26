@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Assets;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
@@ -60,6 +61,9 @@ public class SettingsViewModel
 
         SettingsLoadCommand = new DelegateCommand(
             async () => await LoadSettingsAsync());
+
+        SettingsNewCommand = new DelegateCommand(
+            async () => await NewSessionAsync());
 
         SettingsSaveCommand = new DelegateCommand(
             async () => await SaveSettingsAsync());
@@ -188,6 +192,8 @@ public class SettingsViewModel
 
     public DelegateCommand SettingsLoadCommand { get; }
 
+    public DelegateCommand SettingsNewCommand { get; }
+
     public DelegateCommand SettingsSaveCommand { get; }
 
     public DelegateCommand UpdateControllersCommand { get; }
@@ -285,6 +291,30 @@ public class SettingsViewModel
         }
     }
 
+    private async Task NewSessionAsync()
+    {
+        var result = await dialogService.GetMessageBoxResultAsync(
+            contentMessage: Texts.SettingsNewMessage,
+            contentTitle: Texts.SettingsNewHeader,
+            buttonDefinitions: ButtonEnum.YesNo,
+            enterDefaultButton: ClickEnum.No);
+
+        if (result == ButtonResult.Yes)
+        {
+            var path = settingsService.GetPath(
+                appName: Texts.AppName,
+                fileName: Defaults.FileNameSettings + Constants.SettingsExtension);
+
+            sessionService.Contents.SettingsPath = path;
+
+            sessionService.Save();
+
+            settingsService.New(path);
+
+            await SetStartLocationAsync();
+        }
+    }
+
     private void RefreshSettings()
     {
         if (panelService.IsVisible<IStorageService<Session>>())
@@ -313,7 +343,7 @@ public class SettingsViewModel
         var fileName = Path.GetFileNameWithoutExtension(sessionService?.Contents?.SettingsPath);
 
         var path = await dialogService.SaveFilePickerAsync(
-            title: Texts.SettingsLoadHeader,
+            title: Texts.SettingsSaveHeader,
             defaultExtension: Constants.SettingsExtension,
             fileTypeChoices: fileTypeFilter,
             showOverwritePrompt: true,

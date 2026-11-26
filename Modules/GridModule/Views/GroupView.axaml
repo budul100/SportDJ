@@ -54,13 +54,13 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <Viewbox
-                            Grid.Column="0"
+                            Grid.Column="1"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Focusable="False"
@@ -77,9 +77,9 @@
                         </Viewbox>
 
                         <Viewbox
-                            Grid.Column="1"
+                            Grid.Column="0"
                             Margin="{StaticResource KeyMargin}"
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             Focusable="False"
                             IsVisible="{Binding HasKey}"

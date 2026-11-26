@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
@@ -35,12 +35,15 @@ public class Options
     [Range(Constants.OptionsFadeMin, Constants.OptionsFadeMax)]
     public int FadeOnPauseUnfilteredMilliseconds { get; set; } = Defaults.FadeOnPauseUnfilteredMilliseconds;
 
+    [Browsable(false)]
     [IgnoreDataMember]
     public string KeyCodeOutputPause { get; set; } = Defaults.KeyCodeOutputPause;
 
+    [Browsable(false)]
     [IgnoreDataMember]
     public string KeyCodeScreenChange { get; set; } = Defaults.KeyCodeScreenChange;
 
+    [Browsable(false)]
     [IgnoreDataMember]
     public string KeyCodeVolumeTalk { get; set; } = Defaults.KeyCodeVolumeTalk;
 

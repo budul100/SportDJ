@@ -1,0 +1,107 @@
+<UserControl
+    x:Class="SportDJ.Modules.DefinitionsModule.Views.ControllerSettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:SportDJ.Shareds.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mat="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:SportDJ.Modules.DefinitionsModule.ViewModels"
+    xmlns:vml="using:SportDJ.Shareds.ViewModelLocator"
+    vml:ViewModelLocator.AutoWireViewModel="True"
+    x:DataType="vm:ControllerSettingsViewModel"
+    d:DesignHeight="500"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Commons/Assets/Ressources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <mat:MaterialIconStyles />
+    </UserControl.Styles>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel
+            Margin="{StaticResource ContentMargin}"
+            Spacing="{StaticResource SpacingMedium}">
+
+            <TextBlock Classes="Section" Text="Keyboard" />
+            <Separator />
+
+            <!-- One row per key: the title and the key on the left, the buttons on the right edge -->
+            <ItemsControl ItemsSource="{Binding Keys}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ControlKeyViewModel">
+                        <Grid
+                            Margin="0,0,0,4"
+                            ColumnDefinitions="*,Auto">
+
+                            <StackPanel
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Spacing="{StaticResource SpacingSmall}">
+
+                                <TextBlock
+                                    HorizontalAlignment="Left"
+                                    Classes="Caption"
+                                    Text="{Binding Title}"
+                                    TextWrapping="Wrap" />
+
+                                <Panel HorizontalAlignment="Left">
+                                    <ct:KeyDisplay
+                                        FontSize="{StaticResource FontSizeContentSub}"
+                                        IsVisible="{Binding HasKey}"
+                                        KeyCode="{Binding KeyCode}" />
+
+                                    <TextBlock IsVisible="{Binding !HasKey}" Text="{Binding KeyboardText}" />
+                                </Panel>
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="{StaticResource SpacingMedium}">
+                                <Button
+                                    Click="OnListenClick"
+                                    Command="{Binding ListenCommand}"
+                                    Focusable="False"
+                                    ToolTip.Tip="Assign key">
+                                    <Panel>
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource MediumIconSize}"
+                                            Height="{StaticResource MediumIconSize}"
+                                            IsVisible="{Binding !IsListening}"
+                                            Kind="KeyboardOutline" />
+                                        <mat:MaterialIcon
+                                            Width="{StaticResource MediumIconSize}"
+                                            Height="{StaticResource MediumIconSize}"
+                                            IsVisible="{Binding IsListening}"
+                                            Kind="Close" />
+                                    </Panel>
+                                </Button>
+                                <Button
+                                    Command="{Binding ClearCommand}"
+                                    Focusable="False"
+                                    ToolTip.Tip="Clear key">
+                                    <mat:MaterialIcon
+                                        Width="{StaticResource MediumIconSize}"
+                                        Height="{StaticResource MediumIconSize}"
+                                        Kind="KeyboardOffOutline" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

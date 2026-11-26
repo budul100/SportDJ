@@ -317,20 +317,26 @@ public class Service
     {
         var outputs = sessionService?.Contents?.Outputs;
 
-        if (outputs?.Any(o => o.Type == type) != true)
+        // Without a session the options are not stored, but the caller still gets usable defaults
+        if (outputs == default)
         {
-            var outputOptions = new Output
+            return new Output
             {
                 Type = type,
                 Volume = Constants.VolumeMax,
             };
-
-            outputs.Add(outputOptions);
         }
 
-        var result = outputs?.Single(s => s.Type == type);
+        if (!outputs.Any(o => o.Type == type))
+        {
+            outputs.Add(new Output
+            {
+                Type = type,
+                Volume = Constants.VolumeMax,
+            });
+        }
 
-        return result;
+        return outputs.First(s => s.Type == type);
     }
 
     private void InitializeMonitors()

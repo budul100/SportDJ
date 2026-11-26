@@ -115,20 +115,27 @@
                 <TextBlock Classes="Section" Text="Keyboard" />
                 <Separator />
 
-                <TextBlock
-                    HorizontalAlignment="Left"
-                    Classes="Caption"
-                    Text="Key" />
+                <!-- The key is on the left, the buttons are on the right edge of the same row -->
+                <Grid ColumnDefinitions="*,Auto">
 
                 <ct:KeyDisplay
+                    Grid.Column="0"
                     HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
                     FontSize="{StaticResource FontSizeContentSub}"
                     IsVisible="{Binding HasKey}"
                     KeyCode="{Binding KeyCode}" />
 
-                <TextBlock IsVisible="{Binding !HasKey}" Text="{Binding KeyboardText}" />
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding !HasKey}"
+                    Text="{Binding KeyboardText}" />
 
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="{StaticResource SpacingMedium}">
                     <Button
                         Click="OnListenClick"
                         Command="{Binding ListenKeyboardCommand}"
@@ -158,6 +165,8 @@
                     </Button>
                 </StackPanel>
 
+                </Grid>
+
             </StackPanel>
 
             <!-- MIDI -->
@@ -166,14 +175,18 @@
                 <TextBlock Classes="Section" Text="MIDI" />
                 <Separator />
 
+                <!-- The key is on the left, the buttons are on the right edge of the same row -->
+                <Grid ColumnDefinitions="*,Auto">
+
                 <TextBlock
-                    HorizontalAlignment="Left"
-                    Classes="Caption"
-                    Text="Key" />
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="{Binding MidiText}" />
 
-                <TextBlock Text="{Binding MidiText}" />
-
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="{StaticResource SpacingMedium}">
                     <Button
                         Command="{Binding ListenMidiCommand}"
                         Focusable="False"
@@ -202,6 +215,8 @@
                     </Button>
                 </StackPanel>
 
+                </Grid>
+
             </StackPanel>
 
             <!-- Remove -->
@@ -210,8 +225,10 @@
                 <TextBlock Classes="Section" Text="Remove" />
                 <Separator />
 
+                <!-- Dark red, on the right edge -->
                 <Button
-                    HorizontalAlignment="Left"
+                    HorizontalAlignment="Right"
+                    Classes="Danger"
                     Command="{Binding RemoveCommand}"
                     Focusable="False"
                     ToolTip.Tip="Remove player">

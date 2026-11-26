@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Panel;
 using SportDJ.Commons.Events.Player;
@@ -16,6 +17,8 @@ public class DefinitionsViewModel
 {
     #region Private Fields
 
+    private readonly ControllerSettingsViewModel controllerSettingsViewModel;
+    private readonly TabViewModel[] controllerTabs;
     private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
     private readonly LayoutViewModel layoutViewModel;
@@ -28,6 +31,7 @@ public class DefinitionsViewModel
     private readonly TabViewModel[] tabTabs;
 
     private TabViewModel active;
+    private bool isController;
     private bool isTab;
     private TabViewModel[] tabs;
 
@@ -38,8 +42,9 @@ public class DefinitionsViewModel
     public DefinitionsViewModel(IEventAggregator eventAggregator, IPanelService panelService,
         IDispatcherService dispatcherService,
         SettingsViewModel settingsViewModel, StackViewModel stackViewModel, LayoutViewModel layoutViewModel,
-        TabSettingsViewModel tabSettingsViewModel)
+        TabSettingsViewModel tabSettingsViewModel, ControllerSettingsViewModel controllerSettingsViewModel)
     {
+        this.controllerSettingsViewModel = controllerSettingsViewModel;
         this.dispatcherService = dispatcherService;
         this.eventAggregator = eventAggregator;
         this.layoutViewModel = layoutViewModel;
@@ -58,6 +63,11 @@ public class DefinitionsViewModel
 
         eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
             action: SetTab,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<ControllerVisibleEvent>().Subscribe(
+            action: SetController,
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
 
@@ -92,6 +102,12 @@ public class DefinitionsViewModel
         [
             tabSettingsViewModel,
             layoutViewModel
+        ];
+
+        // The controls have no content and no layout
+        controllerTabs =
+        [
+            controllerSettingsViewModel
         ];
 
         tabs = playerTabs;
@@ -137,6 +153,7 @@ public class DefinitionsViewModel
         settingsViewModel.Cancel();
         tabSettingsViewModel.Cancel();
         layoutViewModel.Cancel();
+        controllerSettingsViewModel.Cancel();
     }
 
     private void CancelListeningIfClosed()
@@ -153,16 +170,30 @@ public class DefinitionsViewModel
         panelService?.Deactivate<IPlayerService>();
     }
 
-    // Switches between the tabs of a player and the tabs of a group tab, the shown tab is kept if possible
-    private void SetMode(bool isTab)
+    private void SetController()
     {
-        if (this.isTab != isTab)
+        SetMode(false, true);
+
+        // The controls have neither a player nor a tab
+        settingsViewModel.Set(default);
+        stackViewModel.Set(default);
+        tabSettingsViewModel.Set(default);
+    }
+
+    // Switches between the tabs of a player, of a group tab and of the controls, the shown tab is kept if possible
+    private void SetMode(bool isTab, bool isController)
+    {
+        if (this.isTab != isTab
+            || this.isController != isController)
         {
+            this.isController = isController;
             this.isTab = isTab;
 
-            tabs = isTab
-                ? tabTabs
-                : playerTabs;
+            tabs = isController
+                ? controllerTabs
+                : isTab
+                    ? tabTabs
+                    : playerTabs;
 
             RaisePropertyChanged(nameof(Tabs));
         }
@@ -183,8 +214,9 @@ public class DefinitionsViewModel
         // Closing publishes no player
         if (player != default)
         {
-            SetMode(false);
+            SetMode(false, false);
 
+            controllerSettingsViewModel.Cancel();
             tabSettingsViewModel.Set(default);
 
             settingsViewModel.Set(player);
@@ -198,7 +230,9 @@ public class DefinitionsViewModel
         // Closing publishes no tab
         if (tab != default)
         {
-            SetMode(true);
+            SetMode(true, false);
+
+            controllerSettingsViewModel.Cancel();
 
             // A tab has neither content nor player settings
             settingsViewModel.Set(default);
@@ -214,6 +248,12 @@ public class DefinitionsViewModel
         settingsViewModel.Validate();
         tabSettingsViewModel.Validate();
         layoutViewModel.Validate();
+
+        // The controls do not depend on the grid
+        if (isController)
+        {
+            return;
+        }
 
         var player = settingsViewModel.Current;
         var tab = tabSettingsViewModel.Current;

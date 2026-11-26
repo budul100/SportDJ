@@ -52,12 +52,19 @@
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
 
+    <!-- Destructive actions, e.g. the remove buttons of the settings -->
+    <Color x:Key="ColorDanger">DarkRed</Color>
+    <Color x:Key="ColorDangerHover">#B00000</Color>
+    <Color x:Key="ColorDangerPressed">#5C0000</Color>
+
     <!-- ===== Type scale: 11 / 14 / 16 / 20 ===== -->
 
     <x:Double x:Key="FontSizeSettings">11</x:Double>
     <x:Double x:Key="FontSizeState">14</x:Double>
     <x:Double x:Key="FontSizeContentSub">16</x:Double>
     <x:Double x:Key="FontSizeContentMain">20</x:Double>
+    <!-- Clock, title and remaining time of the display bar -->
+    <x:Double x:Key="FontSizeDisplay">26</x:Double>
 
     <FontWeight x:Key="FontWeightLabel">Medium</FontWeight>
     <FontWeight x:Key="FontWeightTitle">SemiBold</FontWeight>

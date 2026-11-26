@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SportDJ.Commons.Interfaces;
 
@@ -24,6 +24,11 @@ public interface IStorageService<T>
     string GetPathRelative(string path);
 
     void Load(string filePath);
+
+    /// <summary>
+    /// Replaces the contents by an empty set, which is stored at the given path from now on.
+    /// </summary>
+    void New(string filePath);
 
     void Save(string filePath = default);
 

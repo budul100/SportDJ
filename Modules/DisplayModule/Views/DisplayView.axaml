@@ -65,10 +65,10 @@
         <Grid Margin="{StaticResource ContentMargin}">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="5*" />
-                <ColumnDefinition Width="5*" />
-                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="6*" />
+                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
 
             <!-- Clock -->
@@ -78,12 +78,18 @@
                 VerticalAlignment="Stretch"
                 Classes="DisplayField">
 
-                <TextBlock
+                <!-- The viewbox only shrinks the text if the field is too small for it -->
+                <Viewbox
+                    Margin="{StaticResource InnerMargin}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="{StaticResource FontSizeContentSub}"
-                    FontWeight="{StaticResource FontWeightTitle}"
-                    Text="{Binding Clock}" />
+                    Stretch="Uniform"
+                    StretchDirection="DownOnly">
+                    <TextBlock
+                        FontSize="{StaticResource FontSizeDisplay}"
+                        FontWeight="{StaticResource FontWeightTitle}"
+                        Text="{Binding Clock}" />
+                </Viewbox>
             </Border>
 
             <!-- Track info -->
@@ -111,11 +117,16 @@
                         OpacityMin="{StaticResource DisplayOpacityEndingMin}"
                         Color="{StaticResource ColorIsEnding}" />
 
-                    <TextBlock
+                    <Viewbox
+                        Margin="{StaticResource InnerMargin}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContentSub}"
-                        Text="{Binding Content}" />
+                        Stretch="Uniform"
+                        StretchDirection="DownOnly">
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeDisplay}"
+                            Text="{Binding Content}" />
+                    </Viewbox>
                 </Grid>
             </Border>
 
@@ -179,12 +190,17 @@
                         OpacityMin="{StaticResource DisplayOpacityEndingMin}"
                         Color="{StaticResource ColorIsEnding}" />
 
-                    <TextBlock
+                    <Viewbox
+                        Margin="{StaticResource InnerMargin}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontSize="{StaticResource FontSizeContentSub}"
-                        FontWeight="{StaticResource FontWeightTitle}"
-                        Text="{Binding Remaining}" />
+                        Stretch="Uniform"
+                        StretchDirection="DownOnly">
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeDisplay}"
+                            FontWeight="{StaticResource FontWeightTitle}"
+                            Text="{Binding Remaining}" />
+                    </Viewbox>
                 </Grid>
             </Border>
         </Grid>

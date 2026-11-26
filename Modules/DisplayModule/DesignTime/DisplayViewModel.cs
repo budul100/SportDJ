@@ -11,7 +11,7 @@ public class DisplayViewModel
 
     public DisplayViewModel()
         : base(containerProvider: default, eventAggregator: default,
-              panelService: default, settingsService: default, sessionService: default)
+              panelService: default, settingsService: default, sessionService: default, keyboardService: default)
     {
         Content = "Example - Example";
         Remaining = "00:05.3";

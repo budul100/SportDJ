@@ -60,6 +60,10 @@
                                 <views:LayoutView/>
                             </DataTemplate>
 
+                            <DataTemplate DataType="{x:Type vm:ControllerSettingsViewModel}">
+                                <views:ControllerSettingsView/>
+                            </DataTemplate>
+
                         </ContentControl.DataTemplates>
                     </ContentControl>
                 </DataTemplate>

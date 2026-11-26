@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Device;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Output;
+using SportDJ.Commons.Events.Panel;
+using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Events.Signal;
 using SportDJ.Commons.Events.Volume;
@@ -21,11 +25,15 @@ public class ControllerViewModel
 {
     #region Private Fields
 
+    private readonly IEventAggregator eventAggregator;
+    private readonly IKeyboardService keyboardService;
     private readonly IMixerService mixerService;
     private readonly IEnumerable<IMonitorService> monitorServices;
     private readonly IOutputService outputLiveService;
+    private readonly IPanelService panelService;
 
     private bool isLoweredRequested;
+    private bool isSettingsVisible;
     private bool isVolumePressed;
     private Options options;
 
@@ -35,9 +43,13 @@ public class ControllerViewModel
 
     public ControllerViewModel(IContainerProvider containerProvider,
         IEventAggregator eventAggregator,
-        IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices)
+        IStorageService<Set> settingsService, IEnumerable<IMonitorService> monitoringServices,
+        IPanelService panelService, IKeyboardService keyboardService)
     {
+        this.eventAggregator = eventAggregator;
+        this.keyboardService = keyboardService;
         this.monitorServices = monitoringServices;
+        this.panelService = panelService;
 
         mixerService = containerProvider?.Resolve<IMixerService>(
             name: nameof(MixerType.Base));
@@ -62,6 +74,30 @@ public class ControllerViewModel
         PauseCommand = new DelegateCommand(
             executeMethod: () => outputLiveService?.Pause(),
             canExecuteMethod: () => IsActive);
+
+        ShowSettingsCommand = new DelegateCommand(
+            executeMethod: ShowSettings);
+
+        // One pane for all settings: the button is only checked while the pane shows the settings of the control keys
+        eventAggregator?.GetEvent<ControllerVisibleEvent>().Subscribe(
+            action: () => IsSettingsVisible = true,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<PlayerVisibleEvent>().Subscribe(
+            action: _ => IsSettingsVisible = false,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<TabVisibleEvent>().Subscribe(
+            action: _ => IsSettingsVisible = false,
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<PanelUpdatedEvent>().Subscribe(
+            action: _ => UpdatePanelButtons(),
+            threadOption: ThreadOption.PublisherThread,
+            keepSubscriberReferenceAlive: true);
 
         eventAggregator?.GetEvent<SettingsLoadedEvent<Set>>().Subscribe(
             action: () =>
@@ -151,6 +187,12 @@ public class ControllerViewModel
 
     public bool IsMonitoringEnabled => monitorServices?.Any(s => s.IsReady) == true;
 
+    public bool IsSettingsVisible
+    {
+        get => isSettingsVisible;
+        set => SetProperty(ref isSettingsVisible, value);
+    }
+
     public bool IsVolumeLowered => isLoweredRequested
         && outputLiveService?.IsLowered == true;
 
@@ -170,6 +212,8 @@ public class ControllerViewModel
 
     public DelegateCommand PauseCommand { get; }
 
+    public DelegateCommand ShowSettingsCommand { get; }
+
     public DelegateCommand VolumeLowerCommand { get; }
 
     public DelegateCommand VolumeRaiseCommand { get; }
@@ -182,14 +226,20 @@ public class ControllerViewModel
     {
         isLoweredRequested = true;
 
-        outputLiveService.Lower();
+        outputLiveService?.Lower();
     }
 
     private void OnKeyPressed(string keyCode)
     {
+        // While anything waits for a key to be assigned, the key must not trigger a control
+        if (keyboardService?.IsAny == true)
+        {
+            return;
+        }
+
         if (keyCode == options?.KeyCodeOutputPause)
         {
-            outputLiveService.Pause();
+            outputLiveService?.Pause();
         }
         else if (keyCode == options?.KeyCodeVolumeTalk)
         {
@@ -209,7 +259,22 @@ public class ControllerViewModel
     {
         isLoweredRequested = false;
 
-        outputLiveService.Raise();
+        outputLiveService?.Raise();
+    }
+
+    // One pane for all settings, the same button opens and closes it like at a player
+    private void ShowSettings()
+    {
+        if (IsSettingsVisible)
+        {
+            panelService?.Deactivate<IPlayerService>();
+        }
+        else
+        {
+            eventAggregator?.GetEvent<ControllerVisibleEvent>().Publish();
+
+            panelService?.Activate<IControllerService>();
+        }
     }
 
     private void SwitchLoop()
@@ -246,34 +311,6 @@ public class ControllerViewModel
         UpdateControls();
     }
 
-    //public bool HasKey => !string.IsNullOrWhiteSpace(Key);
-    //public string Key => KeyCode.GetKey();
-    //public string KeyCode
-    //{
-    //    get { return keyable?.KeyCode; }
-    //    set
-    //    {
-    //        if (keyable != default
-    //            && value != keyable.KeyCode)
-    //        {
-    //            keyable.KeyCode = value;
-    //            settingsService.Save();
-    //            RaisePropertyChanged(nameof(KeyCode));
-    //            RaisePropertyChanged(nameof(HasKey));
-    //            RaisePropertyChanged(nameof(Key));
-    //        }
-    //    }
-    //}
-    //private void ReceiveHook(string keyCode)
-    //{
-    //    if (isListening)
-    //    {
-    //        KeyCode = keyCode;
-    //        isListening = false;
-    //        listenChecker.Invoke();
-    //        CloseMenu();
-    //    }
-    //}
     private void UpdateControls()
     {
         RaisePropertyChanged(nameof(IsActive));
@@ -299,6 +336,14 @@ public class ControllerViewModel
 
         RaisePropertyChanged(nameof(KeyCodeTalkVolume));
         RaisePropertyChanged(nameof(HasKeyTalkVolume));
+    }
+
+    private void UpdatePanelButtons()
+    {
+        if (panelService?.IsVisible<IPlayerService>() != true)
+        {
+            IsSettingsVisible = false;
+        }
     }
 
     #endregion Private Methods

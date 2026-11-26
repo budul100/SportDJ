@@ -23,6 +23,7 @@ public class DisplayViewModel
 
     private readonly DispatcherTimer clockTimer;
     private readonly IEventAggregator eventAggregator;
+    private readonly IKeyboardService keyboardService;
     private readonly IMixerService mixerService;
     private readonly IPanelService panelService;
     private readonly IStorageService<Session> sessionService;
@@ -43,9 +44,10 @@ public class DisplayViewModel
 
     public DisplayViewModel(IContainerProvider containerProvider,
         IEventAggregator eventAggregator, IPanelService panelService, IStorageService<Set> settingsService,
-        IStorageService<Session> sessionService)
+        IStorageService<Session> sessionService, IKeyboardService keyboardService)
     {
         this.eventAggregator = eventAggregator;
+        this.keyboardService = keyboardService;
         this.panelService = panelService;
         this.settingsService = settingsService;
         this.sessionService = sessionService;
@@ -92,13 +94,14 @@ public class DisplayViewModel
 
     #region Public Properties
 
-    public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
-
     public Bitmap Bitmap
     {
         get { return bitmap; }
         set { SetProperty(ref bitmap, value); }
     }
+
+    // An instance property, because the change is raised by the instance
+    public string Clock => DateTime.Now.ToString(Constants.FormatClock);
 
     public string Content
     {
@@ -207,7 +210,7 @@ public class DisplayViewModel
             Interval = TimeSpan.FromSeconds(1)
         };
 
-        result.Tick += (s, e) => RaisePropertyChanged(nameof(ViewModels.DisplayViewModel.Clock));
+        result.Tick += (s, e) => RaisePropertyChanged(nameof(Clock));
 
         return result;
     }
@@ -223,7 +226,9 @@ public class DisplayViewModel
 
     private void OnKeyPressed(string keyCode)
     {
-        if (keyCode == settingsService?.Contents?.Options?.KeyCodeScreenChange)
+        // While anything waits for a key to be assigned, the key must not switch the screen
+        if (keyboardService?.IsAny != true
+            && keyCode == settingsService?.Contents?.Options?.KeyCodeScreenChange)
         {
             ShowFullscreen = !ShowFullscreen;
         }

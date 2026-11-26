@@ -84,6 +84,24 @@
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
 
+    <!--
+        Dark red button for destructive actions (remove). The Fluent template paints the background
+        on the ContentPresenter, so the colors are set there, including the hover and pressed states.
+        The states are declared after the default, so they win.
+    -->
+    <Style Selector="Button.Danger /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ColorDanger}" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.Danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ColorDangerHover}" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.Danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ColorDangerPressed}" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
     <!-- ===== Surfaces ===== -->
 
     <!-- On/off surface inside a button (loop, monitoring, microphone, pause) -->

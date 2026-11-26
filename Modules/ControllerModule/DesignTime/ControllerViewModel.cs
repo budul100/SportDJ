@@ -7,7 +7,8 @@ public class ControllerViewModel
 
     public ControllerViewModel()
         : base(containerProvider: default, eventAggregator: default,
-               settingsService: default, monitoringServices: default)
+               settingsService: default, monitoringServices: default,
+               panelService: default, keyboardService: default)
     { }
 
     #endregion Public Constructors

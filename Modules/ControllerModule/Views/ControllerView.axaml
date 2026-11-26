@@ -42,6 +42,7 @@
             <ColumnDefinition />
             <ColumnDefinition />
             <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <!-- Loop -->
@@ -111,20 +112,20 @@
                     VerticalAlignment="Stretch">
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="{Binding HasKeyTalkVolume, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <mat:MaterialIcon
-                        Grid.Column="0"
+                        Grid.Column="1"
                         Width="{StaticResource LargeIconSize}"
                         Height="{StaticResource LargeIconSize}"
                         Kind="Microphone" />
 
                     <ct:KeyDisplay
-                        Grid.Column="1"
+                        Grid.Column="0"
                         Margin="{StaticResource KeyMargin}"
-                        HorizontalAlignment="Right"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource FontSizeContentMain}"
                         IsVisible="{Binding HasKeyTalkVolume}"
@@ -151,20 +152,20 @@
                     VerticalAlignment="Stretch">
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="{Binding HasKeyPauseOutput, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <mat:MaterialIcon
-                        Grid.Column="0"
+                        Grid.Column="1"
                         Width="{StaticResource LargeIconSize}"
                         Height="{StaticResource LargeIconSize}"
                         Kind="PauseCircle" />
 
                     <ct:KeyDisplay
-                        Grid.Column="1"
+                        Grid.Column="0"
                         Margin="{StaticResource KeyMargin}"
-                        HorizontalAlignment="Right"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         FontSize="{StaticResource FontSizeContentMain}"
                         IsVisible="{Binding HasKeyPauseOutput}"
@@ -172,6 +173,25 @@
                 </Grid>
             </Border>
         </Button>
+
+        <!-- Settings of the control keys: opens and closes the left pane, checked while it shows them -->
+        <ToggleButton
+            Grid.Row="0"
+            Grid.Column="4"
+            MinWidth="60"
+            Margin="{StaticResource InnerMargin}"
+            HorizontalAlignment="Right"
+            HorizontalContentAlignment="Center"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            Classes="SettingsToggle"
+            Command="{Binding ShowSettingsCommand}"
+            IsChecked="{Binding IsSettingsVisible, Mode=OneWay}">
+            <mat:MaterialIcon
+                Width="{StaticResource MediumIconSize}"
+                Height="{StaticResource MediumIconSize}"
+                Kind="Build" />
+        </ToggleButton>
 
     </Grid>
 </UserControl>

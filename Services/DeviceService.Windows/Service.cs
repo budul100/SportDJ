@@ -275,7 +275,7 @@ public class Service(IEventAggregator eventAggregator)
 
                     result = new Device(
                         Name: capability.ProductName,
-                        Channels: capability.Channels,
+                        Channels: channels,
                         Type: DeviceType.Wasapi,
                         Number: index);
                 }

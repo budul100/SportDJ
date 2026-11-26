@@ -57,15 +57,16 @@
             </Grid.RowDefinitions>
 
             <!--
-                Top row: PFL (placeholder, disabled until PFL is available), key, settings.
-                PFL and settings are equally wide, the key only takes the width of its badge, as in the tab header.
-                Without a key the middle column is gone, so the two buttons share the row.
+                Top row: PFL (placeholder, disabled until PFL is available), infos, settings.
+                PFL and settings are equally wide, the infos only take the width they need.
+                The infos in the middle are the keyboard key, the MIDI key and the overlay icon, each one only if it exists.
+                Without any info the middle column is gone, so the two buttons share the row.
                 The gaps are margins (1 px each side), so they only exist together with their neighbours.
             -->
             <Grid Grid.Row="0" Margin="{StaticResource PlayerInnerMargin}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="{Binding HasKey, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
+                    <ColumnDefinition Width="{Binding HasInfo, Converter={StaticResource BoolToGridSizeAutoConverter}}" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -90,15 +91,56 @@
 
                 </ToggleButton>
 
-                <!-- Only shown if a key is assigned -->
-                <ct:KeyDisplay
+                <!-- Keyboard key, MIDI key and overlay icon, shrunk only if the row is too small -->
+                <Viewbox
                     Grid.Column="1"
                     Margin="1,0,1,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Stretch"
-                    FontSize="{StaticResource FontSizeContentMain}"
-                    IsVisible="{Binding HasKey}"
-                    KeyCode="{Binding KeyCode}" />
+                    IsVisible="{Binding HasInfo}"
+                    Stretch="Uniform"
+                    StretchDirection="DownOnly">
+                    <StackPanel
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="4">
+
+                        <ct:KeyDisplay
+                            VerticalAlignment="Center"
+                            FontSize="{StaticResource FontSizeContentMain}"
+                            IsVisible="{Binding HasKey}"
+                            KeyCode="{Binding KeyCode}" />
+
+                        <Border
+                            VerticalAlignment="Center"
+                            Classes="KeyBadge"
+                            IsVisible="{Binding HasMidi}"
+                            ToolTip.Tip="{Binding MidiText}">
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="4">
+                                <mat:MaterialIcon
+                                    Width="{StaticResource FontSizeContentMain}"
+                                    Height="{StaticResource FontSizeContentMain}"
+                                    VerticalAlignment="Center"
+                                    Kind="Piano" />
+                                <TextBlock
+                                    FontSize="{StaticResource FontSizeContentMain}"
+                                    Text="{Binding MidiNumber}" />
+                            </StackPanel>
+                        </Border>
+
+                        <mat:MaterialIcon
+                            Width="{StaticResource PlayerIconSize}"
+                            Height="{StaticResource PlayerIconSize}"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsOverlay}"
+                            Kind="ChevronUpBoxOutline"
+                            ToolTip.Tip="Overlay signal" />
+                    </StackPanel>
+                </Viewbox>
 
                 <ToggleButton
                     Grid.Column="2"
@@ -197,12 +239,6 @@
                                     VerticalAlignment="Top"
                                     Orientation="Horizontal"
                                     Spacing="2">
-                                    <mat:MaterialIcon
-                                        Width="{StaticResource FontSizeState}"
-                                        Height="{StaticResource FontSizeState}"
-                                        VerticalAlignment="Center"
-                                        IsVisible="{Binding IsOverlay}"
-                                        Kind="ChevronUpBoxOutline" />
                                     <TextBlock
                                         Focusable="False"
                                         FontSize="{StaticResource FontSizeState}"

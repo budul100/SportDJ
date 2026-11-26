@@ -119,6 +119,19 @@ public class Service<T>(IEventAggregator eventAggregator)
         }
     }
 
+    public void New(string filePath)
+    {
+        Contents = Activator.CreateInstance<T>();
+
+        // From now on all changes go to the new path, so the previous file stays untouched
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            Path = System.IO.Path.GetFullPath(filePath);
+        }
+
+        eventAggregator.GetEvent<SettingsLoadedEvent<T>>().Publish();
+    }
+
     public void Save(string filePath = default)
     {
         Task.Run(() => SaveSettingsAsync(filePath));
