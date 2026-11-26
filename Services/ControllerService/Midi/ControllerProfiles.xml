@@ -7,6 +7,8 @@
 		<!--
 			Colors of the keys (value = velocity of the Note On, which lights the key).
 			Launchpad Mk1 and Mini Mk1: value = 16 * green (0..3) + red (0..3) + 12 (flags: normal).
+			The device only has red and green LEDs, so all other colors are approximations by mixing both.
+			Colors which share a value (Blue/Indigo, Gray/White) cannot be told apart on the device.
 			Values are not verified on the devices. Colors without an entry do not light the key.
 		-->
 		<Colors>
@@ -15,6 +17,18 @@
 			<Color name="Orange" value="31" />
 			<Color name="Yellow" value="62" />
 			<Color name="Green" value="60" />
+			<Color name="Teal" value="44" />
+			<Color name="Blue" value="28" />
+			<Color name="Pink" value="14" />
+			<Color name="Gray" value="63" />
+			<Color name="Purple" value="13" />
+			<Color name="Lime" value="61" />
+			<Color name="Brown" value="30" />
+			<Color name="Cyan" value="45" />
+			<Color name="Indigo" value="28" />
+			<Color name="Coral" value="47" />
+			<Color name="Mint" value="46" />
+			<Color name="White" value="63" />
 		</Colors>
 		<InitSysEx>F0 00 20 29 02 08 0E 01 F7</InitSysEx>
 		<FinalSysEx>F0 00 20 29 02 08 0E 00 F7</FinalSysEx>

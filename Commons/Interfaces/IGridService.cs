@@ -20,11 +20,17 @@ public interface IGridService
 
     void CancelListening();
 
+    void ClearMidi(Grid grid);
+
     Task GroupAsync(Player player);
 
     bool IsListening(Grid grid);
 
+    bool IsListeningMidi(Grid grid);
+
     void ListenKey(Grid grid);
+
+    void ListenMidi(Grid grid);
 
     void MoveCell(Cell cell, OrientationType orientation);
 

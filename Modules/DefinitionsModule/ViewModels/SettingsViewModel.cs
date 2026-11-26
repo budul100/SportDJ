@@ -148,6 +148,12 @@ public class SettingsViewModel
         Service?.CancelListening();
     }
 
+    // Shows the stored name again, e.g. if the input was left empty
+    public void RestoreName()
+    {
+        RaisePropertyChanged(nameof(Name));
+    }
+
     public void Set(Player player)
     {
         if (this.player != player)

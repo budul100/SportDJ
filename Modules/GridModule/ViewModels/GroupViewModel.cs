@@ -51,6 +51,12 @@ public class GroupViewModel
             keepSubscriberReferenceAlive: true,
             filter: _ => IsVisible));
 
+        // The MIDI key of a tab selects it as well
+        AddSubscription(eventAggregator?.GetEvent<TabKeyPressedEvent>().Subscribe(
+            action: OnTabKeyPressed,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true));
+
         // The new tab is shown, so the user sees what was just created
         AddSubscription(eventAggregator?.GetEvent<TabAddedEvent>().Subscribe(
             action: OnTabAdded,
@@ -202,6 +208,21 @@ public class GroupViewModel
         if (added != default)
         {
             Show(added);
+        }
+    }
+
+    private void OnTabKeyPressed(Grid tab)
+    {
+        if (IsVisible
+            && !IsAnyListening)
+        {
+            var selection = Tabs
+                .FirstOrDefault(t => t.Model == tab);
+
+            if (selection != default)
+            {
+                Selected = selection;
+            }
         }
     }
 

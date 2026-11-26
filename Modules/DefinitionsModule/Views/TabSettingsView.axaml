@@ -32,7 +32,7 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- General: the name is on the left, the key and its buttons are on the right edge of the same row -->
+            <!-- General -->
             <StackPanel Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="General" />
@@ -41,32 +41,45 @@
                 <TextBlock
                     HorizontalAlignment="Left"
                     Classes="Caption"
-                    Text="Name and key" />
+                    Text="Name" />
 
+                <TextBox
+                    HorizontalAlignment="Stretch"
+                    IsTabStop="False"
+                    KeyDown="OnNameKeyDown"
+                    LostFocus="OnNameLostFocus"
+                    MaxLength="{Binding MaxLengthName}"
+                    Text="{Binding Name, Mode=TwoWay}" />
+
+            </StackPanel>
+
+            <!-- Keyboard -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Keyboard" />
+                <Separator />
+
+                <!-- The key is on the left, the buttons are on the right edge of the same row -->
                 <Grid ColumnDefinitions="*,Auto">
 
-                    <TextBox
+                    <ct:KeyDisplay
                         Grid.Column="0"
-                        Margin="0,0,4,0"
-                        HorizontalAlignment="Stretch"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        IsTabStop="False"
-                        KeyDown="OnNameKeyDown"
-                        MaxLength="{Binding MaxLengthName}"
-                        Text="{Binding Name, Mode=TwoWay}" />
+                        FontSize="{StaticResource FontSizeContentSub}"
+                        IsVisible="{Binding HasKey}"
+                        KeyCode="{Binding KeyCode}" />
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding !HasKey}"
+                        Text="{Binding KeyboardText}" />
 
                     <StackPanel
                         Grid.Column="1"
-                        VerticalAlignment="Center"
                         Orientation="Horizontal"
-                        Spacing="{StaticResource SpacingSmall}">
-
-                        <ct:KeyDisplay
-                            VerticalAlignment="Center"
-                            FontSize="{StaticResource FontSizeState}"
-                            IsVisible="{Binding HasKey}"
-                            KeyCode="{Binding KeyCode}" />
-
+                        Spacing="{StaticResource SpacingMedium}">
                         <Button
                             Click="OnListenClick"
                             Command="{Binding ListenKeyboardCommand}"
@@ -85,7 +98,6 @@
                                     Kind="Close" />
                             </Panel>
                         </Button>
-
                         <Button
                             Command="{Binding ClearKeyboardCommand}"
                             Focusable="False"
@@ -96,6 +108,57 @@
                                 Kind="KeyboardOffOutline" />
                         </Button>
                     </StackPanel>
+
+                </Grid>
+
+            </StackPanel>
+
+            <!-- MIDI -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="MIDI" />
+                <Separator />
+
+                <!-- The key is on the left, the buttons are on the right edge of the same row -->
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Text="{Binding MidiText}" />
+
+                    <StackPanel
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="{StaticResource SpacingMedium}">
+                        <Button
+                            Command="{Binding ListenMidiCommand}"
+                            Focusable="False"
+                            ToolTip.Tip="Assign MIDI key">
+                            <Panel>
+                                <mat:MaterialIcon
+                                    Width="{StaticResource MediumIconSize}"
+                                    Height="{StaticResource MediumIconSize}"
+                                    IsVisible="{Binding !IsListeningMidi}"
+                                    Kind="Piano" />
+                                <mat:MaterialIcon
+                                    Width="{StaticResource MediumIconSize}"
+                                    Height="{StaticResource MediumIconSize}"
+                                    IsVisible="{Binding IsListeningMidi}"
+                                    Kind="Close" />
+                            </Panel>
+                        </Button>
+                        <Button
+                            Command="{Binding ClearMidiCommand}"
+                            Focusable="False"
+                            ToolTip.Tip="Clear MIDI key">
+                            <mat:MaterialIcon
+                                Width="{StaticResource MediumIconSize}"
+                                Height="{StaticResource MediumIconSize}"
+                                Kind="Close" />
+                        </Button>
+                    </StackPanel>
+
                 </Grid>
 
             </StackPanel>

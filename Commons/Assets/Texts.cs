@@ -33,7 +33,7 @@ public static class Texts
     public const string StackShuffleMessage = "Shall the player tracks be shuffled?";
 
     public const string TabRemoveHeader = "Remove tab";
-    public const string TabRemoveMessage = "Shall the tab be removed? Its players move to the level above.";
+    public const string TabRemoveMessage = "Shall the tab and all of its players be removed?";
 
     #endregion Public Fields
 }

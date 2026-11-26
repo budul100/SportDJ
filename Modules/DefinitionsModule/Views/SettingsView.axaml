@@ -59,6 +59,7 @@
                     HorizontalAlignment="Stretch"
                     IsTabStop="False"
                     KeyDown="OnNameKeyDown"
+                    LostFocus="OnNameLostFocus"
                     MaxLength="{Binding MaxLengthName}"
                     Text="{Binding Name, Mode=TwoWay}" />
 

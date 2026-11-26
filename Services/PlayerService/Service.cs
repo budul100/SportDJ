@@ -251,10 +251,11 @@ public class Service
                 player.Name = trimmed;
 
                 settingsService.Save();
-            }
 
-            // Also notify for invalid input, so the UI falls back to the stored name
-            UpdateContent();
+                // Invalid input does not notify, as the UI would write the stored name back while the user is typing.
+                // The view restores the stored name, when the input loses the focus.
+                UpdateContent();
+            }
         }
     }
 
@@ -420,6 +421,9 @@ public class Service
 
     public async Task SetFileAsync()
     {
+        // The settings file might have been saved elsewhere since the player was initialized
+        await SetStartLocationAsync();
+
         var paths = await dialogService.OpenFilePickerAsync(
             title: Texts.PlayerSelectionFileHeader,
             allowMultiple: true,
@@ -440,6 +444,8 @@ public class Service
 
     public async Task SetFolderAsync()
     {
+        await SetStartLocationAsync();
+
         var paths = await dialogService.OpenFolderPickerAsync(
             title: Texts.PlayerSelectionFolderHeader,
             allowMultiple: true,
@@ -789,19 +795,23 @@ public class Service
     private async Task SetStartLocationAsync()
     {
         var paths = player?.Paths?
-            .Select(settingsService.GetPathFull).ToArray();
+            .Select(settingsService.GetPathFull).ToArray() ?? [];
 
-        if (paths?.Length > 0)
+        // Without usable paths of the player the dialogs start where the settings file is
+        var hasFolder = paths
+            .Any(p => Directory.Exists(p)
+                || Directory.Exists(Path.GetDirectoryName(p)));
+
+        // The storage provider belongs to the UI thread, so no Task.Run here
+        try
         {
-            // The storage provider belongs to the UI thread, so no Task.Run here
-            try
-            {
-                startLocation = await dialogService.GetFolderAsync(paths);
-            }
-            catch (Exception)
-            {
-                startLocation = default;
-            }
+            startLocation = hasFolder
+                ? await dialogService.GetFolderAsync(paths)
+                : await dialogService.GetFolderAsync(Path.GetDirectoryName(settingsService.Path));
+        }
+        catch (Exception)
+        {
+            startLocation = default;
         }
     }
 

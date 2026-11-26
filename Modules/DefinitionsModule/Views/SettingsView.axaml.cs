@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using SportDJ.Modules.DefinitionsModule.ViewModels;
 
 namespace SportDJ.Modules.DefinitionsModule.Views;
 
@@ -40,6 +41,12 @@ public partial class SettingsView
 
             e.Handled = true;
         }
+    }
+
+    // An empty name is not stored, so the stored name is shown again as soon as the input is left
+    private void OnNameLostFocus(object sender, RoutedEventArgs e)
+    {
+        (DataContext as SettingsViewModel)?.RestoreName();
     }
 
     #endregion Private Methods

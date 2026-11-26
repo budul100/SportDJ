@@ -56,7 +56,6 @@ public class LayoutViewModel
             action: _ => Refresh(),
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
-
     }
 
     #endregion Public Constructors
@@ -66,6 +65,9 @@ public class LayoutViewModel
     public DelegateCommand<OrientationType> AddCellCommand { get; }
 
     public DelegateCommand<OrientationType> AddTabCommand { get; }
+
+    // The last tab of a group cannot be removed, the group would be empty
+    public bool CanRemoveTab => tab?.Group?.Grids?.Count > 1;
 
     public DelegateCommand GroupCommand { get; }
 
@@ -102,7 +104,7 @@ public class LayoutViewModel
     // Removes the player, only for players
     public DelegateCommand RemoveCellCommand { get; }
 
-    // Removes the tab, only for tabs, its group disappears with the last tab
+    // Removes the tab with its players, only for tabs
     public DelegateCommand RemoveTabCommand { get; }
 
     public override string Title => Titel;
@@ -177,6 +179,7 @@ public class LayoutViewModel
 
     private void Refresh()
     {
+        RaisePropertyChanged(nameof(CanRemoveTab));
         RaisePropertyChanged(nameof(GroupText));
         RaisePropertyChanged(nameof(HasGroup));
         RaisePropertyChanged(nameof(IsActive));

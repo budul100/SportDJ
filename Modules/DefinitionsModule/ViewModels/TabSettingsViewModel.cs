@@ -14,6 +14,7 @@ public class TabSettingsViewModel
     #region Private Fields
 
     private const string KeyboardHint = "Press a key...";
+    private const string MidiHint = "Press a MIDI key...";
     private const string NoKey = "None";
     private const string Titel = "Settings";
 
@@ -32,6 +33,8 @@ public class TabSettingsViewModel
 
         ListenKeyboardCommand = new DelegateCommand(ToggleKeyboard);
         ClearKeyboardCommand = new DelegateCommand(ClearKeyboard);
+        ListenMidiCommand = new DelegateCommand(ToggleMidi);
+        ClearMidiCommand = new DelegateCommand(ClearMidi);
 
         eventAggregator?.GetEvent<TabUpdatedEvent>().Subscribe(
             action: _ => Refresh(),
@@ -54,6 +57,8 @@ public class TabSettingsViewModel
 
     public DelegateCommand ClearKeyboardCommand { get; }
 
+    public DelegateCommand ClearMidiCommand { get; }
+
     public Grid Current => tab;
 
     public bool HasKey => !IsListeningKeyboard
@@ -63,6 +68,8 @@ public class TabSettingsViewModel
 
     public bool IsListeningKeyboard => gridService?.IsListening(tab) == true;
 
+    public bool IsListeningMidi => gridService?.IsListeningMidi(tab) == true;
+
     public string KeyboardText => IsListeningKeyboard
         ? KeyboardHint
         : NoKey;
@@ -70,6 +77,12 @@ public class TabSettingsViewModel
     public string KeyCode => tab?.KeyCode;
 
     public DelegateCommand ListenKeyboardCommand { get; }
+
+    public DelegateCommand ListenMidiCommand { get; }
+
+    public string MidiText => IsListeningMidi
+        ? MidiHint
+        : tab?.Key.GetText() ?? NoKey;
 
     public string Name
     {
@@ -88,6 +101,12 @@ public class TabSettingsViewModel
     public void Cancel()
     {
         gridService?.CancelListening();
+    }
+
+    // Shows the stored name again, e.g. if the input was left empty
+    public void RestoreName()
+    {
+        RaisePropertyChanged(nameof(Name));
     }
 
     public void Set(Grid tab)
@@ -122,14 +141,21 @@ public class TabSettingsViewModel
         gridService?.SetKeyCode(tab, default);
     }
 
+    private void ClearMidi()
+    {
+        gridService?.ClearMidi(tab);
+    }
+
     private void Refresh()
     {
         // The bindings still show the values of the previous tab otherwise
         RaisePropertyChanged(nameof(HasKey));
         RaisePropertyChanged(nameof(IsActive));
         RaisePropertyChanged(nameof(IsListeningKeyboard));
+        RaisePropertyChanged(nameof(IsListeningMidi));
         RaisePropertyChanged(nameof(KeyboardText));
         RaisePropertyChanged(nameof(KeyCode));
+        RaisePropertyChanged(nameof(MidiText));
         RaisePropertyChanged(nameof(Name));
     }
 
@@ -142,6 +168,18 @@ public class TabSettingsViewModel
         else
         {
             gridService?.ListenKey(tab);
+        }
+    }
+
+    private void ToggleMidi()
+    {
+        if (gridService?.IsListeningMidi(tab) == true)
+        {
+            gridService.CancelListening();
+        }
+        else
+        {
+            gridService?.ListenMidi(tab);
         }
     }
 

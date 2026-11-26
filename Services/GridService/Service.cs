@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Assets;
@@ -9,6 +11,7 @@ using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Models.Records;
 using SportDJ.Commons.Models.Settings;
 using SportDJ.Commons.Models.Structure;
 using SportDJ.Services.GridService.Extensions;
@@ -30,21 +33,28 @@ public class Service
 
     #region Private Fields
 
+    private readonly IControllerService controllerService;
     private readonly IDialogService dialogService;
     private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
+    private readonly object lockKeys = new();
+    private readonly HashSet<Key> registeredKeys = [];
     private readonly IStorageService<Set> settingsService;
 
     private Grid listeningGrid;
+    private Grid listeningMidiGrid;
+    private CancellationTokenSource midiSource;
 
     #endregion Private Fields
 
     #region Public Constructors
 
     public Service(IEventAggregator eventAggregator, IStorageService<Set> settingsService,
-        IDialogService dialogService, IKeyboardService keyListenService, IDispatcherService dispatcherService)
+        IDialogService dialogService, IKeyboardService keyListenService, IDispatcherService dispatcherService,
+        IControllerService controllerService)
     {
+        this.controllerService = controllerService;
         this.dispatcherService = dispatcherService;
         this.keyListenService = keyListenService;
         this.eventAggregator = eventAggregator;
@@ -108,6 +118,8 @@ public class Service
 
     public void CancelListening()
     {
+        CancelMidi();
+
         var grid = listeningGrid;
 
         if (grid != default)
@@ -118,6 +130,13 @@ public class Service
 
             eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
         }
+    }
+
+    public void ClearMidi(Grid grid)
+    {
+        SetKey(
+            grid: grid,
+            key: default);
     }
 
     public async Task GroupAsync(Player player)
@@ -141,6 +160,12 @@ public class Service
             && keyListenService.IsListening(grid);
     }
 
+    public bool IsListeningMidi(Grid grid)
+    {
+        return grid != default
+            && ReferenceEquals(listeningMidiGrid, grid);
+    }
+
     public void ListenKey(Grid grid)
     {
         if (grid != default)
@@ -158,6 +183,14 @@ public class Service
             }
 
             eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
+    }
+
+    public void ListenMidi(Grid grid)
+    {
+        if (grid != default)
+        {
+            _ = ListenMidiAsync(grid);
         }
     }
 
@@ -194,7 +227,8 @@ public class Service
 
     public async Task RemoveGridAsync(Grid grid)
     {
-        if (grid?.Group != default)
+        // The last tab of a group cannot be removed, the group would be empty
+        if (grid?.Group?.Grids?.Count > 1)
         {
             var result = await dialogService.GetMessageBoxResultAsync(
                 contentMessage: Texts.TabRemoveMessage,
@@ -202,7 +236,7 @@ public class Service
 
             if (result == ButtonResult.Yes)
             {
-                Apply(grid.Dissolve);
+                Apply(grid.Remove);
             }
         }
     }
@@ -231,10 +265,11 @@ public class Service
             grid.Name = trimmed;
 
             Persist();
-        }
 
-        // Also notify for invalid input, so the UI falls back to the stored name
-        eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+            // Invalid input does not notify, as the UI would write the stored name back while the user is typing.
+            // The view restores the stored name, when the input loses the focus.
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
     }
 
     #endregion Public Methods
@@ -286,11 +321,25 @@ public class Service
             snapshot.Restore();
         }
 
+        RegisterKeys();
+
         CancelListening();
 
         eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
 
         return isKept;
+    }
+
+    private void CancelMidi()
+    {
+        try
+        {
+            midiSource?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // The listener has already finished
+        }
     }
 
     private void Initialize()
@@ -302,11 +351,53 @@ public class Service
 
         Grid.Initialize();
 
+        RegisterKeys();
+
         Persist();
 
         CancelListening();
 
         eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
+    }
+
+    private async Task ListenMidiAsync(Grid grid)
+    {
+        // Replaces a pending keyboard or MIDI assignment
+        CancelListening();
+
+        var source = new CancellationTokenSource();
+
+        midiSource = source;
+        listeningMidiGrid = grid;
+
+        eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+
+        try
+        {
+            var key = await controllerService.ListenAsync(
+                cancellationToken: source.Token);
+
+            SetKey(
+                grid: grid,
+                key: key);
+        }
+        catch (OperationCanceledException)
+        {
+            // Listening was replaced by another assignment, cancelled or the controller was closed
+        }
+        finally
+        {
+            // A replaced listener must not reset the state of its successor
+            if (ReferenceEquals(midiSource, source))
+            {
+                midiSource = default;
+                listeningMidiGrid = default;
+            }
+
+            source.Dispose();
+
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
     }
 
     private void OnKeyPressed(string keyCode)
@@ -326,6 +417,49 @@ public class Service
         settingsService.Contents.Grid = Grid;
 
         settingsService.Save();
+    }
+
+    // Registers the MIDI keys of all tabs anew, as tabs are added, removed or get another key
+    private void RegisterKeys()
+    {
+        lock (lockKeys)
+        {
+            foreach (var registered in registeredKeys)
+            {
+                controllerService.Unregister(registered);
+            }
+
+            registeredKeys.Clear();
+
+            foreach (var tab in Grid.GetTabs())
+            {
+                if (tab.Key != default
+                    && registeredKeys.Add(tab.Key))
+                {
+                    var current = tab;
+
+                    controllerService.Register(
+                        key: tab.Key,
+                        strokeType: StrokeType.Down,
+                        action: () => eventAggregator.GetEvent<TabKeyPressedEvent>().Publish(current));
+                }
+            }
+        }
+    }
+
+    private void SetKey(Grid grid, Key key)
+    {
+        if (grid != default
+            && grid.Key != key)
+        {
+            grid.Key = key;
+
+            Persist();
+
+            RegisterKeys();
+
+            eventAggregator.GetEvent<TabUpdatedEvent>().Publish(grid);
+        }
     }
 
     #endregion Private Methods

@@ -33,7 +33,37 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- Order: move tab, move, remove, add tab, add player, group. The tab parts are only shown if the pane was opened from a tab of a group -->
+            <!-- Order: group, move tab, move, remove, add tab, add player. The tab parts are only shown if the pane was opened from a tab of a group, the group part only for a player -->
+
+            <!-- Group: puts the player into a new group, only for players -->
+            <StackPanel IsVisible="{Binding IsPlayer}" Spacing="{StaticResource SpacingSmall}">
+
+                <TextBlock Classes="Section" Text="Group" />
+                <Separator />
+
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
+
+                    <Button
+                        Command="{Binding GroupCommand}"
+                        Focusable="False"
+                        ToolTip.Tip="Put player into a new group">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Tab" />
+                    </Button>
+
+                    <!-- Shows the group, which the player belongs to, hidden without a group -->
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Classes="Caption"
+                        IsVisible="{Binding HasGroup}"
+                        Text="{Binding GroupText, StringFormat='Group: {0}'}"
+                        TextTrimming="CharacterEllipsis" />
+
+                </StackPanel>
+
+            </StackPanel>
 
             <!-- Move tab -->
             <StackPanel IsVisible="{Binding IsTab}" Spacing="{StaticResource SpacingSmall}">
@@ -73,14 +103,14 @@
 
             </StackPanel>
 
-            <!-- Remove: the player or the tab, whatever the pane was opened from. Dark red, on the right edge -->
+            <!-- Remove: the player or the tab with its players, whatever the pane was opened from. Dark red, on the left edge -->
             <StackPanel Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="Remove" />
                 <Separator />
 
                 <Button
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Left"
                     Classes="Danger"
                     Command="{Binding RemoveCellCommand}"
                     Focusable="False"
@@ -93,12 +123,13 @@
                 </Button>
 
                 <Button
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Left"
                     Classes="Danger"
                     Command="{Binding RemoveTabCommand}"
                     Focusable="False"
+                    IsEnabled="{Binding CanRemoveTab}"
                     IsVisible="{Binding IsTab}"
-                    ToolTip.Tip="Remove tab">
+                    ToolTip.Tip="Remove tab with its players">
                     <mat:MaterialIcon
                         Width="{StaticResource MediumIconSize}"
                         Height="{StaticResource MediumIconSize}"
@@ -151,35 +182,6 @@
 
             </StackPanel>
 
-            <!-- Group: puts the player into a new group, only for players -->
-            <StackPanel IsVisible="{Binding IsPlayer}" Spacing="{StaticResource SpacingSmall}">
-
-                <TextBlock Classes="Section" Text="Group" />
-                <Separator />
-
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SpacingMedium}">
-
-                    <Button
-                        Command="{Binding GroupCommand}"
-                        Focusable="False"
-                        ToolTip.Tip="Put player into a new group">
-                        <mat:MaterialIcon
-                            Width="{StaticResource MediumIconSize}"
-                            Height="{StaticResource MediumIconSize}"
-                            Kind="Tab" />
-                    </Button>
-
-                    <!-- Shows the group, which the player belongs to, hidden without a group -->
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Classes="Caption"
-                        IsVisible="{Binding HasGroup}"
-                        Text="{Binding GroupText, StringFormat='Group: {0}'}"
-                        TextTrimming="CharacterEllipsis" />
-
-                </StackPanel>
-
-            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

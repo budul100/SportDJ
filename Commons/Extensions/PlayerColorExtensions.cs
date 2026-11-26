@@ -44,6 +44,14 @@ public static class PlayerColorExtensions
             PlayerColorType.Blue => Color.FromRgb(0x1E, 0x88, 0xE5),
             PlayerColorType.Pink => Color.FromRgb(0xD8, 0x1B, 0x60),
             PlayerColorType.Gray => Color.FromRgb(0x9E, 0x9E, 0x9E),
+            PlayerColorType.Purple => Color.FromRgb(0x8E, 0x24, 0xAA),
+            PlayerColorType.Lime => Color.FromRgb(0xC0, 0xCA, 0x33),
+            PlayerColorType.Brown => Color.FromRgb(0x8D, 0x6E, 0x63),
+            PlayerColorType.Cyan => Color.FromRgb(0x29, 0xB6, 0xF6),
+            PlayerColorType.Indigo => Color.FromRgb(0x39, 0x49, 0xAB),
+            PlayerColorType.Coral => Color.FromRgb(0xFF, 0x70, 0x43),
+            PlayerColorType.Mint => Color.FromRgb(0x69, 0xF0, 0xAE),
+            PlayerColorType.White => Color.FromRgb(0xEC, 0xEF, 0xF1),
             _ => baseColor,
         };
     }

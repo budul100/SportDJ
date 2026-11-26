@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Structure;
@@ -24,35 +25,22 @@ internal static class GridExtensions
         return result;
     }
 
-    /// <summary>
-    /// Removes the tab and moves its cells into the grid of its group, to the place of the group.
-    /// The group disappears together with its last tab.
-    /// </summary>
-    public static void Dissolve(this Grid tab)
+    // Returns all tabs of the groups of the grid, including the tabs of nested groups
+    public static IEnumerable<Grid> GetTabs(this Grid grid)
     {
-        var group = tab?.Group;
-        var parent = group?.Grid;
-
-        if (parent != default)
+        if (grid?.Cells != default)
         {
-            var cells = tab.Cells
-                .Where(c => c != default).ToArray();
-
-            group.Grids.Remove(tab);
-
-            // Overlaps with cells of the parent are resolved when the grid is tidied
-            foreach (var cell in cells)
+            foreach (var group in grid.Cells.OfType<Group>())
             {
-                cell.Column += group.Column;
-                cell.Row += group.Row;
-                cell.Grid = parent;
+                foreach (var tab in group.Grids)
+                {
+                    yield return tab;
 
-                parent.Cells.Add(cell);
-            }
-
-            if (group.Grids.Count == 0)
-            {
-                parent.Cells.Remove(group);
+                    foreach (var nested in tab.GetTabs())
+                    {
+                        yield return nested;
+                    }
+                }
             }
         }
     }
@@ -134,6 +122,25 @@ internal static class GridExtensions
             grid.Group.Grids.Insert(
                 index: index - 1,
                 item: temp);
+        }
+    }
+
+    /// <summary>
+    /// Removes the tab together with its cells. The group disappears together with its last tab.
+    /// </summary>
+    public static void Remove(this Grid tab)
+    {
+        var group = tab?.Group;
+        var parent = group?.Grid;
+
+        if (parent != default)
+        {
+            group.Grids.Remove(tab);
+
+            if (group.Grids.Count == 0)
+            {
+                parent.Cells.Remove(group);
+            }
         }
     }
 
