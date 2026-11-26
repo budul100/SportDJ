@@ -212,31 +212,20 @@ public class LayoutViewModel
 
     #region Private Methods
 
-    private static void CollectGroups(Grid grid, Grid excluded, List<GroupOption> result)
+    private static void AddGroup(Group group, List<GroupOption> result)
     {
-        foreach (var group in grid.Cells.OfType<Group>())
-        {
-            var text = string.Join(
-                separator: ", ",
-                values: group.Grids.Select(g => g.Name));
+        var text = string.Join(
+            separator: " | ",
+            values: group.Grids.Select(g => g.Name));
 
-            // Groups with the same tabs are numbered, so they can be told apart
-            var count = result.Count(o => o.Text == text || o.Text.StartsWith($"{text} ("));
+        // Groups with the same tabs are numbered, so they can be told apart
+        var count = result.Count(o => o.Text == text || o.Text.StartsWith($"{text} ("));
 
-            result.Add(new GroupOption(
-                Group: group,
-                Text: count > 0
-                    ? $"{text} ({count + 1})"
-                    : text));
-
-            foreach (var groupTab in group.Grids.Where(g => g != excluded))
-            {
-                CollectGroups(
-                    grid: groupTab,
-                    excluded: excluded,
-                    result: result);
-            }
-        }
+        result.Add(new GroupOption(
+            Group: group,
+            Text: count > 0
+                ? $"{text} ({count + 1})"
+                : text));
     }
 
     private async Task ConfirmGroupAsync()
@@ -293,11 +282,28 @@ public class LayoutViewModel
         if (gridService?.Grid != default
             && cell != default)
         {
-            // A tab does not move into a group, which it contains itself
-            CollectGroups(
-                grid: gridService.Grid,
-                excluded: tab,
-                result: result);
+            // Only the groups of the same level are offered, together with the current group.
+            // Groups inside of other groups would be confusing and are reached by moving the element there first.
+            var levelGrid = tab != default
+                ? tab.Group?.Grid
+                : cell.Grid;
+
+            var groups = (levelGrid?.Cells.OfType<Group>() ?? []).ToList();
+
+            var current = CurrentGroup;
+
+            if (current != default
+                && !groups.Contains(current))
+            {
+                groups.Insert(0, current);
+            }
+
+            foreach (var group in groups)
+            {
+                AddGroup(
+                    group: group,
+                    result: result);
+            }
 
             result.Add(new GroupOption(
                 Group: default,
