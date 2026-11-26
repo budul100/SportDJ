@@ -15,12 +15,12 @@ set "CONFIGURATION=Release"
 set "RUNTIME_ID=win-x64"
 set "OUTPUT_DIR=%CD%\App\bin\Publish"
 set "SETUP_DIR=_Setup"
-set "SETUP_SCRIPT=Additionals\Build\SportDJ.iss"
+set "SETUP_SCRIPT=Additionals\Setup\SportDJ.iss"
 set "SINGLE_FILE_ARGS="
 set "BUILD_SETUP=1"
 set "NO_BUMP="
 set "BUILD_COMPLETE="
-set "VERSION_FILE=Directory.Build.props"
+set "VERSION_FILE=App\App.csproj"
 set "BUMP_SCRIPT=Additionals\Build\BumpVersion.ps1"
 
 for %%A in (%*) do (
@@ -97,14 +97,18 @@ if not defined ISCC (
     goto :done
 )
 
-"%ISCC%" /Q "/DPublishDir=%OUTPUT_DIR%" "%SETUP_SCRIPT%"
+echo.
+echo Installer
+"%ISCC%" /Qp "/DPublishDir=%OUTPUT_DIR%" "%SETUP_SCRIPT%"
 if errorlevel 1 (
     echo ERROR: installer build failed.
     set "EXIT_CODE=1"
     goto :end
 )
 
-"%ISCC%" /Q /DPortable "/DPublishDir=%OUTPUT_DIR%" "%SETUP_SCRIPT%"
+echo.
+echo Portable setup
+"%ISCC%" /Qp /DPortable "/DPublishDir=%OUTPUT_DIR%" "%SETUP_SCRIPT%"
 if errorlevel 1 (
     echo ERROR: portable setup build failed.
     set "EXIT_CODE=1"
