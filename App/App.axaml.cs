@@ -201,6 +201,12 @@ public class App
 
             LogStartup("MainViewModel initialized");
 
+            // The property grid of the settings pane takes seconds to build and can only be built on the UI thread.
+            // Doing it before the window appears means the window is fully usable from the first moment on.
+            container.Resolve<IPanelService>().Preload<IStorageService<Session>>();
+
+            LogStartup("Settings view preloaded");
+
             desktop.MainWindow = mainWindow;
 
             // Without Prism nobody shows the shell, so this has to happen explicitly

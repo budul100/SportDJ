@@ -20,6 +20,11 @@ public interface IPanelService
 
     bool IsVisible<TService>();
 
+    /// <summary>
+    /// Creates the view of a registered service now, so the first activation is fast.
+    /// </summary>
+    void Preload<TService>();
+
     void Register<TService>(PanelType type, Control view, Action action = default);
 
     /// <summary>

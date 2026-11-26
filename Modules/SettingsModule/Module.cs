@@ -14,7 +14,7 @@ public static class Module
     public static void Initialize(IContainerProvider containerProvider)
     {
         // The view model reacts to events from the start, so it is created now.
-        // The view (property grid) is expensive and only needed once the panel is opened.
+        // The view (property grid) is expensive, the App builds it before the main window is shown.
         containerProvider.Resolve<SettingsViewModel>();
 
         var panelService = containerProvider.Resolve<IPanelService>();

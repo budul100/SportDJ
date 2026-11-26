@@ -52,6 +52,9 @@
     <Color x:Key="ColorIsPlaying">Purple</Color>
     <Color x:Key="ColorIsEnding">DarkRed</Color>
 
+    <!-- Something is loading: players without playable content yet, the settings which are about to open -->
+    <Color x:Key="ColorIsLoading">Gold</Color>
+
     <!-- Destructive actions, e.g. the remove buttons of the settings -->
     <Color x:Key="ColorDanger">DarkRed</Color>
     <Color x:Key="ColorDangerHover">#B00000</Color>

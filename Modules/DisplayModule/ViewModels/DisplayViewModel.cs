@@ -34,6 +34,7 @@ public class DisplayViewModel
     private bool isDisposed;
     private bool isEnding;
     private bool isPlaying;
+    private bool isSettingsLoading;
     private string lastWindowState;
     private double? progress;
     private string remaining;
@@ -94,14 +95,14 @@ public class DisplayViewModel
 
     #region Public Properties
 
+    // An instance property, because the change is raised by the instance
+    public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
+
     public Bitmap Bitmap
     {
         get { return bitmap; }
         set { SetProperty(ref bitmap, value); }
     }
-
-    // An instance property, because the change is raised by the instance
-    public static string Clock => DateTime.Now.ToString(Constants.FormatClock);
 
     public string Content
     {
@@ -119,6 +120,13 @@ public class DisplayViewModel
     {
         get { return isPlaying; }
         set { SetProperty(ref isPlaying, value); }
+    }
+
+    // The settings are about to open, building their view can take a moment
+    public bool IsSettingsLoading
+    {
+        get { return isSettingsLoading; }
+        set { SetProperty(ref isSettingsLoading, value); }
     }
 
     public bool IsSettingsVisible => panelService.IsVisible<IStorageService<Session>>()
@@ -203,6 +211,18 @@ public class DisplayViewModel
 
     #region Private Methods
 
+    private void ActivateSettings()
+    {
+        try
+        {
+            panelService.Activate<IStorageService<Session>>();
+        }
+        finally
+        {
+            IsSettingsLoading = false;
+        }
+    }
+
     private DispatcherTimer GetClockTimer()
     {
         var result = new DispatcherTimer
@@ -246,13 +266,23 @@ public class DisplayViewModel
 
     private void ShowSettings()
     {
+        if (IsSettingsLoading)
+        {
+            return;
+        }
+
         if (IsSettingsVisible || settingsService?.Contents?.Options == default)
         {
             panelService.Deactivate<IStorageService<Session>>();
         }
         else
         {
-            panelService.Activate<IStorageService<Session>>();
+            // The pending frame shows the loading state first, then the (possibly slow) activation follows
+            IsSettingsLoading = true;
+
+            Dispatcher.UIThread.Post(
+                action: ActivateSettings,
+                priority: DispatcherPriority.Background);
         }
     }
 

@@ -116,6 +116,16 @@ public class Service(IEventAggregator eventAggregator)
         return result;
     }
 
+    public void Preload<TService>()
+    {
+        if (registrations.TryGetValue(
+            key: typeof(TService),
+            value: out var registration))
+        {
+            registration.GetView();
+        }
+    }
+
     public void Register<TService>(PanelType type, Control view, Action action = default)
     {
         registrations[typeof(TService)] = new Registration(

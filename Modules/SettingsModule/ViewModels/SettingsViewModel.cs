@@ -40,6 +40,8 @@ public class SettingsViewModel
     private bool controllersNotAvailable;
     private Device device;
     private bool devicesNotAvailable;
+    private bool isControllersLoading;
+    private bool isDevicesLoading;
     private bool isUpdateControllers;
     private bool isUpdateDevices;
     private IStorageFolder startLocation;
@@ -69,10 +71,10 @@ public class SettingsViewModel
             async () => await SaveSettingsAsync());
 
         UpdateDevicesCommand = new DelegateCommand(
-            executeMethod: UpdateDevices);
+            async () => await UpdateDevicesAsync());
 
         UpdateControllersCommand = new DelegateCommand(
-            executeMethod: UpdateControllers);
+            async () => await UpdateControllersAsync());
 
         outputService = containerProvider?.Resolve<IOutputService>(
             name: nameof(OutputType.Live));
@@ -81,7 +83,7 @@ public class SettingsViewModel
             .SingleOrDefault(o => o.Type == OutputType.Live);
 
         eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
-            action: InitializeSettings,
+            action: () => _ = InitializeSettingsAsync(),
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
 
@@ -185,6 +187,18 @@ public class SettingsViewModel
         set { SetProperty(ref devicesNotAvailable, value); }
     }
 
+    public bool IsControllersLoading
+    {
+        get { return isControllersLoading; }
+        private set { SetProperty(ref isControllersLoading, value); }
+    }
+
+    public bool IsDevicesLoading
+    {
+        get { return isDevicesLoading; }
+        private set { SetProperty(ref isDevicesLoading, value); }
+    }
+
     public bool IsActive => Options != default
         && panelService.IsVisible<IStorageService<Session>>();
 
@@ -256,12 +270,15 @@ public class SettingsViewModel
 
     #region Private Methods
 
-    private void InitializeSettings()
+    // The output service has already enumerated the devices while it was created, so they are only taken over here.
+    // The controllers are enumerated in the background, the UI stays usable meanwhile.
+    private async Task InitializeSettingsAsync()
     {
-        UpdateDevices();
-        UpdateControllers();
+        SetDevices();
 
-        _ = SetStartLocationAsync();
+        await UpdateControllersAsync();
+
+        await SetStartLocationAsync();
     }
 
     private async Task LoadSettingsAsync()
@@ -449,27 +466,49 @@ public class SettingsViewModel
         }
     }
 
-    private void UpdateControllers()
+    private async Task UpdateControllersAsync()
     {
         if (!isUpdateControllers)
         {
             isUpdateControllers = true;
+            IsControllersLoading = true;
 
-            controllerService?.Update();
-
-            isUpdateControllers = false;
+            try
+            {
+                await Task.Run(() => controllerService?.Update());
+            }
+            catch (Exception)
+            {
+                // TODO: Log exception, the list keeps its previous content
+            }
+            finally
+            {
+                isUpdateControllers = false;
+                IsControllersLoading = false;
+            }
         }
     }
 
-    private void UpdateDevices()
+    private async Task UpdateDevicesAsync()
     {
         if (!isUpdateDevices)
         {
             isUpdateDevices = true;
+            IsDevicesLoading = true;
 
-            outputService?.Update();
-
-            isUpdateDevices = false;
+            try
+            {
+                await Task.Run(() => outputService?.Update());
+            }
+            catch (Exception)
+            {
+                // TODO: Log exception, the list keeps its previous content
+            }
+            finally
+            {
+                isUpdateDevices = false;
+                IsDevicesLoading = false;
+            }
         }
     }
 

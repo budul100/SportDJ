@@ -47,7 +47,8 @@
         Name="PlayingBorder"
         Margin="{StaticResource ContentMargin}"
         Classes="PlayerCard"
-        Classes.IsActive="{Binding IsActive}">
+        Classes.IsActive="{Binding IsActive}"
+        Classes.IsLoading="{Binding IsLoading}">
 
         <Grid>
             <Grid.RowDefinitions>

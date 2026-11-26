@@ -145,6 +145,8 @@ public class PlayerViewModel
 
     public bool IsEnding => playerService?.IsEnding == true;
 
+    public virtual bool IsLoading => playerService?.IsLoading == true;
+
     public bool IsOverlay => playerService?.IsOverlay == true;
 
     public virtual bool IsPlaying => playerService?.IsPlaying == true;
@@ -291,6 +293,7 @@ public class PlayerViewModel
         RaisePropertyChanged(nameof(HasStack));
 
         RaisePropertyChanged(nameof(Name));
+        RaisePropertyChanged(nameof(IsLoading));
         RaisePropertyChanged(nameof(IsOverlay));
         RaisePropertyChanged(nameof(SurfaceBrush));
         RaisePropertyChanged(nameof(Key));

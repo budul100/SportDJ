@@ -53,6 +53,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             DockPanel.Dock="Right"
+            Classes.IsLoading="{Binding IsSettingsLoading}"
             IsChecked="{Binding IsSettingsVisible, Mode=OneWay}"
             Command="{Binding ShowSettingsCommand}"
             Focusable="False">

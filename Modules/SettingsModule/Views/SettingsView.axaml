@@ -64,6 +64,11 @@
                     Classes="Caption"
                     Text="Output device" />
 
+                <ProgressBar
+                    Height="3"
+                    IsIndeterminate="True"
+                    IsVisible="{Binding IsDevicesLoading}" />
+
                 <ComboBox
                     HorizontalAlignment="Stretch"
                     Focusable="False"
@@ -123,6 +128,11 @@
                     HorizontalAlignment="Left"
                     Classes="Caption"
                     Text="Midi controller" />
+
+                <ProgressBar
+                    Height="3"
+                    IsIndeterminate="True"
+                    IsVisible="{Binding IsControllersLoading}" />
 
                 <ComboBox
                     HorizontalAlignment="Stretch"

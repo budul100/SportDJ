@@ -37,8 +37,8 @@ public class Service
     private readonly IDialogService dialogService;
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
-    private readonly IStorageService<Set> settingsService;
     private readonly Lock lockSignalServices = new();
+    private readonly IStorageService<Set> settingsService;
     private readonly HashSet<ISignalService> signalServices = [];
     private readonly IStackService stackService;
     private readonly CancellationTokenSource tokenSource = new();
@@ -46,6 +46,7 @@ public class Service
 
     private bool isDisposed;
     private bool isListeningMidi;
+    private volatile bool isStackLoading;
     private CancellationTokenSource midiSource;
     private MixerType mixerType;
     private Player player;
@@ -186,6 +187,10 @@ public class Service
         && keyListenService?.IsListening(player) == true;
 
     public bool IsListeningMidi => isListeningMidi;
+
+    // The files are read in the background, afterwards the signal needs an initialized mixer
+    public bool IsLoading => isStackLoading
+        || (stackService.Track is { IsSilent: false } && !IsAvailable);
 
     public bool IsOverlay
     {
@@ -532,22 +537,6 @@ public class Service
         }
     }
 
-    private void InitializePlayer()
-    {
-        RegisterKey();
-
-        var paths = player.Paths
-            .Select(settingsService.GetPathFull).ToArray();
-
-        Task.Run(() => stackService.Initialize(
-            player: player,
-            paths: paths));
-
-        // TO DO: Push into DefinitionsModule/SettingsView
-        // should be called after AppInitializedEvent
-        _ = SetStartLocationAsync();
-    }
-
     private ISignalService[] GetSignalServices()
     {
         lock (lockSignalServices)
@@ -556,13 +545,20 @@ public class Service
         }
     }
 
-    // Used as event filter, which runs on the thread of the publisher
-    private bool IsOwnSignal(ISignalService signalService)
+    private void InitializePlayer()
     {
-        lock (lockSignalServices)
-        {
-            return signalServices.Contains(signalService);
-        }
+        RegisterKey();
+
+        var paths = player.Paths
+            .Select(settingsService.GetPathFull).ToArray();
+
+        isStackLoading = paths.Length > 0;
+
+        _ = Task.Run(() => InitializeStack(paths));
+
+        // TO DO: Push into DefinitionsModule/SettingsView
+        // should be called after AppInitializedEvent
+        _ = SetStartLocationAsync();
     }
 
     private void InitializeSignal()
@@ -596,6 +592,35 @@ public class Service
         }
 
         trackService?.Update(stackService.Track);
+
+        // The loading state might have ended
+        UpdateContent();
+    }
+
+    private void InitializeStack(string[] paths)
+    {
+        try
+        {
+            stackService.Initialize(
+                player: player,
+                paths: paths);
+        }
+        finally
+        {
+            // Also after an error, otherwise the player would show loading forever
+            isStackLoading = false;
+
+            UpdateContent();
+        }
+    }
+
+    // Used as event filter, which runs on the thread of the publisher
+    private bool IsOwnSignal(ISignalService signalService)
+    {
+        lock (lockSignalServices)
+        {
+            return signalServices.Contains(signalService);
+        }
     }
 
     private void OnKeyPressed(string keyCode)

@@ -35,6 +35,11 @@ public interface IPlayerService
 
     bool IsListeningMidi { get; }
 
+    /// <summary>
+    /// The player waits for its files or for its signal, so it cannot be played yet.
+    /// </summary>
+    bool IsLoading { get; }
+
     bool IsOverlay { get; set; }
 
     bool IsPlaying { get; }

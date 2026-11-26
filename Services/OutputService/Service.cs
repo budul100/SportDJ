@@ -323,6 +323,14 @@ public class Service
         providerBase?.Dispose();
     }
 
+    private IMixerService[] GetMixers()
+    {
+        lock (lockMixers)
+        {
+            return [.. mixersAll];
+        }
+    }
+
     private Output GetOptions(OutputType type)
     {
         var outputs = sessionService?.Contents?.Outputs;
@@ -396,11 +404,14 @@ public class Service
             cancellationToken: cancellationTokenSource.Token);
     }
 
-    private IMixerService[] GetMixers()
+    private void InvokeOnMonitors(Action<IMonitorService> action)
     {
-        lock (lockMixers)
+        if (monitorServices?.Any() == true)
         {
-            return [.. mixersAll];
+            foreach (var volumeService in monitorServices)
+            {
+                action(volumeService);
+            }
         }
     }
 
@@ -417,17 +428,6 @@ public class Service
         lock (lockMixers)
         {
             return mixersOverlay.Contains(mixerService);
-        }
-    }
-
-    private void InvokeOnMonitors(Action<IMonitorService> action)
-    {
-        if (monitorServices?.Any() == true)
-        {
-            foreach (var volumeService in monitorServices)
-            {
-                action(volumeService);
-            }
         }
     }
 

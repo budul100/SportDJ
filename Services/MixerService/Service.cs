@@ -247,6 +247,18 @@ public class Service
 
     #region Private Methods
 
+    private void EndMixer()
+    {
+        var isPlaying = GetSignalServices().Any(s => s.IsPlaying);
+
+        if (IsPlaying && !isPlaying)
+        {
+            IsPlaying = false;
+
+            eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
+        }
+    }
+
     private ISignalService[] GetSignalServices()
     {
         lock (lockSignalServices)
@@ -261,28 +273,6 @@ public class Service
         lock (lockSignalServices)
         {
             return signalServices.Contains(signalService);
-        }
-    }
-
-    private bool TryGetFadingProvider(ISignalService signalService, out FadingProvider fadingProvider)
-    {
-        lock (lockFadingProviders)
-        {
-            return fadingProviders.TryGetValue(
-                key: signalService,
-                value: out fadingProvider);
-        }
-    }
-
-    private void EndMixer()
-    {
-        var isPlaying = GetSignalServices().Any(s => s.IsPlaying);
-
-        if (IsPlaying && !isPlaying)
-        {
-            IsPlaying = false;
-
-            eventAggregator.GetEvent<MixerStoppedEvent>().Publish(this);
         }
     }
 
@@ -411,6 +401,16 @@ public class Service
         else if (signalService.Output != default)
         {
             mixingProvider.Remove(signalService.Output);
+        }
+    }
+
+    private bool TryGetFadingProvider(ISignalService signalService, out FadingProvider fadingProvider)
+    {
+        lock (lockFadingProviders)
+        {
+            return fadingProviders.TryGetValue(
+                key: signalService,
+                value: out fadingProvider);
         }
     }
 
