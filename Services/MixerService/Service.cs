@@ -218,6 +218,34 @@ public class Service
         GetSignalServices().OnEach(s => s?.Pause(useFilterEffect));
     }
 
+    public void Remove(ISignalService signalService)
+    {
+        if (signalService == default)
+        {
+            return;
+        }
+
+        var isKnown = false;
+
+        lock (lockSignalServices)
+        {
+            isKnown = signalServices.Remove(signalService);
+        }
+
+        // The provider has to leave the mix before the signal is disposed, otherwise the audio thread keeps reading it
+        if (isKnown)
+        {
+            RemoveSignal(signalService);
+        }
+
+        if (this.signalService == signalService)
+        {
+            this.signalService = default;
+        }
+
+        EndMixer();
+    }
+
     #endregion Public Methods
 
     #region Protected Methods

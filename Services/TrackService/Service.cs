@@ -35,6 +35,7 @@ public class Service
     private readonly ConcurrentQueue<Track> loadedUpdates = [];
     private readonly ConcurrentQueue<Track> otherTrims = [];
     private readonly ConcurrentQueue<Track> otherUpdates = [];
+    private readonly SemaphoreSlim pending = new(0);
     private readonly PlaylistIOFactory playlistIOFactory;
     private readonly IStorageService<Set> settingsService;
     private readonly ConcurrentDictionary<string, Track> tracks = [];
@@ -89,8 +90,8 @@ public class Service
 
                 if (result != default)
                 {
-                    otherUpdates.Enqueue(result);
-                    otherTrims.Enqueue(result);
+                    Enqueue(otherUpdates, result);
+                    Enqueue(otherTrims, result);
 
                     yield return result;
                 }
@@ -114,8 +115,8 @@ public class Service
 
         track.Registers.Add(register);
 
-        activeUpdates.Enqueue(track);
-        activeRenders.Enqueue(track);
+        Enqueue(activeUpdates, track);
+        Enqueue(activeRenders, track);
 
         eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
     }
@@ -153,9 +154,9 @@ public class Service
     {
         if (track != default)
         {
-            loadedUpdates.Enqueue(track);
-            loadedTrims.Enqueue(track);
-            loadedRenders.Enqueue(track);
+            Enqueue(loadedUpdates, track);
+            Enqueue(loadedTrims, track);
+            Enqueue(loadedRenders, track);
         }
     }
 
@@ -179,6 +180,14 @@ public class Service
     #endregion Protected Methods
 
     #region Private Methods
+
+    // Every queued track is announced to the worker, so it can sleep while nothing is queued
+    private void Enqueue(ConcurrentQueue<Track> queue, Track track)
+    {
+        queue.Enqueue(track);
+
+        pending.Release();
+    }
 
     private IEnumerable<string> GetFiles(IEnumerable<string> paths)
     {
@@ -254,6 +263,46 @@ public class Service
         return result;
     }
 
+    // Takes the most important queued track, the order of the branches is the priority
+    private void ProcessNext()
+    {
+        if (!activeUpdates.IsEmpty
+            && activeUpdates.TryDequeue(out Track activeUpdate))
+        {
+            UpdateTrack(activeUpdate);
+        }
+        else if (!activeRenders.IsEmpty
+            && activeRenders.TryDequeue(out Track activeRender))
+        {
+            RenderTrack(activeRender);
+        }
+        else if (!loadedUpdates.IsEmpty
+            && loadedUpdates.TryDequeue(out Track loadedUpdate))
+        {
+            UpdateTrack(loadedUpdate);
+        }
+        else if (!loadedTrims.IsEmpty
+            && loadedTrims.TryDequeue(out Track loadedTrim))
+        {
+            TrimTrack(loadedTrim);
+        }
+        else if (!otherUpdates.IsEmpty
+            && otherUpdates.TryDequeue(out Track otherUpdate))
+        {
+            UpdateTrack(otherUpdate);
+        }
+        else if (!loadedRenders.IsEmpty
+            && loadedRenders.TryDequeue(out Track loadedRender))
+        {
+            RenderTrack(loadedRender);
+        }
+        else if (!otherTrims.IsEmpty
+            && otherTrims.TryDequeue(out Track otherTrim))
+        {
+            TrimTrack(otherTrim);
+        }
+    }
+
     private void RenderTrack(Track track)
     {
         if (track?.IsRendered == false)
@@ -275,40 +324,24 @@ public class Service
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            if (!activeUpdates.IsEmpty
-                && activeUpdates.TryDequeue(out Track activeUpdate))
+            try
             {
-                UpdateTrack(activeUpdate);
+                // Sleeps until a track was enqueued, one count stands for one queued track
+                pending.Wait(cancellationToken);
             }
-            else if (!activeRenders.IsEmpty
-                && activeRenders.TryDequeue(out Track activeRender))
+            catch (OperationCanceledException)
             {
-                RenderTrack(activeRender);
+                break;
             }
-            else if (!loadedUpdates.IsEmpty
-                && loadedUpdates.TryDequeue(out Track loadedUpdate))
+
+            try
             {
-                UpdateTrack(loadedUpdate);
+                ProcessNext();
             }
-            else if (!loadedTrims.IsEmpty
-                && loadedTrims.TryDequeue(out Track loadedTrim))
+            catch (Exception exception)
             {
-                TrimTrack(loadedTrim);
-            }
-            else if (!otherUpdates.IsEmpty
-                && otherUpdates.TryDequeue(out Track otherUpdate))
-            {
-                UpdateTrack(otherUpdate);
-            }
-            else if (!loadedRenders.IsEmpty
-                && loadedRenders.TryDequeue(out Track loadedRender))
-            {
-                RenderTrack(loadedRender);
-            }
-            else if (!otherTrims.IsEmpty
-                && otherTrims.TryDequeue(out Track otherTrim))
-            {
-                TrimTrack(otherTrim);
+                // A failing track must not end the worker for all later tracks
+                System.Diagnostics.Trace.WriteLine($"[Track] Shaping failed: {exception}");
             }
         }
     }

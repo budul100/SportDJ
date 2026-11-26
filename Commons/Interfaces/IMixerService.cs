@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NAudio.Wave;
 using SportDJ.Commons.Enums;
 using SportDJ.Commons.Models.Contents;
@@ -51,6 +51,11 @@ public interface IMixerService
     void Initialize(MixerType type, WaveFormat waveFormat, bool signalsCanOverlap);
 
     void Pause();
+
+    /// <summary>
+    /// Takes the signal out of the mix. Unknown signals are ignored.
+    /// </summary>
+    void Remove(ISignalService signalService);
 
     #endregion Public Methods
 }

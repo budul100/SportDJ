@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -41,10 +42,11 @@ public class Service
     private readonly IStorageService<Set> settingsService;
     private readonly HashSet<ISignalService> signalServices = [];
     private readonly IStackService stackService;
+    private readonly List<SubscriptionToken> subscriptions = [];
     private readonly CancellationTokenSource tokenSource = new();
     private readonly ITrackService trackService;
 
-    private bool isDisposed;
+    private volatile bool isDisposed;
     private bool isListeningMidi;
     private volatile bool isStackLoading;
     private CancellationTokenSource midiSource;
@@ -71,76 +73,76 @@ public class Service
         this.keyListenService = keyListenService;
 
         // Only this player takes the key, while it waits for an assignment
-        eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
             action: OnKeyPressed,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
             filter: _ => player != default
-                && this.keyListenService?.IsListening(player) == true);
+                && this.keyListenService?.IsListening(player) == true));
 
         // The controller may be connected after the keys were registered
-        eventAggregator?.GetEvent<ControllerUpdatedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<ControllerUpdatedEvent>().Subscribe(
             action: ApplyLed,
             threadOption: ThreadOption.PublisherThread,
-            keepSubscriberReferenceAlive: true);
+            keepSubscriberReferenceAlive: true));
 
-        eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<AppInitializedEvent>().Subscribe(
             action: () => _ = SetStartLocationAsync(),
-            keepSubscriberReferenceAlive: true);
+            keepSubscriberReferenceAlive: true));
 
-        eventAggregator?.GetEvent<MixerInitializedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<MixerInitializedEvent>().Subscribe(
             action: _ => InitializeSignal(),
             threadOption: ThreadOption.PublisherThread,
-            keepSubscriberReferenceAlive: true);
+            keepSubscriberReferenceAlive: true));
 
-        eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<SignalUpdatedEvent>().Subscribe(
             action: _ => UpdateDuration(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: s => signalService == s);
+            filter: s => signalService == s));
 
-        eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<SignalStartedEvent>().Subscribe(
             action: OnSignalStarted,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: s => signalService == s);
+            filter: s => signalService == s));
 
-        eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<SignalStoppedEvent>().Subscribe(
             action: OnSignalStopped,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: IsOwnSignal);
+            filter: IsOwnSignal));
 
-        eventAggregator?.GetEvent<SignalEndedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<SignalEndedEvent>().Subscribe(
             action: OnSignalEnded,
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: IsOwnSignal);
+            filter: IsOwnSignal));
 
-        eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<SignalNextEvent>().Subscribe(
             action: _ => Next(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
             filter: s => signalService == s
-                && mixerType == MixerType.Base);
+                && mixerType == MixerType.Base));
 
-        eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<StackUpdatedEvent>().Subscribe(
             action: _ => InitializeSignal(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: p => player == p);
+            filter: p => player == p));
 
-        eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<StackResetEvent>().Subscribe(
             action: _ => UpdateContent(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: p => player == p);
+            filter: p => player == p));
 
-        eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
+        AddSubscription(eventAggregator?.GetEvent<TrackUpdatedEvent>().Subscribe(
             action: _ => UpdateTrack(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: t => this.stackService.Track == t);
+            filter: t => this.stackService.Track == t));
     }
 
     #endregion Public Constructors
@@ -477,23 +479,47 @@ public class Service
     {
         if (!isDisposed)
         {
+            // Set first, so handlers which are still running do not touch the released resources
+            isDisposed = true;
+
             if (isDisposing)
             {
+                // Without this the instance stays alive in the event aggregator and keeps reacting to events
+                foreach (var subscription in subscriptions)
+                {
+                    subscription.Dispose();
+                }
+
+                subscriptions.Clear();
+
                 keyListenService?.End(player);
+
+                if (player != default)
+                {
+                    ClearLed();
+
+                    controllerService?.Unregister(player.Key);
+                }
 
                 tokenSource?.Cancel();
                 tokenSource?.Dispose();
 
-                signalService?.Dispose();
+                ReleaseSignals();
             }
-
-            isDisposed = true;
         }
     }
 
     #endregion Protected Methods
 
     #region Private Methods
+
+    private void AddSubscription(SubscriptionToken subscription)
+    {
+        if (subscription != default)
+        {
+            subscriptions.Add(subscription);
+        }
+    }
 
     private void ApplyLed()
     {
@@ -563,6 +589,11 @@ public class Service
 
     private void InitializeSignal()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         if (stackService.Track != default)
         {
             mixerType = player.IsOverlay
@@ -599,6 +630,11 @@ public class Service
 
     private void InitializeStack(string[] paths)
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         try
         {
             stackService.Initialize(
@@ -702,6 +738,54 @@ public class Service
         ApplyLed();
     }
 
+    // Takes all signals of this player out of their mixers and disposes them
+    private void ReleaseSignals()
+    {
+        var signals = GetSignalServices();
+
+        // The current signal might not have been started yet, so it is not part of the set
+        if (signalService != default
+            && !signals.Contains(signalService))
+        {
+            signals = [.. signals, signalService];
+        }
+
+        lock (lockSignalServices)
+        {
+            signalServices.Clear();
+        }
+
+        signalService = default;
+
+        if (signals.Length > 0)
+        {
+            try
+            {
+                // The type of the mixer changes with IsOverlay, so a signal might belong to either one
+                var mixers = new[] { MixerType.Base, MixerType.Overlay }
+                    .Select(t => containerProvider?.Resolve<IMixerService>(
+                        name: t.ToString())).ToArray();
+
+                foreach (var signal in signals)
+                {
+                    foreach (var mixer in mixers)
+                    {
+                        mixer?.Remove(signal);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Trace.WriteLine($"[Player] Removing signals from the mixers failed: {exception}");
+            }
+        }
+
+        foreach (var signal in signals)
+        {
+            signal.Dispose();
+        }
+    }
+
     private async Task SetStartLocationAsync()
     {
         var paths = player?.Paths?
@@ -723,11 +807,21 @@ public class Service
 
     private void UpdateContent()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         eventAggregator.GetEvent<PlayerUpdateEvent>().Publish(player);
     }
 
     private void UpdateDuration()
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         var remaining = signalService?.Track == stackService.Track
             ? signalService?.Remaining
             : stackService?.Track?.Duration;
