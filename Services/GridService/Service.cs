@@ -6,6 +6,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
+using SportDJ.Commons.Events.Player;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -76,9 +77,15 @@ public class Service
     {
         if (grid?.Group != default)
         {
-            Apply(() => grid.Group.Add(
+            var added = default(Grid);
+
+            // The new tab is announced after the grid update, so its view model exists when it is shown
+            if (Apply(() => added = grid.Group.Add(
                 anchor: grid,
-                orientation: orientation));
+                orientation: orientation)))
+            {
+                eventAggregator.GetEvent<TabAddedEvent>().Publish(added);
+            }
         }
     }
 
@@ -86,9 +93,16 @@ public class Service
     {
         if (cell?.Grid != default)
         {
-            Apply(() => cell.Grid.Add(
+            var added = default(Cell);
+
+            // The new player is announced after the grid update, so its view model exists when it is shown
+            if (Apply(() => added = cell.Grid.Add(
                 anchor: cell,
-                orientation: orientation));
+                orientation: orientation))
+                && added is Player player)
+            {
+                eventAggregator.GetEvent<PlayerAddedEvent>().Publish(player);
+            }
         }
     }
 
@@ -237,12 +251,12 @@ public class Service
     }
 
     // Runs the change, tidies the grid and checks the limits. The change is undone
-    // if it throws or if it grows the grid beyond MaxCount.
-    private void Apply(Action change)
+    // if it throws or if it grows the grid beyond MaxCount. Returns true if the change was kept.
+    private bool Apply(Action change)
     {
         if (Grid == default)
         {
-            return;
+            return false;
         }
 
         var sizeBefore = Grid.Measure();
@@ -261,18 +275,22 @@ public class Service
             throw;
         }
 
-        if (IsLimitExceeded(sizeBefore, Grid.Measure()))
+        var isKept = !IsLimitExceeded(sizeBefore, Grid.Measure());
+
+        if (isKept)
         {
-            snapshot.Restore();
+            Persist();
         }
         else
         {
-            Persist();
+            snapshot.Restore();
         }
 
         CancelListening();
 
         eventAggregator.GetEvent<GridUpdatedEvent>().Publish();
+
+        return isKept;
     }
 
     private void Initialize()

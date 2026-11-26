@@ -12,6 +12,7 @@ public class CanvasViewModel
 {
     #region Private Fields
 
+    private readonly ViewModelCache cache = new();
     private readonly IContainerProvider containerProvider;
     private readonly IGridService gridService;
 
@@ -52,19 +53,42 @@ public class CanvasViewModel
 
     private void Initialize()
     {
-        // The old grid has to leave the collection, otherwise all grids are stacked on each other
-        Grids.Clear();
+        var model = gridService.Grid;
 
-        grid?.Dispose();
-        grid = default;
-
-        if (gridService.Grid != default)
+        if (grid != default
+            && model != default
+            && grid.Model == model)
         {
-            grid = new GridViewModel(
-                containerProvider: containerProvider,
-                grid: gridService.Grid);
+            // Same grid, only its structure changed: players which are still there keep their view model and their files
+            cache.BeginUpdate();
 
-            Grids.Add(grid);
+            grid.Update();
+
+            cache.Sweep();
+        }
+        else
+        {
+            // Another grid (e.g. a loaded file): nothing of the old one is reused
+            // The old grid has to leave the collection, otherwise all grids are stacked on each other
+            Grids.Clear();
+
+            grid?.Dispose();
+            grid = default;
+
+            cache.DisposeAll();
+
+            if (model != default)
+            {
+                cache.BeginUpdate();
+
+                grid = new GridViewModel(
+                    containerProvider: containerProvider,
+                    cache: cache,
+                    grid: model,
+                    parent: default);
+
+                Grids.Add(grid);
+            }
         }
     }
 

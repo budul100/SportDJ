@@ -25,6 +25,7 @@ public class PlayerViewModel
     private readonly IPlayerService playerService;
 
     private bool isSettingsVisible;
+    private GridViewModel parent;
 
     #endregion Private Fields
 
@@ -34,6 +35,7 @@ public class PlayerViewModel
         : base(containerProvider: containerProvider, element: player)
     {
         this.player = player;
+        this.parent = parent;
 
         panelService = containerProvider?.Resolve<IPanelService>();
         playerService = containerProvider?.Resolve<IPlayerService>();
@@ -87,7 +89,7 @@ public class PlayerViewModel
             action: _ => ExecuteAvailable(),
             threadOption: ThreadOption.PublisherThread,
             keepSubscriberReferenceAlive: true,
-            filter: k => parent?.IsVisible == true
+            filter: k => this.parent?.IsVisible == true
                 && !IsAnyListening
                 && k == player.KeyCode));
 
@@ -178,6 +180,16 @@ public class PlayerViewModel
     public DelegateCommand TrackForwardCommand { get; }
 
     #endregion Public Properties
+
+    #region Internal Methods
+
+    // The player moved into another tab or grid, its content stays
+    internal void SetParent(GridViewModel parent)
+    {
+        this.parent = parent;
+    }
+
+    #endregion Internal Methods
 
     #region Protected Methods
 

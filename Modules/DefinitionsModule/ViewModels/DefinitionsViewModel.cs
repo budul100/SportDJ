@@ -71,7 +71,18 @@ public class DefinitionsViewModel
             threadOption: ThreadOption.UIThread,
             keepSubscriberReferenceAlive: true);
 
-        // The whole grid is rebuilt after each change, so the shown element might not exist anymore
+        // A new player or tab shows its settings, so it can be named right away
+        eventAggregator?.GetEvent<PlayerAddedEvent>().Subscribe(
+            action: OnPlayerAdded,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
+        eventAggregator?.GetEvent<TabAddedEvent>().Subscribe(
+            action: OnTabAdded,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true);
+
+        // The grid might change after each change, so the shown element might not exist anymore
         eventAggregator?.GetEvent<GridUpdatedEvent>().Subscribe(
             action: Validate,
             threadOption: ThreadOption.UIThread,
@@ -168,6 +179,27 @@ public class DefinitionsViewModel
     {
         // Resets the buttons of the players and cancels pending assignments via the panel update
         panelService?.Deactivate<IPlayerService>();
+    }
+
+    private void OnPlayerAdded(Player player)
+    {
+        if (player != default)
+        {
+            eventAggregator?.GetEvent<PlayerVisibleEvent>().Publish(player);
+
+            // Posted after the visible event is handled, which switches the mode and keeps the shown tab
+            dispatcherService?.Post(() => Active = settingsViewModel);
+        }
+    }
+
+    private void OnTabAdded(Grid tab)
+    {
+        if (tab != default)
+        {
+            eventAggregator?.GetEvent<TabVisibleEvent>().Publish(tab);
+
+            dispatcherService?.Post(() => Active = tabSettingsViewModel);
+        }
     }
 
     private void SetController()

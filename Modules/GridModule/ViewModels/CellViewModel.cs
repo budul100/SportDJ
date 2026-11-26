@@ -67,7 +67,7 @@ public abstract class CellViewModel
 
     #region Public Properties
 
-    public virtual int Column => cell.Column;
+    public virtual int Column => cell?.Column ?? 0;
 
     public int ColumnSpan { get; protected set; } = 1;
 
@@ -107,7 +107,7 @@ public abstract class CellViewModel
         }
     }
 
-    public virtual int Row => cell.Row;
+    public virtual int Row => cell?.Row ?? 0;
 
     public int RowSpan { get; protected set; } = 1;
 
@@ -134,6 +134,15 @@ public abstract class CellViewModel
             GC.SuppressFinalize(
                 obj: this);
         }
+    }
+
+    // The cell moved or changed its size, e.g. because another cell was added next to it
+    public void RefreshPosition()
+    {
+        RaisePropertyChanged(nameof(Column));
+        RaisePropertyChanged(nameof(ColumnSpan));
+        RaisePropertyChanged(nameof(Row));
+        RaisePropertyChanged(nameof(RowSpan));
     }
 
     #endregion Public Methods

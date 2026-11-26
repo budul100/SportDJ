@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using SportDJ.Commons.Events.Aggregation;
+using SportDJ.Commons.Events.Grid;
 using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Ioc;
 using SportDJ.Commons.Models.Structure;
@@ -12,8 +14,10 @@ public class GroupViewModel
 {
     #region Private Fields
 
-    private readonly GridViewModel parent;
+    private readonly ViewModelCache cache;
+    private readonly Group group;
 
+    private GridViewModel parent;
     private GridViewModel selected;
 
     #endregion Private Fields
@@ -21,8 +25,24 @@ public class GroupViewModel
     #region Public Constructors
 
     public GroupViewModel(IContainerProvider containerProvider, Group group, GridViewModel parent, bool isOnCanvas)
+        : this(
+            containerProvider: containerProvider,
+            cache: new ViewModelCache(),
+            group: group,
+            parent: parent,
+            isOnCanvas: isOnCanvas)
+    { }
+
+    #endregion Public Constructors
+
+    #region Internal Constructors
+
+    internal GroupViewModel(IContainerProvider containerProvider, ViewModelCache cache, Group group,
+        GridViewModel parent, bool isOnCanvas)
         : base(containerProvider: containerProvider, element: group)
     {
+        this.cache = cache;
+        this.group = group;
         this.parent = parent;
 
         AddSubscription(eventAggregator?.GetEvent<KeyPressedEvent>().Subscribe(
@@ -31,13 +51,18 @@ public class GroupViewModel
             keepSubscriberReferenceAlive: true,
             filter: _ => IsVisible));
 
-        InitializeTabs(
-            containerProvider: containerProvider,
-            group: group,
-            isOnCanvas: isOnCanvas);
+        // The new tab is shown, so the user sees what was just created
+        AddSubscription(eventAggregator?.GetEvent<TabAddedEvent>().Subscribe(
+            action: OnTabAdded,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true));
+
+        Update(isOnCanvas);
+
+        Initialize();
     }
 
-    #endregion Public Constructors
+    #endregion Internal Constructors
 
     #region Public Properties
 
@@ -69,42 +94,62 @@ public class GroupViewModel
 
     #endregion Public Properties
 
-    #region Protected Methods
+    #region Internal Methods
 
-    protected override void Dispose(bool isDisposing)
+    internal void SetParent(GridViewModel parent)
     {
-        if (isDisposing)
-        {
-            foreach (var tab in Tabs.ToArray())
-            {
-                tab.Dispose();
-            }
-        }
-
-        base.Dispose(
-            isDisposing: isDisposing);
+        this.parent = parent;
     }
 
-    #endregion Protected Methods
-
-    #region Private Methods
-
-    private void InitializeTabs(IContainerProvider containerProvider, Group group, bool isOnCanvas)
+    // Selects the tab and makes sure this group is visible as well
+    internal void Show(GridViewModel tab)
     {
+        Selected = tab;
+
+        parent?.Reveal();
+    }
+
+    // Adjusts the tabs to the structure: view models of known tabs are kept (and with them the selection)
+    internal void Update(bool isOnCanvas)
+    {
+        var desired = new List<GridViewModel>();
+
         Rows = 1;
         Columns = 1;
 
         if (group?.Grids?.Count > 0)
         {
-            foreach (var grid in group.Grids)
+            foreach (var grid in group.Grids.ToArray())
             {
-                var gridTab = new GridViewModel(
-                    containerProvider: containerProvider,
-                    grid: grid,
-                    parent: this);
+                var gridTab = cache.Get<GridViewModel>(grid);
 
-                Tabs.Add(gridTab);
+                if (gridTab == default)
+                {
+                    gridTab = new GridViewModel(
+                        containerProvider: containerProvider,
+                        cache: cache,
+                        grid: grid,
+                        parent: this);
+
+                    cache.Add(
+                        model: grid,
+                        viewModel: gridTab);
+                }
+                else
+                {
+                    gridTab.SetParent(this);
+
+                    cache.Use(grid);
+
+                    gridTab.Update();
+                }
+
+                desired.Add(gridTab);
             }
+
+            ViewModelCache.Synchronize(
+                target: Tabs,
+                desired: desired);
 
             if (!isOnCanvas)
             {
@@ -120,14 +165,25 @@ public class GroupViewModel
 
             // The selection must not depend on the view, otherwise no tab is visible
             // (and no key is processed) until the TabControl is realized
-            Selected = Tabs.First();
+            // A tab which is still there stays selected
+            if (selected == default
+                || !Tabs.Contains(selected))
+            {
+                Selected = Tabs.First();
+            }
+        }
+        else
+        {
+            Tabs.Clear();
         }
 
         RowSpan = Rows;
         ColumnSpan = Columns;
-
-        base.Initialize();
     }
+
+    #endregion Internal Methods
+
+    #region Private Methods
 
     private void OnKeyPressed(string keyCode)
     {
@@ -135,6 +191,17 @@ public class GroupViewModel
         if (!IsAnyListening)
         {
             SelectTab(keyCode);
+        }
+    }
+
+    private void OnTabAdded(Grid tab)
+    {
+        var added = Tabs
+            .FirstOrDefault(t => t.Model == tab);
+
+        if (added != default)
+        {
+            Show(added);
         }
     }
 
