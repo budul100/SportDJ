@@ -21,7 +21,7 @@ public static class Texts
 
     public const string SettingsLoadHeader = "Load settings";
     public const string SettingsNewHeader = "New session";
-    public const string SettingsNewMessage = "Shall an empty session be started? The current session stays in its file, further changes are stored in the default settings file.";
+    public const string SettingsNewMessage = "Shall an empty session be started? The current session stays in its file. Next you choose where the new settings file is stored, the audio files stay where they are and are linked relative to it.";
     public const string SettingsSaveHeader = "Save settings";
 
     public const string SplashCancellingMessage = "Cancelling ...";

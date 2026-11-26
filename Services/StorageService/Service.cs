@@ -73,18 +73,9 @@ public class Service<T>(IEventAggregator eventAggregator)
 
     public string GetPathFull(string path)
     {
-        if (!string.IsNullOrWhiteSpace(Path)
-            && Directory.Exists(System.IO.Path.GetDirectoryName(Path))
-            && !(Directory.Exists(path) || File.Exists(path)))
-        {
-            return System.IO.Path.Combine(
-                path1: System.IO.Path.GetDirectoryName(Path),
-                path2: path);
-        }
-        else
-        {
-            return path;
-        }
+        return ResolvePath(
+            path: path,
+            folder: GetFolder(Path));
     }
 
     public string GetPathRelative(string path)
@@ -158,6 +149,51 @@ public class Service<T>(IEventAggregator eventAggregator)
 
     #region Private Methods
 
+    private static string GetFolder(string filePath)
+    {
+        var result = !string.IsNullOrWhiteSpace(filePath)
+            ? System.IO.Path.GetDirectoryName(filePath)
+            : default;
+
+        return Directory.Exists(result)
+            ? result
+            : default;
+    }
+
+    private static string RebasePath(string path, string oldFolder, string newFolder)
+    {
+        return !string.IsNullOrWhiteSpace(path)
+            ? System.IO.Path.GetRelativePath(
+                relativeTo: newFolder,
+                path: ResolvePath(
+                    path: path,
+                    folder: oldFolder))
+            : path;
+    }
+
+    private static string ResolvePath(string path, string folder)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return path;
+        }
+
+        // Without a settings folder a relative path stays as it is
+        if (System.IO.Path.IsPathRooted(path))
+        {
+            return System.IO.Path.GetFullPath(path);
+        }
+        else if (!string.IsNullOrWhiteSpace(folder))
+        {
+            return System.IO.Path.GetFullPath(
+                path: System.IO.Path.Combine(folder, path));
+        }
+        else
+        {
+            return path;
+        }
+    }
+
     private bool LoadSettings(string filePath)
     {
         var result = false;
@@ -193,6 +229,26 @@ public class Service<T>(IEventAggregator eventAggregator)
         return result;
     }
 
+    private bool RebasePaths(string oldFolder, string newFolder)
+    {
+        var result = false;
+
+        if (Contents is IPathHolder holder
+            && !string.IsNullOrWhiteSpace(oldFolder)
+            && !string.IsNullOrWhiteSpace(newFolder)
+            && !string.Equals(
+                a: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(oldFolder)),
+                b: System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(newFolder)),
+                comparisonType: StringComparison.OrdinalIgnoreCase))
+        {
+            holder.ConvertPaths(p => RebasePath(p, oldFolder, newFolder));
+
+            result = true;
+        }
+
+        return result;
+    }
+
     private void SaveSettings(string filePath = default)
     {
         var fullPath = !string.IsNullOrWhiteSpace(filePath)
@@ -205,6 +261,13 @@ public class Service<T>(IEventAggregator eventAggregator)
         {
             Directory.CreateDirectory(folderPath);
         }
+
+        // The stored paths are relative to the settings file, so they follow it to the new folder
+        var previousFolder = GetFolder(Path);
+
+        var isRebased = RebasePaths(
+            oldFolder: previousFolder,
+            newFolder: folderPath);
 
         using var file = File.Create(fullPath);
 
@@ -222,6 +285,13 @@ public class Service<T>(IEventAggregator eventAggregator)
         }
         catch
         {
+            if (isRebased)
+            {
+                RebasePaths(
+                    oldFolder: folderPath,
+                    newFolder: previousFolder);
+            }
+
             // TODO: Log exception
             Debugger.Break();
         }

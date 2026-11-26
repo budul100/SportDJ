@@ -318,17 +318,29 @@ public class SettingsViewModel
 
         if (result == ButtonResult.Yes)
         {
-            var path = settingsService.GetPath(
-                appName: Texts.AppName,
-                fileName: Defaults.FileNameSettings + Constants.SettingsExtension);
+            // The audio paths of a session are stored relative to its settings file, so the user decides where it lives
+            var file = await dialogService.SaveFilePickerAsync(
+                title: Texts.SettingsNewHeader,
+                defaultExtension: Constants.SettingsExtension,
+                fileTypeChoices: fileTypeFilter,
+                showOverwritePrompt: true,
+                suggestedFileName: Defaults.FileNameSettings,
+                suggestedStartLocation: startLocation);
 
-            sessionService.Contents.SettingsPath = path;
+            if (file != default)
+            {
+                var path = file.Path.LocalPath;
 
-            sessionService.Save();
+                sessionService.Contents.SettingsPath = path;
 
-            settingsService.New(path);
+                sessionService.Save();
 
-            await SetStartLocationAsync();
+                settingsService.New(path);
+
+                settingsService.Save();
+
+                await SetStartLocationAsync();
+            }
         }
     }
 
