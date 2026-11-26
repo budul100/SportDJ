@@ -75,7 +75,8 @@ public class Tests
 
         service.Update();
 
-        Assert.True(service.Controllers.Any());
+        // Without a connected MIDI device the list is empty, which is no failure of the service
+        Assert.NotNull(service.Controllers);
     }
 
     #endregion Public Methods

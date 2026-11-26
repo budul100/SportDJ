@@ -29,13 +29,14 @@ public class Service
 {
     #region Private Fields
 
+    private const int InitialUpdateWaitSeconds = 15;
+
     private readonly IEventAggregator eventAggregator;
-    private readonly ConcurrentDictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
     private readonly Task initialUpdate;
+    private readonly ConcurrentDictionary<Key, (StrokeType Type, Action Action)> keyStrokes = [];
     private readonly IStorageService<Session> sessionService;
 
     private IReadOnlyDictionary<PlayerColorType, int> colors = new Dictionary<PlayerColorType, int>();
-    private const int InitialUpdateWaitSeconds = 15;
 
     private IEnumerable<Controller> controllers = [];
     private bool isDisposed;
@@ -365,36 +366,6 @@ public class Service
         }
     }
 
-    private void UpdateControllers()
-    {
-        controllers = GetControllers().ToArray();
-
-        eventAggregator?.GetEvent<ControllersUpdatedEvent>().Publish();
-    }
-
-    private void UpdateInitially()
-    {
-        try
-        {
-            profiles = GetProfiles().ToArray();
-
-            UpdateControllers();
-        }
-        catch (Exception exception)
-        {
-            Log.Error("Listing the controllers failed.", exception);
-        }
-    }
-
-    private void WaitForInitialUpdate()
-    {
-        if (initialUpdate?.IsCompleted == false
-            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
-        {
-            Log.Warning("Listing the controllers takes longer than expected.");
-        }
-    }
-
     private void OnKeyPressed(Key key, StrokeType type)
     {
         var tcs = listenerTcs;
@@ -507,6 +478,36 @@ public class Service
 
                 CloseController();
             }
+        }
+    }
+
+    private void UpdateControllers()
+    {
+        controllers = GetControllers().ToArray();
+
+        eventAggregator?.GetEvent<ControllersUpdatedEvent>().Publish();
+    }
+
+    private void UpdateInitially()
+    {
+        try
+        {
+            profiles = GetProfiles().ToArray();
+
+            UpdateControllers();
+        }
+        catch (Exception exception)
+        {
+            Log.Error("Listing the controllers failed.", exception);
+        }
+    }
+
+    private void WaitForInitialUpdate()
+    {
+        if (initialUpdate?.IsCompleted == false
+            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
+        {
+            Log.Warning("Listing the controllers takes longer than expected.");
         }
     }
 

@@ -60,7 +60,7 @@ public class RemoveTests
     }
 
     [Fact]
-    public async Task RemoveGridAsync_Confirmed_MovesPlayersToTheLevelAbove()
+    public async Task RemoveGridAsync_Confirmed_RemovesTabWithItsPlayers()
     {
         var group = CreateGroup(
             0,
@@ -73,8 +73,8 @@ public class RemoveTests
         await context.Service.RemoveGridAsync(group.Grids[0]);
 
         Assert.Equal(["Tab 2"], TabNames(group));
-        Assert.Equal(["A"], context.Grid.Cells.OfType<Player>().Select(p => p.Name).ToArray());
-        Assert.All(context.Grid.Cells, c => Assert.Same(context.Grid, c.Grid));
+        Assert.Empty(context.Grid.Cells.OfType<Player>());
+        Assert.Same(group, context.Grid.Cells.Single());
         Assert.Equal(1, context.SaveCount);
 
         AssertNoOverlaps(context.Grid);
@@ -98,7 +98,7 @@ public class RemoveTests
     }
 
     [Fact]
-    public async Task RemoveGridAsync_LastTab_DissolvesGroup()
+    public async Task RemoveGridAsync_LastTab_RemovesGroupWithItsPlayers()
     {
         var group = CreateGroup(
             1,
@@ -110,7 +110,7 @@ public class RemoveTests
         await context.Service.RemoveGridAsync(group.Grids[0]);
 
         Assert.Empty(context.Grid.Cells.OfType<Group>());
-        Assert.Equal(["P0", "PA", "PB"], Names(context.Grid));
+        Assert.Equal(["P0"], Names(context.Grid));
         Assert.All(context.Grid.Cells, c => Assert.Same(context.Grid, c.Grid));
 
         AssertNoOverlaps(context.Grid);

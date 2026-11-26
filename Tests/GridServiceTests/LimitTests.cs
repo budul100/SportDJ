@@ -197,7 +197,7 @@ public class LimitTests
     }
 
     [Fact]
-    public async Task RemoveGridAsync_BeyondMaxColumns_KeepsTab()
+    public async Task RemoveGridAsync_BeyondMaxColumns_RemovesTab()
     {
         var group = CreateGroup(
             0,
@@ -206,13 +206,13 @@ public class LimitTests
             CreateTab("Tab 2", [.. CreateRow(200, "B").Cells]));
 
         var context = new ServiceContext(CreateGrid(group));
-        var before = Describe(context.Grid);
 
+        // Removing a tab never grows the grid, so it is allowed even if the remaining one is oversized
         await context.Service.RemoveGridAsync(group.Grids[0]);
 
         Assert.Same(group, context.Grid.Cells.Single());
-        Assert.Equal(before, Describe(context.Grid));
-        Assert.Equal(0, context.SaveCount);
+        Assert.Equal(["Tab 2"], TabNames(group));
+        Assert.Equal(1, context.SaveCount);
     }
 
     #endregion Public Methods

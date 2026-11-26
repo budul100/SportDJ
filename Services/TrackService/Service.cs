@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ATL.AudioData;
@@ -182,6 +183,21 @@ public class Service
 
     #region Private Methods
 
+    private static string DecodePlaylist(byte[] bytes)
+    {
+        try
+        {
+            // Strict, so that ANSI text with umlauts is not taken for UTF-8
+            return new UTF8Encoding(
+                encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true).GetString(bytes).TrimStart('\uFEFF');
+        }
+        catch (DecoderFallbackException)
+        {
+            return Encoding.Latin1.GetString(bytes);
+        }
+    }
+
     // Every queued track is announced to the worker, so it can sleep while nothing is queued
     private void Enqueue(ConcurrentQueue<Track> queue, Track track)
     {
@@ -238,7 +254,7 @@ public class Service
         var folder = Path.GetDirectoryName(Path.GetFullPath(playlistPath));
         var result = new List<string>();
 
-        foreach (var entry in playlistIOFactory.GetPlaylistIO(playlistPath).FilePaths)
+        foreach (var entry in ReadPlaylistEntries(playlistPath))
         {
             var path = !string.IsNullOrWhiteSpace(entry) && !Path.IsPathRooted(entry)
                 ? Path.GetFullPath(Path.Combine(folder, entry))
@@ -290,23 +306,6 @@ public class Service
         return result;
     }
 
-    private void RenderTrack(Track track)
-    {
-        if (track?.IsRendered == false)
-        {
-            var start = System.Diagnostics.Stopwatch.GetTimestamp();
-
-            track.Render();
-
-            Log.Debug($"Wave rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
-
-            if (track.Bitmap != default)
-            {
-                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
-            }
-        }
-    }
-
     // Takes the most important queued track, the order of the branches is the priority
     private void ProcessNext()
     {
@@ -344,6 +343,45 @@ public class Service
             && otherTrims.TryDequeue(out Track otherTrim))
         {
             TrimTrack(otherTrim);
+        }
+    }
+
+    // Plain m3u files are often saved in the ANSI code page, which the playlist reader of ATL takes as UTF-8
+    // (umlauts get lost) and it returns the header line as an entry. So these files are read here.
+    private IEnumerable<string> ReadPlaylistEntries(string playlistPath)
+    {
+        var extension = Path.GetExtension(playlistPath);
+
+        if (string.Equals(extension, ".m3u", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, ".m3u8", StringComparison.OrdinalIgnoreCase))
+        {
+            var bytes = File.ReadAllBytes(playlistPath);
+
+            var text = DecodePlaylist(bytes);
+
+            return text
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .Where(l => l.Length > 0 && !l.StartsWith('#')).ToArray();
+        }
+
+        return playlistIOFactory.GetPlaylistIO(playlistPath).FilePaths;
+    }
+
+    private void RenderTrack(Track track)
+    {
+        if (track?.IsRendered == false)
+        {
+            var start = System.Diagnostics.Stopwatch.GetTimestamp();
+
+            track.Render();
+
+            Log.Debug($"Wave rendered in {System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms, bitmap {(track.Bitmap != default ? "created" : "MISSING")}: {track.Path}");
+
+            if (track.Bitmap != default)
+            {
+                eventAggregator.GetEvent<TrackUpdatedEvent>().Publish(track);
+            }
         }
     }
 

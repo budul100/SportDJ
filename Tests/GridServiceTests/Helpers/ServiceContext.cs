@@ -4,7 +4,6 @@ using Moq;
 using MsBox.Avalonia.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Grid;
-using SportDJ.Commons.Events.Hook;
 using SportDJ.Commons.Events.Settings;
 using SportDJ.Commons.Interfaces;
 using SportDJ.Commons.Models.Settings;
@@ -19,7 +18,7 @@ internal sealed class ServiceContext
 {
     #region Private Fields
 
-    private readonly SettingsLoadedEvent<Set> loadedEvent = new();
+    private readonly SettingsLoadedEvent<Set> loadedEvent;
     private readonly Mock<IStorageService<Set>> storage = new();
 
     private int saveCountAtLoad;
@@ -38,24 +37,14 @@ internal sealed class ServiceContext
             .Setup(m => m.Contents)
             .Returns(Set);
 
-        var updatedEvent = new GridUpdatedEvent();
+        // A real aggregator, so that every event the service publishes (added, moved, updated, ...) is available
+        var eventAggregator = new EventAggregator();
 
-        updatedEvent.Subscribe(
+        loadedEvent = eventAggregator.GetEvent<SettingsLoadedEvent<Set>>();
+
+        eventAggregator.GetEvent<GridUpdatedEvent>().Subscribe(
             action: () => updateCount++,
             keepSubscriberReferenceAlive: true);
-
-        var eventAggregator = new Mock<IEventAggregator>();
-        eventAggregator
-            .Setup(x => x.GetEvent<SettingsLoadedEvent<Set>>())
-            .Returns(loadedEvent);
-        eventAggregator
-            .Setup(x => x.GetEvent<GridUpdatedEvent>())
-            .Returns(updatedEvent);
-
-        var keyPressedEvent = new KeyPressedEvent();
-        eventAggregator
-            .Setup(x => x.GetEvent<KeyPressedEvent>())
-            .Returns(keyPressedEvent);
 
         var dialogService = new Mock<IDialogService>();
         dialogService.SetReturnsDefault(Task.FromResult(dialogResult));
@@ -65,7 +54,7 @@ internal sealed class ServiceContext
         var controllerService = new Mock<IControllerService>();
 
         Service = new Services.GridService.Service(
-            eventAggregator: eventAggregator.Object,
+            eventAggregator: eventAggregator,
             settingsService: storage.Object,
             dialogService: dialogService.Object,
             keyListenService: keyListenService.Object,

@@ -10,6 +10,7 @@ using SportDJ.Commons.Enums;
 using SportDJ.Commons.Events.Aggregation;
 using SportDJ.Commons.Events.Device;
 using SportDJ.Commons.Interfaces;
+using SportDJ.Commons.Logging;
 using SportDJ.Commons.Models.Records;
 using SportDJ.Services.DeviceService.Windows.Exceptions;
 
@@ -108,9 +109,10 @@ public class Service(IEventAggregator eventAggregator)
                     Volume = volume;
                 }
             }
-            catch
+            catch (Exception exception)
             {
-                // TO DO: Log exception
+                Log.Error($"Initializing the device '{Device?.Name}' failed.", exception);
+
                 Debugger.Break();
             }
         }
@@ -186,9 +188,10 @@ public class Service(IEventAggregator eventAggregator)
             {
                 result = function();
             }
-            catch
+            catch (Exception exception)
             {
-                // TO DO: Log exception
+                // Drivers fail for many reasons (in use, not connected, wrong bitness), so this is no error of the app
+                Log.Warning("Accessing the audio driver failed.", exception);
             }
         });
 
@@ -218,7 +221,7 @@ public class Service(IEventAggregator eventAggregator)
 
     private IEnumerable<Device> GetCapabilitiesAsio()
     {
-        var driverNames = ExecuteOnSTAThread(AsioOut.GetDriverNames);
+        var driverNames = ExecuteOnSTAThread(AsioOut.GetDriverNames) ?? [];
 
         foreach (var driverName in driverNames)
         {
@@ -243,7 +246,10 @@ public class Service(IEventAggregator eventAggregator)
                             Type: DeviceType.Asio);
                     }
                 }
-                catch { }
+                catch (Exception exception)
+                {
+                    Log.Debug($"The ASIO driver '{driverName}' is not usable: {exception.Message}");
+                }
             }
 
             if (result != default)
@@ -280,7 +286,10 @@ public class Service(IEventAggregator eventAggregator)
                         Number: index);
                 }
             }
-            catch { }
+            catch (Exception exception)
+            {
+                Log.Debug($"The output device {index} is not usable: {exception.Message}");
+            }
 
             if (result != default)
             {
@@ -293,9 +302,10 @@ public class Service(IEventAggregator eventAggregator)
     {
         if (e.Exception != default)
         {
+            Log.Error($"The playback on '{Device?.Name}' stopped with an error.", e.Exception);
+
             Debugger.Break();
 
-            // TODO: Log exception
             CloseDevice();
         }
 

@@ -27,6 +27,8 @@ public class Service
 {
     #region Private Fields
 
+    private const int InitialUpdateWaitSeconds = 15;
+
     private readonly CancellationTokenSource cancellationTokenSource = new();
     private readonly IContainerProvider containerProvider;
     private readonly IDeviceService deviceService;
@@ -37,8 +39,6 @@ public class Service
     private readonly HashSet<IMixerService> mixersOverlay = [];
     private readonly IStorageService<Session> sessionService;
     private readonly IStorageService<Set> settingsService;
-
-    private const int InitialUpdateWaitSeconds = 15;
 
     private bool isDisposed;
     private IEnumerable<IMonitorService> monitorServices;
@@ -468,27 +468,6 @@ public class Service
             milliSeconds: fadeMilliseconds));
     }
 
-    private void UpdateInitially()
-    {
-        try
-        {
-            deviceService?.Update();
-        }
-        catch (Exception exception)
-        {
-            Log.Error("Listing the audio devices failed.", exception);
-        }
-    }
-
-    private void WaitForInitialUpdate()
-    {
-        if (initialUpdate?.IsCompleted == false
-            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
-        {
-            Log.Warning("Listing the audio devices takes longer than expected.");
-        }
-    }
-
     private void OnFadingEnded(object sender, EventArgs e)
     {
         eventAggregator.GetEvent<OutputFadedEvent>().Publish(this);
@@ -542,6 +521,27 @@ public class Service
             IsPlaying = false;
 
             eventAggregator.GetEvent<OutputStoppedEvent>().Publish(this);
+        }
+    }
+
+    private void UpdateInitially()
+    {
+        try
+        {
+            deviceService?.Update();
+        }
+        catch (Exception exception)
+        {
+            Log.Error("Listing the audio devices failed.", exception);
+        }
+    }
+
+    private void WaitForInitialUpdate()
+    {
+        if (initialUpdate?.IsCompleted == false
+            && !initialUpdate.Wait(TimeSpan.FromSeconds(InitialUpdateWaitSeconds)))
+        {
+            Log.Warning("Listing the audio devices takes longer than expected.");
         }
     }
 
