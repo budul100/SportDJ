@@ -1,10 +1,30 @@
-﻿using SportDJ.Commons.Models.Structure;
+using System.Linq;
+using SportDJ.Commons.Models.Structure;
 
 namespace SportDJ.Services.GridService.Extensions;
 
 internal static class PlayerExtensions
 {
     #region Public Methods
+
+    /// <summary>
+    /// Puts the player into a new tab at the end of the group.
+    /// </summary>
+    public static Grid MoveToGroup(this Player player, Group group)
+    {
+        var tab = group.Add(
+            anchor: group.Grids.LastOrDefault());
+
+        player.Grid.Cells.Remove(player);
+
+        player.Column = 0;
+        player.Row = 0;
+        player.Grid = tab;
+
+        tab.Cells.Add(player);
+
+        return tab;
+    }
 
     public static void ToGroup(this Player player)
     {

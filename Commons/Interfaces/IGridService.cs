@@ -36,6 +36,12 @@ public interface IGridService
 
     void MoveGrid(Grid grid, OrientationType orientation);
 
+    void MoveIntoGroup(Grid grid, Group group);
+
+    void MoveIntoGroup(Player player, Group group);
+
+    void MoveOutOfGroup(Grid grid);
+
     Task RemoveCellAsync(Cell cell);
 
     Task RemoveGridAsync(Grid grid);

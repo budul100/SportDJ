@@ -33,10 +33,10 @@
             IsEnabled="{Binding IsActive}"
             Spacing="{StaticResource SpacingMedium}">
 
-            <!-- Order: group, move tab, move, remove, add tab, add player. The tab parts are only shown if the pane was opened from a tab of a group, the group part only for a player -->
+            <!-- Order: group, move tab, move, remove, add tab, add player. The tab parts are only shown if the pane was opened from a tab of a group -->
 
-            <!-- Group: puts the player into a new group, only for players -->
-            <StackPanel IsVisible="{Binding IsPlayer}" Spacing="{StaticResource SpacingSmall}">
+            <!-- Group: a player gets its own group, players and tabs move into other groups, tabs leave their group -->
+            <StackPanel Spacing="{StaticResource SpacingSmall}">
 
                 <TextBlock Classes="Section" Text="Group" />
                 <Separator />
@@ -46,11 +46,24 @@
                     <Button
                         Command="{Binding GroupCommand}"
                         Focusable="False"
+                        IsVisible="{Binding IsPlayer}"
                         ToolTip.Tip="Put player into a new group">
                         <mat:MaterialIcon
                             Width="{StaticResource MediumIconSize}"
                             Height="{StaticResource MediumIconSize}"
                             Kind="Tab" />
+                    </Button>
+
+                    <Button
+                        Command="{Binding MoveOutOfGroupCommand}"
+                        Focusable="False"
+                        IsEnabled="{Binding CanMoveOutOfGroup}"
+                        IsVisible="{Binding IsTab}"
+                        ToolTip.Tip="Move tab out of its group into a group of its own">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Logout" />
                     </Button>
 
                     <!-- Shows the group, which the player belongs to, hidden without a group -->
@@ -62,6 +75,38 @@
                         TextTrimming="CharacterEllipsis" />
 
                 </StackPanel>
+
+                <!-- The target group, the player or tab is moved into -->
+                <Grid ColumnDefinitions="*,Auto">
+
+                    <ComboBox
+                        Grid.Column="0"
+                        Margin="0,0,8,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        Focusable="False"
+                        ItemsSource="{Binding Targets}"
+                        SelectedItem="{Binding SelectedTarget}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:GroupOption">
+                                <TextBlock Text="{Binding Text}" TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding MoveIntoGroupCommand}"
+                        Focusable="False"
+                        IsEnabled="{Binding CanMoveIntoGroup}"
+                        ToolTip.Tip="Move into the selected group">
+                        <mat:MaterialIcon
+                            Width="{StaticResource MediumIconSize}"
+                            Height="{StaticResource MediumIconSize}"
+                            Kind="Login" />
+                    </Button>
+
+                </Grid>
 
             </StackPanel>
 

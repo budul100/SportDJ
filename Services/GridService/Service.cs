@@ -38,7 +38,7 @@ public class Service
     private readonly IDispatcherService dispatcherService;
     private readonly IEventAggregator eventAggregator;
     private readonly IKeyboardService keyListenService;
-    private readonly object lockKeys = new();
+    private readonly Lock lockKeys = new();
     private readonly HashSet<Key> registeredKeys = [];
     private readonly IStorageService<Set> settingsService;
 
@@ -207,6 +207,47 @@ public class Service
         if (grid != default)
         {
             Apply(() => grid.Move(orientation));
+        }
+    }
+
+    public void MoveIntoGroup(Grid grid, Group group)
+    {
+        // Not into its own group and not into a group, which is part of the tab itself
+        if (grid?.Group != default
+            && group != default
+            && grid.Group != group
+            && !grid.Contains(group))
+        {
+            if (Apply(() => grid.MoveToGroup(group)))
+            {
+                eventAggregator.GetEvent<TabMovedEvent>().Publish(grid);
+            }
+        }
+    }
+
+    public void MoveIntoGroup(Player player, Group group)
+    {
+        // A player, which is the only cell of its grid, cannot leave it, the grid would be empty
+        if (player?.Grid?.Cells?.Count > 1
+            && group != default)
+        {
+            var moved = default(Grid);
+
+            if (Apply(() => moved = player.MoveToGroup(group)))
+            {
+                eventAggregator.GetEvent<TabMovedEvent>().Publish(moved);
+            }
+        }
+    }
+
+    public void MoveOutOfGroup(Grid grid)
+    {
+        if (grid?.Group?.Grids?.Count > 1)
+        {
+            if (Apply(grid.MoveOut))
+            {
+                eventAggregator.GetEvent<TabMovedEvent>().Publish(grid);
+            }
         }
     }
 

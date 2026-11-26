@@ -51,6 +51,12 @@ public class GroupViewModel
             keepSubscriberReferenceAlive: true,
             filter: _ => IsVisible));
 
+        // A tab, which was moved, is shown as well
+        AddSubscription(eventAggregator?.GetEvent<TabMovedEvent>().Subscribe(
+            action: OnTabAdded,
+            threadOption: ThreadOption.UIThread,
+            keepSubscriberReferenceAlive: true));
+
         // The MIDI key of a tab selects it as well
         AddSubscription(eventAggregator?.GetEvent<TabKeyPressedEvent>().Subscribe(
             action: OnTabKeyPressed,

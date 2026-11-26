@@ -25,6 +25,24 @@ internal static class GridExtensions
         return result;
     }
 
+    // Checks if the group is part of the tab or of one of its nested tabs
+    public static bool Contains(this Grid tab, Group group)
+    {
+        var grid = group?.Grid;
+
+        while (grid != default)
+        {
+            if (grid == tab)
+            {
+                return true;
+            }
+
+            grid = grid.Group?.Grid;
+        }
+
+        return false;
+    }
+
     // Returns all tabs of the groups of the grid, including the tabs of nested groups
     public static IEnumerable<Grid> GetTabs(this Grid grid)
     {
@@ -122,6 +140,59 @@ internal static class GridExtensions
             grid.Group.Grids.Insert(
                 index: index - 1,
                 item: temp);
+        }
+    }
+
+    /// <summary>
+    /// Moves the tab out of its group into a new group of its own, to the right of the old group.
+    /// Overlaps with other cells are resolved when the grid is tidied.
+    /// </summary>
+    public static void MoveOut(this Grid tab)
+    {
+        var source = tab?.Group;
+        var parent = source?.Grid;
+
+        if (parent != default
+            && source.Grids.Count > 1)
+        {
+            source.Grids.Remove(tab);
+
+            var group = new Group
+            {
+                Column = source.Column + source.Columns,
+                Row = source.Row,
+                Grid = parent,
+            };
+
+            group.Grids.Add(tab);
+
+            tab.Group = group;
+
+            parent.Cells.Add(group);
+        }
+    }
+
+    /// <summary>
+    /// Moves the tab to the end of another group. The old group disappears together with its last tab.
+    /// </summary>
+    public static void MoveToGroup(this Grid tab, Group target)
+    {
+        var source = tab?.Group;
+
+        if (source != default
+            && target != default
+            && source != target)
+        {
+            source.Grids.Remove(tab);
+
+            target.Grids.Add(tab);
+
+            tab.Group = target;
+
+            if (source.Grids.Count == 0)
+            {
+                source.Grid.Cells.Remove(source);
+            }
         }
     }
 
